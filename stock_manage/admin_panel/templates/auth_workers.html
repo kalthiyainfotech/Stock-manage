@@ -1,5 +1,44 @@
 {% extends "base.html" %}
 {% block admin_dash %}
 
+<main class="p-4 sm:p-6 lg:p-8">
+        <button class="px-4 py-2 bg-slate-700 text-white font-medium rounded-lg hover:bg-gray-600 transition">
+            <i class="fa-solid fa-plus"></i> Add Worker
+        </button>
+
+        <div class="overflow-x-auto mt-5">
+            <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+                <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">ID</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-200">
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm">1</td>
+                    <td class="px-4 py-3 text-sm">John Doe</td>
+                    <td class="px-4 py-3 text-sm">john@example.com</td>
+                    <td class="px-4 py-3 text-sm">Admin</td>
+                    <td class="px-4 py-3 text-sm text-green-600 font-medium">Active</td>
+                </tr>
+
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm">2</td>
+                    <td class="px-4 py-3 text-sm">Jane Smith</td>
+                    <td class="px-4 py-3 text-sm">jane@example.com</td>
+                    <td class="px-4 py-3 text-sm">Editor</td>
+                    <td class="px-4 py-3 text-sm text-red-600 font-medium">Inactive</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+    </main>
 
 {% endblock admin_dash %}
