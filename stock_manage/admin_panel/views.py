@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from .models import *
 
 def auth_login(request):
@@ -39,8 +40,15 @@ def auth_dashboard(request):
 @never_cache
 @login_required(login_url='auth_login')
 def auth_suppliers(request):
-    suppliers = Suppliers.objects.all()
-    return render(request,'auth_suppliers.html',{'suppliers': suppliers})
+    supplier_list = Suppliers.objects.all().order_by('-id')
+
+    paginator = Paginator(supplier_list, 10)  # ✅ 10 per page
+    page_number = request.GET.get('page')
+    suppliers = paginator.get_page(page_number)
+
+    return render(request, 'auth_suppliers.html', {
+        'suppliers': suppliers
+    })
 
 def add_supplier(request):
     if request.method == "POST":
