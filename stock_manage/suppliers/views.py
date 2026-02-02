@@ -1,39 +1,74 @@
-from django.contrib.auth import authenticate, login
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from admin_panel.models import Suppliers
-from django.contrib.auth.decorators import login_required
+from functools import wraps
+
+
+def supplier_login_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if 'supplier_id' not in request.session:
+            messages.error(request, "Please login to access this page")
+            return redirect('supplier_login')
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 
 def supplier_login(request):
     if request.method == "POST":
-        email = request.POST['email']
-        password = request.POST['password']
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
 
-        user = authenticate(
-            request,
-            username=email,
-            password=password
-        )
+        if not email or not password:
+            messages.error(request, "Please provide both email and password")
+            return render(request, 'sup_login.html')
 
-        if user:
-            try:
-                supplier = Suppliers.objects.get(user=user)
-                if supplier.status != "Active":
-                    messages.error(request, "Account is inactive")
-                    return redirect('supplier_login')
+        try:
+            # Check if supplier exists with the email assigned by admin
+            supplier = Suppliers.objects.get(email=email)
+            
+            # Verify the password matches the one assigned by admin
+            if supplier.password != password:
+                messages.error(request, "Invalid email or password")
+                return render(request, 'sup_login.html')
+            
+            # Check if supplier account is active
+            if supplier.status != "Active":
+                messages.error(request, "Account is inactive. Please contact administrator.")
+                return render(request, 'sup_login.html')
+            
+            # Store supplier ID in session for authentication
+            request.session['supplier_id'] = supplier.id
+            request.session['supplier_email'] = supplier.email
+            request.session['supplier_name'] = supplier.name
+            messages.success(request, f"Welcome back, {supplier.name}!")
+            return redirect('supplier_dashboard')
 
-                login(request, user)
-                return redirect('sup_dash')
-
-            except Suppliers.DoesNotExist:
-                messages.error(request, "Not a supplier account")
-        else:
-            messages.error(request, "Invalid email or password")
+        except Suppliers.DoesNotExist:
+            messages.error(request, "Invalid email or password. This email is not assigned by admin.")
+        except Exception as e:
+            messages.error(request, "An error occurred. Please try again.")
 
     return render(request, 'sup_login.html')
 
 
-@login_required(login_url='supplier_login')
+@supplier_login_required
 def sup_dash(request):
-    return render(request, 'supplier/sup_dash.html')
+    supplier_id = request.session.get('supplier_id')
+    try:
+        supplier = Suppliers.objects.get(id=supplier_id)
+        context = {
+            'supplier': supplier
+        }
+        return render(request, 'sup_dash.html', context)
+    except Suppliers.DoesNotExist:
+        messages.error(request, "Supplier account not found")
+        return redirect('supplier_login')
+
+
+def supplier_logout(request):
+    if 'supplier_id' in request.session:
+        supplier_name = request.session.get('supplier_name', '')
+        request.session.flush()
+        messages.success(request, f"Logged out successfully. Goodbye, {supplier_name}!")
+    return redirect('supplier_login')

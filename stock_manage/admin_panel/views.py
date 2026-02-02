@@ -199,8 +199,152 @@ def delete_worker(request, id):
 
 
 
+@never_cache
+@login_required(login_url='auth_login')
+def add_inventory(request):
+    if request.method == "POST":
+
+        # CATEGORY
+        category, _ = Category.objects.get_or_create(
+            name=request.POST['category']
+        )
+
+        # SUBCATEGORY
+        subcategory, _ = Subcetegory.objects.get_or_create(
+            category=category,
+            name=request.POST['subcategory']
+        )
+
+        # BRAND
+        brand, _ = Brand.objects.get_or_create(
+            subcetegory=subcategory,
+            name=request.POST['brand']
+        )
+
+        # PRODUCT
+        product, _ = Product.objects.get_or_create(
+            brand=brand,
+            name=request.POST['product'],
+            defaults={
+                'description': request.POST.get('description', ''),
+                'base_price': request.POST.get('price') or 0,
+                'image': request.FILES.get('product_picture')
+            }
+        )
+
+        # COLOR
+        color, _ = Color.objects.get_or_create(
+            name=request.POST.get('color')
+        )
+
+        # SIZE
+        size, _ = Size.objects.get_or_create(
+            name=request.POST.get('size')
+        )
+
+        # PRODUCT VARIANT
+        ProductVariant.objects.create(
+            product=product,
+            color=color,
+            size=size,
+            price=request.POST.get('price') or 0,
+            stock=request.POST.get('stock') or 0,
+            sku=f"{product.id}-{color.id}-{size.id}"
+        )
+
+        return redirect('auth_inventory')
+
+    return redirect('auth_inventory')
 
 
+
+@never_cache
+@login_required(login_url='auth_login')
+def auth_inventory(request):
+    inventory_list = ProductVariant.objects.select_related(
+        'product',
+        'color',
+        'size',
+        'product__brand',
+        'product__brand__subcetegory',
+        'product__brand__subcetegory__category'
+    ).order_by('-id')
+
+    paginator = Paginator(inventory_list, 10)
+    page_number = request.GET.get('page')
+    inventory = paginator.get_page(page_number)
+
+    return render(request, 'auth_inventory.html', {
+        'inventorys': inventory  # KEEP NAME to avoid HTML change
+    })
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def edit_inventory(request, id):
+    inventory = ProductVariant.objects.get(id=id)
+
+    if request.method == "POST":
+
+        # CATEGORY
+        category, _ = Category.objects.get_or_create(
+            name=request.POST['category']
+        )
+
+        # SUBCATEGORY
+        subcategory, _ = Subcetegory.objects.get_or_create(
+            category=category,
+            name=request.POST['subcategory']
+        )
+
+        # BRAND
+        brand, _ = Brand.objects.get_or_create(
+            subcetegory=subcategory,
+            name=request.POST['brand']
+        )
+
+        # PRODUCT
+        product = inventory.product
+        product.brand = brand
+        product.name = request.POST['product']
+        product.description = request.POST.get('description', '')
+        product.base_price = request.POST.get('price') or 0
+
+        if request.FILES.get('product_picture'):
+            product.image = request.FILES.get('product_picture')
+
+        product.save()
+
+        # COLOR
+        color, _ = Color.objects.get_or_create(
+            name=request.POST.get('color')
+        )
+
+        # SIZE
+        size, _ = Size.objects.get_or_create(
+            name=request.POST.get('size')
+        )
+
+        # VARIANT
+        inventory.product = product
+        inventory.color = color
+        inventory.size = size
+        inventory.price = request.POST.get('price') or 0
+        inventory.stock = request.POST.get('stock') or 0
+        inventory.save()
+
+        return redirect('auth_inventory')
+
+    return redirect('auth_inventory')
+
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_inventory(request, id):
+    inventory = ProductVariant.objects.get(id=id)
+    inventory.delete()
+    return redirect('auth_inventory')
 
 
 
@@ -211,10 +355,6 @@ def delete_worker(request, id):
 def auth_buyers(request):
     return render(request,'auth_buyers.html')
 
-@never_cache
-@login_required(login_url='auth_login')
-def auth_inventory(request):
-    return render(request,'auth_inventory.html')
 
 
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from admin_panel.views import auth_login ,auth_dashboard,auth_logout,auth_suppliers,auth_buyers,auth_workers,auth_inventory,add_supplier,edit_supplier,delete_supplier,add_worker,edit_worker,delete_worker
+from admin_panel.views import *
 
 urlpatterns = [
     path('auth_login/',auth_login,name='auth_login'),
@@ -17,8 +17,13 @@ urlpatterns = [
     path('worker/delete/<int:id>/', delete_worker, name='delete_worker'),
 
 
-    path('auth_buyers/',auth_buyers,name='auth_buyers'),
     path('auth_inventory/',auth_inventory,name='auth_inventory'),
+    path('add_inventory/',add_inventory,name='add_inventory'),
+    path('edit/inventory/<int:id>/',edit_inventory,name='edit_inventory'),
+    path('delete/inventory/<int:id>/',delete_inventory,name='delete_inventory'),
+
+
+    path('auth_buyers/',auth_buyers,name='auth_buyers'),
 
 
 ]
