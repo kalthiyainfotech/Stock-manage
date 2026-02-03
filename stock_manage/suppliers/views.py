@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from admin_panel.models import Suppliers
 from functools import wraps
+from django.views.decorators.cache import never_cache
 
 
 def supplier_login_required(view_func):
@@ -13,7 +14,7 @@ def supplier_login_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
-
+@never_cache
 def supplier_login(request):
     if request.method == "POST":
         email = request.POST.get('email', '').strip()
@@ -51,7 +52,7 @@ def supplier_login(request):
 
     return render(request, 'sup_login.html')
 
-
+@never_cache
 @supplier_login_required
 def sup_dash(request):
     supplier_id = request.session.get('supplier_id')
@@ -65,7 +66,7 @@ def sup_dash(request):
         messages.error(request, "Supplier account not found")
         return redirect('supplier_login')
 
-
+@never_cache
 def supplier_logout(request):
     if 'supplier_id' in request.session:
         supplier_name = request.session.get('supplier_name', '')

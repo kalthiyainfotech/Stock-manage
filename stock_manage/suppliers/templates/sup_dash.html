@@ -30,8 +30,8 @@
         <!-- Logout Button -->
         <div class="absolute bottom-8 left-0 right-0 px-4">
             <button class="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-slate-700 rounded-lg w-full transition-colors">
-                <i class="fas fa-sign-out-alt"></i>
-                <span class="font-medium">Logout</span>
+                <i class="fas fa-sign-out-alt text-red-600"></i>
+                <span class="font-medium"><a href="{% url 'supplier_logout' %}" class="">Logout</a></span>
             </button>
         </div>
     </aside>
