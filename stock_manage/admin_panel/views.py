@@ -5,6 +5,7 @@ from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from .models import *
+from buyers.models import Buyer
 
 def auth_login(request):
     if request.user.is_authenticated:
@@ -353,7 +354,18 @@ def delete_inventory(request, id):
 @never_cache
 @login_required(login_url='auth_login')
 def auth_buyers(request):
-    return render(request,'auth_buyers.html')
+    buyers = Buyer.objects.all().order_by('-id') 
+    context = {
+        'buyers': buyers
+    }
+    return render(request, 'auth_buyers.html', context)
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_buyer(request, id):
+    buyer = Buyer.objects.get(id=id)
+    buyer.delete()
+    return redirect('auth_buyers')
 
 
 

@@ -39,7 +39,7 @@ def by_login(request):
             if check_password(password, buyer.password):
                 request.session["buyer_id"] = buyer.id
                 request.session["buyer_email"] = buyer.email
-                return redirect("by_dash")
+                return redirect("by_index")
             else:
                 messages.error(request, "Invalid password")
         except Buyer.DoesNotExist:
@@ -49,8 +49,41 @@ def by_login(request):
 
 
 @never_cache
-def by_dash(request):
-    return render(request,'by_dash.html')
+def by_index(request):
+    return render(request,'by_index.html')
+
+@never_cache
+def by_about(request):
+    return render(request,'by_about.html')
+
+@never_cache
+def by_blog(request):
+    return render(request,'by_blog.html')
+
+@never_cache
+def by_cart(request):
+    return render(request,'by_cart.html')
+
+@never_cache
+def by_checkout(request):
+    return render(request,'by_checkout.html')
+
+@never_cache
+def by_contact(request):
+    return render(request,'by_contact.html')
+
+@never_cache
+def by_services(request):
+    return render(request,'by_services.html')
+
+@never_cache
+def by_shop(request):
+    return render(request,'by_shop.html')
+
+@never_cache
+def by_thankyou(request):
+    return render(request,'by_thankyou.html')
+
 
 
 def by_logout(request):

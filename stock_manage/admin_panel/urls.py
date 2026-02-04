@@ -24,6 +24,8 @@ urlpatterns = [
 
 
     path('auth_buyers/',auth_buyers,name='auth_buyers'),
+    path('delete/buyer/<int:id>/',delete_buyer,name='delete_buyer'),
+
 
 
 ]
