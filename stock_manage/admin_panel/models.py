@@ -123,5 +123,25 @@ class ProductVariant(models.Model):
         return f"{self.product.name} - {self.color.name} - {self.size.name}"
 
 
+class VariantSpec(models.Model):
+    """
+    Flexible key/value specs per inventory variant.
+    Examples: Storage=128GB, RAM=8GB, Weight=500g, Material=Steel, etc.
+    """
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.CASCADE,
+        related_name='specs'
+    )
+    name = models.CharField(max_length=100)
+    value = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        unique_together = ('variant', 'name')
+
+    def __str__(self):
+        return f"{self.variant_id} - {self.name}: {self.value}"
+
+
 
 

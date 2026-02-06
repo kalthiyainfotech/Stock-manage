@@ -26,6 +26,9 @@ urlpatterns = [
     path('auth_buyers/',auth_buyers,name='auth_buyers'),
     path('delete/buyer/<int:id>/',delete_buyer,name='delete_buyer'),
 
-
+    # AJAX endpoints for dynamic dropdowns
+    path('api/get-subcategories/', get_subcategories, name='get_subcategories'),
+    path('api/get-brands/', get_brands, name='get_brands'),
+    path('api/get-products/', get_products, name='get_products'),
 
 ]

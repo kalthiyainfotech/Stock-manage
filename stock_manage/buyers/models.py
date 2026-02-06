@@ -1,4 +1,6 @@
 from django.db import models
+from admin_panel.models import ProductVariant
+
 
 class Buyer(models.Model):
     name = models.CharField(max_length=100)
@@ -15,3 +17,24 @@ class Buyer(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class CartItem(models.Model):
+    buyer = models.ForeignKey(
+        Buyer,
+        on_delete=models.CASCADE,
+        related_name="cart_items"
+    )
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.CASCADE,
+        related_name="cart_items"
+    )
+    quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("buyer", "variant")
+
+    def __str__(self):
+        return f"{self.buyer.email} - {self.variant} x {self.quantity}"

@@ -3,8 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.cache import never_cache
 from functools import wraps
-
-from .models import Buyer
+from .models import Buyer, CartItem
+from admin_panel.models import ProductVariant
 
 
 def buyer_login_required(view_func):
@@ -87,13 +87,90 @@ def by_services(request):
 
 @never_cache
 def by_shop(request):
-    return render(request,'by_shop.html')
+    products = ProductVariant.objects.select_related(
+        'product',
+        'product__brand',
+        'product__brand__subcetegory',
+        'product__brand__subcetegory__category'
+    ).filter(
+        product__status=True,
+        stock__gt=0
+    ).order_by('-id')
+
+    return render(request, 'by_shop.html', {
+        'products': products
+    })
+
+
+@never_cache
+def add_to_cart(request, variant_id):
+    buyer_id = request.session.get("buyer_id")
+    if not buyer_id:
+        messages.error(request, "Please login to add items to your cart.")
+        return redirect("by_login")
+
+    try:
+        buyer = Buyer.objects.get(id=buyer_id)
+    except Buyer.DoesNotExist:
+        messages.error(request, "Buyer not found. Please login again.")
+        return redirect("by_login")
+
+    try:
+        variant = ProductVariant.objects.get(id=variant_id, product__status=True)
+    except ProductVariant.DoesNotExist:
+        messages.error(request, "Product not found.")
+        return redirect("by_shop")
+
+    cart_item, created = CartItem.objects.get_or_create(
+        buyer=buyer,
+        variant=variant,
+        defaults={"quantity": 1},
+    )
+
+    if not created:
+        
+        if cart_item.quantity < variant.stock:
+            cart_item.quantity += 1
+            cart_item.save()
+        else:
+            messages.warning(request, "No more stock available for this product.")
+            return redirect("by_shop")
+
+    messages.success(request, "Product added to cart.")
+    return redirect("by_cart")
 
 
 @never_cache
 @buyer_login_required
 def by_cart(request):
-    return render(request,'by_cart.html')
+    buyer_id = request.session.get("buyer_id")
+    buyer = Buyer.objects.get(id=buyer_id)
+
+    cart_items = CartItem.objects.select_related(
+        "variant",
+        "variant__product"
+    ).filter(buyer=buyer)
+
+    subtotal = 0
+    for item in cart_items:
+        item.total_price = item.variant.price * item.quantity
+        subtotal += item.total_price
+
+    context = {
+        "cart_items": cart_items,
+        "subtotal": subtotal,
+        "total": subtotal,  
+    }
+
+    return render(request, "by_cart.html", context)
+
+
+@never_cache
+@buyer_login_required
+def remove_from_cart(request, item_id):
+    buyer_id = request.session.get("buyer_id")
+    CartItem.objects.filter(id=item_id, buyer_id=buyer_id).delete()
+    return redirect("by_cart")
 
 
 @never_cache

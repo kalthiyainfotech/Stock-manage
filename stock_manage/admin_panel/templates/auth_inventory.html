@@ -27,17 +27,52 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
-                    <input type="text" name="category" placeholder="Category" required
+                    <!-- Category Dropdown with Add New Option -->
+                    <div class="relative">
+                        <select id="categorySelect" name="category" required
                         class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.name }}">{{ category.name }}</option>
+                            {% endfor %}
+                            <option value="__new__">+ Add New Category</option>
+                        </select>
+                        <input type="text" id="newCategoryInput" placeholder="Enter New Category"
+                            class="hidden w-full rounded-md border border-gray-300 px-3 py-2 text-sm mt-2">
+                    </div>
 
-                    <input type="text" name="subcategory" placeholder="Subcategory" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                    <!-- Subcategory Dropdown with Add New Option -->
+                    <div class="relative">
+                        <select id="subcategorySelect" name="subcategory" required
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" disabled>
+                            <option value="">Select Subcategory</option>
+                            <option value="__new__">+ Add New Subcategory</option>
+                        </select>
+                        <input type="text" id="newSubcategoryInput" placeholder="Enter New Subcategory"
+                            class="hidden w-full rounded-md border border-gray-300 px-3 py-2 text-sm mt-2">
+                    </div>
 
-                    <input type="text" name="brand" placeholder="Brand" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                    <!-- Brand Dropdown with Add New Option -->
+                    <div class="relative">
+                        <select id="brandSelect" name="brand" required
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" disabled>
+                            <option value="">Select Brand</option>
+                            <option value="__new__">+ Add New Brand</option>
+                        </select>
+                        <input type="text" id="newBrandInput" placeholder="Enter New Brand"
+                            class="hidden w-full rounded-md border border-gray-300 px-3 py-2 text-sm mt-2">
+                    </div>
 
-                    <input type="text" name="product" placeholder="Product" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                    <!-- Product Dropdown with Add New Option -->
+                    <div class="relative">
+                        <select id="productSelect" name="product" required
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" disabled>
+                            <option value="">Select Product</option>
+                            <option value="__new__">+ Add New Product</option>
+                        </select>
+                        <input type="text" id="newProductInput" placeholder="Enter New Product"
+                            class="hidden w-full rounded-md border border-gray-300 px-3 py-2 text-sm mt-2">
+                    </div>
 
                     <textarea name="description" placeholder="Description"
                         class="sm:col-span-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"></textarea>
@@ -46,18 +81,40 @@
                         placeholder="Color"
                         class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
 
-                    <select name="size" required
+                    <input type="text" name="size" placeholder="Size (e.g., S, M, L, XL, 500g, 1kg, etc.)"
                         class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                        <option value="">Select Size</option>
-                        <option>S</option>
-                        <option>M</option>
-                        <option>L</option>
-                        <option>XL</option>
-                        <option>XXL</option>
-                        <option>3XL</option>
-                    </select>
 
-                    <input type="number" name="price" placeholder="Price"
+                    <!-- Specifications (Storage/RAM/Weight/etc.) -->
+                    <div class="sm:col-span-2 rounded-md border border-gray-200 p-3">
+                        <div class="flex items-center justify-between gap-3 mb-2">
+                            <p class="text-sm font-medium text-gray-800">Specifications (Optional)</p>
+                            <button type="button" id="addSpecRowBtn"
+                                class="text-xs px-3 py-1 rounded border border-gray-300 hover:bg-gray-50">
+                                + Add Spec
+                            </button>
+                        </div>
+
+                        <div id="specsContainer" class="space-y-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 spec-row">
+                                <input type="text" name="spec_name" placeholder="Spec name (e.g., Storage, RAM)"
+                                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                                <div class="flex gap-2">
+                                    <input type="text" name="spec_value" placeholder="Spec value (e.g., 128GB, 8GB)"
+                                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                                    <button type="button"
+                                        class="removeSpecRowBtn px-3 rounded border border-gray-300 hover:bg-gray-50">
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="mt-2 text-xs text-gray-500">
+                            Add only what you need (Storage/RAM/Processor/Weight/Material/etc.). Leave empty if not required.
+                        </p>
+                    </div>
+
+                    <input type="number" name="price" placeholder="Price" step="0.01"
                         class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
 
                     <input type="number" name="stock" placeholder="Stock"
@@ -168,7 +225,8 @@
                     '{{ inventory.price }}',
                     `{{ inventory.product.description|default_if_none:'' }}`,
                     'Active',
-                    '{% if inventory.product.image %}{{ inventory.product.image.url }}{% endif %}'
+                    '{% if inventory.product.image %}{{ inventory.product.image.url }}{% endif %}',
+                    `{% for s in inventory.specs.all %}{{ s.name|escapejs }}: {{ s.value|escapejs }}{% if not forloop.last %}\n{% endif %}{% endfor %}`
                 )"
                 class="px-1 text-xs text-green-600 border rounded border-green-500 py-1">
                 <i class="fa-solid fa-eye"></i>
@@ -186,7 +244,8 @@
                     '{{ inventory.color.name }}',
                     '{{ inventory.size.name }}',
                     '{{ inventory.price }}',
-                    '{{ inventory.stock }}'
+                    '{{ inventory.stock }}',
+                    `[{% for s in inventory.specs.all %}{\"name\":\"{{ s.name|escapejs }}\",\"value\":\"{{ s.value|escapejs }}\"}{% if not forloop.last %},{% endif %}{% endfor %}]`
                 )"
                 class="text-xs text-blue-600 border px-1 rounded border-blue-500 py-1">
                 <i class="fa-solid fa-pen-to-square"></i>
@@ -388,10 +447,98 @@ const inventoryForm = document.getElementById('inventoryForm');
 const modalTitle = document.getElementById('modalTitle');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
+// Get dropdown elements
+const categorySelect = document.getElementById('categorySelect');
+const subcategorySelect = document.getElementById('subcategorySelect');
+const brandSelect = document.getElementById('brandSelect');
+const productSelect = document.getElementById('productSelect');
+
+// Get input fields for new items
+const newCategoryInput = document.getElementById('newCategoryInput');
+const newSubcategoryInput = document.getElementById('newSubcategoryInput');
+const newBrandInput = document.getElementById('newBrandInput');
+const newProductInput = document.getElementById('newProductInput');
+
+// Specs (Storage/RAM/Weight/etc.)
+const specsContainer = document.getElementById('specsContainer');
+const addSpecRowBtn = document.getElementById('addSpecRowBtn');
+
+function addSpecRow(name = '', value = '') {
+    const row = document.createElement('div');
+    row.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2 spec-row';
+    row.innerHTML = `
+        <input type="text" name="spec_name" placeholder="Spec name (e.g., Storage, RAM)"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" value="${(name || '').replace(/"/g, '&quot;')}">
+        <div class="flex gap-2">
+            <input type="text" name="spec_value" placeholder="Spec value (e.g., 128GB, 8GB)"
+                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" value="${(value || '').replace(/"/g, '&quot;')}">
+            <button type="button" class="removeSpecRowBtn px-3 rounded border border-gray-300 hover:bg-gray-50">✕</button>
+        </div>
+    `;
+    specsContainer.appendChild(row);
+}
+
+function resetSpecs() {
+    specsContainer.innerHTML = '';
+    addSpecRow();
+}
+
+specsContainer.addEventListener('click', function(e) {
+    const btn = e.target.closest('.removeSpecRowBtn');
+    if (!btn) return;
+    const row = btn.closest('.spec-row');
+    if (!row) return;
+    // keep at least 1 row
+    if (specsContainer.querySelectorAll('.spec-row').length <= 1) {
+        row.querySelector('input[name="spec_name"]').value = '';
+        row.querySelector('input[name="spec_value"]').value = '';
+        return;
+    }
+    row.remove();
+});
+
+addSpecRowBtn.addEventListener('click', function() {
+    addSpecRow();
+});
+
 document.getElementById('openinventoryModal').onclick = () => {
     inventoryForm.reset();
     inventoryForm.action = "{% url 'add_inventory' %}";
     modalTitle.innerText = "Add Inventory";
+    
+    // Reset category dropdown to empty
+    categorySelect.value = '';
+    categorySelect.setAttribute('required', 'required');
+    categorySelect.setAttribute('name', 'category');
+    
+    // Restore name attributes for all dropdowns
+    subcategorySelect.setAttribute('name', 'subcategory');
+    brandSelect.setAttribute('name', 'brand');
+    productSelect.setAttribute('name', 'product');
+    
+    // Clear and hide all new input fields
+    newCategoryInput.value = '';
+    newCategoryInput.removeAttribute('name');
+    newCategoryInput.removeAttribute('required');
+    newCategoryInput.classList.add('hidden');
+    
+    newSubcategoryInput.value = '';
+    newSubcategoryInput.removeAttribute('name');
+    newSubcategoryInput.removeAttribute('required');
+    newSubcategoryInput.classList.add('hidden');
+    
+    newBrandInput.value = '';
+    newBrandInput.removeAttribute('name');
+    newBrandInput.removeAttribute('required');
+    newBrandInput.classList.add('hidden');
+    
+    newProductInput.value = '';
+    newProductInput.removeAttribute('name');
+    newProductInput.removeAttribute('required');
+    newProductInput.classList.add('hidden');
+    
+    resetDropdowns();
+    resetSpecs();
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
 };
@@ -400,22 +547,501 @@ document.getElementById('closeinventoryModal').onclick = () => {
     inventoryModal.classList.add('hidden');
 };
 
-function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock) {
+function resetDropdowns() {
+    // Reset all dropdowns
+    subcategorySelect.innerHTML = '<option value="">Select Subcategory</option><option value="__new__">+ Add New Subcategory</option>';
+    brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
+    productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
+    
+    // Disable dependent dropdowns
+    subcategorySelect.disabled = true;
+    brandSelect.disabled = true;
+    productSelect.disabled = true;
+    
+    // Hide new input fields and clear them
+    newCategoryInput.classList.add('hidden');
+    newCategoryInput.value = '';
+    newCategoryInput.removeAttribute('required');
+    newCategoryInput.removeAttribute('name');
+    
+    newSubcategoryInput.classList.add('hidden');
+    newSubcategoryInput.value = '';
+    newSubcategoryInput.removeAttribute('required');
+    newSubcategoryInput.removeAttribute('name');
+    
+    newBrandInput.classList.add('hidden');
+    newBrandInput.value = '';
+    newBrandInput.removeAttribute('required');
+    newBrandInput.removeAttribute('name');
+    
+    newProductInput.classList.add('hidden');
+    newProductInput.value = '';
+    newProductInput.removeAttribute('required');
+    newProductInput.removeAttribute('name');
+    
+    // Ensure dropdowns have proper name attributes
+    subcategorySelect.setAttribute('name', 'subcategory');
+    brandSelect.setAttribute('name', 'brand');
+    productSelect.setAttribute('name', 'product');
+}
+
+// Category change handler
+categorySelect.addEventListener('change', function() {
+    const selectedValue = this.value;
+    
+    if (selectedValue === '__new__') {
+        // Show new category input
+        newCategoryInput.classList.remove('hidden');
+        newCategoryInput.required = true;
+        newCategoryInput.value = ''; // Clear any previous value
+        this.removeAttribute('required');
+        this.setAttribute('name', ''); // Remove name so it's not submitted
+        
+        // Enable subcategory dropdown so user can add new subcategory
+        subcategorySelect.innerHTML = '<option value="">Select Subcategory</option><option value="__new__">+ Add New Subcategory</option>';
+        subcategorySelect.disabled = false;
+        subcategorySelect.value = '';
+        subcategorySelect.setAttribute('name', 'subcategory');
+        subcategorySelect.setAttribute('required', 'required');
+        
+        // Reset brand and product dropdowns but keep them ready
+        brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
+        brandSelect.disabled = true;
+        brandSelect.value = '';
+        
+        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
+        productSelect.disabled = true;
+        productSelect.value = '';
+        
+        // Hide and clear new input fields for subcategory, brand, product
+        newSubcategoryInput.classList.add('hidden');
+        newSubcategoryInput.value = '';
+        newSubcategoryInput.removeAttribute('required');
+        newSubcategoryInput.removeAttribute('name');
+        
+        newBrandInput.classList.add('hidden');
+        newBrandInput.value = '';
+        newBrandInput.removeAttribute('required');
+        newBrandInput.removeAttribute('name');
+        
+        newProductInput.classList.add('hidden');
+        newProductInput.value = '';
+        newProductInput.removeAttribute('required');
+        newProductInput.removeAttribute('name');
+    } else if (selectedValue && selectedValue !== '') {
+        // Hide new category input and clear it
+        newCategoryInput.classList.add('hidden');
+        newCategoryInput.removeAttribute('required');
+        newCategoryInput.value = ''; // Clear the input
+        newCategoryInput.removeAttribute('name'); // Remove name attribute
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'category'); // Ensure name is set
+        
+        // Load subcategories
+        loadSubcategories(selectedValue);
+    } else {
+        // Empty selection - reset everything
+        newCategoryInput.classList.add('hidden');
+        newCategoryInput.removeAttribute('required');
+        newCategoryInput.value = '';
+        newCategoryInput.removeAttribute('name');
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'category');
+        resetDropdowns();
+    }
+});
+
+// Subcategory change handler
+subcategorySelect.addEventListener('change', function() {
+    const selectedValue = this.value;
+    const categoryValue = categorySelect.value;
+    
+    if (selectedValue === '__new__') {
+        newSubcategoryInput.classList.remove('hidden');
+        newSubcategoryInput.required = true;
+        newSubcategoryInput.value = ''; // Clear any previous value
+        this.removeAttribute('required');
+        this.setAttribute('name', '');
+        
+        // Enable brand dropdown so user can add new brand
+        brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
+        brandSelect.disabled = false;
+        brandSelect.value = '';
+        brandSelect.setAttribute('name', 'brand');
+        brandSelect.setAttribute('required', 'required');
+        
+        // Reset product dropdown
+        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
+        productSelect.disabled = true;
+        productSelect.value = '';
+        
+        // Hide and clear brand and product new inputs
+        newBrandInput.classList.add('hidden');
+        newBrandInput.value = '';
+        newBrandInput.removeAttribute('required');
+        newBrandInput.removeAttribute('name');
+        
+        newProductInput.classList.add('hidden');
+        newProductInput.value = '';
+        newProductInput.removeAttribute('required');
+        newProductInput.removeAttribute('name');
+    } else if (selectedValue && selectedValue !== '' && categoryValue && categoryValue !== '__new__') {
+        // Existing category selected - load brands from database
+        newSubcategoryInput.classList.add('hidden');
+        newSubcategoryInput.removeAttribute('required');
+        newSubcategoryInput.value = ''; // Clear the input
+        newSubcategoryInput.removeAttribute('name');
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'subcategory');
+        
+        loadBrands(selectedValue);
+    } else if (selectedValue && selectedValue !== '' && categoryValue === '__new__') {
+        // New category selected - enable brand dropdown for new brand
+        newSubcategoryInput.classList.add('hidden');
+        newSubcategoryInput.removeAttribute('required');
+        newSubcategoryInput.value = '';
+        newSubcategoryInput.removeAttribute('name');
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'subcategory');
+        
+        // Enable brand dropdown
+        brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
+        brandSelect.disabled = false;
+        brandSelect.setAttribute('name', 'brand');
+        brandSelect.setAttribute('required', 'required');
+        
+        // Reset product dropdown
+        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
+        productSelect.disabled = true;
+    } else if (selectedValue === '') {
+        newSubcategoryInput.classList.add('hidden');
+        newSubcategoryInput.removeAttribute('required');
+        newSubcategoryInput.value = '';
+        newSubcategoryInput.removeAttribute('name');
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'subcategory');
+        brandSelect.disabled = true;
+        productSelect.disabled = true;
+    }
+});
+
+// Brand change handler
+brandSelect.addEventListener('change', function() {
+    const selectedValue = this.value;
+    const categoryValue = categorySelect.value;
+    const subcategoryValue = subcategorySelect.value;
+    
+    if (selectedValue === '__new__') {
+        newBrandInput.classList.remove('hidden');
+        newBrandInput.required = true;
+        newBrandInput.value = ''; // Clear any previous value
+        this.removeAttribute('required');
+        this.setAttribute('name', '');
+        
+        // Enable product dropdown so user can add new product
+        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
+        productSelect.disabled = false;
+        productSelect.value = '';
+        productSelect.setAttribute('name', 'product');
+        productSelect.setAttribute('required', 'required');
+        
+        // Hide and clear product new input
+        newProductInput.classList.add('hidden');
+        newProductInput.value = '';
+        newProductInput.removeAttribute('required');
+        newProductInput.removeAttribute('name');
+    } else if (selectedValue && selectedValue !== '' && categoryValue !== '__new__' && subcategoryValue !== '__new__') {
+        // Existing category/subcategory selected - load products from database
+        newBrandInput.classList.add('hidden');
+        newBrandInput.removeAttribute('required');
+        newBrandInput.value = ''; // Clear the input
+        newBrandInput.removeAttribute('name');
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'brand');
+        loadProducts(selectedValue);
+    } else if (selectedValue && selectedValue !== '') {
+        // New category or subcategory - enable product dropdown for new product
+        newBrandInput.classList.add('hidden');
+        newBrandInput.removeAttribute('required');
+        newBrandInput.value = '';
+        newBrandInput.removeAttribute('name');
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'brand');
+        
+        // Enable product dropdown
+        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
+        productSelect.disabled = false;
+        productSelect.setAttribute('name', 'product');
+        productSelect.setAttribute('required', 'required');
+    } else if (selectedValue === '') {
+        newBrandInput.classList.add('hidden');
+        newBrandInput.removeAttribute('required');
+        newBrandInput.value = '';
+        newBrandInput.removeAttribute('name');
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'brand');
+        productSelect.disabled = true;
+    }
+});
+
+// Product change handler
+productSelect.addEventListener('change', function() {
+    const selectedValue = this.value;
+    
+    if (selectedValue === '__new__') {
+        newProductInput.classList.remove('hidden');
+        newProductInput.required = true;
+        newProductInput.value = ''; // Clear any previous value
+        this.removeAttribute('required');
+        this.setAttribute('name', '');
+    } else if (selectedValue && selectedValue !== '') {
+        newProductInput.classList.add('hidden');
+        newProductInput.removeAttribute('required');
+        newProductInput.value = ''; // Clear the input
+        newProductInput.removeAttribute('name');
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'product');
+    } else if (selectedValue === '') {
+        newProductInput.classList.add('hidden');
+        newProductInput.removeAttribute('required');
+        newProductInput.value = '';
+        newProductInput.removeAttribute('name');
+        this.setAttribute('required', 'required');
+        this.setAttribute('name', 'product');
+    }
+});
+
+// Load subcategories via AJAX
+function loadSubcategories(categoryName) {
+    if (!categoryName) return;
+    
+    fetch(`{% url 'get_subcategories' %}?category_name=${encodeURIComponent(categoryName)}`)
+        .then(response => response.json())
+        .then(data => {
+            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.name;
+                option.textContent = item.name;
+                subcategorySelect.appendChild(option);
+            });
+            subcategorySelect.innerHTML += '<option value="__new__">+ Add New Subcategory</option>';
+            subcategorySelect.disabled = false;
+            
+            // Reset dependent dropdowns
+            brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
+            productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
+            brandSelect.disabled = true;
+            productSelect.disabled = true;
+        })
+        .catch(error => {
+            console.error('Error loading subcategories:', error);
+            subcategorySelect.disabled = false;
+        });
+}
+
+// Load brands via AJAX
+function loadBrands(subcategoryName) {
+    const categoryName = categorySelect.value;
+    if (!subcategoryName || !categoryName) return;
+    
+    fetch(`{% url 'get_brands' %}?category_name=${encodeURIComponent(categoryName)}&subcategory_name=${encodeURIComponent(subcategoryName)}`)
+        .then(response => response.json())
+        .then(data => {
+            brandSelect.innerHTML = '<option value="">Select Brand</option>';
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.name;
+                option.textContent = item.name;
+                brandSelect.appendChild(option);
+            });
+            brandSelect.innerHTML += '<option value="__new__">+ Add New Brand</option>';
+            brandSelect.disabled = false;
+            
+            // Reset product dropdown
+            productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
+            productSelect.disabled = true;
+        })
+        .catch(error => {
+            console.error('Error loading brands:', error);
+            brandSelect.disabled = false;
+        });
+}
+
+// Load products via AJAX
+function loadProducts(brandName) {
+    const categoryName = categorySelect.value;
+    const subcategoryName = subcategorySelect.value;
+    if (!brandName || !subcategoryName || !categoryName) return;
+    
+    fetch(`{% url 'get_products' %}?category_name=${encodeURIComponent(categoryName)}&subcategory_name=${encodeURIComponent(subcategoryName)}&brand_name=${encodeURIComponent(brandName)}`)
+        .then(response => response.json())
+        .then(data => {
+            productSelect.innerHTML = '<option value="">Select Product</option>';
+            data.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.name;
+                option.textContent = item.name;
+                productSelect.appendChild(option);
+            });
+            productSelect.innerHTML += '<option value="__new__">+ Add New Product</option>';
+            productSelect.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error loading products:', error);
+            productSelect.disabled = false;
+        });
+}
+
+// Handle form submission - use new inputs if "Add New" was selected
+inventoryForm.addEventListener('submit', function(e) {
+    let hasErrors = false;
+    
+    // Validate category
+    if (categorySelect.value === '__new__') {
+        if (!newCategoryInput.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a new category name');
+            hasErrors = true;
+            return false;
+        }
+        // Ensure name attributes are set correctly
+        if (!categorySelect.hasAttribute('name') || categorySelect.getAttribute('name') === '') {
+            categorySelect.removeAttribute('name');
+            newCategoryInput.setAttribute('name', 'new_category');
+        }
+    } else if (!categorySelect.value || categorySelect.value === '') {
+        e.preventDefault();
+        alert('Please select or add a category');
+        hasErrors = true;
+        return false;
+    } else {
+        // Ensure category select has name attribute
+        categorySelect.setAttribute('name', 'category');
+        newCategoryInput.removeAttribute('name');
+        newCategoryInput.value = '';
+    }
+    
+    // Validate subcategory
+    if (subcategorySelect.value === '__new__') {
+        if (!newSubcategoryInput.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a new subcategory name');
+            hasErrors = true;
+            return false;
+        }
+        if (!subcategorySelect.hasAttribute('name') || subcategorySelect.getAttribute('name') === '') {
+            subcategorySelect.removeAttribute('name');
+            newSubcategoryInput.setAttribute('name', 'new_subcategory');
+        }
+    } else if (!subcategorySelect.value || subcategorySelect.value === '') {
+        e.preventDefault();
+        alert('Please select or add a subcategory');
+        hasErrors = true;
+        return false;
+    } else {
+        subcategorySelect.setAttribute('name', 'subcategory');
+        newSubcategoryInput.removeAttribute('name');
+        newSubcategoryInput.value = '';
+    }
+    
+    // Validate brand
+    if (brandSelect.value === '__new__') {
+        if (!newBrandInput.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a new brand name');
+            hasErrors = true;
+            return false;
+        }
+        if (!brandSelect.hasAttribute('name') || brandSelect.getAttribute('name') === '') {
+            brandSelect.removeAttribute('name');
+            newBrandInput.setAttribute('name', 'new_brand');
+        }
+    } else if (!brandSelect.value || brandSelect.value === '') {
+        e.preventDefault();
+        alert('Please select or add a brand');
+        hasErrors = true;
+        return false;
+    } else {
+        brandSelect.setAttribute('name', 'brand');
+        newBrandInput.removeAttribute('name');
+        newBrandInput.value = '';
+    }
+    
+    // Validate product
+    if (productSelect.value === '__new__') {
+        if (!newProductInput.value.trim()) {
+            e.preventDefault();
+            alert('Please enter a new product name');
+            hasErrors = true;
+            return false;
+        }
+        if (!productSelect.hasAttribute('name') || productSelect.getAttribute('name') === '') {
+            productSelect.removeAttribute('name');
+            newProductInput.setAttribute('name', 'new_product');
+        }
+    } else if (!productSelect.value || productSelect.value === '') {
+        e.preventDefault();
+        alert('Please select or add a product');
+        hasErrors = true;
+        return false;
+    } else {
+        productSelect.setAttribute('name', 'product');
+        newProductInput.removeAttribute('name');
+        newProductInput.value = '';
+    }
+    
+    if (hasErrors) {
+        return false;
+    }
+});
+
+function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, specsJson) {
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
 
     modalTitle.innerText = "Edit inventory";
     inventoryForm.action = editUrl;
 
-    inventoryForm.category.value = category;
-    inventoryForm.subcategory.value = subcategory;
-    inventoryForm.brand.value = brand;
-    inventoryForm.product.value = product;
+    // Set category and load dependent dropdowns
+    categorySelect.value = category;
+    if (category) {
+        loadSubcategories(category);
+        // Wait a bit for subcategories to load, then set subcategory
+        setTimeout(() => {
+            subcategorySelect.value = subcategory;
+            if (subcategory) {
+                loadBrands(subcategory);
+                setTimeout(() => {
+                    brandSelect.value = brand;
+                    if (brand) {
+                        loadProducts(brand);
+                        setTimeout(() => {
+                            productSelect.value = product;
+                        }, 300);
+                    }
+                }, 300);
+            }
+        }, 300);
+    }
+    
     inventoryForm.description.value = description;
     inventoryForm.color.value = color;
     inventoryForm.size.value = size;
     inventoryForm.price.value = price;
     inventoryForm.stock.value = stock;
+
+    // Specs
+    resetSpecs();
+    try {
+        const specs = JSON.parse(specsJson || '[]');
+        if (Array.isArray(specs) && specs.length) {
+            specsContainer.innerHTML = '';
+            specs.forEach(s => addSpecRow(s.name || '', s.value || ''));
+        }
+    } catch (e) {
+        // ignore
+    }
 }
 
 function openDeleteModal(deleteUrl) {
@@ -435,7 +1061,7 @@ function closeDeleteModal() {
 const viewModal = document.getElementById('viewModal');
 
 function openViewModal(
-    id, product, brand, category, subcategory, color, size, stock, price, description, status, profile
+    id, product, brand, category, subcategory, color, size, stock, price, description, status, profile, specsText
 ) {
     document.getElementById('viewId').innerText = id;
     document.getElementById('viewName').innerText = product;
@@ -446,7 +1072,8 @@ function openViewModal(
     document.getElementById('viewSize').innerText = size;
     document.getElementById('viewStock').innerText = stock;
     document.getElementById('viewPrice').innerText = price;
-    document.getElementById('viewDescription').innerText = description;
+    const specs = (specsText || '').trim();
+    document.getElementById('viewDescription').innerText = specs ? `${description}\n\nSpecs:\n${specs}` : description;
     document.getElementById('viewStatus').innerText = status;
 
     const img = document.getElementById('viewProfile');

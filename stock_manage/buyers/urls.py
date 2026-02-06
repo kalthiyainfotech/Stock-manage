@@ -8,6 +8,7 @@ urlpatterns = [
     path("about-us/", by_about, name="by_about"),
     path("blog/", by_blog, name="by_blog"),
     path("cart/", by_cart, name="by_cart"),
+    path("cart/add/<int:variant_id>/", add_to_cart, name="by_add_to_cart"),
     path("checkout/", by_checkout, name="by_checkout"),
     path("contact/", by_contact, name="by_contact"),
     path("services/", by_services, name="by_services"),
@@ -18,4 +19,5 @@ urlpatterns = [
 
 
     path("logout/", by_logout, name="by_logout"),
+    path("cart/remove/<int:item_id>/", remove_from_cart, name="by_remove_from_cart"),
 ]

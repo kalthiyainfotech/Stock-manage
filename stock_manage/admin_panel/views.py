@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from .models import *
 from buyers.models import Buyer
 
@@ -205,54 +206,109 @@ def delete_worker(request, id):
 def add_inventory(request):
     if request.method == "POST":
 
-        # CATEGORY
+        # CATEGORY - use new_category if provided, otherwise use category
+        category_name = request.POST.get('new_category') or request.POST.get('category')
+        if not category_name:
+            messages.error(request, "Category is required")
+            return redirect('auth_inventory')
+        
         category, _ = Category.objects.get_or_create(
-            name=request.POST['category']
+            name=category_name
         )
 
-        # SUBCATEGORY
+        # SUBCATEGORY - use new_subcategory if provided, otherwise use subcategory
+        subcategory_name = request.POST.get('new_subcategory') or request.POST.get('subcategory')
+        if not subcategory_name:
+            messages.error(request, "Subcategory is required")
+            return redirect('auth_inventory')
+        
         subcategory, _ = Subcetegory.objects.get_or_create(
             category=category,
-            name=request.POST['subcategory']
+            name=subcategory_name
         )
 
-        # BRAND
+        # BRAND - use new_brand if provided, otherwise use brand
+        brand_name = request.POST.get('new_brand') or request.POST.get('brand')
+        if not brand_name:
+            messages.error(request, "Brand is required")
+            return redirect('auth_inventory')
+        
         brand, _ = Brand.objects.get_or_create(
             subcetegory=subcategory,
-            name=request.POST['brand']
+            name=brand_name
         )
 
-        # PRODUCT
+        # PRODUCT - use new_product if provided, otherwise use product
+        product_name = request.POST.get('new_product') or request.POST.get('product')
+        if not product_name:
+            messages.error(request, "Product is required")
+            return redirect('auth_inventory')
+        
         product, _ = Product.objects.get_or_create(
             brand=brand,
-            name=request.POST['product'],
+            name=product_name,
             defaults={
                 'description': request.POST.get('description', ''),
                 'base_price': request.POST.get('price') or 0,
                 'image': request.FILES.get('product_picture')
             }
         )
+        
+        # Update product if it already exists
+        if not _:
+            product.description = request.POST.get('description', '')
+            product.base_price = request.POST.get('price') or 0
+            if request.FILES.get('product_picture'):
+                product.image = request.FILES.get('product_picture')
+            product.save()
 
         # COLOR
+        color_name = request.POST.get('color', '').strip()
+        if not color_name:
+            color_name = 'Default'
         color, _ = Color.objects.get_or_create(
-            name=request.POST.get('color')
+            name=color_name
         )
 
         # SIZE
+        size_name = request.POST.get('size', '').strip()
+        if not size_name:
+            size_name = 'Default'
         size, _ = Size.objects.get_or_create(
-            name=request.POST.get('size')
+            name=size_name
         )
 
         # PRODUCT VARIANT
-        ProductVariant.objects.create(
+        sku = f"{product.id}-{color.id}-{size.id}"
+        # Check if variant already exists
+        variant, created = ProductVariant.objects.get_or_create(
             product=product,
             color=color,
             size=size,
-            price=request.POST.get('price') or 0,
-            stock=request.POST.get('stock') or 0,
-            sku=f"{product.id}-{color.id}-{size.id}"
+            defaults={
+                'price': request.POST.get('price') or 0,
+                'stock': request.POST.get('stock') or 0,
+                'sku': sku
+            }
         )
+        
+        # Update if variant already exists
+        if not created:
+            variant.price = request.POST.get('price') or 0
+            variant.stock = request.POST.get('stock') or 0
+            variant.save()
 
+        # SPECS (flexible attributes like Storage, RAM, Weight, etc.)
+        spec_names = request.POST.getlist('spec_name')
+        spec_values = request.POST.getlist('spec_value')
+        VariantSpec.objects.filter(variant=variant).delete()
+        for name, value in zip(spec_names, spec_values):
+            name = (name or '').strip()
+            value = (value or '').strip()
+            if name and value:
+                VariantSpec.objects.create(variant=variant, name=name, value=value)
+
+        messages.success(request, "Inventory added successfully")
         return redirect('auth_inventory')
 
     return redirect('auth_inventory')
@@ -275,39 +331,66 @@ def auth_inventory(request):
     page_number = request.GET.get('page')
     inventory = paginator.get_page(page_number)
 
+    categories = Category.objects.filter(status=True).order_by('name')
+
     return render(request, 'auth_inventory.html', {
-        'inventorys': inventory  # KEEP NAME to avoid HTML change
+        'inventorys': inventory,  # KEEP NAME to avoid HTML change
+        'categories': categories
     })
 
 
 @never_cache
 @login_required(login_url='auth_login')
 def edit_inventory(request, id):
-    inventory = ProductVariant.objects.get(id=id)
+    try:
+        inventory = ProductVariant.objects.get(id=id)
+    except ProductVariant.DoesNotExist:
+        messages.error(request, "Inventory not found")
+        return redirect('auth_inventory')
 
     if request.method == "POST":
 
-        # CATEGORY
+        # CATEGORY - use new_category if provided, otherwise use category
+        category_name = request.POST.get('new_category') or request.POST.get('category')
+        if not category_name:
+            messages.error(request, "Category is required")
+            return redirect('auth_inventory')
+        
         category, _ = Category.objects.get_or_create(
-            name=request.POST['category']
+            name=category_name
         )
 
-        # SUBCATEGORY
+        # SUBCATEGORY - use new_subcategory if provided, otherwise use subcategory
+        subcategory_name = request.POST.get('new_subcategory') or request.POST.get('subcategory')
+        if not subcategory_name:
+            messages.error(request, "Subcategory is required")
+            return redirect('auth_inventory')
+        
         subcategory, _ = Subcetegory.objects.get_or_create(
             category=category,
-            name=request.POST['subcategory']
+            name=subcategory_name
         )
 
-        # BRAND
+        # BRAND - use new_brand if provided, otherwise use brand
+        brand_name = request.POST.get('new_brand') or request.POST.get('brand')
+        if not brand_name:
+            messages.error(request, "Brand is required")
+            return redirect('auth_inventory')
+        
         brand, _ = Brand.objects.get_or_create(
             subcetegory=subcategory,
-            name=request.POST['brand']
+            name=brand_name
         )
 
-        # PRODUCT
+        # PRODUCT - use new_product if provided, otherwise use product
+        product_name = request.POST.get('new_product') or request.POST.get('product')
+        if not product_name:
+            messages.error(request, "Product is required")
+            return redirect('auth_inventory')
+        
         product = inventory.product
         product.brand = brand
-        product.name = request.POST['product']
+        product.name = product_name
         product.description = request.POST.get('description', '')
         product.base_price = request.POST.get('price') or 0
 
@@ -317,13 +400,19 @@ def edit_inventory(request, id):
         product.save()
 
         # COLOR
+        color_name = request.POST.get('color', '').strip()
+        if not color_name:
+            color_name = 'Default'
         color, _ = Color.objects.get_or_create(
-            name=request.POST.get('color')
+            name=color_name
         )
 
         # SIZE
+        size_name = request.POST.get('size', '').strip()
+        if not size_name:
+            size_name = 'Default'
         size, _ = Size.objects.get_or_create(
-            name=request.POST.get('size')
+            name=size_name
         )
 
         # VARIANT
@@ -332,8 +421,20 @@ def edit_inventory(request, id):
         inventory.size = size
         inventory.price = request.POST.get('price') or 0
         inventory.stock = request.POST.get('stock') or 0
+        inventory.sku = f"{product.id}-{color.id}-{size.id}"
         inventory.save()
 
+        # SPECS (flexible attributes)
+        spec_names = request.POST.getlist('spec_name')
+        spec_values = request.POST.getlist('spec_value')
+        VariantSpec.objects.filter(variant=inventory).delete()
+        for name, value in zip(spec_names, spec_values):
+            name = (name or '').strip()
+            value = (value or '').strip()
+            if name and value:
+                VariantSpec.objects.create(variant=inventory, name=name, value=value)
+
+        messages.success(request, "Inventory updated successfully")
         return redirect('auth_inventory')
 
     return redirect('auth_inventory')
@@ -346,6 +447,79 @@ def delete_inventory(request, id):
     inventory = ProductVariant.objects.get(id=id)
     inventory.delete()
     return redirect('auth_inventory')
+
+
+# AJAX endpoints for dynamic dropdowns
+@never_cache
+@login_required(login_url='auth_login')
+def get_subcategories(request):
+    category_name = request.GET.get('category_name')
+    if category_name:
+        try:
+            category = Category.objects.get(name=category_name, status=True)
+            subcategories = Subcetegory.objects.filter(
+                category=category, 
+                status=True
+            ).order_by('name')
+            data = [{'id': sub.id, 'name': sub.name} for sub in subcategories]
+            return JsonResponse(data, safe=False)
+        except Category.DoesNotExist:
+            return JsonResponse([], safe=False)
+    return JsonResponse([], safe=False)
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def get_brands(request):
+    subcategory_name = request.GET.get('subcategory_name')
+    category_name = request.GET.get('category_name')
+    if subcategory_name and category_name:
+        try:
+            category = Category.objects.get(name=category_name, status=True)
+            subcategory = Subcetegory.objects.get(
+                category=category,
+                name=subcategory_name, 
+                status=True
+            )
+            brands = Brand.objects.filter(
+                subcetegory=subcategory, 
+                status=True
+            ).order_by('name')
+            data = [{'id': brand.id, 'name': brand.name} for brand in brands]
+            return JsonResponse(data, safe=False)
+        except (Category.DoesNotExist, Subcetegory.DoesNotExist):
+            return JsonResponse([], safe=False)
+    return JsonResponse([], safe=False)
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def get_products(request):
+    brand_name = request.GET.get('brand_name')
+    subcategory_name = request.GET.get('subcategory_name')
+    category_name = request.GET.get('category_name')
+    if brand_name and subcategory_name and category_name:
+        try:
+            category = Category.objects.get(name=category_name, status=True)
+            subcategory = Subcetegory.objects.get(
+                category=category,
+                name=subcategory_name, 
+                status=True
+            )
+            brand = Brand.objects.get(
+                subcetegory=subcategory,
+                name=brand_name, 
+                status=True
+            )
+            products = Product.objects.filter(
+                brand=brand, 
+                status=True
+            ).order_by('name')
+            data = [{'id': prod.id, 'name': prod.name} for prod in products]
+            return JsonResponse(data, safe=False)
+        except (Category.DoesNotExist, Subcetegory.DoesNotExist, Brand.DoesNotExist):
+            return JsonResponse([], safe=False)
+    return JsonResponse([], safe=False)
 
 
 
