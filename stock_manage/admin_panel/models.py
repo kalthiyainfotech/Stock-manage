@@ -124,10 +124,6 @@ class ProductVariant(models.Model):
 
 
 class VariantSpec(models.Model):
-    """
-    Flexible key/value specs per inventory variant.
-    Examples: Storage=128GB, RAM=8GB, Weight=500g, Material=Steel, etc.
-    """
     variant = models.ForeignKey(
         ProductVariant,
         on_delete=models.CASCADE,

@@ -3,8 +3,11 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.cache import never_cache
 from functools import wraps
-from .models import Buyer, CartItem
+from .models import Buyer, CartItem, Order, OrderItem
 from admin_panel.models import ProductVariant
+from django.utils import timezone
+import random
+import string
 
 
 def buyer_login_required(view_func):
@@ -127,7 +130,11 @@ def add_to_cart(request, variant_id):
         defaults={"quantity": 1},
     )
 
-    if not created:
+    if created:
+        
+        cart_item.quantity = 1
+        cart_item.save()
+    else:
         
         if cart_item.quantity < variant.stock:
             cart_item.quantity += 1
@@ -146,6 +153,32 @@ def by_cart(request):
     buyer_id = request.session.get("buyer_id")
     buyer = Buyer.objects.get(id=buyer_id)
 
+
+    if request.method == "POST":
+        for item in CartItem.objects.filter(buyer=buyer):
+            quantity_key = f"quantity_{item.id}"
+            if quantity_key in request.POST:
+                try:
+                    new_quantity = int(request.POST.get(quantity_key))
+                    
+                    if new_quantity < 1:
+                        new_quantity = 1
+                    
+                    
+                    if new_quantity <= item.variant.stock:
+                        item.quantity = new_quantity
+                        item.save()
+                    else:
+                       
+                        item.quantity = item.variant.stock
+                        item.save()
+                        messages.warning(request, f"Only {item.variant.stock} items available for {item.variant.product.name}. Quantity adjusted.")
+                except ValueError:
+                    
+                    item.quantity = 1
+                    item.save()
+        return redirect("by_cart")
+
     cart_items = CartItem.objects.select_related(
         "variant",
         "variant__product"
@@ -153,6 +186,10 @@ def by_cart(request):
 
     subtotal = 0
     for item in cart_items:
+       
+        if item.quantity < 1:
+            item.quantity = 1
+            item.save()
         item.total_price = item.variant.price * item.quantity
         subtotal += item.total_price
 
@@ -176,7 +213,152 @@ def remove_from_cart(request, item_id):
 @never_cache
 @buyer_login_required
 def by_checkout(request):
-    return render(request,'by_checkout.html')
+    buyer_id = request.session.get("buyer_id")
+    buyer = Buyer.objects.get(id=buyer_id)
+    
+    cart_items = CartItem.objects.select_related(
+        "variant",
+        "variant__product"
+    ).filter(buyer=buyer)
+    
+    if not cart_items.exists():
+        messages.warning(request, "Your cart is empty. Please add items to cart first.")
+        return redirect("by_cart")
+    
+    subtotal = 0
+    for item in cart_items:
+        if item.quantity < 1:
+            item.quantity = 1
+            item.save()
+        item.total_price = float(item.variant.price) * item.quantity
+        subtotal += item.total_price
+    
+    context = {
+        "cart_items": cart_items,
+        "subtotal": subtotal,
+        "total": subtotal,
+        "buyer": buyer,
+    }
+    
+    return render(request, 'by_checkout.html', context)
+
+
+def generate_order_number():
+    """Generate unique order number"""
+    timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
+    random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    return f"ORD-{timestamp}-{random_str}"
+
+
+@never_cache
+@buyer_login_required
+def place_order(request):
+    if request.method != "POST":
+        return redirect("by_checkout")
+    
+    buyer_id = request.session.get("buyer_id")
+    buyer = Buyer.objects.get(id=buyer_id)
+    
+    cart_items = CartItem.objects.select_related("variant", "variant__product").filter(buyer=buyer)
+    
+    if not cart_items.exists():
+        messages.error(request, "Your cart is empty.")
+        return redirect("by_cart")
+    
+    
+    for item in cart_items:
+        if item.quantity > item.variant.stock:
+            messages.error(request, f"Insufficient stock for {item.variant.product.name}. Only {item.variant.stock} available.")
+            return redirect("by_checkout")
+    
+    
+    first_name = request.POST.get("c_fname", "").strip()
+    last_name = request.POST.get("c_lname", "").strip()
+    company_name = request.POST.get("c_companyname", "").strip()
+    email = request.POST.get("c_email_address", "").strip()
+    phone = request.POST.get("c_phone", "").strip()
+    address = request.POST.get("c_address", "").strip()
+    address_line2 = request.POST.get("c_address_line2", "").strip()
+    state_city = request.POST.get("c_state_country", "").strip()
+    postal_code = request.POST.get("c_postal_zip", "").strip()
+    country = request.POST.get("c_country", "").strip()
+    payment_method = request.POST.get("payment_method", "cash_on_delivery")
+    order_notes = request.POST.get("c_order_notes", "").strip()
+    ship_to_different = request.POST.get("c_ship_different_address") == "1"
+    
+    
+    if not all([first_name, last_name, email, phone, address, state_city, postal_code, country]):
+        messages.error(request, "Please fill in all required fields.")
+        return redirect("by_checkout")
+    
+    
+    subtotal = sum(item.variant.price * item.quantity for item in cart_items)
+    total = subtotal
+    
+  
+    order_number = generate_order_number()
+    order = Order.objects.create(
+        buyer=buyer,
+        order_number=order_number,
+        first_name=first_name,
+        last_name=last_name,
+        company_name=company_name if company_name else None,
+        email=email,
+        phone=phone,
+        address=address,
+        address_line2=address_line2 if address_line2 else None,
+        city=state_city,
+        state=state_city,
+        postal_code=postal_code,
+        country=country,
+        ship_to_different_address=ship_to_different,
+        subtotal=subtotal,
+        total=total,
+        payment_method=payment_method,
+        order_notes=order_notes if order_notes else None,
+    )
+    
+    
+    if ship_to_different:
+        shipping_first_name = request.POST.get("c_diff_fname", "").strip()
+        shipping_last_name = request.POST.get("c_diff_lname", "").strip()
+        shipping_company_name = request.POST.get("c_diff_companyname", "").strip()
+        shipping_address = request.POST.get("c_diff_address", "").strip()
+        shipping_address_line2 = request.POST.get("c_diff_address_line2", "").strip()
+        shipping_state_city = request.POST.get("c_diff_state_country", "").strip()
+        shipping_postal_code = request.POST.get("c_diff_postal_zip", "").strip()
+        shipping_country = request.POST.get("c_diff_country", "").strip()
+        
+        if all([shipping_first_name, shipping_last_name, shipping_address, shipping_state_city, shipping_postal_code, shipping_country]):
+            order.shipping_first_name = shipping_first_name
+            order.shipping_last_name = shipping_last_name
+            order.shipping_company_name = shipping_company_name if shipping_company_name else None
+            order.shipping_address = shipping_address
+            order.shipping_address_line2 = shipping_address_line2 if shipping_address_line2 else None
+            order.shipping_city = shipping_state_city
+            order.shipping_state = shipping_state_city
+            order.shipping_postal_code = shipping_postal_code
+            order.shipping_country = shipping_country
+            order.save()
+    
+    for item in cart_items:
+        OrderItem.objects.create(
+            order=order,
+            variant=item.variant,
+            product_name=item.variant.product.name,
+            quantity=item.quantity,
+            price=item.variant.price,
+            total=item.variant.price * item.quantity
+        )
+        
+        item.variant.stock -= item.quantity
+        item.variant.save()
+    
+    
+    cart_items.delete()
+    
+    messages.success(request, f"Order placed successfully! Order Number: {order_number}")
+    return redirect("by_thankyou")
 
 
 @never_cache

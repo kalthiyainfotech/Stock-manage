@@ -20,4 +20,5 @@ urlpatterns = [
 
     path("logout/", by_logout, name="by_logout"),
     path("cart/remove/<int:item_id>/", remove_from_cart, name="by_remove_from_cart"),
+    path("checkout/place-order/", place_order, name="by_place_order"),
 ]

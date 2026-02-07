@@ -33,14 +33,14 @@
                           <th class="product-thumbnail">Image</th>
                           <th class="product-name">Product</th>
                           <th class="product-price">Price</th>
-                          <th class="product-quantity">Quantity</th>
+                          <th class="product-quantity" style="text-align: center;">Quantity</th>
                           <th class="product-total">Total</th>
                           <th class="product-remove">Remove</th>
                         </tr>
                       </thead>
                       <tbody>
                         {% for item in cart_items %}
-                        <tr>
+                        <tr data-item-id="{{ item.id }}">
                           <td class="product-thumbnail">
                             {% if item.variant.product.image %}
                               <img src="{{ item.variant.product.image.url }}" alt="Image" class="img-fluid">
@@ -51,20 +51,20 @@
                           <td class="product-name">
                             <h2 class="h5 text-black">{{ item.variant.product.name }}</h2>
                           </td>
-                          <td>₹{{ item.variant.price }}</td>
-                          <td>
-                            <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px;">
+                          <td class="item-price" data-price="{{ item.variant.price }}">₹{{ item.variant.price }}</td>
+                          <td style="text-align: center;">
+                            <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px; margin: 0 auto;" data-item-id="{{ item.id }}" data-max-stock="{{ item.variant.stock }}">
                               <div class="input-group-prepend">
-                                <button class="btn btn-outline-black decrease" type="button">&minus;</button>
+                                <button class="btn btn-outline-black decrease" type="button" data-item-id="{{ item.id }}">&minus;</button>
                               </div>
-                              <input type="text" class="form-control text-center quantity-amount" value="{{ item.quantity }}" readonly>
+                              <input type="hidden" name="quantity_{{ item.id }}" id="quantity_{{ item.id }}" value="{{ item.quantity }}">
+                              <input type="text" class="form-control text-center quantity-amount" value="{{ item.quantity }}" readonly data-item-id="{{ item.id }}">
                               <div class="input-group-append">
-                                <button class="btn btn-outline-black increase" type="button">&plus;</button>
+                                <button class="btn btn-outline-black increase" type="button" data-item-id="{{ item.id }}">&plus;</button>
                               </div>
                             </div>
-        
                           </td>
-                          <td>₹{{ item.total_price }}</td>
+                          <td class="item-total-cell">₹<span class="item-total">{{ item.total_price }}</span></td>
                           <td><a href="{% url 'by_remove_from_cart' item.id %}" class="btn btn-black btn-sm">X</a></td>
                         </tr>
                         {% empty %}
@@ -81,23 +81,8 @@
               <div class="row">
                 <div class="col-md-6">
                   <div class="row mb-5">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                      <button class="btn btn-black btn-sm btn-block">Update Cart</button>
-                    </div>
-                    <div class="col-md-6">
-                      <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>
-                    </div>
-                  </div>
-                  <div class="row">
                     <div class="col-md-12">
-                      <label class="text-black h4" for="coupon">Coupon</label>
-                      <p>Enter your coupon code if you have one.</p>
-                    </div>
-                    <div class="col-md-8 mb-3 mb-md-0">
-                      <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
-                    </div>
-                    <div class="col-md-4">
-                      <button class="btn btn-black">Apply Coupon</button>
+                      <button type="button" class="btn btn-outline-black btn-sm btn-block" onclick="window.location='{% url "by_shop" %}'">Continue Shopping</button>
                     </div>
                   </div>
                 </div>
@@ -114,7 +99,7 @@
                           <span class="text-black">Subtotal</span>
                         </div>
                         <div class="col-md-6 text-right">
-                          <strong class="text-black">₹{{ subtotal }}</strong>
+                          <strong class="text-black">₹<span id="cart-subtotal">{{ subtotal }}</span></strong>
                         </div>
                       </div>
                       <div class="row mb-5">
@@ -122,7 +107,7 @@
                           <span class="text-black">Total</span>
                         </div>
                         <div class="col-md-6 text-right">
-                          <strong class="text-black">₹{{ total }}</strong>
+                          <strong class="text-black">₹<span id="cart-total">{{ total }}</span></strong>
                         </div>
                       </div>
         
@@ -137,5 +122,194 @@
               </div>
             </div>
           </div>
+
+<script>
+(function() {
+    'use strict';
+    
+    // Completely override custom.js quantity handlers for cart page
+    // Run after custom.js by using setTimeout
+    function initCartQuantity() {
+        // First, ensure all quantities are valid on page load (must be exactly 1 for new items)
+        var allQuantityInputs = document.querySelectorAll('.quantity-amount');
+        allQuantityInputs.forEach(function(input) {
+            var quantity = parseInt(input.value);
+            // If quantity is invalid, NaN, or less than 1, set to 1
+            if (isNaN(quantity) || quantity < 1) {
+                quantity = 1;
+                input.value = 1;
+                var itemId = input.getAttribute('data-item-id');
+                var hiddenInput = document.getElementById('quantity_' + itemId);
+                if (hiddenInput) {
+                    hiddenInput.value = 1;
+                }
+            }
+        });
+        
+        // Remove existing event listeners by cloning and replacing entire quantity containers
+        var quantityContainers = document.querySelectorAll('.quantity-container');
+        quantityContainers.forEach(function(container) {
+            // Clone the entire container to remove all event listeners
+            var newContainer = container.cloneNode(true);
+            container.parentNode.replaceChild(newContainer, container);
+        });
+        
+        // Now get fresh references after cloning
+        var increaseButtons = document.querySelectorAll('.quantity-container .increase');
+        var decreaseButtons = document.querySelectorAll('.quantity-container .decrease');
+        
+        // Function to calculate and update totals
+        function updateTotals() {
+            var subtotal = 0;
+            var rows = document.querySelectorAll('tbody tr[data-item-id]');
+            
+            rows.forEach(function(row) {
+                var price = parseFloat(row.querySelector('.item-price').getAttribute('data-price'));
+                var quantityInput = row.querySelector('.quantity-amount');
+                var quantity = parseInt(quantityInput.value) || 1;
+                
+                // Ensure minimum quantity is 1
+                if (quantity < 1) {
+                    quantity = 1;
+                    quantityInput.value = 1;
+                    var hiddenInput = row.querySelector('input[type="hidden"][id^="quantity_"]');
+                    if (hiddenInput) {
+                        hiddenInput.value = 1;
+                    }
+                }
+                
+                var itemTotal = price * quantity;
+                
+                // Update item total
+                var totalCell = row.querySelector('.item-total');
+                if (totalCell) {
+                    totalCell.textContent = itemTotal.toFixed(2);
+                }
+                
+                subtotal += itemTotal;
+            });
+            
+            // Update subtotal and total
+            var subtotalElement = document.getElementById('cart-subtotal');
+            var totalElement = document.getElementById('cart-total');
+            if (subtotalElement) {
+                subtotalElement.textContent = subtotal.toFixed(2);
+            }
+            if (totalElement) {
+                totalElement.textContent = subtotal.toFixed(2);
+            }
+        }
+        
+        // Handle increase button - prevent double increment
+        increaseButtons.forEach(function(button) {
+            // Remove any existing listeners by replacing the button
+            var newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var itemId = this.getAttribute('data-item-id');
+                var quantityInput = document.querySelector('.quantity-amount[data-item-id="' + itemId + '"]');
+                var hiddenInput = document.getElementById('quantity_' + itemId);
+                var quantityContainer = this.closest('.quantity-container');
+                var maxStock = parseInt(quantityContainer.getAttribute('data-max-stock')) || 999;
+                var currentQuantity = parseInt(quantityInput.value) || 1;
+                
+                // Ensure minimum quantity is 1
+                if (currentQuantity < 1) {
+                    currentQuantity = 1;
+                    quantityInput.value = 1;
+                    if (hiddenInput) {
+                        hiddenInput.value = 1;
+                    }
+                }
+                
+                if (currentQuantity < maxStock) {
+                    var newQuantity = currentQuantity + 1;
+                    quantityInput.value = newQuantity;
+                    if (hiddenInput) {
+                        hiddenInput.value = newQuantity;
+                    }
+                    updateTotals();
+                } else {
+                    alert('Only ' + maxStock + ' items available in stock');
+                }
+            });
+        });
+        
+        // Handle decrease button
+        decreaseButtons.forEach(function(button) {
+            // Remove any existing listeners by replacing the button
+            var newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var itemId = this.getAttribute('data-item-id');
+                var quantityInput = document.querySelector('.quantity-amount[data-item-id="' + itemId + '"]');
+                var hiddenInput = document.getElementById('quantity_' + itemId);
+                var currentQuantity = parseInt(quantityInput.value) || 1;
+                
+                // Ensure minimum quantity is 1
+                if (currentQuantity < 1) {
+                    currentQuantity = 1;
+                    quantityInput.value = 1;
+                    if (hiddenInput) {
+                        hiddenInput.value = 1;
+                    }
+                    return;
+                }
+                
+                if (currentQuantity > 1) {
+                    var newQuantity = currentQuantity - 1;
+                    // Ensure new quantity is at least 1
+                    if (newQuantity < 1) {
+                        newQuantity = 1;
+                    }
+                    quantityInput.value = newQuantity;
+                    if (hiddenInput) {
+                        hiddenInput.value = newQuantity;
+                    }
+                    updateTotals();
+                }
+            });
+        });
+        
+        // Initial calculation
+        updateTotals();
+    }
+    
+    // Run after DOM is ready and after custom.js (with longer delay to ensure custom.js finishes)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initCartQuantity, 200);
+        });
+    } else {
+        setTimeout(initCartQuantity, 200);
+    }
+    
+    // Also run on window load as a safety net
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            var allQuantityInputs = document.querySelectorAll('.quantity-amount');
+            allQuantityInputs.forEach(function(input) {
+                var quantity = parseInt(input.value);
+                if (isNaN(quantity) || quantity < 1) {
+                    input.value = 1;
+                    var itemId = input.getAttribute('data-item-id');
+                    var hiddenInput = document.getElementById('quantity_' + itemId);
+                    if (hiddenInput) {
+                        hiddenInput.value = 1;
+                    }
+                }
+            });
+        }, 100);
+    });
+})();
+</script>
 		
 {% endblock buyer_layout %}

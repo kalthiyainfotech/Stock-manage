@@ -38,3 +38,75 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.buyer.email} - {self.variant} x {self.quantity}"
+
+
+class Order(models.Model):
+    ORDER_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
+    PAYMENT_METHOD_CHOICES = [
+        ('upi', 'UPI / GPay / PhonePe / Paytm'),
+        ('cash_on_delivery', 'Cash on Delivery'),
+    ]
+    
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, related_name="orders")
+    order_number = models.CharField(max_length=50, unique=True)
+    
+    # Billing Details
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    company_name = models.CharField(max_length=100, blank=True, null=True)
+    email = models.EmailField()
+    phone = models.CharField(max_length=15)
+    address = models.TextField()
+    address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=20)
+    country = models.CharField(max_length=100)
+    
+    # Shipping Details (if different)
+    ship_to_different_address = models.BooleanField(default=False)
+    shipping_first_name = models.CharField(max_length=100, blank=True, null=True)
+    shipping_last_name = models.CharField(max_length=100, blank=True, null=True)
+    shipping_company_name = models.CharField(max_length=100, blank=True, null=True)
+    shipping_address = models.TextField(blank=True, null=True)
+    shipping_address_line2 = models.CharField(max_length=255, blank=True, null=True)
+    shipping_city = models.CharField(max_length=100, blank=True, null=True)
+    shipping_state = models.CharField(max_length=100, blank=True, null=True)
+    shipping_postal_code = models.CharField(max_length=20, blank=True, null=True)
+    shipping_country = models.CharField(max_length=100, blank=True, null=True)
+    
+    # Order Details
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHOD_CHOICES)
+    order_notes = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Order {self.order_number} - {self.buyer.email}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE)
+    product_name = models.CharField(max_length=255)  # Store product name at time of order
+    quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # Store price at time of order
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    def __str__(self):
+        return f"{self.product_name} x {self.quantity} - Order {self.order.order_number}"

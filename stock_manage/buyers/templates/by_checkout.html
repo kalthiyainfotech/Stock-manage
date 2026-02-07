@@ -20,39 +20,36 @@
 
 		<div class="untree_co-section">
 		    <div class="container">
-		      <div class="row mb-5">
-		        <div class="col-md-12">
-		          <div class="border p-4 rounded" role="alert">
-		            Returning customer? <a href="#">Click here</a> to login
-		          </div>
-		        </div>
-		      </div>
+		      <form method="post" action="{% url 'by_place_order' %}">
+		        {% csrf_token %}
+		      
 		      <div class="row">
 		        <div class="col-md-6 mb-5 mb-md-0">
 		          <h2 class="h3 mb-3 text-black">Billing Details</h2>
 		          <div class="p-3 p-lg-5 border bg-white">
 		            <div class="form-group">
 		              <label for="c_country" class="text-black">Country <span class="text-danger">*</span></label>
-		              <select id="c_country" class="form-control">
-		                <option value="1">Select a country</option>    
-		                <option value="2">bangladesh</option>    
-		                <option value="3">Algeria</option>    
-		                <option value="4">Afghanistan</option>    
-		                <option value="5">Ghana</option>    
-		                <option value="6">Albania</option>    
-		                <option value="7">Bahrain</option>    
-		                <option value="8">Colombia</option>    
-		                <option value="9">Dominican Republic</option>    
+		              <select id="c_country" name="c_country" class="form-control" required>
+		                <option value="">Select a country</option>    
+		                <option value="India" {% if buyer.country == 'India' %}selected{% endif %}>India</option>    
+		                <option value="Bangladesh">Bangladesh</option>    
+		                <option value="Algeria">Algeria</option>    
+		                <option value="Afghanistan">Afghanistan</option>    
+		                <option value="Ghana">Ghana</option>    
+		                <option value="Albania">Albania</option>    
+		                <option value="Bahrain">Bahrain</option>    
+		                <option value="Colombia">Colombia</option>    
+		                <option value="Dominican Republic">Dominican Republic</option>    
 		              </select>
 		            </div>
 		            <div class="form-group row">
 		              <div class="col-md-6">
 		                <label for="c_fname" class="text-black">First Name <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_fname" name="c_fname">
+		                <input type="text" class="form-control" id="c_fname" name="c_fname" value="{% if buyer.name %}{{ buyer.name }}{% endif %}" required>
 		              </div>
 		              <div class="col-md-6">
 		                <label for="c_lname" class="text-black">Last Name <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_lname" name="c_lname">
+		                <input type="text" class="form-control" id="c_lname" name="c_lname" required>
 		              </div>
 		            </div>
 
@@ -66,33 +63,33 @@
 		            <div class="form-group row">
 		              <div class="col-md-12">
 		                <label for="c_address" class="text-black">Address <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_address" name="c_address" placeholder="Street address">
+		                <input type="text" class="form-control" id="c_address" name="c_address" placeholder="Street address" value="{% if buyer.address %}{{ buyer.address }}{% endif %}" required>
 		              </div>
 		            </div>
 
 		            <div class="form-group mt-3">
-		              <input type="text" class="form-control" placeholder="Apartment, suite, unit etc. (optional)">
+		              <input type="text" class="form-control" name="c_address_line2" placeholder="Apartment, suite, unit etc. (optional)">
 		            </div>
 
 		            <div class="form-group row">
 		              <div class="col-md-6">
-		                <label for="c_state_country" class="text-black">State / Country <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_state_country" name="c_state_country">
+		                <label for="c_state_country" class="text-black">State / City <span class="text-danger">*</span></label>
+		                <input type="text" class="form-control" id="c_state_country" name="c_state_country" value="{% if buyer.state %}{{ buyer.state }}{% elif buyer.city %}{{ buyer.city }}{% endif %}" required>
 		              </div>
 		              <div class="col-md-6">
-		                <label for="c_postal_zip" class="text-black">Posta / Zip <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_postal_zip" name="c_postal_zip">
+		                <label for="c_postal_zip" class="text-black">Postal / Zip <span class="text-danger">*</span></label>
+		                <input type="text" class="form-control" id="c_postal_zip" name="c_postal_zip" value="{% if buyer.pincode %}{{ buyer.pincode }}{% endif %}" required>
 		              </div>
 		            </div>
 
 		            <div class="form-group row mb-5">
 		              <div class="col-md-6">
 		                <label for="c_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_email_address" name="c_email_address">
+		                <input type="email" class="form-control" id="c_email_address" name="c_email_address" value="{{ buyer.email }}" required>
 		              </div>
 		              <div class="col-md-6">
 		                <label for="c_phone" class="text-black">Phone <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_phone" name="c_phone" placeholder="Phone Number">
+		                <input type="text" class="form-control" id="c_phone" name="c_phone" placeholder="Phone Number" value="{{ buyer.phone }}" required>
 		              </div>
 		            </div>
 
@@ -117,16 +114,17 @@
 
 		                  <div class="form-group">
 		                    <label for="c_diff_country" class="text-black">Country <span class="text-danger">*</span></label>
-		                    <select id="c_diff_country" class="form-control">
-		                      <option value="1">Select a country</option>    
-		                      <option value="2">bangladesh</option>    
-		                      <option value="3">Algeria</option>    
-		                      <option value="4">Afghanistan</option>    
-		                      <option value="5">Ghana</option>    
-		                      <option value="6">Albania</option>    
-		                      <option value="7">Bahrain</option>    
-		                      <option value="8">Colombia</option>    
-		                      <option value="9">Dominican Republic</option>    
+		                    <select id="c_diff_country" name="c_diff_country" class="form-control">
+		                      <option value="">Select a country</option>    
+		                      <option value="India">India</option>    
+		                      <option value="Bangladesh">Bangladesh</option>    
+		                      <option value="Algeria">Algeria</option>    
+		                      <option value="Afghanistan">Afghanistan</option>    
+		                      <option value="Ghana">Ghana</option>    
+		                      <option value="Albania">Albania</option>    
+		                      <option value="Bahrain">Bahrain</option>    
+		                      <option value="Colombia">Colombia</option>    
+		                      <option value="Dominican Republic">Dominican Republic</option>    
 		                    </select>
 		                  </div>
 
@@ -157,7 +155,7 @@
 		                  </div>
 
 		                  <div class="form-group">
-		                    <input type="text" class="form-control" placeholder="Apartment, suite, unit etc. (optional)">
+		                    <input type="text" class="form-control" name="c_diff_address_line2" placeholder="Apartment, suite, unit etc. (optional)">
 		                  </div>
 
 		                  <div class="form-group row">
@@ -198,23 +196,6 @@
 
 		          <div class="row mb-5">
 		            <div class="col-md-12">
-		              <h2 class="h3 mb-3 text-black">Coupon Code</h2>
-		              <div class="p-3 p-lg-5 border bg-white">
-
-		                <label for="c_code" class="text-black mb-3">Enter your coupon code if you have one</label>
-		                <div class="input-group w-75 couponcode-wrap">
-		                  <input type="text" class="form-control me-2" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code" aria-describedby="button-addon2">
-		                  <div class="input-group-append">
-		                    <button class="btn btn-black btn-sm" type="button" id="button-addon2">Apply</button>
-		                  </div>
-		                </div>
-
-		              </div>
-		            </div>
-		          </div>
-
-		          <div class="row mb-5">
-		            <div class="col-md-12">
 		              <h2 class="h3 mb-3 text-black">Your Order</h2>
 		              <div class="p-3 p-lg-5 border bg-white">
 		                <table class="table site-block-order-table mb-5">
@@ -223,57 +204,73 @@
 		                    <th>Total</th>
 		                  </thead>
 		                  <tbody>
+		                    {% for item in cart_items %}
 		                    <tr>
-		                      <td>Top Up T-Shirt <strong class="mx-2">x</strong> 1</td>
-		                      <td>$250.00</td>
+		                      <td>{{ item.variant.product.name }} <strong class="mx-2">x</strong> {{ item.quantity }}</td>
+		                      <td>₹{{ item.total_price|floatformat:2 }}</td>
 		                    </tr>
+		                    {% empty %}
 		                    <tr>
-		                      <td>Polo Shirt <strong class="mx-2">x</strong>   1</td>
-		                      <td>$100.00</td>
+		                      <td colspan="2" class="text-center">Your cart is empty.</td>
 		                    </tr>
+		                    {% endfor %}
 		                    <tr>
 		                      <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-		                      <td class="text-black">$350.00</td>
+		                      <td class="text-black"><strong>₹{{ subtotal|floatformat:2 }}</strong></td>
 		                    </tr>
 		                    <tr>
 		                      <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
-		                      <td class="text-black font-weight-bold"><strong>$350.00</strong></td>
+		                      <td class="text-black font-weight-bold"><strong>₹{{ total|floatformat:2 }}</strong></td>
 		                    </tr>
 		                  </tbody>
 		                </table>
 
-		                <div class="border p-3 mb-3">
-		                  <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsebank" role="button" aria-expanded="false" aria-controls="collapsebank">Direct Bank Transfer</a></h3>
-
-		                  <div class="collapse" id="collapsebank">
-		                    <div class="py-2">
-		                      <p class="mb-0">Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won’t be shipped until the funds have cleared in our account.</p>
+		                <h3 class="h6 mb-3 text-black">Payment Method <span class="text-danger">*</span></h3>
+		                
+		                <div class="border p-3 mb-3 payment-method-option">
+		                  <label class="d-block mb-0" style="cursor: pointer;">
+		                    <input type="radio" name="payment_method" value="upi" id="payment_upi" required style="margin-right: 8px;">
+		                    <strong>UPI / GPay / PhonePe / Paytm</strong>
+		                  </label>
+		                  <div class="py-2 mt-2">
+		                    <p class="mb-0 text-muted">Pay using UPI apps like Google Pay, PhonePe, Paytm, or any UPI app. Scan the QR code below to complete payment.</p>
+		                  </div>
+		                  <div id="upi_qr_section" style="display: none; margin-top: 15px; text-align: center;">
+		                    <div class="border p-3 bg-light">
+		                      <p class="mb-2"><strong>Scan QR Code to Pay</strong></p>
+		                      <div id="upi_qr_code" style="background: white; padding: 20px; display: inline-block; border: 2px solid #ddd; border-radius: 8px;">
+		                        <!-- QR Code generated using API -->
+		                        <img id="qr_code_image" src="" alt="UPI QR Code" style="width: 200px; height: 200px; display: none; border: 1px solid #ddd; border-radius: 4px;">
+		                        <div id="qr_placeholder" style="width: 200px; height: 200px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">
+		                          <div style="text-align: center;">
+		                            <div style="font-size: 48px; margin-bottom: 10px;">📱</div>
+		                            <div style="font-size: 12px; color: #666;">Loading QR Code...</div>
+		                          </div>
+		                        </div>
+		                      </div>
+		                      <p class="mt-3 mb-0" style="font-size: 14px; color: #666;">
+		                        <strong>UPI ID:</strong> <span id="upi_id_display">yourstore@paytm</span><br>
+		                        <strong>Amount:</strong> ₹<span id="upi_amount">{{ total|floatformat:2 }}</span>
+		                      </p>
+		                      <p class="mt-2 mb-0" style="font-size: 12px; color: #999;">
+		                        Scan with GPay, PhonePe, Paytm or any UPI app
+		                      </p>
 		                    </div>
 		                  </div>
 		                </div>
 
-		                <div class="border p-3 mb-3">
-		                  <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsecheque" role="button" aria-expanded="false" aria-controls="collapsecheque">Cheque Payment</a></h3>
-
-		                  <div class="collapse" id="collapsecheque">
-		                    <div class="py-2">
-		                      <p class="mb-0">Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won’t be shipped until the funds have cleared in our account.</p>
-		                    </div>
-		                  </div>
-		                </div>
-
-		                <div class="border p-3 mb-5">
-		                  <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsepaypal" role="button" aria-expanded="false" aria-controls="collapsepaypal">Paypal</a></h3>
-
-		                  <div class="collapse" id="collapsepaypal">
-		                    <div class="py-2">
-		                      <p class="mb-0">Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won’t be shipped until the funds have cleared in our account.</p>
-		                    </div>
+		                <div class="border p-3 mb-5 payment-method-option">
+		                  <label class="d-block mb-0" style="cursor: pointer;">
+		                    <input type="radio" name="payment_method" value="cash_on_delivery" id="payment_cod" checked required style="margin-right: 8px;">
+		                    <strong>Cash on Delivery (COD)</strong>
+		                  </label>
+		                  <div class="py-2 mt-2">
+		                    <p class="mb-0 text-muted">Pay cash when your order is delivered. Additional charges may apply for COD orders.</p>
 		                  </div>
 		                </div>
 
 		                <div class="form-group">
-		                  <button class="btn btn-black btn-lg py-3 btn-block" onclick="window.location='thankyou.html'">Place Order</button>
+		                  <button type="submit" class="btn btn-black btn-lg py-3 btn-block">Place Order</button>
 		                </div>
 
 		              </div>
@@ -282,8 +279,71 @@
 
 		        </div>
 		      </div>
-		      <!-- </form> -->
+		      </form>
 		    </div>
 		  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var upiRadio = document.getElementById('payment_upi');
+    var codRadio = document.getElementById('payment_cod');
+    var upiQrSection = document.getElementById('upi_qr_section');
+    var upiAmount = document.getElementById('upi_amount');
+    var qrImage = document.getElementById('qr_code_image');
+    var qrPlaceholder = document.getElementById('qr_placeholder');
+    var totalAmount = {{ total }};
+    var upiId = 'yourstore@paytm'; // Change this to your actual UPI ID
+    
+    // Update UPI amount display
+    if (upiAmount) {
+        upiAmount.textContent = totalAmount.toFixed(2);
+    }
+    
+    // Generate QR Code URL (using QR Server API)
+    function generateQRCode() {
+        // UPI Payment URL format: upi://pay?pa=UPI_ID&pn=MerchantName&am=AMOUNT&cu=INR
+        var merchantName = 'Your Store Name';
+        var upiPaymentUrl = 'upi://pay?pa=' + encodeURIComponent(upiId) + 
+                           '&pn=' + encodeURIComponent(merchantName) + 
+                           '&am=' + totalAmount.toFixed(2) + 
+                           '&cu=INR';
+        
+        // Use QR Server API to generate QR code
+        var qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(upiPaymentUrl);
+        
+        if (qrImage) {
+            qrImage.src = qrCodeUrl;
+            qrImage.onload = function() {
+                qrImage.style.display = 'block';
+                if (qrPlaceholder) {
+                    qrPlaceholder.style.display = 'none';
+                }
+            };
+            qrImage.onerror = function() {
+                // If QR code fails to load, show placeholder
+                if (qrPlaceholder) {
+                    qrPlaceholder.innerHTML = '<div style="text-align: center;"><div style="font-size: 48px; margin-bottom: 10px;">📱</div><div style="font-size: 12px; color: #666;">UPI QR Code</div><div style="font-size: 10px; color: #999; margin-top: 5px;">' + upiId + '</div></div>';
+                }
+            };
+        }
+    }
+    
+    // Handle payment method change
+    function handlePaymentMethodChange() {
+        if (upiRadio.checked) {
+            upiQrSection.style.display = 'block';
+            generateQRCode();
+        } else {
+            upiQrSection.style.display = 'none';
+        }
+    }
+    
+    upiRadio.addEventListener('change', handlePaymentMethodChange);
+    codRadio.addEventListener('change', handlePaymentMethodChange);
+    
+    // Initial check
+    handlePaymentMethodChange();
+});
+</script>
 
 {% endblock buyer_layout %}
