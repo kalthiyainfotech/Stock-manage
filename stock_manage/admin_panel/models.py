@@ -137,7 +137,25 @@ class VariantSpec(models.Model):
 
     def __str__(self):
         return f"{self.variant_id} - {self.name}: {self.value}"
+    
+
+class Blogs(models.Model):
+    image = models.ImageField(upload_to='blogs/', blank=True, null=True)
+    des = models.TextField()
+    by = models.CharField(max_length=100)
+    date = models.DateField()
+
+    def __str__(self):
+        return f"{self.by} - {self.date}"
 
 
+class Contact(models.Model):
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100, blank=True)
+    email = models.EmailField()
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
-
+    def __str__(self):
+        full_name = f"{self.first_name} {self.last_name}".strip()
+        return f"{full_name} - {self.email}"

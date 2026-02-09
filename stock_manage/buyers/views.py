@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from .models import Buyer, CartItem, Order, OrderItem
-from admin_panel.models import ProductVariant
+from admin_panel.models import ProductVariant, Blogs, Contact
 from django.utils import timezone
 import random
 import string
@@ -14,7 +14,7 @@ def buyer_login_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.session.get("buyer_id"):
-            messages.error(request, "Please login first")
+            
             return redirect("by_login")
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -28,7 +28,7 @@ def by_register(request):
         password = request.POST.get("password")
 
         if Buyer.objects.filter(email=email).exists():
-            messages.error(request, "Email already registered")
+            
             return redirect("by_register")
 
         buyer = Buyer(
@@ -38,7 +38,7 @@ def by_register(request):
         )
         buyer.save()
 
-        messages.success(request, "Registration successful. Please login.")
+        
         return redirect("by_login")
 
     return render(request, "by_register.html")
@@ -78,11 +78,33 @@ def by_about(request):
 
 @never_cache
 def by_blog(request):
-    return render(request,'by_blog.html')
+    blogs = Blogs.objects.all().order_by('-id')
+    return render(request, 'by_blog.html', {
+        'blogs': blogs
+    })
 
 @never_cache
 def by_contact(request):
-    return render(request,'by_contact.html')
+    if request.method == "POST":
+        first_name = request.POST.get("fname", "").strip()
+        last_name = request.POST.get("lname", "").strip()
+        email = request.POST.get("email", "").strip()
+        message_text = request.POST.get("message", "").strip()
+
+        if first_name and email and message_text:
+            Contact.objects.create(
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                message=message_text,
+            )
+            messages.success(request, "Your message has been sent successfully.")
+        else:
+            messages.error(request, "Please fill all required fields.")
+
+        return redirect("by_contact")
+
+    return render(request, 'by_contact.html')
 
 @never_cache
 def by_services(request):
@@ -109,19 +131,19 @@ def by_shop(request):
 def add_to_cart(request, variant_id):
     buyer_id = request.session.get("buyer_id")
     if not buyer_id:
-        messages.error(request, "Please login to add items to your cart.")
+        
         return redirect("by_login")
 
     try:
         buyer = Buyer.objects.get(id=buyer_id)
     except Buyer.DoesNotExist:
-        messages.error(request, "Buyer not found. Please login again.")
+        
         return redirect("by_login")
 
     try:
         variant = ProductVariant.objects.get(id=variant_id, product__status=True)
     except ProductVariant.DoesNotExist:
-        messages.error(request, "Product not found.")
+        
         return redirect("by_shop")
 
     cart_item, created = CartItem.objects.get_or_create(
@@ -140,10 +162,10 @@ def add_to_cart(request, variant_id):
             cart_item.quantity += 1
             cart_item.save()
         else:
-            messages.warning(request, "No more stock available for this product.")
+            
             return redirect("by_shop")
 
-    messages.success(request, "Product added to cart.")
+    
     return redirect("by_cart")
 
 
@@ -172,7 +194,7 @@ def by_cart(request):
                        
                         item.quantity = item.variant.stock
                         item.save()
-                        messages.warning(request, f"Only {item.variant.stock} items available for {item.variant.product.name}. Quantity adjusted.")
+                        
                 except ValueError:
                     
                     item.quantity = 1
@@ -222,7 +244,7 @@ def by_checkout(request):
     ).filter(buyer=buyer)
     
     if not cart_items.exists():
-        messages.warning(request, "Your cart is empty. Please add items to cart first.")
+        
         return redirect("by_cart")
     
     subtotal = 0
@@ -262,13 +284,13 @@ def place_order(request):
     cart_items = CartItem.objects.select_related("variant", "variant__product").filter(buyer=buyer)
     
     if not cart_items.exists():
-        messages.error(request, "Your cart is empty.")
+        
         return redirect("by_cart")
     
     
     for item in cart_items:
         if item.quantity > item.variant.stock:
-            messages.error(request, f"Insufficient stock for {item.variant.product.name}. Only {item.variant.stock} available.")
+            
             return redirect("by_checkout")
     
     
@@ -288,7 +310,7 @@ def place_order(request):
     
     
     if not all([first_name, last_name, email, phone, address, state_city, postal_code, country]):
-        messages.error(request, "Please fill in all required fields.")
+        
         return redirect("by_checkout")
     
     
@@ -357,8 +379,9 @@ def place_order(request):
     
     cart_items.delete()
     
-    messages.success(request, f"Order placed successfully! Order Number: {order_number}")
     return redirect("by_thankyou")
+
+
 
 
 @never_cache

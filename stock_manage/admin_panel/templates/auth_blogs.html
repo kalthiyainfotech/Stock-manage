@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block admin_dash %}
+
+<main class="p-4 sm:p-6 lg:p-8">
+
+    <!-- Add Blog Button -->
+    <button id="openBlogModal"
+        class="px-4 py-2 bg-slate-700 text-white font-medium rounded-lg hover:bg-gray-600 transition">
+        <i class="fa-solid fa-plus"></i> Add Blog
+    </button>
+
+
+    <!-- Blog Modal -->
+    <div id="blogModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
+
+        <div class="relative w-full max-w-xl rounded-lg bg-white p-4 sm:p-6 shadow-lg">
+
+            <h2 id="modalTitle"
+                class="mb-4 text-lg sm:text-xl font-semibold text-gray-800">
+                Add Blog
+            </h2>
+
+            <form id="blogForm"
+                  method="POST"
+                  action="{% url 'add_blogs' %}"
+                  enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 gap-4">
+
+                    <input type="file" name="image"
+                        class="w-full rounded-md border px-3 py-2 text-sm">
+
+                    <input type="text" name="by"
+                        placeholder="Author"
+                        required
+                        class="w-full rounded-md border px-3 py-2 text-sm">
+
+                    <input type="date" name="date"
+                        required
+                        class="w-full rounded-md border px-3 py-2 text-sm">
+
+                    <textarea name="des"
+                        placeholder="Description"
+                        rows="4"
+                        required
+                        class="w-full rounded-md border px-3 py-2 text-sm"></textarea>
+
+                </div>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" id="closeBlogModal"
+                        class="bg-gray-200 px-4 py-2 rounded">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                        class="bg-slate-700 text-white px-4 py-2 rounded">
+                        Save Blog
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Table -->
+    <div class="overflow-x-auto mt-5">
+        <table class="min-w-full border border-gray-200 rounded-lg">
+
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-3 text-left text-sm">No.</th>
+                    <th class="px-4 py-3 text-left text-sm">ID</th>
+                    <th class="px-4 py-3 text-left text-sm">Image</th>
+                    <th class="px-4 py-3 text-left text-sm">Description</th>
+                    <th class="px-4 py-3 text-left text-sm">By</th>
+                    <th class="px-4 py-3 text-left text-sm">Date</th>
+                    <th class="px-4 py-3 text-left text-sm">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for blog in blogs %}
+                <tr class="hover:bg-gray-50">
+
+                    <td class="px-4 py-3">{{ forloop.counter }}</td>
+                    <td class="px-4 py-3">{{ blog.id }}</td>
+
+                    <td class="px-4 py-3">
+                        {% if blog.image %}
+                        <img src="{{ blog.image.url }}"
+                             class="h-12 w-12 object-cover rounded">
+                        {% endif %}
+                    </td>
+
+                    <td class="px-4 py-3">
+                        {{ blog.des|truncatechars:40 }}
+                    </td>
+
+                    <td class="px-4 py-3">{{ blog.by }}</td>
+                    <td class="px-4 py-3">{{ blog.date }}</td>
+
+                    <td class="px-4 py-3 flex gap-2">
+
+                        <!-- Edit -->
+                        <button
+                            onclick="openEditModal(
+                                '{% url 'edit_blogs' blog.id %}',
+                                '{{ blog.by }}',
+                                '{{ blog.date }}',
+                                `{{ blog.des|escapejs }}`
+                            )"
+                            class="text-xs text-blue-600 border px-1 rounded border-blue-500 py-1">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+
+                        <!-- Delete -->
+                        <button
+                            onclick="openDeleteModal('{% url 'delete_blogs' blog.id %}')"
+                            class="px-1 text-xs text-red-600 border rounded border-red-500 py-1">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden bg-black/50">
+    <div class="flex h-full w-full items-center justify-center px-4">
+        <div class="w-full max-w-sm bg-white rounded-lg shadow-lg p-6">
+
+            <h2 class="text-lg font-semibold mb-3">
+                Confirm Delete
+            </h2>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closeDeleteModal()"
+                    class="px-4 py-2 bg-gray-200 rounded">
+                    Cancel
+                </button>
+
+                <a id="confirmDeleteBtn"
+                   class="px-4 py-2 bg-red-600 text-white rounded">
+                    Delete
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- JS -->
+<script>
+
+const blogModal = document.getElementById('blogModal');
+const blogForm = document.getElementById('blogForm');
+const modalTitle = document.getElementById('modalTitle');
+const deleteModal = document.getElementById('deleteModal');
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+
+document.getElementById('openBlogModal').onclick = () => {
+    blogForm.reset();
+    blogForm.action = "{% url 'add_blogs' %}";
+    modalTitle.innerText = "Add Blog";
+    blogModal.classList.remove('hidden');
+    blogModal.classList.add('flex');
+};
+
+document.getElementById('closeBlogModal').onclick = () => {
+    blogModal.classList.add('hidden');
+};
+
+
+function openEditModal(url, by, date, des) {
+    blogModal.classList.remove('hidden');
+    blogModal.classList.add('flex');
+
+    modalTitle.innerText = "Edit Blog";
+    blogForm.action = url;
+
+    blogForm.by.value = by;
+    blogForm.date.value = date;
+    blogForm.des.value = des;
+}
+
+
+function openDeleteModal(url) {
+    deleteModal.classList.remove('hidden');
+    deleteModal.classList.add('flex');
+    confirmDeleteBtn.href = url;
+}
+
+function closeDeleteModal() {
+    deleteModal.classList.add('hidden');
+}
+
+</script>
+
+{% endblock %}

@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var qrImage = document.getElementById('qr_code_image');
     var qrPlaceholder = document.getElementById('qr_placeholder');
     var totalAmount = {{ total }};
-    var upiId = 'yourstore@paytm'; // Change this to your actual UPI ID
+    var upiId = 'mystore@paytm'; // Change this to your actual UPI ID
     
     // Update UPI amount display
     if (upiAmount) {
@@ -302,7 +302,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Generate QR Code URL (using QR Server API)
     function generateQRCode() {
         // UPI Payment URL format: upi://pay?pa=UPI_ID&pn=MerchantName&am=AMOUNT&cu=INR
-        var merchantName = 'Your Store Name';
+		
+        var merchantName = 'My Store';
         var upiPaymentUrl = 'upi://pay?pa=' + encodeURIComponent(upiId) + 
                            '&pn=' + encodeURIComponent(merchantName) + 
                            '&am=' + totalAmount.toFixed(2) + 

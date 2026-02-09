@@ -1,4 +1,4 @@
-from django.shortcuts import render , redirect
+from django.shortcuts import render , redirect,get_object_or_404
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
@@ -542,6 +542,87 @@ def delete_buyer(request, id):
     return redirect('auth_buyers')
 
 
+
+
+
+
+
+# Blogs
+
+@never_cache
+@login_required(login_url='auth_login')
+def auth_blogs(request):
+    blogs_list = Blogs.objects.all().order_by('-id')
+
+    paginator = Paginator(blogs_list, 5)
+    page_number = request.GET.get('page')
+    blogs = paginator.get_page(page_number)
+
+    return render(request, 'auth_blogs.html', {
+        'blogs': blogs
+    })
+
+
+# ADD BLOG
+@never_cache
+@login_required(login_url='auth_login')
+def add_blogs(request):
+    if request.method == "POST":
+        Blogs.objects.create(
+            image=request.FILES.get('image'),
+            des=request.POST.get('des'),
+            by=request.POST.get('by'),
+            date=request.POST.get('date'),
+        )
+    return redirect('auth_blogs')
+
+
+# EDIT BLOG
+@never_cache
+@login_required(login_url='auth_login')
+def edit_blogs(request, id):
+    blog = get_object_or_404(Blogs, id=id)
+
+    if request.method == "POST":
+        blog.des = request.POST.get('des')
+        blog.by = request.POST.get('by')
+        blog.date = request.POST.get('date')
+
+        if request.FILES.get('image'):
+            blog.image = request.FILES.get('image')
+
+        blog.save()
+
+    return redirect('auth_blogs')
+
+
+# DELETE BLOG
+@never_cache
+@login_required(login_url='auth_login')
+def delete_blogs(request, id):
+    Blogs.objects.filter(id=id).delete()
+    return redirect('auth_blogs')
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def auth_contacts(request):
+    contacts_list = Contact.objects.all().order_by('-id')
+
+    paginator = Paginator(contacts_list, 10)
+    page_number = request.GET.get('page')
+    contacts = Paginator(contacts_list, 10).get_page(page_number)
+
+    return render(request, 'auth_contacts.html', {
+        'contacts': contacts
+    })
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_contact(request, id):
+    Contact.objects.filter(id=id).delete()
+    return redirect('auth_contacts')
 
 
 

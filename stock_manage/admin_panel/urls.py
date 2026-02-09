@@ -31,4 +31,12 @@ urlpatterns = [
     path('api/get-brands/', get_brands, name='get_brands'),
     path('api/get-products/', get_products, name='get_products'),
 
+    path('blogs/', auth_blogs, name='auth_blogs'),
+    path('blogs/add/', add_blogs, name='add_blogs'),
+    path('blogs/edit/<int:id>/', edit_blogs, name='edit_blogs'),
+    path('blogs/delete/<int:id>/', delete_blogs, name='delete_blogs'),
+
+    path('contacts/', auth_contacts, name='auth_contacts'),
+    path('contacts/delete/<int:id>/', delete_contact, name='delete_contact'),
+
 ]
