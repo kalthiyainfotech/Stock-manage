@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from .models import *
-from buyers.models import Buyer
+from buyers.models import Buyer, Order
 
 def auth_login(request):
     if request.user.is_authenticated:
@@ -37,7 +37,23 @@ def auth_logout(request):
 @never_cache
 @login_required(login_url='auth_login')
 def auth_dashboard(request):
-    return render(request,'auth_dashboard.html')
+    stats = {
+        'suppliers_count': Suppliers.objects.count(),
+        'workers_count': Workers.objects.count(),
+        'buyers_count': Buyer.objects.count(),
+        'inventory_count': ProductVariant.objects.count(),
+        'orders_count': Order.objects.count(),
+        'contacts_count': Contact.objects.count(),
+    }
+
+    recent_orders = Order.objects.select_related('buyer').order_by('-created_at')[:5]
+    recent_contacts = Contact.objects.order_by('-created_at')[:5]
+
+    return render(request, 'auth_dashboard.html', {
+        **stats,
+        'recent_orders': recent_orders,
+        'recent_contacts': recent_contacts,
+    })
 
 
 
@@ -51,12 +67,19 @@ def auth_dashboard(request):
 def auth_suppliers(request):
     supplier_list = Suppliers.objects.all().order_by('-id')
 
+    total_suppliers = supplier_list.count()
+    active_suppliers = supplier_list.filter(status='Active').count()
+    inactive_suppliers = supplier_list.filter(status='Inactive').count()
+
     paginator = Paginator(supplier_list, 10)  
     page_number = request.GET.get('page')
     suppliers = paginator.get_page(page_number)
 
     return render(request, 'auth_suppliers.html', {
-        'suppliers': suppliers
+        'suppliers': suppliers,
+        'total_suppliers': total_suppliers,
+        'active_suppliers': active_suppliers,
+        'inactive_suppliers': inactive_suppliers,
     })
 
 @never_cache
@@ -206,7 +229,6 @@ def delete_worker(request, id):
 def add_inventory(request):
     if request.method == "POST":
 
-        # CATEGORY - use new_category if provided, otherwise use category
         category_name = request.POST.get('new_category') or request.POST.get('category')
         if not category_name:
             messages.error(request, "Category is required")
@@ -216,7 +238,6 @@ def add_inventory(request):
             name=category_name
         )
 
-        # SUBCATEGORY - use new_subcategory if provided, otherwise use subcategory
         subcategory_name = request.POST.get('new_subcategory') or request.POST.get('subcategory')
         if not subcategory_name:
             messages.error(request, "Subcategory is required")
@@ -227,7 +248,6 @@ def add_inventory(request):
             name=subcategory_name
         )
 
-        # BRAND - use new_brand if provided, otherwise use brand
         brand_name = request.POST.get('new_brand') or request.POST.get('brand')
         if not brand_name:
             messages.error(request, "Brand is required")
@@ -238,7 +258,6 @@ def add_inventory(request):
             name=brand_name
         )
 
-        # PRODUCT - use new_product if provided, otherwise use product
         product_name = request.POST.get('new_product') or request.POST.get('product')
         if not product_name:
             messages.error(request, "Product is required")
@@ -254,7 +273,6 @@ def add_inventory(request):
             }
         )
         
-        # Update product if it already exists
         if not _:
             product.description = request.POST.get('description', '')
             product.base_price = request.POST.get('price') or 0
@@ -262,7 +280,6 @@ def add_inventory(request):
                 product.image = request.FILES.get('product_picture')
             product.save()
 
-        # COLOR
         color_name = request.POST.get('color', '').strip()
         if not color_name:
             color_name = 'Default'
@@ -270,7 +287,6 @@ def add_inventory(request):
             name=color_name
         )
 
-        # SIZE
         size_name = request.POST.get('size', '').strip()
         if not size_name:
             size_name = 'Default'
@@ -278,9 +294,7 @@ def add_inventory(request):
             name=size_name
         )
 
-        # PRODUCT VARIANT
         sku = f"{product.id}-{color.id}-{size.id}"
-        # Check if variant already exists
         variant, created = ProductVariant.objects.get_or_create(
             product=product,
             color=color,
@@ -292,13 +306,11 @@ def add_inventory(request):
             }
         )
         
-        # Update if variant already exists
         if not created:
             variant.price = request.POST.get('price') or 0
             variant.stock = request.POST.get('stock') or 0
             variant.save()
 
-        # SPECS (flexible attributes like Storage, RAM, Weight, etc.)
         spec_names = request.POST.getlist('spec_name')
         spec_values = request.POST.getlist('spec_value')
         VariantSpec.objects.filter(variant=variant).delete()
@@ -334,7 +346,7 @@ def auth_inventory(request):
     categories = Category.objects.filter(status=True).order_by('name')
 
     return render(request, 'auth_inventory.html', {
-        'inventorys': inventory,  # KEEP NAME to avoid HTML change
+        'inventorys': inventory,  
         'categories': categories
     })
 
@@ -350,7 +362,6 @@ def edit_inventory(request, id):
 
     if request.method == "POST":
 
-        # CATEGORY - use new_category if provided, otherwise use category
         category_name = request.POST.get('new_category') or request.POST.get('category')
         if not category_name:
             messages.error(request, "Category is required")
@@ -360,7 +371,6 @@ def edit_inventory(request, id):
             name=category_name
         )
 
-        # SUBCATEGORY - use new_subcategory if provided, otherwise use subcategory
         subcategory_name = request.POST.get('new_subcategory') or request.POST.get('subcategory')
         if not subcategory_name:
             messages.error(request, "Subcategory is required")
@@ -371,7 +381,6 @@ def edit_inventory(request, id):
             name=subcategory_name
         )
 
-        # BRAND - use new_brand if provided, otherwise use brand
         brand_name = request.POST.get('new_brand') or request.POST.get('brand')
         if not brand_name:
             messages.error(request, "Brand is required")
@@ -382,7 +391,6 @@ def edit_inventory(request, id):
             name=brand_name
         )
 
-        # PRODUCT - use new_product if provided, otherwise use product
         product_name = request.POST.get('new_product') or request.POST.get('product')
         if not product_name:
             messages.error(request, "Product is required")
@@ -399,7 +407,6 @@ def edit_inventory(request, id):
 
         product.save()
 
-        # COLOR
         color_name = request.POST.get('color', '').strip()
         if not color_name:
             color_name = 'Default'
@@ -407,7 +414,6 @@ def edit_inventory(request, id):
             name=color_name
         )
 
-        # SIZE
         size_name = request.POST.get('size', '').strip()
         if not size_name:
             size_name = 'Default'
@@ -415,7 +421,6 @@ def edit_inventory(request, id):
             name=size_name
         )
 
-        # VARIANT
         inventory.product = product
         inventory.color = color
         inventory.size = size
@@ -424,7 +429,6 @@ def edit_inventory(request, id):
         inventory.sku = f"{product.id}-{color.id}-{size.id}"
         inventory.save()
 
-        # SPECS (flexible attributes)
         spec_names = request.POST.getlist('spec_name')
         spec_values = request.POST.getlist('spec_value')
         VariantSpec.objects.filter(variant=inventory).delete()
@@ -449,7 +453,6 @@ def delete_inventory(request, id):
     return redirect('auth_inventory')
 
 
-# AJAX endpoints for dynamic dropdowns
 @never_cache
 @login_required(login_url='auth_login')
 def get_subcategories(request):
@@ -563,7 +566,6 @@ def auth_blogs(request):
     })
 
 
-# ADD BLOG
 @never_cache
 @login_required(login_url='auth_login')
 def add_blogs(request):
@@ -577,7 +579,6 @@ def add_blogs(request):
     return redirect('auth_blogs')
 
 
-# EDIT BLOG
 @never_cache
 @login_required(login_url='auth_login')
 def edit_blogs(request, id):
@@ -596,7 +597,6 @@ def edit_blogs(request, id):
     return redirect('auth_blogs')
 
 
-# DELETE BLOG
 @never_cache
 @login_required(login_url='auth_login')
 def delete_blogs(request, id):
@@ -623,6 +623,27 @@ def auth_contacts(request):
 def delete_contact(request, id):
     Contact.objects.filter(id=id).delete()
     return redirect('auth_contacts')
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def auth_order(request):
+    orders_list = Order.objects.select_related('buyer').prefetch_related('items').all().order_by('-created_at')
+    
+    paginator = Paginator(orders_list, 10)
+    page_number = request.GET.get('page')
+    orders = paginator.get_page(page_number)
+    
+    return render(request, 'auth_orders.html', {
+        'orders': orders
+    })
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_order(request, id):
+    Order.objects.filter(id=id).delete()
+    return redirect('auth_order')
 
 
 

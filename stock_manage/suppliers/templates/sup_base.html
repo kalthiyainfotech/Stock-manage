@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Desk</title>
+    <title>Supplier Desk</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -13,15 +13,15 @@
     <aside id="sidebar" class="fixed top-0 left-0 z-40 h-screen w-64 bg-gradient-to-b from-slate-900 to-slate-800 shadow-xl transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
         <!-- Logo -->
         <div class="flex h-16 items-center justify-between px-5 border-b border-white/10">
-            <a href="{% url 'auth_dashboard' %}" class="flex items-center gap-3">
+            <div class="flex items-center gap-3">
                 <div class="h-9 w-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
-                    <i class="fa-solid fa-layer-group text-white"></i>
+                    <i class="fa-solid fa-truck-fast text-white"></i>
                 </div>
                 <div class="leading-tight">
-                    <h1 class="text-lg font-bold text-white tracking-wide">Admin Desk</h1>
-                    <p class="text-[11px] text-white/60">Manage your store</p>
+                    <h1 class="text-lg font-bold text-white tracking-wide">Supplier Desk</h1>
+                    <p class="text-[11px] text-white/60">Manage your products</p>
                 </div>
-            </a>
+            </div>
             <button onclick="toggleSidebar()" class="lg:hidden text-white/80 hover:text-white">
                 <i class="fas fa-times text-xl"></i>
             </button>
@@ -29,78 +29,21 @@
 
         <!-- Navigation -->
         <nav class="mt-5 px-3 space-y-1 overflow-y-auto h-[calc(100vh-8rem)] pb-6">
+            <a href="{% url 'supplier_dashboard' %}"
+               class="sup-nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
+                    <i class="fa-solid fa-gauge-high text-sm"></i>
+                </span>
+                <span class="font-medium">Dashboard</span>
+            </a>
 
-    <!-- Item -->
-    <a href="{% url 'auth_dashboard' %}"
-       class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-        <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-            <i class="fas fa-home text-sm"></i>
-        </span>
-        <span class="font-medium">Dashboard</span>
-    </a>
-
-    <a href="{% url 'auth_suppliers' %}"
-       class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-        <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-            <i class="fa-solid fa-truck text-sm"></i>
-        </span>
-        <span class="font-medium">Suppliers</span>
-    </a>
-
-    <a href="{% url 'auth_workers' %}"
-       class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-        <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-            <i class="fa-solid fa-user-gear text-sm"></i>
-        </span>
-        <span class="font-medium">Workers</span>
-    </a>
-
-    <a href="{% url 'auth_inventory' %}"
-       class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-        <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-            <i class="fa-solid fa-boxes-stacked text-sm"></i>
-        </span>
-        <span class="font-medium">Inventory</span>
-    </a>
-
-    <a href="{% url 'auth_buyers' %}"
-       class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-        <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-            <i class="fa-solid fa-users text-sm"></i>
-        </span>
-        <span class="font-medium">Buyers</span>
-    </a>
-
-    <a href="{% url 'auth_blogs' %}"
-       class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-        <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-            <i class="fa-solid fa-blog text-sm"></i>
-        </span>
-        <span class="font-medium">Blogs</span>
-    </a>
-
-    <a href="{% url 'auth_order' %}"
-       class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-        <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-            <i class="fa-solid fa-bag-shopping text-sm"></i>
-        </span>
-        <span class="font-medium">Orders</span>
-    </a>
-
-    <a href="{% url 'auth_contacts' %}"
-       class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-        <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-            <i class="fa-solid fa-envelope text-sm"></i>
-        </span>
-        <span class="font-medium">Contacts</span>
-    </a>
-
-</nav>
-
+            <!-- Add more supplier links here when needed -->
+            
+        </nav>
 
         <!-- Logout Button -->
         <div class="absolute bottom-5 left-0 right-0 px-3">
-            <a href="{% url 'auth_logout' %}"
+            <a href="{% url 'supplier_logout' %}"
                class="group flex items-center justify-between gap-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl w-full transition-colors border border-white/10">
                 <span class="flex items-center gap-3">
                     <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
@@ -128,10 +71,10 @@
                     </button>
                     <div class="flex items-center gap-3">
                         <span class="hidden sm:inline-flex h-9 w-9 rounded-xl bg-slate-900 text-white items-center justify-center">
-                            <i id="pageIcon" class="fa-solid fa-gauge-high text-sm"></i>
+                            <i id="supPageIcon" class="fa-solid fa-gauge-high text-sm"></i>
                         </span>
                         <div>
-                            <h2 id="pageTitle" class="text-lg sm:text-xl font-semibold text-gray-800 leading-tight">Dashboard</h2>
+                            <h2 id="supPageTitle" class="text-lg sm:text-xl font-semibold text-gray-800 leading-tight">Dashboard</h2>
                             <p class="hidden sm:block text-xs text-gray-500 leading-tight">Welcome back</p>
                         </div>
                     </div>
@@ -147,19 +90,18 @@
 
                     <!-- User Profile -->
                     <div class="flex items-center gap-2 sm:gap-3">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base shadow">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base">
                             DD
                         </div>
-                        <span class="hidden sm:block text-sm font-medium text-gray-700">Dhruvin Dhameliya</span>
+                        <span class="hidden sm:block text-sm font-medium text-gray-700">{{ supplier.name }}</span>
                     </div>
                 </div>
             </div>
         </header>
 
-        {% block admin_dash %}
-        
-        {% endblock admin_dash %} 
-    </div>
+    {% block sup_base %}
+    
+    {% endblock sup_base %}
 
     <script>
         function toggleSidebar() {
@@ -170,10 +112,10 @@
             overlay.classList.toggle('hidden');
         }
 
-        // Active nav highlight + page title (no backend changes needed)
+        // Active nav highlight + title/icon for supplier layout
         (function () {
             const path = window.location.pathname.replace(/\/+$/, '');
-            const links = document.querySelectorAll('a.nav-link');
+            const links = document.querySelectorAll('a.sup-nav-link');
             let activeText = null;
 
             links.forEach((a) => {
@@ -186,16 +128,14 @@
             });
 
             if (activeText) {
-                const titleEl = document.getElementById('pageTitle');
+                const titleEl = document.getElementById('supPageTitle');
                 if (titleEl) titleEl.textContent = activeText;
 
-                const pageIconEl = document.getElementById('pageIcon');
+                const pageIconEl = document.getElementById('supPageIcon');
                 if (pageIconEl) {
-                    // Copy icon class from active nav item (keeps different icons per page)
                     const activeLink = Array.from(links).find((a) => a.innerText.trim() === activeText);
                     const navIcon = activeLink ? activeLink.querySelector('i') : null;
                     if (navIcon) {
-                        // Preserve Tailwind size class for header icon
                         const classes = navIcon.className.split(' ').filter(Boolean);
                         if (!classes.includes('text-sm')) classes.push('text-sm');
                         pageIconEl.className = classes.join(' ');
@@ -205,4 +145,4 @@
         })();
     </script>
 </body>
-</html> 
+</html>

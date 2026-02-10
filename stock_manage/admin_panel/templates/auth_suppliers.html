@@ -1,201 +1,409 @@
 {% extends "base.html" %}
 {% block admin_dash %}
 
-<main class="p-4 sm:p-6 lg:p-8">
+<main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
-    <!-- Add Supplier Button -->
-    <button id="openSupplierModal"
-        class="px-4 py-2 bg-slate-700 text-white font-medium rounded-lg hover:bg-gray-600 transition">
-        <i class="fa-solid fa-plus"></i> Add Supplier
-    </button>
+    <!-- Header + Add Supplier Button -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
+                Suppliers
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                Manage and monitor all your suppliers in one clean, responsive view.
+            </p>
+        </div>
+
+        <button id="openSupplierModal"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700
+                   px-4 py-2.5 text-sm font-semibold text-white shadow-sm
+                   hover:from-slate-800 hover:via-slate-700 hover:to-slate-700
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50
+                   transition">
+            <span
+                class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-xs border border-white/20">
+                <i class="fa-solid fa-plus"></i>
+            </span>
+            <span>Add Supplier</span>
+        </button>
+    </div>
 
     <!-- Supplier Modal -->
     <div id="supplierModal"
         class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
 
-        <div class="relative w-full max-w-2xl rounded-lg bg-white p-4 sm:p-6 shadow-lg max-h-[90vh] overflow-y-auto">
+        <div
+            class="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl shadow-slate-300/40 max-h-[90vh] overflow-y-auto">
 
-            <h2 id="modalTitle" class="mb-4 text-lg sm:text-xl font-semibold text-gray-800">
-                Add Supplier
-            </h2>
+            <!-- Modal header -->
+            <div
+                class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
+                <div>
+                    <h2 id="modalTitle" class="text-base sm:text-lg font-semibold text-slate-900">
+                        Add Supplier
+                    </h2>
+                    <p class="mt-0.5 text-xs sm:text-sm text-slate-500">
+                        Fill in the basic details to create or update a supplier profile.
+                    </p>
+                </div>
+                <button id="closeSupplierModal"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+                    <span class="sr-only">Close</span>
+                    ✕
+                </button>
+            </div>
 
-            <form id="supplierForm" method="POST"
-                action="{% url 'add_supplier' %}"
-                enctype="multipart/form-data">
+            <!-- Modal body -->
+            <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
+                <form id="supplierForm" method="POST"
+                    action="{% url 'add_supplier' %}"
+                    enctype="multipart/form-data"
+                    class="space-y-6">
 
-                {% csrf_token %}
+                    {% csrf_token %}
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- Personal Info -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            Personal Information
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Name</label>
+                                <input type="text" name="name" required
+                                    placeholder="e.g. Darpan Traders"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
 
-                    <input type="text" name="name" placeholder="Name" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Email</label>
+                                <input type="email" name="email" required
+                                    placeholder="name@supplier.com"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
 
-                    <input type="email" name="email" placeholder="Email" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">First Name</label>
+                                <input type="text" name="first_name" required
+                                    placeholder="First name"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
 
-                    <input type="text" name="first_name" placeholder="First Name" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Last Name</label>
+                                <input type="text" name="last_name" required
+                                    placeholder="Last name"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
 
-                    <input type="text" name="last_name" placeholder="Last Name" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Password</label>
+                                <div class="relative">
+                                    <input
+                                        id="supplierPassword"
+                                        type="password"
+                                        name="password"
+                                        placeholder="Leave blank to keep same"
+                                        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    <button
+                                        type="button"
+                                        id="togglePasswordVisibility"
+                                        class="absolute inset-y-0 right-2 flex items-center text-slate-400 hover:text-slate-600">
+                                        <i class="fa-solid fa-eye text-xs" id="passwordEyeIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
 
-                    <input type="password" name="password"
-                        placeholder="Password (leave blank to keep same)"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-
-                    <input type="number" name="mbno" placeholder="Mobile Number" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-
-                    <input type="text" name="state" placeholder="State"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-
-                    <input type="text" name="city" placeholder="City"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-
-                    <input type="text" name="address" placeholder="Address"
-                        class="sm:col-span-2 w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-
-                    <select name="gender" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                        <option value="">Select Gender</option>
-                        <option>Male</option>
-                        <option>Female</option>
-                        <option>Other</option>
-                    </select>
-
-                    <select name="status" required
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                        <option value="">Select Status</option>
-                        <option>Active</option>
-                        <option>Inactive</option>
-                    </select>
-
-                    <div class="flex flex-col gap-1">
-                        <label class="text-sm font-medium">Profile Picture</label>
-                        <input type="file" name="profile_picture">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Mobile Number</label>
+                                <input type="number" name="mbno" required
+                                    placeholder="e.g. 9876543210"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="flex flex-col gap-1">
-                        <label class="text-sm font-medium">Document</label>
-                        <input type="file" name="document">
+                    <!-- Location & Meta -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            Location & Status
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">State</label>
+                                <input type="text" name="state"
+                                    placeholder="State"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">City</label>
+                                <input type="text" name="city"
+                                    placeholder="City"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
+
+                            <div class="space-y-1.5 sm:col-span-2">
+                                <label class="text-xs font-medium text-slate-700">Address</label>
+                                <textarea name="address" rows="2"
+                                    placeholder="Street, area, landmark"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 resize-none"></textarea>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Gender</label>
+                                <select name="gender" required
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    <option value="">Select Gender</option>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Status</label>
+                                <select name="status" required
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    <option value="">Select Status</option>
+                                    <option>Active</option>
+                                    <option>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
-                </div>
+                    <!-- Files -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            Attachments
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Profile Picture</label>
+                                <div
+                                    class="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
+                                    <div
+                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-xs">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <input type="file" name="profile_picture"
+                                            class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
+                                        <p class="mt-0.5 text-[11px] text-slate-400">
+                                            JPG or PNG, up to 2MB.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
 
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" id="closeSupplierModal"
-                        class="bg-gray-200 px-4 py-2 rounded">
-                        Cancel
-                    </button>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Document</label>
+                                <div
+                                    class="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
+                                    <div
+                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 text-xs">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <input type="file" name="document"
+                                            class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
+                                        <p class="mt-0.5 text-[11px] text-slate-400">
+                                            Any supporting ID or agreement file.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                    <button type="submit"
-                        class="bg-slate-700 text-white px-4 py-2 rounded">
-                        Save Supplier
-                    </button>
-                </div>
+                    <!-- Actions -->
+                    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-2 border-t border-slate-100">
+                        <button type="button" id="closeSupplierModalBottom"
+                            class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                            Cancel
+                        </button>
 
-            </form>
+                        <button type="submit"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                            <i class="fa-solid fa-floppy-disk text-xs"></i>
+                            <span>Save Supplier</span>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto mt-5">
-        <table class="min-w-full border border-gray-200 rounded-lg">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-4 py-3 text-left text-sm">No.</th>
-                    <th class="px-4 py-3 text-left text-sm">Supplier ID</th>
-                    <th class="px-4 py-3 text-left text-sm">Profile</th>
-                    <th class="px-4 py-3 text-left text-sm">Name</th>
-                    <th class="px-4 py-3 text-left text-sm">Email</th>
-                    <th class="px-4 py-3 text-left text-sm">Status</th>
-                    <th class="px-4 py-3 text-left text-sm">Action</th>
-                </tr>
-            </thead>
+    <!-- Table Card -->
+    <section
+        class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
 
-            <tbody>
-                {% for supplier in suppliers %}
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">{{ forloop.counter }}</td>
-                    <td class="px-4 py-3">{{ supplier.id }}</td>
+        <!-- Table Top Bar -->
+        <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="space-y-0.5">
+                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                    Overview
+                </p>
+                <p class="text-sm text-slate-500">
+                    Showing
+                    <span class="font-semibold text-slate-900">
+                        {{ suppliers.start_index }}–{{ suppliers.end_index }}
+                    </span>
+                    of
+                    <span class="font-semibold text-slate-900">
+                        {{ suppliers.paginator.count }}
+                    </span>
+                    suppliers.
+                </p>
+            </div>
 
-                    <td class="px-4 py-3">
-                        {% if supplier.profile_picture %}
-                        <img src="{{ supplier.profile_picture.url }}"
-                            class="h-10 w-10 rounded-full object-cover">
-                        {% else %}
-                        <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            N/A
-                        </div>
-                        {% endif %}
-                    </td>
+            <!-- Simple client-side search (optional to use) -->
+            <div class="w-full sm:w-auto">
+                <label class="relative block">
+                    <span class="sr-only">Search suppliers</span>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input
+                        id="supplierSearch"
+                        type="text"
+                        placeholder="Search by name, email, or ID…"
+                        class="w-full sm:w-64 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
+                               text-slate-700 placeholder:text-slate-400 shadow-sm
+                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                </label>
+            </div>
+        </div>
 
-                    <td class="px-4 py-3">{{ supplier.name }}</td>
-                    <td class="px-4 py-3">{{ supplier.email }}</td>
+        <!-- Responsive Table Wrapper -->
+        <div class="overflow-x-auto border-t border-slate-100">
+            <table class="min-w-full text-left text-sm text-slate-700">
+                <thead
+                    class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
+                    <tr>
+                        <th class="px-4 py-3 font-medium text-center">No.</th>
+                        <th class="px-4 py-3 font-medium whitespace-nowrap text-center">Supplier ID</th>
+                        <th class="px-4 py-3 font-medium text-center">Profile</th>
+                        <th class="px-4 py-3 font-medium">Name</th>
+                        <th class="px-4 py-3 font-medium">Email</th>
+                        <th class="px-4 py-3 font-medium text-center">Status</th>
+                        <th class="px-4 py-3 font-medium text-center">Action</th>
+                    </tr>
+                </thead>
 
-                    <td class="px-4 py-3 font-medium
-                        {% if supplier.status == 'Active' %}
-                        text-green-600
-                        {% else %}
-                        text-red-600
-                        {% endif %}">
-                        {{ supplier.status }}
-                    </td>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                    {% for supplier in suppliers %}
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
+                            {{ forloop.counter }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm font-medium text-slate-700 text-center">
+                            #{{ supplier.id }}
+                        </td>
 
-                    
+                        <td class="px-4 py-3 align-middle text-center">
+                            {% if supplier.profile_picture %}
+                            <div class="flex justify-center">
+                                <img src="{{ supplier.profile_picture.url }}"
+                                    class="h-10 w-10 rounded-full object-cover ring-2 ring-slate-100 shadow-xs">
+                            </div>
+                            {% else %}
+                            <div class="flex justify-center">
+                                <div
+                                    class="h-10 w-10 rounded-full bg-slate-100 text-slate-500 text-xs font-medium flex items-center justify-center ring-1 ring-slate-200">
+                                    N/A
+                                </div>
+                            </div>
+                            {% endif %}
+                        </td>
 
-                    <td class="px-4 py-3 flex gap-2">
-                        <button
-    onclick="openViewModal(
-        '{{ supplier.id }}',
-        '{{ supplier.name }}',
-        '{{ supplier.email }}',
-        '{{ supplier.first_name }}',
-        '{{ supplier.last_name }}',
-        '{{ supplier.mbno }}',
-        '{{ supplier.state }}',
-        '{{ supplier.city }}',
-        '{{ supplier.address }}',
-        '{{ supplier.gender }}',
-        '{{ supplier.status }}',
-        '{% if supplier.profile_picture %}{{ supplier.profile_picture.url }}{% endif %}'
-    )"
-    class="px-1 text-xs text-green-600 border rounded border-green-500 py-1">
-    <i class="fa-solid fa-eye"></i>
-</button>
+                        <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900">
+                            {{ supplier.name }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
+                            {{ supplier.email }}
+                        </td>
 
-                        <button
-                           onclick="openEditModal(
-                                    '{% url 'edit_supplier' supplier.id %}',
-                                    '{{ supplier.name }}',
-                                    '{{ supplier.email }}',
-                                    '{{ supplier.first_name }}',
-                                    '{{ supplier.last_name }}',
-                                    '{{ supplier.mbno }}',
-                                    '{{ supplier.state }}',
-                                    '{{ supplier.city }}',
-                                    '{{ supplier.address }}',
-                                    '{{ supplier.gender }}',
-                                    '{{ supplier.status }}'
-                                )"
+                        <td class="px-4 py-3 align-middle text-center">
+                            <span
+                                class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold
+                                {% if supplier.status == 'Active' %}
+                                    bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100
+                                {% else %}
+                                    bg-rose-50 text-rose-700 ring-1 ring-rose-100
+                                {% endif %}">
+                                <span class="h-1.5 w-1.5 rounded-full
+                                    {% if supplier.status == 'Active' %}
+                                        bg-emerald-500
+                                    {% else %}
+                                        bg-rose-500
+                                    {% endif %}"></span>
+                                {{ supplier.status }}
+                            </span>
+                        </td>
 
-                            class="text-xs text-blue-600 border px-1 rounded border-blue-500 py-1">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </button>
+                        <td class="px-4 py-3 align-middle text-center">
+                            <div class="inline-flex items-center justify-center gap-2">
+                                <button
+                                    onclick="openViewModal(
+                                        '{{ supplier.id }}',
+                                        '{{ supplier.name }}',
+                                        '{{ supplier.email }}',
+                                        '{{ supplier.first_name }}',
+                                        '{{ supplier.last_name }}',
+                                        '{{ supplier.mbno }}',
+                                        '{{ supplier.state }}',
+                                        '{{ supplier.city }}',
+                                        '{{ supplier.address }}',
+                                        '{{ supplier.gender }}',
+                                        '{{ supplier.status }}',
+                                        '{% if supplier.profile_picture %}{{ supplier.profile_picture.url }}{% endif %}'
+                                    )"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
+                                    title="View">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    <span class="sr-only">View</span>
+                                </button>
 
-                       <button
-                            onclick="openDeleteModal('{% url 'delete_supplier' supplier.id %}')"
-                            class="px-1 text-xs text-red-600 border rounded border-red-500 py-1">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+                                <button
+                                   onclick="openEditModal(
+                                            '{% url 'edit_supplier' supplier.id %}',
+                                            '{{ supplier.name }}',
+                                            '{{ supplier.email }}',
+                                            '{{ supplier.first_name }}',
+                                            '{{ supplier.last_name }}',
+                                            '{{ supplier.mbno }}',
+                                            '{{ supplier.state }}',
+                                            '{{ supplier.city }}',
+                                            '{{ supplier.address }}',
+                                            '{{ supplier.gender }}',
+                                            '{{ supplier.status }}'
+                                        )"
 
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition"
+                                    title="Edit">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                    <span class="sr-only">Edit</span>
+                                </button>
 
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                               <button
+                                    onclick="openDeleteModal('{% url 'delete_supplier' supplier.id %}')"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
+                                    title="Delete">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                    <span class="sr-only">Delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </section>
 
 </main>
 
@@ -375,6 +583,11 @@ const deleteModal = document.getElementById('deleteModal');
 const supplierForm = document.getElementById('supplierForm');
 const modalTitle = document.getElementById('modalTitle');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+const closeSupplierModalTop = document.getElementById('closeSupplierModal');
+const closeSupplierModalBottom = document.getElementById('closeSupplierModalBottom');
+const passwordInput = document.getElementById('supplierPassword');
+const togglePasswordBtn = document.getElementById('togglePasswordVisibility');
+const passwordEyeIcon = document.getElementById('passwordEyeIcon');
 
 document.getElementById('openSupplierModal').onclick = () => {
     supplierForm.reset();
@@ -384,9 +597,30 @@ document.getElementById('openSupplierModal').onclick = () => {
     supplierModal.classList.add('flex');
 };
 
-document.getElementById('closeSupplierModal').onclick = () => {
+function hideSupplierModal() {
     supplierModal.classList.add('hidden');
-};
+    supplierModal.classList.remove('flex');
+}
+
+if (closeSupplierModalTop) {
+    closeSupplierModalTop.onclick = hideSupplierModal;
+}
+
+if (closeSupplierModalBottom) {
+    closeSupplierModalBottom.onclick = hideSupplierModal;
+}
+
+// Toggle password visibility (add / edit)
+if (togglePasswordBtn && passwordInput && passwordEyeIcon) {
+    togglePasswordBtn.addEventListener('click', () => {
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+
+        // Swap icon
+        passwordEyeIcon.classList.toggle('fa-eye', !isHidden);
+        passwordEyeIcon.classList.toggle('fa-eye-slash', isHidden);
+    });
+}
 
 function openEditModal(editUrl, name, email, first_name, last_name, mbno, state, city, address, gender, status) {
     supplierModal.classList.remove('hidden');

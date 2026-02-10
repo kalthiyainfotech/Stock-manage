@@ -1,61 +1,120 @@
 {% extends "base.html" %}
 {% block admin_dash %}
 
-<main class="p-4 sm:p-6 lg:p-8">
+<main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
-  
-    
-
-    <!-- buyer Modal -->
-    <div id="buyerModal"
-        class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
+                Buyers
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                View and manage all registered buyers in a clean, responsive table.
+            </p>
+        </div>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto mt-5">
-        <table class="min-w-full border border-gray-200 rounded-lg">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-4 py-3 text-left text-sm">No.</th>
-                    <th class="px-4 py-3 text-left text-sm">Buyer ID</th>
-                    <th class="px-4 py-3 text-left text-sm">Name</th>
-                    <th class="px-4 py-3 text-left text-sm">Email</th>
-                    <th class="px-4 py-3 text-left text-sm">Action</th>
-                </tr>
-            </thead>
+    <!-- Table Card -->
+    <section
+        class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
 
-            <tbody>
-                {% for buyer in buyers %}
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">{{ forloop.counter }}</td>
-                    <td class="px-4 py-3">{{ buyer.id }}</td>
-                    <td class="px-4 py-3">{{ buyer.name }}</td>
-                    <td class="px-4 py-3">{{ buyer.email }}</td>
-                    <td class="px-4 py-3 flex gap-2">
-                        <button
-    onclick="openViewModal(
-        '{{ buyer.id }}',
-        '{{ buyer.name }}',
-        '{{ buyer.email }}',
-    )"
-    class="px-1 text-xs text-green-600 border rounded border-green-500 py-1">
-    <i class="fa-solid fa-eye"></i>
-</button>
+        <!-- Table Top Bar -->
+        <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="space-y-0.5">
+                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                    Overview
+                </p>
+                <p class="text-sm text-slate-500">
+                    Showing
+                    <span class="font-semibold text-slate-900">
+                        {{ buyers.start_index }}–{{ buyers.end_index }}
+                    </span>
+                    of
+                    <span class="font-semibold text-slate-900">
+                        {{ buyers.paginator.count }}
+                    </span>
+                    buyers.
+                </p>
+            </div>
 
-                        
-                       <button
-                            onclick="openDeleteModal('{% url 'delete_buyer' buyer.id %}')"
-                            class="px-1 text-xs text-red-600 border rounded border-red-500 py-1">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
+            <!-- Simple client-side search (visual only) -->
+            <div class="w-full sm:w-auto">
+                <label class="relative block">
+                    <span class="sr-only">Search buyers</span>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input
+                        id="buyerSearch"
+                        type="text"
+                        placeholder="Search by name, email, or ID…"
+                        class="w-full sm:w-64 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
+                               text-slate-700 placeholder:text-slate-400 shadow-sm
+                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                </label>
+            </div>
+        </div>
 
+        <!-- Table -->
+        <div class="overflow-x-auto border-t border-slate-100">
+            <table class="min-w-full text-left text-sm text-slate-700">
+                <thead
+                    class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
+                    <tr>
+                        <th class="px-4 py-3 font-medium text-center">No.</th>
+                        <th class="px-4 py-3 font-medium text-center">Buyer ID</th>
+                        <th class="px-4 py-3 font-medium">Name</th>
+                        <th class="px-4 py-3 font-medium">Email</th>
+                        <th class="px-4 py-3 font-medium text-center">Action</th>
+                    </tr>
+                </thead>
 
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                    {% for buyer in buyers %}
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
+                            {{ forloop.counter }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm font-medium text-slate-700 text-center">
+                            #{{ buyer.id }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900">
+                            {{ buyer.name }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
+                            {{ buyer.email }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-center">
+                            <div class="inline-flex items-center justify-center gap-2">
+                                <button
+                                    onclick="openViewModal(
+                                        '{{ buyer.id }}',
+                                        '{{ buyer.name }}',
+                                        '{{ buyer.email }}'
+                                    )"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
+                                    title="View">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    <span class="sr-only">View</span>
+                                </button>
+
+                                <button
+                                    onclick="openDeleteModal('{% url 'delete_buyer' buyer.id %}')"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
+                                    title="Delete">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                    <span class="sr-only">Delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </section>
 
 </main>
 
@@ -96,7 +155,7 @@
 <div id="viewModal"
      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
 
-    <div class="bg-white w-full max-w-4xl rounded-xl p-5 sm:p-6 relative">
+    <div class="bg-white w-full max-w-md rounded-xl p-5 sm:p-6 relative">
 
         <!-- Close -->
         <button onclick="closeViewModal()"
@@ -105,31 +164,25 @@
         </button>
 
         <!-- Content -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div class="space-y-5">
 
-            <!-- LEFT : BIG IMAGE -->
-            <div class="w-full flex justify-center">
-                <img id="viewProfile"
-                     class="w-full max-w-sm h-72 md:h-96 object-cover rounded-lg shadow bg-gray-200">
-            </div>
-
-            <!-- RIGHT : DETAILS -->
-            <div class="space-y-4">
-
+            <div class="flex items-center gap-4">
+                <div
+                    class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white text-lg font-semibold">
+                    <span id="viewInitials"></span>
+                </div>
                 <div>
                     <h2 id="viewName"
-                        class="text-2xl font-bold text-gray-800"></h2>
+                        class="text-xl font-bold text-gray-800"></h2>
                     <p id="viewEmail"
                        class="text-sm text-gray-500"></p>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-
-                    <p><strong>ID:</strong> <span id="viewId"></span></p>
-                    
-                </div>
-
             </div>
+
+            <div class="grid grid-cols-1 gap-2 text-sm">
+                <p><strong>ID:</strong> <span id="viewId"></span></p>
+            </div>
+
         </div>
     </div>
 </div>
@@ -209,32 +262,9 @@
 
 <!-- JS -->
 <script>
-/* ===============================
-   EXISTING CODE (UNCHANGED)
-================================ */
-
-const buyerModal = document.getElementById('buyerModal');
 const deleteModal = document.getElementById('deleteModal');
-const buyerForm = document.getElementById('buyerForm');
-const modalTitle = document.getElementById('modalTitle');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-
-
-
-document.getElementById('closebuyerModal').onclick = () => {
-    buyerModal.classList.add('hidden');
-};
-
-function openEditModal(editUrl, name, email) {
-    buyerModal.classList.remove('hidden');
-    buyerModal.classList.add('flex');
-
-    modalTitle.innerText = "Edit buyer";
-    buyerForm.action = editUrl;
-
-    buyerForm.name.value = name;
-    buyerForm.email.value = email;
-}
+const viewModal = document.getElementById('viewModal');
 
 function openDeleteModal(deleteUrl) {
     deleteModal.classList.remove('hidden');
@@ -246,23 +276,18 @@ function closeDeleteModal() {
     deleteModal.classList.add('hidden');
 }
 
-/* ===============================
-   VIEW MODAL (ADDED CODE)
-================================ */
-
-const viewModal = document.getElementById('viewModal');
-
-function openViewModal(
-    id, name, email
-) {
+function openViewModal(id, name, email) {
     document.getElementById('viewId').innerText = id;
     document.getElementById('viewName').innerText = name;
     document.getElementById('viewEmail').innerText = email;
-    
 
-    const img = document.getElementById('viewProfile');
-    img.src = profile ? profile : '';
-    img.alt = name;
+    const initials = (name || '')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part.charAt(0).toUpperCase())
+        .join('') || '?';
+    document.getElementById('viewInitials').innerText = initials;
 
     viewModal.classList.remove('hidden');
     viewModal.classList.add('flex');

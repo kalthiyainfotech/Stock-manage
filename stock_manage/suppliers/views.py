@@ -71,5 +71,4 @@ def supplier_logout(request):
     if 'supplier_id' in request.session:
         supplier_name = request.session.get('supplier_name', '')
         request.session.flush()
-        messages.success(request, f"Logged out successfully. Goodbye, {supplier_name}!")
     return redirect('supplier_login')

@@ -39,4 +39,7 @@ urlpatterns = [
     path('contacts/', auth_contacts, name='auth_contacts'),
     path('contacts/delete/<int:id>/', delete_contact, name='delete_contact'),
 
+    path('orders/',auth_order,name='auth_order'),
+    path('orders/delete/<int:id>/', delete_order, name='delete_order'),
+
 ]

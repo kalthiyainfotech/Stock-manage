@@ -1,56 +1,112 @@
 {% extends "base.html" %}
 {% block admin_dash %}
 
-<main class="p-4 sm:p-6 lg:p-8">
-    <div class="flex items-center justify-between mb-4">
-        <h1 class="text-xl sm:text-2xl font-semibold text-gray-800">
-            Contact Messages
-        </h1>
+<main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+        <div>
+            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
+                Contact Messages
+            </h1>
+            <p class="mt-1 text-sm text-slate-500">
+                Review messages sent via your contact form and manage them easily.
+            </p>
+        </div>
     </div>
 
-    <div class="overflow-x-auto mt-4">
-        <table class="min-w-full border border-gray-200 rounded-lg">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-4 py-3 text-left text-sm">No.</th>
-                    <th class="px-4 py-3 text-left text-sm">Name</th>
-                    <th class="px-4 py-3 text-left text-sm">Email</th>
-                    <th class="px-4 py-3 text-left text-sm">Message</th>
-                    <th class="px-4 py-3 text-left text-sm">Date</th>
-                    <th class="px-4 py-3 text-left text-sm">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for contact in contacts %}
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">{{ forloop.counter }}</td>
-                    <td class="px-4 py-3">
-                        {{ contact.first_name }} {{ contact.last_name }}
-                    </td>
-                    <td class="px-4 py-3">{{ contact.email }}</td>
-                    <td class="px-4 py-3">
-                        {{ contact.message|truncatechars:80 }}
-                    </td>
-                    <td class="px-4 py-3">
-                        {{ contact.created_at|date:"Y-m-d H:i" }}
-                    </td>
-                    <td class="px-4 py-3">
-                        <a href="{% url 'delete_contact' contact.id %}"
-                           class="px-2 py-1 text-xs text-red-600 border border-red-500 rounded">
-                            Delete
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="px-4 py-3 text-center text-gray-500">
-                        No contact messages yet.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <!-- Table Card -->
+    <section
+        class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
+
+        <!-- Table Top Bar -->
+        <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="space-y-0.5">
+                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                    Overview
+                </p>
+                <p class="text-sm text-slate-500">
+                    Showing
+                    <span class="font-semibold text-slate-900">
+                        {{ contacts|length }}
+                    </span>
+                    contact messages.
+                </p>
+            </div>
+
+            <!-- Simple client-side search (visual only) -->
+            <div class="w-full sm:w-auto">
+                <label class="relative block">
+                    <span class="sr-only">Search contacts</span>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input
+                        id="contactSearch"
+                        type="text"
+                        placeholder="Search by name, email, or message…"
+                        class="w-full sm:w-72 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
+                               text-slate-700 placeholder:text-slate-400 shadow-sm
+                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                </label>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto border-t border-slate-100">
+            <table class="min-w-full text-left text-sm text-slate-700">
+                <thead
+                    class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
+                    <tr>
+                        <th class="px-4 py-3 font-medium text-center">No.</th>
+                        <th class="px-4 py-3 font-medium">Name</th>
+                        <th class="px-4 py-3 font-medium">Email</th>
+                        <th class="px-4 py-3 font-medium">Message</th>
+                        <th class="px-4 py-3 font-medium whitespace-nowrap">Date</th>
+                        <th class="px-4 py-3 font-medium text-center">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-slate-100 bg-white">
+                    {% for contact in contacts %}
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
+                            {{ forloop.counter }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900">
+                            {{ contact.first_name }} {{ contact.last_name }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
+                            {{ contact.email }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
+                            {{ contact.message|truncatechars:80 }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
+                            {{ contact.created_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-center">
+                            <a href="{% url 'delete_contact' contact.id %}"
+                               class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
+                               title="Delete">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                                <span class="sr-only">Delete</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-4 py-3 text-center text-gray-500">
+                            No contact messages yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
 </main>
 
 {% endblock %}
