@@ -381,6 +381,30 @@ def place_order(request):
     
     return redirect("by_thankyou")
 
+@never_cache
+@buyer_login_required
+def by_history(request):
+    buyer_id = request.session.get("buyer_id")
+    buyer = Buyer.objects.get(id=buyer_id)
+    
+    orders = Order.objects.filter(buyer=buyer).prefetch_related(
+        "items",
+        "items__variant",
+        "items__variant__product"
+    ).order_by("-created_at")
+    status_counts = {
+        "all": orders.count(),
+        "pending": orders.filter(status="pending").count(),
+        "processing": orders.filter(status="processing").count(),
+        "shipped": orders.filter(status="shipped").count(),
+        "delivered": orders.filter(status="delivered").count(),
+        "cancelled": orders.filter(status="cancelled").count(),
+    }
+    return render(request, 'by_history.html', {
+        "orders": orders,
+        "status_counts": status_counts
+    })
+
 
 
 
@@ -389,6 +413,31 @@ def place_order(request):
 def by_thankyou(request):
     return render(request,'by_thankyou.html')
 
+@never_cache
+@buyer_login_required
+def by_cancel_order(request, order_id):
+    if request.method != "POST":
+        return redirect("by_history")
+    buyer_id = request.session.get("buyer_id")
+    try:
+        order = Order.objects.select_related("buyer").prefetch_related(
+            "items",
+            "items__variant"
+        ).get(id=order_id, buyer_id=buyer_id)
+    except Order.DoesNotExist:
+        
+        return redirect("by_history")
+    if order.status not in ("pending", "processing"):
+        
+        return redirect("by_history")
+    for item in order.items.all():
+        variant = item.variant
+        variant.stock += item.quantity
+        variant.save()
+    order.status = "cancelled"
+    order.save()
+    messages.success(request, "Your order has been cancelled.")
+    return redirect("by_history")
 
 def by_logout(request):
     request.session.flush()

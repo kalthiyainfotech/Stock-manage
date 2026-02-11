@@ -1,0 +1,169 @@
+{% extends "by_base.html" %}
+{% load static %}
+{% block buyer_layout %}
+
+		<style>
+			.order-card {
+				border: 1px solid #e9ecef;
+				border-radius: 12px;
+				background: #fff;
+				padding: 16px;
+				margin-bottom: 16px;
+			}
+			.order-header {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-between;
+				align-items: center;
+				gap: 12px;
+			}
+			.order-meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 16px;
+				font-size: 14px;
+				color: #6c757d;
+			}
+			.order-product-img {
+				width: 60px;
+				height: 60px;
+				object-fit: cover;
+				border-radius: 8px;
+			}
+			@media (max-width: 576px) {
+				.order-product-img {
+					width: 48px;
+					height: 48px;
+				}
+			}
+		</style>
+
+		<div class="hero">
+			<div class="container">
+				<div class="row justify-content-between">
+					<div class="col-lg-5">
+						<div class="intro-excerpt">
+							<h1>Order History</h1>
+						</div>
+					</div>
+					<div class="col-lg-7">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="untree_co-section before-footer-section">
+			<div class="container">
+				<div class="row">
+					<div class="col-12">
+						{% if orders %}
+							{% for order in orders %}
+								<div class="order-card">
+									<div class="order-header">
+										<div>
+											<div class="h6 mb-1">Order {{ order.order_number }}</div>
+											<div class="order-meta">
+												<span>Placed {{ order.created_at|date:"M d, Y H:i" }}</span>
+												<span>Payment: {{ order.get_payment_method_display }}</span>
+												<span>Total: ₹{{ order.total }}</span>
+											</div>
+										</div>
+										<div>
+											<span class="badge 
+												{% if order.status == 'pending' %} bg-secondary 
+												{% elif order.status == 'processing' %} bg-warning text-dark
+												{% elif order.status == 'shipped' %} bg-info text-dark
+												{% elif order.status == 'delivered' %} bg-success
+												{% elif order.status == 'cancelled' %} bg-danger
+												{% else %} bg-light text-dark
+												{% endif %}">
+												{{ order.get_status_display }}
+											</span>
+											<button class="btn btn-sm btn-outline-dark ms-2" 
+												type="button" 
+												data-bs-toggle="collapse" 
+												data-bs-target="#orderItems{{ forloop.counter }}" 
+												aria-expanded="false" 
+												aria-controls="orderItems{{ forloop.counter }}">
+												View items
+											</button>
+											{% if order.status == 'pending' or order.status == 'processing' %}
+											<button class="btn btn-sm btn-outline-danger ms-2" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ forloop.counter }}">
+												<i class="fa-regular fa-circle-xmark"></i>
+												Cancel
+											</button>
+											{% endif %}
+										</div>
+									</div>
+									{% if order.status == 'pending' or order.status == 'processing' %}
+									<div class="modal fade" id="cancelOrderModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+										<div class="modal-dialog modal-dialog-centered">
+											<div class="modal-content">
+												<div class="modal-header">
+													<h6 class="modal-title">Cancel Order</h6>
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body">
+													Are you sure you want to cancel Order {{ order.order_number }}?
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">No</button>
+													<form method="post" action="{% url 'by_cancel_order' order.id %}">
+														{% csrf_token %}
+														<button type="submit" class="btn btn-danger btn-sm">Yes, Cancel</button>
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
+									{% endif %}
+									<div class="collapse mt-3" id="orderItems{{ forloop.counter }}">
+										<div class="table-responsive">
+											<table class="table align-middle">
+												<thead>
+													<tr>
+														<th>Image</th>
+														<th>Product</th>
+														<th class="text-end">Price</th>
+														<th class="text-center">Qty</th>
+														<th class="text-end">Total</th>
+													</tr>
+												</thead>
+												<tbody>
+													{% for item in order.items.all %}
+														<tr>
+															<td style="width:80px">
+																{% if item.variant.product.image %}
+																	<img src="{{ item.variant.product.image.url }}" class="order-product-img" alt="{{ item.product_name }}">
+																{% else %}
+																	<img src="{% static 'images/product-1.png' %}" class="order-product-img" alt="{{ item.product_name }}">
+																{% endif %}
+															</td>
+															<td>
+																<div class="fw-semibold">{{ item.product_name }}</div>
+																<div class="text-muted small">
+																	{{ item.variant.color.name }} / {{ item.variant.size.name }}
+																</div>
+															</td>
+															<td class="text-end">₹{{ item.price }}</td>
+															<td class="text-center">{{ item.quantity }}</td>
+															<td class="text-end">₹{{ item.total }}</td>
+														</tr>
+													{% endfor %}
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							{% endfor %}
+						{% else %}
+							<div class="text-center text-muted py-5">
+								No orders yet.
+							</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+
+{% endblock buyer_layout %}

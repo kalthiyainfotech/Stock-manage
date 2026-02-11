@@ -3,6 +3,8 @@ from django.contrib import messages
 from admin_panel.models import Suppliers
 from functools import wraps
 from django.views.decorators.cache import never_cache
+from buyers.models import Order
+from django.http import HttpResponseForbidden
 
 
 def supplier_login_required(view_func):
@@ -58,14 +60,53 @@ def sup_dash(request):
     supplier_id = request.session.get('supplier_id')
     try:
         supplier = Suppliers.objects.get(id=supplier_id)
+        orders = Order.objects.prefetch_related(
+            "items",
+            "items__variant",
+            "items__variant__product"
+        ).order_by("-created_at")
         context = {
-            'supplier': supplier
+            'supplier': supplier,
+            'orders': orders,
+            'ORDER_STATUS_CHOICES': Order.ORDER_STATUS_CHOICES
         }
         return render(request, 'sup_dash.html', context)
     except Suppliers.DoesNotExist:
         messages.error(request, "Supplier account not found")
         return redirect('supplier_login')
 
+@never_cache
+@supplier_login_required
+def sup_update_order_status(request, order_id):
+    if request.method != "POST":
+        return redirect('supplier_dashboard')
+    try:
+        new_status = request.POST.get("status", "").strip()
+        valid_statuses = [s[0] for s in Order.ORDER_STATUS_CHOICES]
+        if new_status not in valid_statuses:
+            messages.error(request, "Invalid status")
+            return redirect('supplier_dashboard')
+        order = Order.objects.get(id=order_id)
+        order.status = new_status
+        order.save()
+        messages.success(request, f"Order {order.order_number} updated to {order.get_status_display()}")
+    except Order.DoesNotExist:
+        messages.error(request, "Order not found")
+    return redirect('supplier_dashboard')
+
+@never_cache
+@supplier_login_required
+def sup_delete_order(request, order_id):
+    if request.method != "POST":
+        return HttpResponseForbidden()
+    try:
+        order = Order.objects.get(id=order_id)
+        order_number = order.order_number
+        order.delete()
+        messages.success(request, f"Order {order_number} deleted")
+    except Order.DoesNotExist:
+        messages.error(request, "Order not found")
+    return redirect('supplier_dashboard')
 @never_cache
 def supplier_logout(request):
     if 'supplier_id' in request.session:
