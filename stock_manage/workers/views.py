@@ -25,20 +25,16 @@ def worker_login(request):
             return render(request, 'wk_login.html')
 
         try:
-            # Check if worker exists with the email assigned by admin
             worker = Workers.objects.get(email=email)
             
-            # Verify the password matches the one assigned by admin
             if worker.password != password:
                 messages.error(request, "Invalid email or password")
                 return render(request, 'wk_login.html')
             
-            # Check if worker account is active
             if worker.status != "Active":
                 messages.error(request, "Account is inactive. Please contact administrator.")
                 return render(request, 'wk_login.html')
             
-            # Store worker ID in session for authentication
             request.session['worker_id'] = worker.id
             request.session['worker_email'] = worker.email
             request.session['worker_name'] = worker.name
@@ -70,6 +66,8 @@ def work_dash(request):
 def worker_logout(request):
     if 'worker_id' in request.session:
         worker_name = request.session.get('worker_name', '')
-        request.session.flush()
+        request.session.pop('worker_id', None)
+        request.session.pop('worker_email', None)
+        request.session.pop('worker_name', None)
         messages.success(request, f"Logged out successfully. Goodbye, {worker_name}!")
     return redirect('worker_login')

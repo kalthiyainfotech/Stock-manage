@@ -1,7 +1,6 @@
 {% extends "by_base.html" %}
 {% block buyer_layout %}
 
-		<!-- Start Hero Section -->
 			<div class="hero">
 				<div class="container">
 					<div class="row justify-content-between">
@@ -16,7 +15,6 @@
 					</div>
 				</div>
 			</div>
-		<!-- End Hero Section -->
 
 		<div class="untree_co-section">
 		    <div class="container">
@@ -239,7 +237,6 @@
 		                    <div class="border p-3 bg-light">
 		                      <p class="mb-2"><strong>Scan QR Code to Pay</strong></p>
 		                      <div id="upi_qr_code" style="background: white; padding: 20px; display: inline-block; border: 2px solid #ddd; border-radius: 8px;">
-		                        <!-- QR Code generated using API -->
 		                        <img id="qr_code_image" src="" alt="UPI QR Code" style="width: 200px; height: 200px; display: none; border: 1px solid #ddd; border-radius: 4px;">
 		                        <div id="qr_placeholder" style="width: 200px; height: 200px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">
 		                          <div style="text-align: center;">
@@ -292,16 +289,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var qrImage = document.getElementById('qr_code_image');
     var qrPlaceholder = document.getElementById('qr_placeholder');
     var totalAmount = {{ total }};
-    var upiId = 'mystore@paytm'; // Change this to your actual UPI ID
+    var upiId = 'mystore@paytm'; 
     
-    // Update UPI amount display
     if (upiAmount) {
         upiAmount.textContent = totalAmount.toFixed(2);
     }
     
-    // Generate QR Code URL (using QR Server API)
     function generateQRCode() {
-        // UPI Payment URL format: upi://pay?pa=UPI_ID&pn=MerchantName&am=AMOUNT&cu=INR
 		
         var merchantName = 'My Store';
         var upiPaymentUrl = 'upi://pay?pa=' + encodeURIComponent(upiId) + 
@@ -309,7 +303,6 @@ document.addEventListener('DOMContentLoaded', function() {
                            '&am=' + totalAmount.toFixed(2) + 
                            '&cu=INR';
         
-        // Use QR Server API to generate QR code
         var qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(upiPaymentUrl);
         
         if (qrImage) {
@@ -321,7 +314,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             };
             qrImage.onerror = function() {
-                // If QR code fails to load, show placeholder
                 if (qrPlaceholder) {
                     qrPlaceholder.innerHTML = '<div style="text-align: center;"><div style="font-size: 48px; margin-bottom: 10px;">📱</div><div style="font-size: 12px; color: #666;">UPI QR Code</div><div style="font-size: 10px; color: #999; margin-top: 5px;">' + upiId + '</div></div>';
                 }
@@ -329,7 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Handle payment method change
     function handlePaymentMethodChange() {
         if (upiRadio.checked) {
             upiQrSection.style.display = 'block';
@@ -342,7 +333,6 @@ document.addEventListener('DOMContentLoaded', function() {
     upiRadio.addEventListener('change', handlePaymentMethodChange);
     codRadio.addEventListener('change', handlePaymentMethodChange);
     
-    // Initial check
     handlePaymentMethodChange();
 });
 </script>

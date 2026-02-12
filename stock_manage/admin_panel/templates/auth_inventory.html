@@ -3,7 +3,6 @@
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
-    <!-- Header + Add Inventory Button -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
         <div>
             <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
@@ -28,14 +27,12 @@
         </button>
     </div>
 
-    <!-- inventory Modal -->
     <div id="inventoryModal"
         class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
 
         <div
             class="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl shadow-slate-300/40 max-h-[90vh] overflow-y-auto">
 
-            <!-- Modal header -->
             <div
                 class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
                 <div>
@@ -53,7 +50,6 @@
                 </button>
             </div>
 
-            <!-- Modal body -->
             <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
                 <form id="inventoryForm" method="POST"
                     action="{% url 'add_inventory' %}"
@@ -62,13 +58,11 @@
 
                     {% csrf_token %}
 
-                    <!-- Product Hierarchy -->
                     <div class="space-y-3">
                         <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             Product Hierarchy
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <!-- Category Dropdown with Add New Option -->
                             <div class="space-y-1.5">
                                 <label class="text-xs font-medium text-slate-700">Category</label>
                                 <select id="categorySelect" name="category" required
@@ -83,7 +77,6 @@
                                     class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                             </div>
 
-                            <!-- Subcategory Dropdown with Add New Option -->
                             <div class="space-y-1.5">
                                 <label class="text-xs font-medium text-slate-700">Subcategory</label>
                                 <select id="subcategorySelect" name="subcategory" required
@@ -96,7 +89,6 @@
                                     class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                             </div>
 
-                            <!-- Brand Dropdown with Add New Option -->
                             <div class="space-y-1.5">
                                 <label class="text-xs font-medium text-slate-700">Brand</label>
                                 <select id="brandSelect" name="brand" required
@@ -109,7 +101,6 @@
                                     class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                             </div>
 
-                            <!-- Product Dropdown with Add New Option -->
                             <div class="space-y-1.5">
                                 <label class="text-xs font-medium text-slate-700">Product</label>
                                 <select id="productSelect" name="product" required
@@ -124,7 +115,6 @@
                         </div>
                     </div>
 
-                    <!-- Description & Attributes -->
                     <div class="space-y-3">
                         <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             Description & Attributes
@@ -151,7 +141,6 @@
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                             </div>
 
-                            <!-- Specifications (Storage/RAM/Weight/etc.) -->
                             <div class="sm:col-span-2 rounded-lg border border-slate-200 p-3 bg-slate-50/60">
                                 <div class="flex items-center justify-between gap-3 mb-2">
                                     <p class="text-sm font-medium text-slate-800">Specifications (optional)</p>
@@ -183,7 +172,6 @@
                         </div>
                     </div>
 
-                    <!-- Pricing & Stock -->
                     <div class="space-y-3">
                         <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             Pricing & Stock
@@ -203,7 +191,6 @@
                         </div>
                     </div>
 
-                    <!-- Media -->
                     <div class="space-y-3">
                         <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             Media
@@ -227,7 +214,6 @@
                         </div>
                     </div>
 
-                    <!-- Actions -->
                     <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-2 border-t border-slate-100">
                         <button type="button" id="closeinventoryModalBottom"
                             class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
@@ -246,11 +232,9 @@
         </div>
     </div>
 
-    <!-- Table Card -->
     <section
         class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
 
-        <!-- Table Top Bar -->
         <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-0.5">
                 <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
@@ -269,7 +253,6 @@
                 </p>
             </div>
 
-            <!-- Simple client-side search (visual only) -->
             <div class="w-full sm:w-auto">
                 <label class="relative block">
                     <span class="sr-only">Search inventory</span>
@@ -287,7 +270,6 @@
             </div>
         </div>
 
-        <!-- Responsive Table Wrapper -->
         <div class="overflow-x-auto border-t border-slate-100">
             <table class="min-w-full text-left text-sm text-slate-700">
                 <thead
@@ -308,12 +290,10 @@
                     {% for inventory in inventorys %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
 
-                        <!-- Row Number -->
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
                             {{ forloop.counter }}
                         </td>
 
-                        <!-- Product Image -->
                         <td class="px-4 py-3 align-middle text-center">
                             {% if inventory.product.image %}
                             <div class="flex justify-center">
@@ -329,27 +309,22 @@
                             {% endif %}
                         </td>
 
-                        <!-- Category -->
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-700">
                             {{ inventory.product.brand.subcetegory.category.name }}
                         </td>
 
-                        <!-- Color -->
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
                             {{ inventory.color.name }}
                         </td>
 
-                        <!-- Size -->
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
                             {{ inventory.size.name }}
                         </td>
 
-                        <!-- Stock -->
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-700 text-center">
                             {{ inventory.stock }}
                         </td>
 
-                        <!-- Status -->
                         <td class="px-4 py-3 align-middle text-center">
                             <span
                                 class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
@@ -358,11 +333,9 @@
                             </span>
                         </td>
 
-                        <!-- Actions -->
                         <td class="px-4 py-3 align-middle text-center">
                             <div class="inline-flex items-center justify-center gap-2">
 
-                                <!-- View -->
                                 <button
                                     onclick="openViewModal(
                                         '{{ inventory.id }}',
@@ -385,7 +358,6 @@
                                     <span class="sr-only">View</span>
                                 </button>
 
-                                <!-- Edit -->
                                 <button
                                     onclick="openEditModal(
                                         '{% url 'edit_inventory' inventory.id %}',
@@ -406,7 +378,6 @@
                                     <span class="sr-only">Edit</span>
                                 </button>
 
-                                <!-- Delete -->
                                 <button
                                     onclick="openDeleteModal('{% url 'delete_inventory' inventory.id %}')"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
@@ -427,11 +398,9 @@
 
 </main>
 
-<!-- Delete Modal -->
 <div id="deleteModal"
      class="fixed inset-0 z-50 hidden bg-black/50">
 
-    <!-- Center Wrapper -->
     <div class="flex h-full w-full items-center justify-center px-4">
         <div class="w-full max-w-sm bg-white rounded-lg shadow-lg p-6">
 
@@ -460,28 +429,23 @@
         </div>
     </div>
 </div>
-<!-- View inventory Modal -->
 <div id="viewModal"
      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
 
     <div class="bg-white w-full max-w-4xl rounded-xl p-5 sm:p-6 relative">
 
-        <!-- Close -->
         <button onclick="closeViewModal()"
                 class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
             ✖
         </button>
 
-        <!-- Content -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
 
-            <!-- LEFT : BIG IMAGE -->
             <div class="w-full flex justify-center">
                 <img id="viewProfile"
                      class="w-full max-w-sm h-72 md:h-96 object-cover rounded-lg shadow bg-gray-200">
             </div>
 
-            <!-- RIGHT : DETAILS -->
             <div class="space-y-4">
 
                 <div>
@@ -521,13 +485,10 @@
 </div>
 
 
-<!-- Fixed Bottom Right Pagination -->
-<!-- Pagination -->
 {% if inventorys.paginator.num_pages > 1 %}
 <div class="flex justify-end mb-4 mr-4">
     <nav class="flex items-center gap-1 p-2 rounded">
 
-        <!-- Previous -->
         {% if inventorys.has_previous %}
             <a href="?page={{ inventorys.previous_page_number }}"
                class="h-9 w-9 flex items-center justify-center
@@ -542,7 +503,6 @@
             </span>
         {% endif %}
 
-        <!-- Page numbers -->
         {% for num in inventorys.paginator.page_range %}
             {% if num == inventorys.number %}
                 <span class="h-9 w-9 flex items-center justify-center
@@ -568,7 +528,6 @@
             {% endif %}
         {% endfor %}
 
-        <!-- Next -->
         {% if inventorys.has_next %}
             <a href="?page={{ inventorys.next_page_number }}"
                class="h-9 w-9 flex items-center justify-center
@@ -593,11 +552,9 @@
 
 
 
-<!-- JS -->
+
 <script>
-/* ===============================
-   EXISTING CODE (UNCHANGED)
-================================ */
+
 
 const inventoryModal = document.getElementById('inventoryModal');
 const deleteModal = document.getElementById('deleteModal');
@@ -607,19 +564,16 @@ const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 const closeInventoryModalTop = document.getElementById('closeinventoryModal');
 const closeInventoryModalBottom = document.getElementById('closeinventoryModalBottom');
 
-// Get dropdown elements
 const categorySelect = document.getElementById('categorySelect');
 const subcategorySelect = document.getElementById('subcategorySelect');
 const brandSelect = document.getElementById('brandSelect');
 const productSelect = document.getElementById('productSelect');
 
-// Get input fields for new items
 const newCategoryInput = document.getElementById('newCategoryInput');
 const newSubcategoryInput = document.getElementById('newSubcategoryInput');
 const newBrandInput = document.getElementById('newBrandInput');
 const newProductInput = document.getElementById('newProductInput');
 
-// Specs (Storage/RAM/Weight/etc.)
 const specsContainer = document.getElementById('specsContainer');
 const addSpecRowBtn = document.getElementById('addSpecRowBtn');
 
@@ -648,7 +602,6 @@ specsContainer.addEventListener('click', function(e) {
     if (!btn) return;
     const row = btn.closest('.spec-row');
     if (!row) return;
-    // keep at least 1 row
     if (specsContainer.querySelectorAll('.spec-row').length <= 1) {
         row.querySelector('input[name="spec_name"]').value = '';
         row.querySelector('input[name="spec_value"]').value = '';
@@ -666,17 +619,14 @@ document.getElementById('openinventoryModal').onclick = () => {
     inventoryForm.action = "{% url 'add_inventory' %}";
     modalTitle.innerText = "Add Inventory";
     
-    // Reset category dropdown to empty
     categorySelect.value = '';
     categorySelect.setAttribute('required', 'required');
     categorySelect.setAttribute('name', 'category');
     
-    // Restore name attributes for all dropdowns
     subcategorySelect.setAttribute('name', 'subcategory');
     brandSelect.setAttribute('name', 'brand');
     productSelect.setAttribute('name', 'product');
     
-    // Clear and hide all new input fields
     newCategoryInput.value = '';
     newCategoryInput.removeAttribute('name');
     newCategoryInput.removeAttribute('required');
@@ -717,17 +667,14 @@ if (closeInventoryModalBottom) {
 }
 
 function resetDropdowns() {
-    // Reset all dropdowns
     subcategorySelect.innerHTML = '<option value="">Select Subcategory</option><option value="__new__">+ Add New Subcategory</option>';
     brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
     productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
     
-    // Disable dependent dropdowns
     subcategorySelect.disabled = true;
     brandSelect.disabled = true;
     productSelect.disabled = true;
     
-    // Hide new input fields and clear them
     newCategoryInput.classList.add('hidden');
     newCategoryInput.value = '';
     newCategoryInput.removeAttribute('required');
@@ -748,32 +695,27 @@ function resetDropdowns() {
     newProductInput.removeAttribute('required');
     newProductInput.removeAttribute('name');
     
-    // Ensure dropdowns have proper name attributes
     subcategorySelect.setAttribute('name', 'subcategory');
     brandSelect.setAttribute('name', 'brand');
     productSelect.setAttribute('name', 'product');
 }
 
-// Category change handler
 categorySelect.addEventListener('change', function() {
     const selectedValue = this.value;
     
     if (selectedValue === '__new__') {
-        // Show new category input
         newCategoryInput.classList.remove('hidden');
         newCategoryInput.required = true;
-        newCategoryInput.value = ''; // Clear any previous value
+        newCategoryInput.value = ''; 
         this.removeAttribute('required');
-        this.setAttribute('name', ''); // Remove name so it's not submitted
+        this.setAttribute('name', ''); 
         
-        // Enable subcategory dropdown so user can add new subcategory
         subcategorySelect.innerHTML = '<option value="">Select Subcategory</option><option value="__new__">+ Add New Subcategory</option>';
         subcategorySelect.disabled = false;
         subcategorySelect.value = '';
         subcategorySelect.setAttribute('name', 'subcategory');
         subcategorySelect.setAttribute('required', 'required');
         
-        // Reset brand and product dropdowns but keep them ready
         brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
         brandSelect.disabled = true;
         brandSelect.value = '';
@@ -782,7 +724,6 @@ categorySelect.addEventListener('change', function() {
         productSelect.disabled = true;
         productSelect.value = '';
         
-        // Hide and clear new input fields for subcategory, brand, product
         newSubcategoryInput.classList.add('hidden');
         newSubcategoryInput.value = '';
         newSubcategoryInput.removeAttribute('required');
@@ -798,18 +739,15 @@ categorySelect.addEventListener('change', function() {
         newProductInput.removeAttribute('required');
         newProductInput.removeAttribute('name');
     } else if (selectedValue && selectedValue !== '') {
-        // Hide new category input and clear it
         newCategoryInput.classList.add('hidden');
         newCategoryInput.removeAttribute('required');
-        newCategoryInput.value = ''; // Clear the input
-        newCategoryInput.removeAttribute('name'); // Remove name attribute
+        newCategoryInput.value = '';
+        newCategoryInput.removeAttribute('name'); 
         this.setAttribute('required', 'required');
-        this.setAttribute('name', 'category'); // Ensure name is set
+        this.setAttribute('name', 'category'); 
         
-        // Load subcategories
         loadSubcategories(selectedValue);
     } else {
-        // Empty selection - reset everything
         newCategoryInput.classList.add('hidden');
         newCategoryInput.removeAttribute('required');
         newCategoryInput.value = '';
@@ -820,7 +758,6 @@ categorySelect.addEventListener('change', function() {
     }
 });
 
-// Subcategory change handler
 subcategorySelect.addEventListener('change', function() {
     const selectedValue = this.value;
     const categoryValue = categorySelect.value;
@@ -828,23 +765,20 @@ subcategorySelect.addEventListener('change', function() {
     if (selectedValue === '__new__') {
         newSubcategoryInput.classList.remove('hidden');
         newSubcategoryInput.required = true;
-        newSubcategoryInput.value = ''; // Clear any previous value
+        newSubcategoryInput.value = ''; 
         this.removeAttribute('required');
         this.setAttribute('name', '');
         
-        // Enable brand dropdown so user can add new brand
         brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
         brandSelect.disabled = false;
         brandSelect.value = '';
         brandSelect.setAttribute('name', 'brand');
         brandSelect.setAttribute('required', 'required');
         
-        // Reset product dropdown
         productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
         productSelect.disabled = true;
         productSelect.value = '';
         
-        // Hide and clear brand and product new inputs
         newBrandInput.classList.add('hidden');
         newBrandInput.value = '';
         newBrandInput.removeAttribute('required');
@@ -855,17 +789,15 @@ subcategorySelect.addEventListener('change', function() {
         newProductInput.removeAttribute('required');
         newProductInput.removeAttribute('name');
     } else if (selectedValue && selectedValue !== '' && categoryValue && categoryValue !== '__new__') {
-        // Existing category selected - load brands from database
         newSubcategoryInput.classList.add('hidden');
         newSubcategoryInput.removeAttribute('required');
-        newSubcategoryInput.value = ''; // Clear the input
+        newSubcategoryInput.value = ''; 
         newSubcategoryInput.removeAttribute('name');
         this.setAttribute('required', 'required');
         this.setAttribute('name', 'subcategory');
         
         loadBrands(selectedValue);
     } else if (selectedValue && selectedValue !== '' && categoryValue === '__new__') {
-        // New category selected - enable brand dropdown for new brand
         newSubcategoryInput.classList.add('hidden');
         newSubcategoryInput.removeAttribute('required');
         newSubcategoryInput.value = '';
@@ -873,13 +805,11 @@ subcategorySelect.addEventListener('change', function() {
         this.setAttribute('required', 'required');
         this.setAttribute('name', 'subcategory');
         
-        // Enable brand dropdown
         brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
         brandSelect.disabled = false;
         brandSelect.setAttribute('name', 'brand');
         brandSelect.setAttribute('required', 'required');
         
-        // Reset product dropdown
         productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
         productSelect.disabled = true;
     } else if (selectedValue === '') {
@@ -894,7 +824,6 @@ subcategorySelect.addEventListener('change', function() {
     }
 });
 
-// Brand change handler
 brandSelect.addEventListener('change', function() {
     const selectedValue = this.value;
     const categoryValue = categorySelect.value;
@@ -903,33 +832,29 @@ brandSelect.addEventListener('change', function() {
     if (selectedValue === '__new__') {
         newBrandInput.classList.remove('hidden');
         newBrandInput.required = true;
-        newBrandInput.value = ''; // Clear any previous value
+        newBrandInput.value = ''; 
         this.removeAttribute('required');
         this.setAttribute('name', '');
         
-        // Enable product dropdown so user can add new product
         productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
         productSelect.disabled = false;
         productSelect.value = '';
         productSelect.setAttribute('name', 'product');
         productSelect.setAttribute('required', 'required');
         
-        // Hide and clear product new input
         newProductInput.classList.add('hidden');
         newProductInput.value = '';
         newProductInput.removeAttribute('required');
         newProductInput.removeAttribute('name');
     } else if (selectedValue && selectedValue !== '' && categoryValue !== '__new__' && subcategoryValue !== '__new__') {
-        // Existing category/subcategory selected - load products from database
         newBrandInput.classList.add('hidden');
         newBrandInput.removeAttribute('required');
-        newBrandInput.value = ''; // Clear the input
+        newBrandInput.value = ''; 
         newBrandInput.removeAttribute('name');
         this.setAttribute('required', 'required');
         this.setAttribute('name', 'brand');
         loadProducts(selectedValue);
     } else if (selectedValue && selectedValue !== '') {
-        // New category or subcategory - enable product dropdown for new product
         newBrandInput.classList.add('hidden');
         newBrandInput.removeAttribute('required');
         newBrandInput.value = '';
@@ -937,7 +862,6 @@ brandSelect.addEventListener('change', function() {
         this.setAttribute('required', 'required');
         this.setAttribute('name', 'brand');
         
-        // Enable product dropdown
         productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
         productSelect.disabled = false;
         productSelect.setAttribute('name', 'product');
@@ -953,20 +877,19 @@ brandSelect.addEventListener('change', function() {
     }
 });
 
-// Product change handler
 productSelect.addEventListener('change', function() {
     const selectedValue = this.value;
     
     if (selectedValue === '__new__') {
         newProductInput.classList.remove('hidden');
         newProductInput.required = true;
-        newProductInput.value = ''; // Clear any previous value
+        newProductInput.value = ''; 
         this.removeAttribute('required');
         this.setAttribute('name', '');
     } else if (selectedValue && selectedValue !== '') {
         newProductInput.classList.add('hidden');
         newProductInput.removeAttribute('required');
-        newProductInput.value = ''; // Clear the input
+        newProductInput.value = '';
         newProductInput.removeAttribute('name');
         this.setAttribute('required', 'required');
         this.setAttribute('name', 'product');
@@ -980,7 +903,6 @@ productSelect.addEventListener('change', function() {
     }
 });
 
-// Load subcategories via AJAX
 function loadSubcategories(categoryName) {
     if (!categoryName) return;
     
@@ -997,7 +919,6 @@ function loadSubcategories(categoryName) {
             subcategorySelect.innerHTML += '<option value="__new__">+ Add New Subcategory</option>';
             subcategorySelect.disabled = false;
             
-            // Reset dependent dropdowns
             brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
             productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
             brandSelect.disabled = true;
@@ -1009,7 +930,6 @@ function loadSubcategories(categoryName) {
         });
 }
 
-// Load brands via AJAX
 function loadBrands(subcategoryName) {
     const categoryName = categorySelect.value;
     if (!subcategoryName || !categoryName) return;
@@ -1027,7 +947,6 @@ function loadBrands(subcategoryName) {
             brandSelect.innerHTML += '<option value="__new__">+ Add New Brand</option>';
             brandSelect.disabled = false;
             
-            // Reset product dropdown
             productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
             productSelect.disabled = true;
         })
@@ -1037,7 +956,6 @@ function loadBrands(subcategoryName) {
         });
 }
 
-// Load products via AJAX
 function loadProducts(brandName) {
     const categoryName = categorySelect.value;
     const subcategoryName = subcategorySelect.value;
@@ -1062,11 +980,9 @@ function loadProducts(brandName) {
         });
 }
 
-// Handle form submission - use new inputs if "Add New" was selected
 inventoryForm.addEventListener('submit', function(e) {
     let hasErrors = false;
     
-    // Validate category
     if (categorySelect.value === '__new__') {
         if (!newCategoryInput.value.trim()) {
             e.preventDefault();
@@ -1074,7 +990,6 @@ inventoryForm.addEventListener('submit', function(e) {
             hasErrors = true;
             return false;
         }
-        // Ensure name attributes are set correctly
         if (!categorySelect.hasAttribute('name') || categorySelect.getAttribute('name') === '') {
             categorySelect.removeAttribute('name');
             newCategoryInput.setAttribute('name', 'new_category');
@@ -1085,13 +1000,11 @@ inventoryForm.addEventListener('submit', function(e) {
         hasErrors = true;
         return false;
     } else {
-        // Ensure category select has name attribute
         categorySelect.setAttribute('name', 'category');
         newCategoryInput.removeAttribute('name');
         newCategoryInput.value = '';
     }
     
-    // Validate subcategory
     if (subcategorySelect.value === '__new__') {
         if (!newSubcategoryInput.value.trim()) {
             e.preventDefault();
@@ -1114,7 +1027,6 @@ inventoryForm.addEventListener('submit', function(e) {
         newSubcategoryInput.value = '';
     }
     
-    // Validate brand
     if (brandSelect.value === '__new__') {
         if (!newBrandInput.value.trim()) {
             e.preventDefault();
@@ -1137,7 +1049,6 @@ inventoryForm.addEventListener('submit', function(e) {
         newBrandInput.value = '';
     }
     
-    // Validate product
     if (productSelect.value === '__new__') {
         if (!newProductInput.value.trim()) {
             e.preventDefault();
@@ -1172,11 +1083,9 @@ function openEditModal(editUrl, category, subcategory, brand, product, descripti
     modalTitle.innerText = "Edit inventory";
     inventoryForm.action = editUrl;
 
-    // Set category and load dependent dropdowns
     categorySelect.value = category;
     if (category) {
         loadSubcategories(category);
-        // Wait a bit for subcategories to load, then set subcategory
         setTimeout(() => {
             subcategorySelect.value = subcategory;
             if (subcategory) {
@@ -1200,7 +1109,6 @@ function openEditModal(editUrl, category, subcategory, brand, product, descripti
     inventoryForm.price.value = price;
     inventoryForm.stock.value = stock;
 
-    // Specs
     resetSpecs();
     try {
         const specs = JSON.parse(specsJson || '[]');
@@ -1209,7 +1117,6 @@ function openEditModal(editUrl, category, subcategory, brand, product, descripti
             specs.forEach(s => addSpecRow(s.name || '', s.value || ''));
         }
     } catch (e) {
-        // ignore
     }
 }
 
@@ -1223,9 +1130,7 @@ function closeDeleteModal() {
     deleteModal.classList.add('hidden');
 }
 
-/* ===============================
-   VIEW MODAL (ADDED CODE)
-================================ */
+
 
 const viewModal = document.getElementById('viewModal');
 

@@ -3,7 +3,6 @@
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
-    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
         <div>
             <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
@@ -15,11 +14,9 @@
         </div>
     </div>
 
-    <!-- Table Card -->
     <section
         class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
 
-        <!-- Table Top Bar -->
         <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-0.5">
                 <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
@@ -38,7 +35,6 @@
                 </p>
             </div>
 
-            <!-- Simple client-side search (visual only) -->
             <div class="w-full sm:w-auto">
                 <label class="relative block">
                     <span class="sr-only">Search buyers</span>
@@ -56,7 +52,6 @@
             </div>
         </div>
 
-        <!-- Table -->
         <div class="overflow-x-auto border-t border-slate-100">
             <table class="min-w-full text-left text-sm text-slate-700">
                 <thead
@@ -118,11 +113,9 @@
 
 </main>
 
-<!-- Delete Modal -->
 <div id="deleteModal"
      class="fixed inset-0 z-50 hidden bg-black/50">
 
-    <!-- Center Wrapper -->
     <div class="flex h-full w-full items-center justify-center px-4">
         <div class="w-full max-w-sm bg-white rounded-lg shadow-lg p-6">
 
@@ -151,19 +144,16 @@
         </div>
     </div>
 </div>
-<!-- View buyer Modal -->
 <div id="viewModal"
      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
 
     <div class="bg-white w-full max-w-md rounded-xl p-5 sm:p-6 relative">
 
-        <!-- Close -->
         <button onclick="closeViewModal()"
                 class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
             ✖
         </button>
 
-        <!-- Content -->
         <div class="space-y-5">
 
             <div class="flex items-center gap-4">
@@ -188,13 +178,10 @@
 </div>
 
 
-<!-- Fixed Bottom Right Pagination -->
-<!-- Pagination -->
 {% if buyers.paginator.num_pages > 1 %}
 <div class="flex justify-end mb-4 mr-4">
     <nav class="flex items-center gap-1 p-2 rounded">
 
-        <!-- Previous -->
         {% if buyers.has_previous %}
             <a href="?page={{ buyers.previous_page_number }}"
                class="h-9 w-9 flex items-center justify-center
@@ -209,7 +196,6 @@
             </span>
         {% endif %}
 
-        <!-- Page numbers -->
         {% for num in buyers.paginator.page_range %}
             {% if num == buyers.number %}
                 <span class="h-9 w-9 flex items-center justify-center
@@ -235,7 +221,6 @@
             {% endif %}
         {% endfor %}
 
-        <!-- Next -->
         {% if buyers.has_next %}
             <a href="?page={{ buyers.next_page_number }}"
                class="h-9 w-9 flex items-center justify-center
@@ -260,7 +245,6 @@
 
 
 
-<!-- JS -->
 <script>
 const deleteModal = document.getElementById('deleteModal');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');

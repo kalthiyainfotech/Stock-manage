@@ -3,7 +3,6 @@
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
-    <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
         <div>
             <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
@@ -15,11 +14,9 @@
         </div>
     </div>
 
-    <!-- Table Card -->
     <section
         class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
 
-        <!-- Table Top Bar -->
         <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-0.5">
                 <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
@@ -38,7 +35,6 @@
                 </p>
             </div>
 
-            <!-- Simple client-side search (visual only) -->
             <div class="w-full sm:w-auto">
                 <label class="relative block">
                     <span class="sr-only">Search orders</span>
@@ -185,7 +181,6 @@
 
     </section>
 
-    <!-- Pagination -->
     {% if orders.has_other_pages %}
     <div class="mt-6 flex justify-end mb-4 mr-4">
         <nav class="flex items-center gap-1 p-2 rounded">
@@ -235,21 +230,17 @@
     {% endif %}
 </main>
 
-<!-- View Order Modal -->
 <div id="viewModal"
      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
     <div class="bg-white w-full max-w-4xl rounded-xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-        <!-- Close Button -->
         <button onclick="closeViewModal()"
                 class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl">
             ✖
         </button>
 
-        <!-- Content -->
         <h2 class="text-2xl font-bold text-gray-800 mb-6">Order Details</h2>
 
         <div class="space-y-6">
-            <!-- Order Info -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <p class="text-sm text-gray-600"><strong>Order Number:</strong></p>
@@ -269,7 +260,6 @@
                 </div>
             </div>
 
-            <!-- Billing Details -->
             <div class="border-t pt-4">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Billing Details</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -308,7 +298,6 @@
                 </div>
             </div>
 
-            <!-- Shipping Details (if different) -->
             <div id="shippingSection" class="border-t pt-4 hidden">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Shipping Details</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -339,7 +328,6 @@
                 </div>
             </div>
 
-            <!-- Order Items -->
             <div class="border-t pt-4">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Order Items</h3>
                 <div class="overflow-x-auto">
@@ -358,7 +346,6 @@
                 </div>
             </div>
 
-            <!-- Order Summary -->
             <div class="border-t pt-4">
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">Order Summary</h3>
                 <div class="flex justify-end">
@@ -375,7 +362,6 @@
                 </div>
             </div>
 
-            <!-- Order Notes -->
             <div class="border-t pt-4">
                 <h3 class="text-xl font-semibold text-gray-800 mb-2">Order Notes</h3>
                 <p id="viewOrderNotes" class="text-gray-600"></p>
@@ -384,7 +370,6 @@
     </div>
 </div>
 
-<!-- Delete Modal -->
 <div id="deleteModal"
      class="fixed inset-0 z-50 hidden bg-black/50">
     <div class="flex h-full w-full items-center justify-center px-4">
@@ -424,13 +409,11 @@ function openViewModal(
     shippingAddress, shippingCity, shippingState, shippingPostalCode, shippingCountry,
     itemsString
 ) {
-    // Order Info
     document.getElementById('viewOrderNumber').innerText = orderNumber;
     document.getElementById('viewOrderDate').innerText = orderDate;
     document.getElementById('viewStatus').innerText = status;
     document.getElementById('viewPaymentMethod').innerText = paymentMethod;
 
-    // Billing Details
     document.getElementById('viewFirstName').innerText = firstName + ' ' + lastName;
     document.getElementById('viewEmail').innerText = email;
     document.getElementById('viewPhone').innerText = phone;
@@ -442,7 +425,6 @@ function openViewModal(
     document.getElementById('viewPostalCode').innerText = postalCode;
     document.getElementById('viewCountry').innerText = country;
 
-    // Shipping Details
     if (shipToDifferent === 'True' && shippingAddress) {
         document.getElementById('shippingSection').classList.remove('hidden');
         document.getElementById('viewShippingName').innerText = (shippingFirstName || '') + ' ' + (shippingLastName || '');
@@ -455,7 +437,6 @@ function openViewModal(
         document.getElementById('shippingSection').classList.add('hidden');
     }
 
-    // Order Items
     const itemsTable = document.getElementById('viewOrderItems');
     itemsTable.innerHTML = '';
     if (itemsString) {
@@ -476,11 +457,9 @@ function openViewModal(
         });
     }
 
-    // Order Summary
     document.getElementById('viewSubtotal').innerText = '₹' + subtotal;
     document.getElementById('viewTotal').innerText = '₹' + total;
 
-    // Order Notes
     document.getElementById('viewOrderNotes').innerText = orderNotes || 'No notes';
 
     viewModal.classList.remove('hidden');

@@ -2,7 +2,6 @@
 {% load static %}
 {% block buyer_layout %}
 
-		<!-- Start Hero Section -->
 			<div class="hero">
 				<div class="container">
 					<div class="row justify-content-between">
@@ -17,7 +16,6 @@
 					</div>
 				</div>
 			</div>
-		<!-- End Hero Section -->
 
 		
 
@@ -127,14 +125,10 @@
 (function() {
     'use strict';
     
-    // Completely override custom.js quantity handlers for cart page
-    // Run after custom.js by using setTimeout
     function initCartQuantity() {
-        // First, ensure all quantities are valid on page load (must be exactly 1 for new items)
         var allQuantityInputs = document.querySelectorAll('.quantity-amount');
         allQuantityInputs.forEach(function(input) {
             var quantity = parseInt(input.value);
-            // If quantity is invalid, NaN, or less than 1, set to 1
             if (isNaN(quantity) || quantity < 1) {
                 quantity = 1;
                 input.value = 1;
@@ -146,19 +140,15 @@
             }
         });
         
-        // Remove existing event listeners by cloning and replacing entire quantity containers
         var quantityContainers = document.querySelectorAll('.quantity-container');
         quantityContainers.forEach(function(container) {
-            // Clone the entire container to remove all event listeners
             var newContainer = container.cloneNode(true);
             container.parentNode.replaceChild(newContainer, container);
         });
         
-        // Now get fresh references after cloning
         var increaseButtons = document.querySelectorAll('.quantity-container .increase');
         var decreaseButtons = document.querySelectorAll('.quantity-container .decrease');
         
-        // Function to calculate and update totals
         function updateTotals() {
             var subtotal = 0;
             var rows = document.querySelectorAll('tbody tr[data-item-id]');
@@ -168,7 +158,6 @@
                 var quantityInput = row.querySelector('.quantity-amount');
                 var quantity = parseInt(quantityInput.value) || 1;
                 
-                // Ensure minimum quantity is 1
                 if (quantity < 1) {
                     quantity = 1;
                     quantityInput.value = 1;
@@ -180,7 +169,6 @@
                 
                 var itemTotal = price * quantity;
                 
-                // Update item total
                 var totalCell = row.querySelector('.item-total');
                 if (totalCell) {
                     totalCell.textContent = itemTotal.toFixed(2);
@@ -189,7 +177,6 @@
                 subtotal += itemTotal;
             });
             
-            // Update subtotal and total
             var subtotalElement = document.getElementById('cart-subtotal');
             var totalElement = document.getElementById('cart-total');
             if (subtotalElement) {
@@ -200,9 +187,7 @@
             }
         }
         
-        // Handle increase button - prevent double increment
         increaseButtons.forEach(function(button) {
-            // Remove any existing listeners by replacing the button
             var newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
             
@@ -217,7 +202,6 @@
                 var maxStock = parseInt(quantityContainer.getAttribute('data-max-stock')) || 999;
                 var currentQuantity = parseInt(quantityInput.value) || 1;
                 
-                // Ensure minimum quantity is 1
                 if (currentQuantity < 1) {
                     currentQuantity = 1;
                     quantityInput.value = 1;
@@ -239,9 +223,7 @@
             });
         });
         
-        // Handle decrease button
         decreaseButtons.forEach(function(button) {
-            // Remove any existing listeners by replacing the button
             var newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
             
@@ -254,7 +236,6 @@
                 var hiddenInput = document.getElementById('quantity_' + itemId);
                 var currentQuantity = parseInt(quantityInput.value) || 1;
                 
-                // Ensure minimum quantity is 1
                 if (currentQuantity < 1) {
                     currentQuantity = 1;
                     quantityInput.value = 1;
@@ -266,7 +247,6 @@
                 
                 if (currentQuantity > 1) {
                     var newQuantity = currentQuantity - 1;
-                    // Ensure new quantity is at least 1
                     if (newQuantity < 1) {
                         newQuantity = 1;
                     }
@@ -279,11 +259,9 @@
             });
         });
         
-        // Initial calculation
         updateTotals();
     }
     
-    // Run after DOM is ready and after custom.js (with longer delay to ensure custom.js finishes)
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(initCartQuantity, 200);
@@ -292,7 +270,6 @@
         setTimeout(initCartQuantity, 200);
     }
     
-    // Also run on window load as a safety net
     window.addEventListener('load', function() {
         setTimeout(function() {
             var allQuantityInputs = document.querySelectorAll('.quantity-amount');

@@ -9,9 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 text-gray-800">
-    <!-- Sidebar -->
     <aside id="sidebar" class="fixed top-0 left-0 z-40 h-screen w-64 bg-gradient-to-b from-slate-900 to-slate-800 shadow-xl transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
-        <!-- Logo -->
         <div class="flex h-16 items-center justify-between px-5 border-b border-white/10">
             <div class="flex items-center gap-3">
                 <div class="h-9 w-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
@@ -27,7 +25,6 @@
             </button>
         </div>
 
-        <!-- Navigation -->
         <nav class="mt-5 px-3 space-y-1 overflow-y-auto h-[calc(100vh-8rem)] pb-6">
             <a href="{% url 'supplier_dashboard' %}"
                class="sup-nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
@@ -37,11 +34,25 @@
                 <span class="font-medium">Dashboard</span>
             </a>
 
-            <!-- Add more supplier links here when needed -->
+            <a href="{% url 'supplier_orders' %}"
+               class="sup-nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
+                    <i class="fa-solid fa-receipt text-sm"></i>
+                </span>
+                <span class="font-medium">Orders</span>
+            </a>
+
+            <a href="{% url 'supplier_returns' %}"
+               class="sup-nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
+                    <i class="fa-solid fa-rotate-left text-sm"></i>
+                </span>
+                <span class="font-medium">Return Orders</span>
+            </a>
+
             
         </nav>
 
-        <!-- Logout Button -->
         <div class="absolute bottom-5 left-0 right-0 px-3">
             <a href="{% url 'supplier_logout' %}"
                class="group flex items-center justify-between gap-3 px-4 py-3 text-white/80 hover:text-white hover:bg-white/10 rounded-xl w-full transition-colors border border-white/10">
@@ -56,15 +67,11 @@
         </div>
     </aside>
 
-    <!-- Overlay for mobile -->
     <div id="overlay" class="fixed inset-0 z-30 bg-black bg-opacity-50 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-    <!-- Main Content -->
     <div class="lg:ml-64">
-        <!-- Header -->
         <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-gray-200 h-16">
             <div class="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
-                <!-- Left side - Menu button and title -->
                 <div class="flex items-center gap-4">
                     <button onclick="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-gray-900">
                         <i class="fas fa-bars text-xl"></i>
@@ -80,15 +87,12 @@
                     </div>
                 </div>
 
-                <!-- Right side - Notifications and user profile -->
                 <div class="flex items-center gap-3 sm:gap-4">
-                    <!-- Notification Icon -->
                     <button class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200">
                         <i class="fas fa-bell"></i>
                         <span class="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
                     </button>
 
-                    <!-- User Profile -->
                     <div class="flex items-center gap-2 sm:gap-3">
                         <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base">
                             DD
@@ -112,7 +116,6 @@
             overlay.classList.toggle('hidden');
         }
 
-        // Active nav highlight + title/icon for supplier layout
         (function () {
             const path = window.location.pathname.replace(/\/+$/, '');
             const links = document.querySelectorAll('a.sup-nav-link');

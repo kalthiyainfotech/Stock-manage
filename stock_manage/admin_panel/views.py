@@ -30,9 +30,12 @@ def auth_login(request):
 @never_cache
 @login_required(login_url='auth_login')
 def auth_logout(request):
-    logout(request)
-    request.session.flush()
-    return redirect('auth_login')
+    try:
+        request.session.pop('_auth_user_id', None)
+        request.session.pop('_auth_user_backend', None)
+        request.session.pop('_auth_user_hash', None)
+    finally:
+        return redirect('auth_login')
 
 @never_cache
 @login_required(login_url='auth_login')

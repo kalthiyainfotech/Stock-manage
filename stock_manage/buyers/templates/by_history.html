@@ -74,6 +74,8 @@
 												{% elif order.status == 'processing' %} bg-warning text-dark
 												{% elif order.status == 'shipped' %} bg-info text-dark
 												{% elif order.status == 'delivered' %} bg-success
+												{% elif order.status == 'return_requested' %} bg-primary
+												{% elif order.status == 'returned' %} bg-dark
 												{% elif order.status == 'cancelled' %} bg-danger
 												{% else %} bg-light text-dark
 												{% endif %}">
@@ -93,6 +95,13 @@
 												Cancel
 											</button>
 											{% endif %}
+											{% if order.status == 'delivered' %}
+											<button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#returnOrderModal{{ forloop.counter }}">
+												<i class="fa-solid fa-rotate-left"></i>
+												Request Return
+											</button>
+											{% endif %}
+											
 										</div>
 									</div>
 									{% if order.status == 'pending' or order.status == 'processing' %}
@@ -117,6 +126,29 @@
 										</div>
 									</div>
 									{% endif %}
+									{% if order.status == 'delivered' %}
+									<div class="modal fade" id="returnOrderModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
+										<div class="modal-dialog modal-dialog-centered">
+											<div class="modal-content">
+												<div class="modal-header">
+													<h6 class="modal-title">Request Return</h6>
+													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+												</div>
+												<div class="modal-body">
+													Are you sure you want to request a return for Order {{ order.order_number }}?
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">No</button>
+													<form method="post" action="{% url 'by_return_order' order.id %}">
+														{% csrf_token %}
+														<button type="submit" class="btn btn-primary btn-sm">Yes, Request Return</button>
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
+									{% endif %}
+
 									<div class="collapse mt-3" id="orderItems{{ forloop.counter }}">
 										<div class="table-responsive">
 											<table class="table align-middle">

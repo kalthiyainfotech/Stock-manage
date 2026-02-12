@@ -439,7 +439,28 @@ def by_cancel_order(request, order_id):
     messages.success(request, "Your order has been cancelled.")
     return redirect("by_history")
 
+@never_cache
+@buyer_login_required
+def by_return_order(request, order_id):
+    if request.method != "POST":
+        return redirect("by_history")
+    buyer_id = request.session.get("buyer_id")
+    try:
+        order = Order.objects.select_related("buyer").prefetch_related(
+            "items",
+            "items__variant"
+        ).get(id=order_id, buyer_id=buyer_id)
+    except Order.DoesNotExist:
+        return redirect("by_history")
+    if order.status != "delivered":
+        return redirect("by_history")
+    order.status = "return_requested"
+    order.save()
+    messages.success(request, "Return request submitted. Supplier will verify shortly.")
+    return redirect("by_history")
 def by_logout(request):
-    request.session.flush()
+    request.session.pop("buyer_id", None)
+    request.session.pop("buyer_name", None)
+    request.session.pop("buyer_email", None)
     return redirect('by_index')
 

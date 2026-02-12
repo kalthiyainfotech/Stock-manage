@@ -1,232 +1,175 @@
 {% extends "sup_base.html" %}
 {% load static %}
 {% block sup_base %}
+
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
         <div>
             <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
-                Orders
+                Welcome, {{ supplier.name }}
             </h1>
             <p class="mt-1 text-sm text-slate-500">
-                View and update delivery status of customer orders.
+                Quick overview of your activity and shortcuts to key actions.
             </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{% url 'supplier_orders' %}" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">
+                <i class="fa-solid fa-receipt"></i>
+                <span>Manage Orders</span>
+            </a>
+            <a href="{% url 'supplier_returns' %}" class="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-amber-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Return Orders</span>
+            </a>
         </div>
     </div>
 
-    <section class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
-        <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="space-y-0.5">
-                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
-                    Overview
-                </p>
-                <p class="text-sm text-slate-500">
-                    Total <span class="font-semibold text-slate-900">{{ orders|length }}</span> orders.
-                </p>
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm p-4 shadow-sm shadow-slate-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Total Orders</p>
+                    <p class="mt-1 text-2xl font-bold text-slate-900">{{ orders|length }}</p>
+                </div>
+                <span class="h-10 w-10 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-layer-group"></i>
+                </span>
             </div>
         </div>
+        <div class="rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm p-4 shadow-sm shadow-slate-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Delivered</p>
+                    <p class="mt-1 text-2xl font-bold text-emerald-700">{{ delivered_count }}</p>
+                </div>
+                <span class="h-10 w-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-circle-check"></i>
+                </span>
+            </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm p-4 shadow-sm shadow-slate-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">In Transit</p>
+                    <p class="mt-1 text-2xl font-bold text-sky-700">{{ shipped_count }}</p>
+                </div>
+                <span class="h-10 w-10 rounded-lg bg-sky-600 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </span>
+            </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm p-4 shadow-sm shadow-slate-100">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Return Requests</p>
+                    <p class="mt-1 text-2xl font-bold text-amber-700">{{ return_requested_count }}</p>
+                </div>
+                <span class="h-10 w-10 rounded-lg bg-amber-600 text-white flex items-center justify-center">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </span>
+            </div>
+        </div>
+    </section>
 
-        <div class="overflow-x-auto border-t border-slate-100">
-            <table class="min-w-full text-left text-sm text-slate-700">
-                <thead class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
-                    <tr>
-                        <th class="px-4 py-3 font-medium whitespace-nowrap">Order #</th>
-                        <th class="px-4 py-3 font-medium whitespace-nowrap">Buyer</th>
-                        <th class="px-4 py-3 font-medium">Items</th>
-                        <th class="px-4 py-3 font-medium text-right">Total</th>
-                        <th class="px-4 py-3 font-medium whitespace-nowrap">Placed</th>
-                        <th class="px-4 py-3 font-medium text-center">Status</th>
-                        <th class="px-4 py-3 font-medium text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100 bg-white">
-                    {% for order in orders %}
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-4 py-3 align-middle font-semibold text-slate-800">
-                            {{ order.order_number }}
-                        </td>
-                        <td class="px-4 py-3 align-middle">
-                            <div class="text-slate-800">{{ order.first_name }} {{ order.last_name }}</div>
-                            <div class="text-xs text-slate-500">{{ order.email }}</div>
-                        </td>
-                        <td class="px-4 py-3 align-middle">
-                            <div class="text-sm">
-                                {{ order.items.count }} items
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 align-middle text-right font-semibold">₹{{ order.total }}</td>
-                        <td class="px-4 py-3 align-middle whitespace-nowrap">
-                            {{ order.created_at|date:"M d, Y H:i" }}
-                        </td>
-                        <td class="px-4 py-3 align-middle text-center">
-                            <span class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs
-                                {% if order.status == 'pending' %} bg-slate-100 text-slate-700 ring-1 ring-slate-200
-                                {% elif order.status == 'processing' %} bg-amber-50 text-amber-700 ring-1 ring-amber-200
-                                {% elif order.status == 'shipped' %} bg-sky-50 text-sky-700 ring-1 ring-sky-200
-                                {% elif order.status == 'delivered' %} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
-                                {% elif order.status == 'cancelled' %} bg-rose-50 text-rose-700 ring-1 ring-rose-200
-                                {% endif %}">
-                                <span class="h-1.5 w-1.5 rounded-full
-                                    {% if order.status == 'pending' %} bg-slate-400
-                                    {% elif order.status == 'processing' %} bg-amber-500
-                                    {% elif order.status == 'shipped' %} bg-sky-500
-                                    {% elif order.status == 'delivered' %} bg-emerald-500
-                                    {% elif order.status == 'cancelled' %} bg-rose-500
+    <section class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
+            <div class="flex items-center justify-between px-4 pt-4 pb-3">
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">Recent Orders</p>
+                    <p class="text-sm text-slate-500">Latest activity across all orders.</p>
+                </div>
+                <a href="{% url 'supplier_orders' %}" class="text-xs font-semibold text-slate-900 hover:text-slate-700">View all</a>
+            </div>
+            <div class="overflow-x-auto border-t border-slate-100">
+                <table class="min-w-full text-left text-sm text-slate-700">
+                    <thead class="bg-slate-900 text-slate-100 text-xs uppercase tracking-wide">
+                        <tr>
+                            <th class="px-4 py-3 font-medium whitespace-nowrap">Order #</th>
+                            <th class="px-4 py-3 font-medium whitespace-nowrap">Buyer</th>
+                            <th class="px-4 py-3 font-medium text-right">Total</th>
+                            <th class="px-4 py-3 font-medium whitespace-nowrap">Placed</th>
+                            <th class="px-4 py-3 font-medium text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 bg-white">
+                        {% for order in orders|slice:":8" %}
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="px-4 py-3 align-middle font-semibold text-slate-800">{{ order.order_number }}</td>
+                            <td class="px-4 py-3 align-middle">
+                                <div class="text-slate-800">{{ order.first_name }} {{ order.last_name }}</div>
+                                <div class="text-xs text-slate-500">{{ order.email }}</div>
+                            </td>
+                            <td class="px-4 py-3 align-middle text-right font-semibold">₹{{ order.total }}</td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">{{ order.created_at|date:"M d, Y H:i" }}</td>
+                            <td class="px-4 py-3 align-middle text-center">
+                                <span class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs
+                                    {% if order.status == 'pending' %} bg-slate-100 text-slate-700 ring-1 ring-slate-200
+                                    {% elif order.status == 'processing' %} bg-amber-50 text-amber-700 ring-1 ring-amber-200
+                                    {% elif order.status == 'shipped' %} bg-sky-50 text-sky-700 ring-1 ring-sky-200
+                                    {% elif order.status == 'delivered' %} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
+                                    {% elif order.status == 'cancelled' %} bg-rose-50 text-rose-700 ring-1 ring-rose-200
+                                    {% elif order.status == 'return_requested' %} bg-amber-50 text-amber-700 ring-1 ring-amber-200
+                                    {% elif order.status == 'returned' %} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
                                     {% endif %}">
+                                    <span class="h-1.5 w-1.5 rounded-full
+                                        {% if order.status == 'pending' %} bg-slate-400
+                                        {% elif order.status == 'processing' %} bg-amber-500
+                                        {% elif order.status == 'shipped' %} bg-sky-500
+                                        {% elif order.status == 'delivered' %} bg-emerald-500
+                                        {% elif order.status == 'cancelled' %} bg-rose-500
+                                        {% elif order.status == 'return_requested' %} bg-amber-500
+                                        {% elif order.status == 'returned' %} bg-emerald-500
+                                        {% endif %}">
+                                    </span>
+                                    {{ order.get_status_display }}
                                 </span>
-                                {{ order.get_status_display }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 align-middle text-center">
-                            <form method="post" action="{% url 'sup_update_order_status' order.id %}" class="inline-flex items-center gap-2 justify-center flex-wrap">
-                                {% csrf_token %}
-                                <select name="status"
-                                    class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                                    {% for value,label in ORDER_STATUS_CHOICES %}
-                                        <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit"
-                                    class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500">
-                                    <i class="fa-solid fa-rotate"></i>
-                                    <span>Update</span>
-                                </button>
-                            </form>
-                            <div class="mt-2 inline-flex items-center justify-center gap-2">
-                                <button
-                                    onclick="openOrderModal('orderModal{{ order.id }}')"
-                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition"
-                                    title="View">
-                                    <i class="fa-solid fa-eye text-xs"></i>
-                                    <span class="sr-only">View</span>
-                                </button>
-                                <button
-                                    onclick="openDeleteModal('deleteModal{{ order.id }}')"
-                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-white text-rose-700 hover:bg-rose-50 transition"
-                                    title="Delete">
-                                    <i class="fa-solid fa-trash text-xs"></i>
-                                    <span class="sr-only">Delete</span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="px-4 py-10 text-center text-slate-500">
-                            No orders found.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-4 py-10 text-center text-slate-500">No orders found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
+            <div class="px-4 pt-4 pb-3">
+                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">Quick Actions</p>
+                <p class="text-sm text-slate-500">Navigate common supplier tasks.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-3 px-4 pb-4">
+                <a href="{% url 'supplier_orders' %}" class="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50 transition">
+                    <span class="flex items-center gap-3">
+                        <span class="h-9 w-9 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                            <i class="fa-solid fa-receipt text-sm"></i>
+                        </span>
+                        <span class="text-sm font-medium text-slate-800">View Orders</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-400 group-hover:text-slate-600"></i>
+                </a>
+                <a href="{% url 'supplier_returns' %}" class="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-slate-50 transition">
+                    <span class="flex items-center gap-3">
+                        <span class="h-9 w-9 rounded-lg bg-amber-600 text-white flex items-center justify-center">
+                            <i class="fa-solid fa-rotate-left text-sm"></i>
+                        </span>
+                        <span class="text-sm font-medium text-slate-800">Process Returns</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-400 group-hover:text-slate-600"></i>
+                </a>
+                <a href="{% url 'supplier_logout' %}" class="group flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 hover:bg-rose-50 transition">
+                    <span class="flex items-center gap-3">
+                        <span class="h-9 w-9 rounded-lg bg-rose-600 text-white flex items-center justify-center">
+                            <i class="fas fa-right-from-bracket text-sm"></i>
+                        </span>
+                        <span class="text-sm font-medium text-slate-800">Logout</span>
+                    </span>
+                    <i class="fa-solid fa-chevron-right text-xs text-slate-400 group-hover:text-slate-600"></i>
+                </a>
+            </div>
         </div>
     </section>
 </main>
-
-{% for order in orders %}
-<div id="orderModal{{ order.id }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">
-    <div class="relative w-full max-w-4xl rounded-2xl bg-white shadow-xl shadow-slate-300/40 max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
-            <div>
-                <h2 class="text-base sm:text-lg font-semibold text-slate-900">
-                    Order {{ order.order_number }}
-                </h2>
-                <p class="mt-0.5 text-xs sm:text-sm text-slate-500">
-                    {{ order.first_name }} {{ order.last_name }} • {{ order.email }}
-                </p>
-            </div>
-            <button onclick="closeOrderModal('orderModal{{ order.id }}')" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
-                ✕
-            </button>
-        </div>
-        <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <div class="text-sm text-slate-600">Placed: {{ order.created_at|date:"M d, Y H:i" }}</div>
-                    <div class="text-sm text-slate-600">Payment: {{ order.get_payment_method_display }}</div>
-                    <div class="text-sm text-slate-600">Status: {{ order.get_status_display }}</div>
-                    <div class="text-sm font-semibold text-slate-900">Total: ₹{{ order.total }}</div>
-                </div>
-                <div class="space-y-1">
-                    <div class="text-sm text-slate-600">Address</div>
-                    <div class="text-sm text-slate-800">{{ order.address }}</div>
-                    {% if order.address_line2 %}<div class="text-sm text-slate-800">{{ order.address_line2 }}</div>{% endif %}
-                    <div class="text-xs text-slate-500">{{ order.city }}, {{ order.state }} {{ order.postal_code }}, {{ order.country }}</div>
-                </div>
-            </div>
-            <div class="mt-6">
-                <h3 class="text-sm font-semibold text-slate-900">Items</h3>
-                <div class="mt-3 space-y-3">
-                    {% for item in order.items.all %}
-                    <div class="flex items-center gap-3">
-                        <div class="h-12 w-12 rounded bg-slate-100 overflow-hidden">
-                            {% if item.variant.product.image %}
-                                <img src="{{ item.variant.product.image.url }}" class="h-12 w-12 object-cover">
-                            {% else %}
-                                <img src="{% static 'images/product-1.png' %}" class="h-12 w-12 object-cover">
-                            {% endif %}
-                        </div>
-                        <div class="flex-1">
-                            <div class="text-sm font-medium text-slate-900">{{ item.product_name }}</div>
-                            <div class="text-xs text-slate-500">{{ item.variant.color.name }} / {{ item.variant.size.name }}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-sm text-slate-800">₹{{ item.price }}</div>
-                            <div class="text-xs text-slate-500">× {{ item.quantity }}</div>
-                        </div>
-                        <div class="text-right w-20 text-sm font-semibold text-slate-900">₹{{ item.total }}</div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-    <span class="sr-only">Modal</span>
-</div>
-
-<div id="deleteModal{{ order.id }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">
-    <div class="bg-white w-full max-w-md rounded-xl p-5 sm:p-6 relative">
-        <button onclick="closeDeleteModal('deleteModal{{ order.id }}')" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
-            ✖
-        </button>
-        <h3 class="text-base sm:text-lg font-semibold text-slate-900">Delete Order</h3>
-        <p class="text-sm text-gray-600 mb-6">Are you sure you want to delete order {{ order.order_number }}?</p>
-        <div class="flex justify-end gap-3">
-            <button type="button" onclick="closeDeleteModal('deleteModal{{ order.id }}')" class="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
-            <form method="post" action="{% url 'sup_delete_order' order.id %}">
-                {% csrf_token %}
-                <button type="submit" class="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
-            </form>
-        </div>
-    </div>
-    <span class="sr-only">Modal</span>
-</div>
-{% endfor %}
-
-<script>
-function openOrderModal(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.classList.remove('hidden');
-    el.classList.add('flex');
-}
-function closeOrderModal(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.classList.add('hidden');
-    el.classList.remove('flex');
-}
-function openDeleteModal(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.classList.remove('hidden');
-    el.classList.add('flex');
-}
-function closeDeleteModal(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.classList.add('hidden');
-    el.classList.remove('flex');
-}
-</script>
 
 {% endblock sup_base %}
