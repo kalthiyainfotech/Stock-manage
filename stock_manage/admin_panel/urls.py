@@ -16,6 +16,10 @@ urlpatterns = [
     path('worker/edit/<int:id>/', edit_worker, name='edit_worker'),
     path('worker/delete/<int:id>/', delete_worker, name='delete_worker'),
 
+    path('auth_holiday/',auth_holiday,name='auth_holiday'),
+    path('add-holiday/', add_holiday, name='add_holiday'),
+    path('holiday/edit/<int:id>/', edit_holiday, name='edit_holiday'),
+    path('holiday/delete/<int:id>/', delete_holiday, name='delete_holiday'),
 
     path('auth_inventory/',auth_inventory,name='auth_inventory'),
     path('add_inventory/',add_inventory,name='add_inventory'),

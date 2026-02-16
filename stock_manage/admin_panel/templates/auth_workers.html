@@ -115,6 +115,13 @@
                                     placeholder="e.g. 9876543210"
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                             </div>
+                            
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Salary</label>
+                                <input type="number" name="salary" step="0.01" min="0" required
+                                    placeholder="e.g. 25000.00"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
                         </div>
                     </div>
 
@@ -342,6 +349,7 @@
                                         '{{ worker.first_name }}',
                                         '{{ worker.last_name }}',
                                         '{{ worker.mbno }}',
+                                        '{{ worker.salary }}',
                                         '{{ worker.state }}',
                                         '{{ worker.city }}',
                                         '{{ worker.address }}',
@@ -363,6 +371,7 @@
                                             '{{ worker.first_name }}',
                                             '{{ worker.last_name }}',
                                             '{{ worker.mbno }}',
+                                            '{{ worker.salary }}',
                                             '{{ worker.state }}',
                                             '{{ worker.city }}',
                                             '{{ worker.address }}',
@@ -465,6 +474,7 @@
                     <p><strong>Last Name:</strong> <span id="viewLastName"></span></p>
 
                     <p><strong>Mobile:</strong> <span id="viewMobile"></span></p>
+                    <p><strong>Salary:</strong> <span id="viewSalary"></span></p>
                     <p><strong>Gender:</strong> <span id="viewGender"></span></p>
 
                     <p><strong>State:</strong> <span id="viewState"></span></p>
@@ -598,7 +608,7 @@ if (toggleWorkerPasswordBtn && workerPasswordInput && workerPasswordEyeIcon) {
     });
 }
 
-function openEditModal(editUrl, name, email, first_name, last_name, mbno, state, city, address, gender, status) {
+function openEditModal(editUrl, name, email, first_name, last_name, mbno, salary, state, city, address, gender, status) {
     workerModal.classList.remove('hidden');
     workerModal.classList.add('flex');
 
@@ -610,6 +620,7 @@ function openEditModal(editUrl, name, email, first_name, last_name, mbno, state,
     workerForm.first_name.value = first_name;
     workerForm.last_name.value = last_name;
     workerForm.mbno.value = mbno;
+    workerForm.salary.value = salary;
     workerForm.state.value = state;
     workerForm.city.value = city;
     workerForm.address.value = address;
@@ -634,7 +645,7 @@ function closeDeleteModal() {
 const viewModal = document.getElementById('viewModal');
 
 function openViewModal(
-    id, name, email, first_name, last_name, mbno,
+    id, name, email, first_name, last_name, mbno, salary,
     state, city, address, gender, status, profile
 ) {
     document.getElementById('viewId').innerText = id;
@@ -643,6 +654,7 @@ function openViewModal(
     document.getElementById('viewFirstName').innerText = first_name;
     document.getElementById('viewLastName').innerText = last_name;
     document.getElementById('viewMobile').innerText = mbno;
+    document.getElementById('viewSalary').innerText = salary;
     document.getElementById('viewState').innerText = state;
     document.getElementById('viewCity').innerText = city;
     document.getElementById('viewAddress').innerText = address;

@@ -42,6 +42,7 @@ class Workers(models.Model):
     address = models.CharField(max_length=255, blank=True)
 
     mbno = models.IntegerField()
+    salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
 
@@ -159,3 +160,17 @@ class Contact(models.Model):
     def __str__(self):
         full_name = f"{self.first_name} {self.last_name}".strip()
         return f"{full_name} - {self.email}"
+
+
+class Holiday(models.Model):
+    name = models.CharField(max_length=150)
+    date = models.DateField()
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date', '-id']
+
+    def __str__(self):
+        return f"{self.name} ({self.date})"

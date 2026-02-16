@@ -43,13 +43,32 @@
         <span class="font-medium">Suppliers</span>
     </a>
 
-    <a href="{% url 'auth_workers' %}"
-       class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-        <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-            <i class="fa-solid fa-user-gear text-sm"></i>
-        </span>
-        <span class="font-medium">Workers</span>
-    </a>
+    <div class="relative">
+        <a href="{% url 'auth_workers' %}"
+           class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+            <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
+                <i class="fa-solid fa-user-gear text-sm"></i>
+            </span>
+            <span class="font-medium">Workers</span>
+           
+        </a>
+        <button id="workersNavDropdownToggle" class="absolute inset-y-0 right-2 my-auto h-7 w-7 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:text-white">
+            <svg id="workersNavChevronBtn" class="h-3 w-3 transition-transform duration-200 mx-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <div id="workersNavDropdownMenuNav"
+             class="absolute left-0 right-0 top-full mt-1 rounded-xl bg-gradient-to-b from-slate-900 to-slate-800 border border-white/10 shadow-xl backdrop-blur
+                    opacity-0 pointer-events-none transition-all duration-200 ease-out origin-top scale-95">
+            <a href="{% url 'auth_holiday' %}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                    <i class="fa-solid fa-calendar-days text-sm"></i>
+                </span>
+                <span class="font-medium">Holiday</span>
+            </a>
+        </div>
+    </div>
 
     <a href="{% url 'auth_inventory' %}"
        class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
@@ -186,6 +205,33 @@
                         pageIconEl.className = classes.join(' ');
                     }
                 }
+            }
+
+            const toggle = document.getElementById('workersNavDropdownToggle');
+            const menuNav = document.getElementById('workersNavDropdownMenuNav');
+            const chevronAnchor = document.getElementById('workersNavChevron');
+            const chevronBtn = document.getElementById('workersNavChevronBtn');
+            if (toggle && menuNav) {
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = menuNav.classList.contains('opacity-100');
+                    menuNav.classList.toggle('opacity-100', !isOpen);
+                    menuNav.classList.toggle('pointer-events-auto', !isOpen);
+                    menuNav.classList.toggle('opacity-0', isOpen);
+                    menuNav.classList.toggle('pointer-events-none', isOpen);
+                    menuNav.classList.toggle('scale-100', !isOpen);
+                    menuNav.classList.toggle('scale-95', isOpen);
+                    if (chevronAnchor) chevronAnchor.classList.toggle('rotate-180', !isOpen);
+                    if (chevronBtn) chevronBtn.classList.toggle('rotate-180', !isOpen);
+                });
+                document.addEventListener('click', (e) => {
+                    if (!menuNav.contains(e.target) && !toggle.contains(e.target)) {
+                        menuNav.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+                        menuNav.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+                        if (chevronAnchor) chevronAnchor.classList.remove('rotate-180');
+                        if (chevronBtn) chevronBtn.classList.remove('rotate-180');
+                    }
+                });
             }
         })();
     </script>

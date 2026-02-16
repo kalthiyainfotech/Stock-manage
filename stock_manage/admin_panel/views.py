@@ -177,6 +177,7 @@ def add_worker(request):
             city=request.POST.get('city'),
             address=request.POST.get('address'),
             mbno=request.POST['mbno'],
+            salary=request.POST.get('salary') or 0,
             gender=request.POST['gender'],
             status=request.POST['status'],
             profile_picture=request.FILES.get('profile_picture'),
@@ -197,6 +198,7 @@ def edit_worker(request, id):
         worker.first_name = request.POST['first_name']
         worker.last_name = request.POST['last_name']
         worker.mbno = request.POST['mbno']
+        worker.salary = request.POST.get('salary') or worker.salary
         worker.state = request.POST.get('state')
         worker.city = request.POST.get('city')
         worker.address = request.POST.get('address')
@@ -219,6 +221,46 @@ def delete_worker(request, id):
     Workers.objects.filter(id=id).delete()
     return redirect('auth_workers')
 
+
+@never_cache
+@login_required(login_url='auth_login')
+def auth_holiday(request):
+    holiday_list = Holiday.objects.all()
+    paginator = Paginator(holiday_list, 10)
+    page_number = request.GET.get('page')
+    holidays = paginator.get_page(page_number)
+    return render(request, 'auth_holiday.html', {
+        'holidays': holidays
+    })
+
+@never_cache
+@login_required(login_url='auth_login')
+def add_holiday(request):
+    if request.method == "POST":
+        Holiday.objects.create(
+            name=request.POST['name'],
+            date=request.POST['date'],
+            description=request.POST.get('description', '')
+        )
+        return redirect('auth_holiday')
+    return redirect('auth_holiday')
+
+@never_cache
+@login_required(login_url='auth_login')
+def edit_holiday(request, id):
+    holiday = get_object_or_404(Holiday, id=id)
+    if request.method == "POST":
+        holiday.name = request.POST['name']
+        holiday.date = request.POST['date']
+        holiday.description = request.POST.get('description', '')
+        holiday.save()
+    return redirect('auth_holiday')
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_holiday(request, id):
+    Holiday.objects.filter(id=id).delete()
+    return redirect('auth_holiday')
 
 
 
