@@ -6,6 +6,11 @@
     <title>Worker Desk</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        html, body { max-width: 100%; overflow-x: hidden; }
+        main { max-width: 100vw; overflow-x: hidden; }
+        .lg\:ml-64 { max-width: 100vw; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
     <aside id="sidebar" class="fixed top-0 left-0 z-40 h-screen w-64 bg-gradient-to-b from-slate-900 to-slate-800 shadow-xl transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
@@ -31,6 +36,13 @@
                     <i class="fa-solid fa-gauge-high text-sm"></i>
                 </span>
                 <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="{% url 'wk_leave' %}"
+               class="wk-nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
+                    <i class="fa-solid fa-calendar-minus text-sm"></i>
+                </span>
+                <span class="font-medium">Leaves</span>
             </a>
         </nav>
 

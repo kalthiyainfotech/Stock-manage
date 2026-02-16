@@ -262,6 +262,64 @@ def delete_holiday(request, id):
     Holiday.objects.filter(id=id).delete()
     return redirect('auth_holiday')
 
+@never_cache
+@login_required(login_url='auth_login')
+def auth_leaves(request):
+    leave_list = Leave.objects.select_related('worker').order_by('-created_at')
+    paginator = Paginator(leave_list, 10)
+    page_number = request.GET.get('page')
+    leaves = paginator.get_page(page_number)
+    stats = {
+        'total': leave_list.count(),
+        'pending': leave_list.filter(status='Pending').count(),
+        'approved': leave_list.filter(status='Approved').count(),
+        'rejected': leave_list.filter(status='Rejected').count(),
+    }
+    return render(request, 'auth_leaves.html', {
+        'leaves': leaves,
+        **stats,
+    })
+
+@never_cache
+@login_required(login_url='auth_login')
+def approve_leave(request, id):
+    leave = get_object_or_404(Leave, id=id)
+    leave.status = 'Approved'
+    leave.save()
+    return redirect('auth_leaves')
+
+@never_cache
+@login_required(login_url='auth_login')
+def reject_leave(request, id):
+    leave = get_object_or_404(Leave, id=id)
+    leave.status = 'Rejected'
+    leave.save()
+    return redirect('auth_leaves')
+
+@never_cache
+@login_required(login_url='auth_login')
+def edit_leave_admin(request, id):
+    leave = get_object_or_404(Leave, id=id)
+    if request.method == "POST":
+        leave.start_date = request.POST.get('start_date') or leave.start_date
+        leave.end_date = request.POST.get('end_date') or leave.end_date
+        leave.start_time = request.POST.get('start_time') or leave.start_time
+        leave.end_time = request.POST.get('end_time') or leave.end_time
+        category = request.POST.get('category') or leave.category
+        if category in ['Sick', 'Emergency', 'Casual']:
+            leave.category = category
+        leave.reason = request.POST.get('reason', leave.reason)
+        status = request.POST.get('status')
+        if status in ['Pending', 'Approved', 'Rejected']:
+            leave.status = status
+        leave.save()
+    return redirect('auth_leaves')
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_leave_admin(request, id):
+    Leave.objects.filter(id=id).delete()
+    return redirect('auth_leaves')
 
 
 

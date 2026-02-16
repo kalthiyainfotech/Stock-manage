@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from admin_panel.models import Workers
+from django.http import JsonResponse
+from admin_panel.models import Workers, Holiday, Leave
 from functools import wraps
 from django.views.decorators.cache import never_cache
 
@@ -71,3 +72,93 @@ def worker_logout(request):
         request.session.pop('worker_name', None)
         messages.success(request, f"Logged out successfully. Goodbye, {worker_name}!")
     return redirect('worker_login')
+
+@never_cache
+@worker_login_required
+def holidays_api(request):
+    try:
+        year = int(request.GET.get('year'))
+        month = int(request.GET.get('month'))
+    except (TypeError, ValueError):
+        today = __import__('datetime').date.today()
+        year = today.year
+        month = today.month
+
+    holidays = Holiday.objects.filter(date__year=year, date__month=month).order_by('date')
+    data = [
+        {
+            "date": h.date.isoformat(),
+            "name": h.name,
+            "description": h.description or ""
+        }
+        for h in holidays
+    ]
+    return JsonResponse({"holidays": data})
+
+@never_cache
+@worker_login_required
+def wk_leave(request):
+    worker_id = request.session.get('worker_id')
+    worker = Workers.objects.get(id=worker_id)
+    leaves = Leave.objects.filter(worker=worker).order_by('-created_at')
+    return render(request, 'wk_leave.html', {
+        'worker': worker,
+        'leaves': leaves
+    })
+
+@never_cache
+@worker_login_required
+def add_leave(request):
+    if request.method == "POST":
+        worker_id = request.session.get('worker_id')
+        worker = Workers.objects.get(id=worker_id)
+        Leave.objects.create(
+            worker=worker,
+            start_date=request.POST.get('start_date'),
+            end_date=request.POST.get('end_date'),
+            start_time=request.POST.get('start_time') or None,
+            end_time=request.POST.get('end_time') or None,
+            category=request.POST.get('category') or 'Casual',
+            reason=request.POST.get('reason', ''),
+            status='Pending'
+        )
+    return redirect('wk_leave')
+
+@never_cache
+@worker_login_required
+def edit_leave(request, id):
+    worker_id = request.session.get('worker_id')
+    worker = Workers.objects.get(id=worker_id)
+    leave = Leave.objects.filter(id=id, worker=worker).first()
+    if not leave:
+        messages.error(request, "Leave not found")
+        return redirect('wk_leave')
+    if leave.status != 'Pending':
+        messages.error(request, "Only pending leave can be edited")
+        return redirect('wk_leave')
+    if request.method == "POST":
+        leave.start_date = request.POST.get('start_date') or leave.start_date
+        leave.end_date = request.POST.get('end_date') or leave.end_date
+        leave.start_time = request.POST.get('start_time') or leave.start_time
+        leave.end_time = request.POST.get('end_time') or leave.end_time
+        category = request.POST.get('category') or leave.category
+        if category in ['Sick', 'Emergency', 'Casual']:
+            leave.category = category
+        leave.reason = request.POST.get('reason', leave.reason)
+        leave.save()
+    return redirect('wk_leave')
+
+@never_cache
+@worker_login_required
+def delete_leave(request, id):
+    worker_id = request.session.get('worker_id')
+    worker = Workers.objects.get(id=worker_id)
+    leave = Leave.objects.filter(id=id, worker=worker).first()
+    if not leave:
+        messages.error(request, "Leave not found")
+        return redirect('wk_leave')
+    if leave.status != 'Pending':
+        messages.error(request, "Only pending leave can be deleted")
+        return redirect('wk_leave')
+    Leave.objects.filter(id=id, worker=worker).delete()
+    return redirect('wk_leave')
