@@ -50,6 +50,14 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                            <span class="text-sm font-medium text-slate-700">Total (estimated)</span>
+                            <span id="leaveTotalPreview" class="text-sm font-semibold text-slate-900">—</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
                         <select id="leaveCategory" name="category" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
@@ -117,6 +125,7 @@
                     <tr>
                         <th class="px-4 py-3 text-left align-middle">Dates</th>
                         <th class="px-4 py-3 text-left align-middle">Times</th>
+                        <th class="px-4 py-3 text-left align-middle">Total</th>
                         <th class="px-4 py-3 text-left align-middle">Category</th>
                         <th class="px-4 py-3 text-left align-middle">Reason</th>
                         <th class="px-4 py-3 text-center align-middle">Status</th>
@@ -129,8 +138,15 @@
                         <td class="px-4 py-3 align-middle text-slate-700">{{ l.start_date }} → {{ l.end_date }}</td>
                         <td class="px-4 py-3 align-middle text-slate-700">
                             {% if l.start_time or l.end_time %}
-                            {{ l.start_time|time:"H:i" }} → {{ l.end_time|time:"H:i" }}
-                            {% else %}—{% endif %}
+                            {{ l.start_time|time:"h:i A" }} → {{ l.end_time|time:"h:i A" }}
+                            {% elif l.start_date == l.end_date %}
+                            09:00 AM → 06:00 PM
+                            {% else %}
+                            Full day
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-slate-700">
+                            {{ l.total_hm }}{% if l.start_date != l.end_date %} ({{ l.day_count }} days){% endif %}
                         </td>
                         <td class="px-4 py-3 align-middle">
                             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold
@@ -184,7 +200,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="px-4 py-10 text-center text-slate-500">No leaves yet.</td>
+                        <td colspan="7" class="px-4 py-10 text-center text-slate-500">No leaves yet.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -206,6 +222,7 @@ const leaveReason = document.getElementById('leaveReason');
 const leaveStartTime = document.getElementById('leaveStartTime');
 const leaveEndTime = document.getElementById('leaveEndTime');
 const leaveCategory = document.getElementById('leaveCategory');
+const leaveTotalPreview = document.getElementById('leaveTotalPreview');
 
 function hideLeaveModal() {
     leaveModal.classList.add('hidden');
@@ -218,6 +235,7 @@ if (openLeaveModalBtn) {
         leaveModalTitle.innerText = "Add Leave";
         leaveModal.classList.remove('hidden');
         leaveModal.classList.add('flex');
+        if (leaveTotalPreview) leaveTotalPreview.textContent = '—';
     };
 }
 if (closeLeaveModalBtn) closeLeaveModalBtn.onclick = hideLeaveModal;
@@ -234,6 +252,7 @@ function openLeaveEdit(editUrl, start, end, startTime, endTime, category, reason
     leaveEndTime.value = endTime || '';
     leaveCategory.value = category || 'Casual';
     leaveReason.value = reason || '';
+    recalcTotal();
 }
 
 const leaveDeleteModal = document.getElementById('leaveDeleteModal');
@@ -263,6 +282,65 @@ if (leaveSearch) {
         if (countEl) countEl.innerText = visible;
     });
 }
+
+function parseDate(v) {
+    if (!v) return null;
+    const d = new Date(v + 'T00:00:00');
+    return isNaN(d.getTime()) ? null : d;
+}
+function parseTime(v) {
+    if (!v) return null;
+    const parts = v.split(':');
+    if (parts.length < 2) return null;
+    const h = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10);
+    if (isNaN(h) || isNaN(m)) return null;
+    return h * 60 + m;
+}
+function minutesDiff(d, m1, m2) {
+    return Math.max(0, m2 - m1);
+}
+function recalcTotal() {
+    const sd = parseDate(leaveStart.value);
+    const ed = parseDate(leaveEnd.value);
+    if (!sd || !ed || ed < sd) {
+        if (leaveTotalPreview) leaveTotalPreview.textContent = '—';
+        return;
+    }
+    const officeStart = 9 * 60;
+    const lunchStart = 13 * 60;
+    const lunchEnd = 14 * 60;
+    const officeEnd = 18 * 60;
+    const sInput = parseTime(leaveStartTime.value);
+    const eInput = parseTime(leaveEndTime.value);
+    let total = 0;
+    const cur = new Date(sd);
+    while (cur <= ed) {
+        const isStartDay = cur.toDateString() === sd.toDateString();
+        const isEndDay = cur.toDateString() === ed.toDateString();
+        let s = isStartDay && sInput != null ? sInput : officeStart;
+        let e = isEndDay && eInput != null ? eInput : officeEnd;
+        s = Math.max(s, officeStart);
+        e = Math.min(e, officeEnd);
+        if (s < e) {
+            let mins = minutesDiff(cur, s, e);
+            const ls = Math.max(s, lunchStart);
+            const le = Math.min(e, lunchEnd);
+            if (ls < le) mins -= minutesDiff(cur, ls, le);
+            total += Math.max(0, mins);
+        }
+        cur.setDate(cur.getDate() + 1);
+    }
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    if (leaveTotalPreview) leaveTotalPreview.textContent = `${h}h ${m}m`;
+}
+['change', 'input'].forEach(evt => {
+    leaveStart.addEventListener(evt, recalcTotal);
+    leaveEnd.addEventListener(evt, recalcTotal);
+    leaveStartTime.addEventListener(evt, recalcTotal);
+    leaveEndTime.addEventListener(evt, recalcTotal);
+});
 </script>
 
 {% endblock wk_base %}

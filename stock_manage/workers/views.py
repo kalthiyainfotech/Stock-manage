@@ -97,6 +97,42 @@ def holidays_api(request):
 
 @never_cache
 @worker_login_required
+def leaves_api(request):
+    try:
+        year = int(request.GET.get('year'))
+        month = int(request.GET.get('month'))
+    except (TypeError, ValueError):
+        today = __import__('datetime').date.today()
+        year = today.year
+        month = today.month
+    worker_id = request.session.get('worker_id')
+    worker = Workers.objects.get(id=worker_id)
+    dt = __import__('datetime')
+    month_start = dt.date(year, month, 1)
+    if month == 12:
+        next_month = dt.date(year + 1, 1, 1)
+    else:
+        next_month = dt.date(year, month + 1, 1)
+    month_end = next_month - dt.timedelta(days=1)
+    leaves = Leave.objects.filter(
+        worker=worker,
+        status__in=['Approved', 'Rejected'],
+        start_date__lte=month_end,
+        end_date__gte=month_start
+    ).order_by('start_date')
+    by_date = {}
+    for l in leaves:
+        s = l.start_date if l.start_date > month_start else month_start
+        e = l.end_date if l.end_date < month_end else month_end
+        cur = s
+        st = (l.status or '').lower()
+        while cur <= e:
+            by_date[cur.isoformat()] = {"date": cur.isoformat(), "status": st}
+            cur += dt.timedelta(days=1)
+    return JsonResponse({"leaves": list(by_date.values())})
+
+@never_cache
+@worker_login_required
 def wk_leave(request):
     worker_id = request.session.get('worker_id')
     worker = Workers.objects.get(id=worker_id)

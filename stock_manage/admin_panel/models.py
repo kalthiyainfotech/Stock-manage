@@ -187,6 +187,7 @@ class Leave(models.Model):
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='Casual')
     reason = models.TextField(blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
+    total_minutes = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -195,3 +196,158 @@ class Leave(models.Model):
 
     def __str__(self):
         return f"{self.worker.name} {self.start_date} - {self.end_date} [{self.category}/{self.status}]"
+
+    def compute_total_minutes(self):
+        from datetime import datetime, date, time, timedelta
+
+        def to_date(v):
+            if isinstance(v, date):
+                return v
+            if isinstance(v, str) and v:
+                try:
+                    return datetime.strptime(v, "%Y-%m-%d").date()
+                except ValueError:
+                    return None
+            return None
+
+        def to_time(v):
+            if isinstance(v, time):
+                return v
+            if isinstance(v, str) and v:
+                for fmt in ("%H:%M", "%H:%M:%S"):
+                    try:
+                        return datetime.strptime(v, fmt).time()
+                    except ValueError:
+                        continue
+            return None
+
+        s_date = to_date(self.start_date)
+        e_date = to_date(self.end_date)
+        s_time_input = to_time(self.start_time)
+        e_time_input = to_time(self.end_time)
+
+        if not s_date or not e_date:
+            return 0
+        if e_date < s_date:
+            return 0
+        office_start = time(9, 0)
+        lunch_start = time(13, 0)
+        lunch_end = time(14, 0)
+        office_end = time(18, 0)
+
+        def day_minutes(d, s, e):
+            s = s or office_start
+            e = e or office_end
+            s = max(s, office_start)
+            e = min(e, office_end)
+            if s >= e:
+                return 0
+            total = int((datetime.combine(d, e) - datetime.combine(d, s)).total_seconds() // 60)
+            ls = max(s, lunch_start)
+            le = min(e, lunch_end)
+            if ls < le:
+                total -= int((datetime.combine(d, le) - datetime.combine(d, ls)).total_seconds() // 60)
+            return max(0, total)
+
+        cur = s_date
+        total = 0
+        while cur <= e_date:
+            if cur == s_date and s_time_input:
+                s = s_time_input
+            else:
+                s = office_start
+            if cur == e_date and e_time_input:
+                e = e_time_input
+            else:
+                e = office_end
+            total += day_minutes(cur, s, e)
+            cur += timedelta(days=1)
+        return total
+
+    def save(self, *args, **kwargs):
+        self.total_minutes = self.compute_total_minutes()
+        super().save(*args, **kwargs)
+
+    @property
+    def total_hm(self):
+        h = (self.total_minutes or 0) // 60
+        m = (self.total_minutes or 0) % 60
+        return f"{h}h {m}m"
+
+    @property
+    def day_count(self):
+        try:
+            return (self.end_date - self.start_date).days + 1
+        except Exception:
+            return 0
+
+    def minutes_in_month(self, year, month):
+        from datetime import datetime, date, time, timedelta
+        def to_date(v):
+            if isinstance(v, date):
+                return v
+            if isinstance(v, str) and v:
+                try:
+                    return datetime.strptime(v, "%Y-%m-%d").date()
+                except ValueError:
+                    return None
+            return None
+        def to_time(v):
+            if isinstance(v, time):
+                return v
+            if isinstance(v, str) and v:
+                for fmt in ("%H:%M", "%H:%M:%S"):
+                    try:
+                        return datetime.strptime(v, fmt).time()
+                    except ValueError:
+                        continue
+            return None
+        s_date = to_date(self.start_date)
+        e_date = to_date(self.end_date)
+        s_time_input = to_time(self.start_time)
+        e_time_input = to_time(self.end_time)
+        if not s_date or not e_date:
+            return 0
+        if e_date < s_date:
+            return 0
+        office_start = time(9, 0)
+        lunch_start = time(13, 0)
+        lunch_end = time(14, 0)
+        office_end = time(18, 0)
+        month_start = date(year, month, 1)
+        if month == 12:
+            next_month = date(year + 1, 1, 1)
+        else:
+            next_month = date(year, month + 1, 1)
+        month_end = next_month - timedelta(days=1)
+        start = s_date if s_date > month_start else month_start
+        end = e_date if e_date < month_end else month_end
+        if end < start:
+            return 0
+        def day_minutes(d, s, e):
+            s = s or office_start
+            e = e or office_end
+            s = max(s, office_start)
+            e = min(e, office_end)
+            if s >= e:
+                return 0
+            total = int((datetime.combine(d, e) - datetime.combine(d, s)).total_seconds() // 60)
+            ls = max(s, lunch_start)
+            le = min(e, lunch_end)
+            if ls < le:
+                total -= int((datetime.combine(d, le) - datetime.combine(d, ls)).total_seconds() // 60)
+            return max(0, total)
+        cur = start
+        total = 0
+        while cur <= end:
+            if cur == s_date and s_time_input:
+                s = s_time_input
+            else:
+                s = office_start
+            if cur == e_date and e_time_input:
+                e = e_time_input
+            else:
+                e = office_end
+            total += day_minutes(cur, s, e)
+            cur += timedelta(days=1)
+        return total

@@ -42,9 +42,9 @@
     }
 
     .holiday-day {
-        background: #ffe4e6;
-        border: 2px solid #fb7185;
-        color: #7f1d1d;
+        background: #dbeafe;
+        border: 2px solid #3b82f6;
+        color: #1e3a8a;
         font-weight: 700;
         position: relative;
     }
@@ -55,8 +55,24 @@
         right: 6px;
         height: 6px;
         width: 6px;
-        background: #ef4444;
+        background: #3b82f6;
         border-radius: 9999px;
+    }
+
+    .approved-day {
+        background: #dcfce7;
+        border: 2px solid #22c55e;
+        color: #14532d;
+        font-weight: 700;
+        position: relative;
+    }
+
+    .rejected-day {
+        background: #fee2e2;
+        border: 2px solid #ef4444;
+        color: #7f1d1d;
+        font-weight: 700;
+        position: relative;
     }
 </style>
 
@@ -134,6 +150,7 @@
     const nextMonthBtn = document.getElementById('nextMonth');
     const todayBtn = document.getElementById('todayBtn');
     const holidaysByDate = new Map();
+    const leavesByDate = new Map();
 
     async function loadHolidays(year, monthIndex) {
         const month = monthIndex + 1;
@@ -149,6 +166,20 @@
         } catch (e) {}
     }
 
+    async function loadLeaves(year, monthIndex) {
+        const month = monthIndex + 1;
+        try {
+            const res = await fetch(`/workers/api/leaves?year=${year}&month=${month}`);
+            if (res.ok) {
+                const data = await res.json();
+                leavesByDate.clear();
+                (data.leaves || []).forEach(l => {
+                    leavesByDate.set(l.date, l);
+                });
+            }
+        } catch (e) {}
+    }
+
     async function renderCalendar() {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
@@ -158,7 +189,7 @@
         currentMonthEl.textContent = monthNames[month];
         currentYearEl.textContent = year;
 
-        await loadHolidays(year, month);
+        await Promise.all([loadHolidays(year, month), loadLeaves(year, month)]);
 
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -205,11 +236,18 @@
         
         dayEl.textContent = day;
         const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-        if (type === 'current' && holidaysByDate.has(dateStr)) {
-            dayEl.classList.add('holiday-day');
-            const badge = document.createElement('span');
-            badge.className = 'holiday-badge';
-            dayEl.appendChild(badge);
+        if (type === 'current') {
+            const leave = leavesByDate.get(dateStr);
+            if (leave && leave.status === 'approved') {
+                dayEl.classList.add('approved-day');
+            } else if (leave && leave.status === 'rejected') {
+                dayEl.classList.add('rejected-day');
+            } else if (holidaysByDate.has(dateStr)) {
+                dayEl.classList.add('holiday-day');
+                const badge = document.createElement('span');
+                badge.className = 'holiday-badge';
+                dayEl.appendChild(badge);
+            }
         }
 
         if (type === 'current') {
@@ -229,8 +267,13 @@
                                   'July', 'August', 'September', 'October', 'November', 'December'];
                 const eventDetails = document.getElementById('eventDetails');
                 const selectedDate = document.getElementById('selectedDate');
+                const l = leavesByDate.get(dateStr);
                 const h = holidaysByDate.get(dateStr);
-                if (h) {
+                if (l && l.status === 'approved') {
+                    selectedDate.textContent = `${monthNames[currentDate.getMonth()]} ${day}, ${currentDate.getFullYear()} — Leave Approved`;
+                } else if (l && l.status === 'rejected') {
+                    selectedDate.textContent = `${monthNames[currentDate.getMonth()]} ${day}, ${currentDate.getFullYear()} — Leave Rejected`;
+                } else if (h) {
                     selectedDate.textContent = `${monthNames[currentDate.getMonth()]} ${day}, ${currentDate.getFullYear()} — Holiday: ${h.name}`;
                 } else {
                     selectedDate.textContent = `${monthNames[currentDate.getMonth()]} ${day}, ${currentDate.getFullYear()}`;

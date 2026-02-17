@@ -32,6 +32,8 @@ urlpatterns = [
     path('leave/edit/<int:id>/', edit_leave_admin, name='edit_leave_admin'),
     path('leave/delete/<int:id>/', delete_leave_admin, name='delete_leave_admin'),
 
+    path('auth_work_salary/', auth_work_salary, name='auth_work_salary'),
+
     path('auth_buyers/',auth_buyers,name='auth_buyers'),
     path('delete/buyer/<int:id>/',delete_buyer,name='delete_buyer'),
 
