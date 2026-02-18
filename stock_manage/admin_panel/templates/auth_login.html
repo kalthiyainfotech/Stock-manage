@@ -19,6 +19,19 @@
                 <p class="text-gray-600 mt-2">Please login to your account</p>
             </div>
 
+            {% if messages %}
+            <div class="mb-4 space-y-2">
+                {% for message in messages %}
+                    {% if 'admin' in message.tags %}
+                    <div class="rounded-lg border px-3 py-2 text-sm
+                        {% if 'error' in message.tags %}border-rose-200 bg-rose-50 text-rose-700{% elif 'success' in message.tags %}border-emerald-200 bg-emerald-50 text-emerald-700{% elif 'warning' in message.tags %}border-amber-200 bg-amber-50 text-amber-800{% else %}border-sky-200 bg-sky-50 text-sky-700{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <form method="POST" id="loginForm" class="space-y-6">
                 {% csrf_token %}
                 <div>

@@ -25,7 +25,7 @@ def auth_login(request):
             login(request, user)
             return redirect('auth_dashboard')
         else:
-            messages.error(request, "Invalid credentials")
+            messages.error(request, "Invalid credentials", extra_tags="admin")
 
     return render(request, 'auth_login.html')
 

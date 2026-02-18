@@ -10,7 +10,7 @@ def worker_login_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if 'worker_id' not in request.session:
-            messages.error(request, "Please login to access this page")
+            messages.error(request, "Please login to access this page", extra_tags="worker")
             return redirect('worker_login')
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -22,30 +22,30 @@ def worker_login(request):
         password = request.POST.get('password', '').strip()
 
         if not email or not password:
-            messages.error(request, "Please provide both email and password")
+            messages.error(request, "Please provide both email and password", extra_tags="worker")
             return render(request, 'wk_login.html')
 
         try:
             worker = Workers.objects.get(email=email)
             
             if worker.password != password:
-                messages.error(request, "Invalid email or password")
+                messages.error(request, "Invalid email or password", extra_tags="worker")
                 return render(request, 'wk_login.html')
             
             if worker.status != "Active":
-                messages.error(request, "Account is inactive. Please contact administrator.")
+                messages.error(request, "Account is inactive. Please contact administrator.", extra_tags="worker")
                 return render(request, 'wk_login.html')
             
             request.session['worker_id'] = worker.id
             request.session['worker_email'] = worker.email
             request.session['worker_name'] = worker.name
-            messages.success(request, f"Welcome back, {worker.name}!")
+            messages.success(request, f"Welcome back, {worker.name}!", extra_tags="worker")
             return redirect('work_dash')
 
         except Workers.DoesNotExist:
-            messages.error(request, "Invalid email or password. This email is not assigned by admin.")
+            messages.error(request, "Invalid email or password. This email is not assigned by admin.", extra_tags="worker")
         except Exception as e:
-            messages.error(request, "An error occurred. Please try again.")
+            messages.error(request, "An error occurred. Please try again.", extra_tags="worker")
 
     return render(request, 'wk_login.html')
 
@@ -60,7 +60,7 @@ def work_dash(request):
         }
         return render(request, 'wk_dash.html', context)
     except Workers.DoesNotExist:
-        messages.error(request, "worker account not found")
+        messages.error(request, "worker account not found", extra_tags="worker")
         return redirect('worker_login')
 
 @never_cache
@@ -70,7 +70,7 @@ def worker_logout(request):
         request.session.pop('worker_id', None)
         request.session.pop('worker_email', None)
         request.session.pop('worker_name', None)
-        messages.success(request, f"Logged out successfully. Goodbye, {worker_name}!")
+        messages.success(request, f"Logged out successfully. Goodbye, {worker_name}!", extra_tags="worker")
     return redirect('worker_login')
 
 @never_cache

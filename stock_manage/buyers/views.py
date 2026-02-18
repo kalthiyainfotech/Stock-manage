@@ -14,7 +14,7 @@ def buyer_login_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.session.get("buyer_id"):
-            
+            messages.error(request, "Please login to access this page", extra_tags="buyer")
             return redirect("by_login")
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -59,10 +59,10 @@ def by_login(request):
                 return redirect("by_index")
 
             else:
-                messages.error(request, "Invalid password")
+                messages.error(request, "Invalid password", extra_tags="buyer")
 
         except Buyer.DoesNotExist:
-            messages.error(request, "Buyer not found")
+            messages.error(request, "Buyer not found", extra_tags="buyer")
 
     return render(request, "by_login.html")
 
@@ -462,5 +462,6 @@ def by_logout(request):
     request.session.pop("buyer_id", None)
     request.session.pop("buyer_name", None)
     request.session.pop("buyer_email", None)
+    messages.success(request, "Logged out successfully.", extra_tags="buyer")
     return redirect('by_index')
 

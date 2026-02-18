@@ -11,7 +11,7 @@ def supplier_login_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if 'supplier_id' not in request.session:
-            messages.error(request, "Please login to access this page")
+            messages.error(request, "Please login to access this page", extra_tags="supplier")
             return redirect('supplier_login')
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -23,30 +23,30 @@ def supplier_login(request):
         password = request.POST.get('password', '').strip()
 
         if not email or not password:
-            messages.error(request, "Please provide both email and password")
+            messages.error(request, "Please provide both email and password", extra_tags="supplier")
             return render(request, 'sup_login.html')
 
         try:
             supplier = Suppliers.objects.get(email=email)
             
             if supplier.password != password:
-                messages.error(request, "Invalid email or password")
+                messages.error(request, "Invalid email or password", extra_tags="supplier")
                 return render(request, 'sup_login.html')
             
             if supplier.status != "Active":
-                messages.error(request, "Account is inactive. Please contact administrator.")
+                messages.error(request, "Account is inactive. Please contact administrator.", extra_tags="supplier")
                 return render(request, 'sup_login.html')
             
             request.session['supplier_id'] = supplier.id
             request.session['supplier_email'] = supplier.email
             request.session['supplier_name'] = supplier.name
-            messages.success(request, f"Welcome back, {supplier.name}!")
+            messages.success(request, f"Welcome back, {supplier.name}!", extra_tags="supplier")
             return redirect('supplier_dashboard')
 
         except Suppliers.DoesNotExist:
-            messages.error(request, "Invalid email or password. This email is not assigned by admin.")
+            messages.error(request, "Invalid email or password. This email is not assigned by admin.", extra_tags="supplier")
         except Exception as e:
-            messages.error(request, "An error occurred. Please try again.")
+            messages.error(request, "An error occurred. Please try again.", extra_tags="supplier")
 
     return render(request, 'sup_login.html')
 
@@ -74,7 +74,7 @@ def sup_dash(request):
         }
         return render(request, 'sup_dash.html', context)
     except Suppliers.DoesNotExist:
-        messages.error(request, "Supplier account not found")
+        messages.error(request, "Supplier account not found", extra_tags="supplier")
         return redirect('supplier_login')
 
 @never_cache
@@ -96,7 +96,7 @@ def sup_orders(request):
         }
         return render(request, 'sup_oders.html', context)
     except Suppliers.DoesNotExist:
-        messages.error(request, "Supplier account not found")
+        messages.error(request, "Supplier account not found", extra_tags="supplier")
         return redirect('supplier_login')
 
 @never_cache
@@ -165,5 +165,5 @@ def supplier_logout(request):
         request.session.pop('supplier_id', None)
         request.session.pop('supplier_email', None)
         request.session.pop('supplier_name', None)
-        messages.success(request, f"Logged out successfully. Goodbye, {supplier_name}!")
+        messages.success(request, f"Logged out successfully. Goodbye, {supplier_name}!", extra_tags="supplier")
     return redirect('supplier_login')
