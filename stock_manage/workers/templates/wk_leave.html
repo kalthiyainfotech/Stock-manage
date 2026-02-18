@@ -17,65 +17,86 @@
     </div>
 
     <div id="leaveModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
-        <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-y-auto">
+        <div class="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl shadow-slate-300/40 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
                 <div>
                     <h2 id="leaveModalTitle" class="text-base sm:text-lg font-semibold text-slate-900">Add Leave</h2>
-                    <p class="text-xs text-slate-500">Submit your leave request</p>
+                    <p class="mt-0.5 text-xs sm:text-sm text-slate-500">Fill the details to create or update a leave.</p>
                 </div>
-                <button id="closeLeaveModal" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
-                    <i class="fa-solid fa-xmark"></i>
+                <button id="closeLeaveModal" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+                    <span class="sr-only">Close</span>
+                    ✕
                 </button>
             </div>
-            <form id="leaveForm" method="POST" action="{% url 'wk_add_leave' %}" class="p-4 sm:p-6 space-y-4">
-                {% csrf_token %}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Start date</label>
-                        <input id="leaveStart" type="date" name="start_date" required class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
+            <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
+                <form id="leaveForm" method="POST" action="{% url 'wk_add_leave' %}" class="space-y-6">
+                    {% csrf_token %}
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Leave Details</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Start date</label>
+                                <input id="leaveStart" type="date" name="start_date" required
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">End date</label>
+                                <input id="leaveEnd" type="date" name="end_date" required
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Start time</label>
+                                <input id="leaveStartTime" type="time" name="start_time" required step="60"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">End time</label>
+                                <input id="leaveEndTime" type="time" name="end_time" required step="60"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">End date</label>
-                        <input id="leaveEnd" type="date" name="end_date" required class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Start time</label>
-                        <input id="leaveStartTime" type="time" name="start_time" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">End time</label>
-                        <input id="leaveEndTime" type="time" name="end_time" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="sm:col-span-2">
-                        <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Summary</h3>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 flex items-center justify-between">
                             <span class="text-sm font-medium text-slate-700">Total (estimated)</span>
                             <span id="leaveTotalPreview" class="text-sm font-semibold text-slate-900">—</span>
                         </div>
                     </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
-                        <select id="leaveCategory" name="category" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                            <option value="Casual">Casual</option>
-                            <option value="Sick">Sick</option>
-                            <option value="Emergency">Emergency</option>
-                        </select>
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Other</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-medium text-slate-700">Category</label>
+                                <select id="leaveCategory" name="category" required
+                                        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    <option value="">Select Category</option>
+                                    <option value="Casual">Casual</option>
+                                    <option value="Sick">Sick</option>
+                                    <option value="Emergency">Emergency</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1.5 sm:col-span-2">
+                                <label class="text-xs font-medium text-slate-700">Reason</label>
+                                <textarea id="leaveReason" name="reason" rows="2" required
+                                    placeholder="Reason for leave"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 resize-none"></textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Reason</label>
-                        <textarea id="leaveReason" name="reason" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300" placeholder="Optional"></textarea>
+                    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-2 border-t border-slate-100">
+                        <button type="button" id="closeLeaveModalBottom"
+                            class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                            <i class="fa-solid fa-floppy-disk text-xs"></i>
+                            <span>Save</span>
+                        </button>
                     </div>
-                </div>
-                <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
-                    <button type="button" id="closeLeaveModalBottom" class="px-4 py-2 text-sm bg-slate-200 rounded hover:bg-slate-300">Cancel</button>
-                    <button class="px-4 py-2 text-sm bg-slate-900 text-white rounded hover:bg-slate-800">Save</button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
