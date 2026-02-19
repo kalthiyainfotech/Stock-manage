@@ -5,6 +5,7 @@ from functools import wraps
 from django.views.decorators.cache import never_cache
 from buyers.models import Order
 from django.http import HttpResponseForbidden
+from django.db.models import F
 
 
 def supplier_login_required(view_func):
@@ -47,7 +48,7 @@ def supplier_login(request):
             messages.error(request, "Invalid email or password. This email is not assigned by admin.", extra_tags="supplier")
         except Exception as e:
             messages.error(request, "An error occurred. Please try again.", extra_tags="supplier")
-
+    
     return render(request, 'sup_login.html')
 
 @never_cache
@@ -135,11 +136,9 @@ def sup_update_order_status(request, order_id):
         previous_status = order.status
         order.status = new_status
         order.save()
-        if new_status == "returned" and previous_status in ("return_requested",):
+        if new_status == "returned" and previous_status in ("return_requested", "delivered"):
             for item in order.items.all():
-                variant = item.variant
-                variant.stock += item.quantity
-                variant.save()
+                item.variant.__class__.objects.filter(id=item.variant_id).update(stock=F('stock') + item.quantity)
         messages.success(request, f"Order {order.order_number} updated to {order.get_status_display()}")
     except Order.DoesNotExist:
         messages.error(request, "Order not found")

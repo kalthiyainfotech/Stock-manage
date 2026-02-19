@@ -6,6 +6,8 @@ from functools import wraps
 from .models import Buyer, CartItem, Order, OrderItem
 from admin_panel.models import ProductVariant, Blogs, Contact
 from django.utils import timezone
+from django.db import transaction
+from django.db.models import F
 import random
 import string
 
@@ -280,20 +282,12 @@ def place_order(request):
     
     buyer_id = request.session.get("buyer_id")
     buyer = Buyer.objects.get(id=buyer_id)
-    
     cart_items = CartItem.objects.select_related("variant", "variant__product").filter(buyer=buyer)
-    
     if not cart_items.exists():
-        
         return redirect("by_cart")
-    
-    
     for item in cart_items:
         if item.quantity > item.variant.stock:
-            
             return redirect("by_checkout")
-    
-    
     first_name = request.POST.get("c_fname", "").strip()
     last_name = request.POST.get("c_lname", "").strip()
     company_name = request.POST.get("c_companyname", "").strip()
@@ -307,78 +301,68 @@ def place_order(request):
     payment_method = request.POST.get("payment_method", "cash_on_delivery")
     order_notes = request.POST.get("c_order_notes", "").strip()
     ship_to_different = request.POST.get("c_ship_different_address") == "1"
-    
-    
     if not all([first_name, last_name, email, phone, address, state_city, postal_code, country]):
-        
         return redirect("by_checkout")
-    
-    
     subtotal = sum(item.variant.price * item.quantity for item in cart_items)
     total = subtotal
-    
-  
-    order_number = generate_order_number()
-    order = Order.objects.create(
-        buyer=buyer,
-        order_number=order_number,
-        first_name=first_name,
-        last_name=last_name,
-        company_name=company_name if company_name else None,
-        email=email,
-        phone=phone,
-        address=address,
-        address_line2=address_line2 if address_line2 else None,
-        city=state_city,
-        state=state_city,
-        postal_code=postal_code,
-        country=country,
-        ship_to_different_address=ship_to_different,
-        subtotal=subtotal,
-        total=total,
-        payment_method=payment_method,
-        order_notes=order_notes if order_notes else None,
-    )
-    
-    
-    if ship_to_different:
-        shipping_first_name = request.POST.get("c_diff_fname", "").strip()
-        shipping_last_name = request.POST.get("c_diff_lname", "").strip()
-        shipping_company_name = request.POST.get("c_diff_companyname", "").strip()
-        shipping_address = request.POST.get("c_diff_address", "").strip()
-        shipping_address_line2 = request.POST.get("c_diff_address_line2", "").strip()
-        shipping_state_city = request.POST.get("c_diff_state_country", "").strip()
-        shipping_postal_code = request.POST.get("c_diff_postal_zip", "").strip()
-        shipping_country = request.POST.get("c_diff_country", "").strip()
-        
-        if all([shipping_first_name, shipping_last_name, shipping_address, shipping_state_city, shipping_postal_code, shipping_country]):
-            order.shipping_first_name = shipping_first_name
-            order.shipping_last_name = shipping_last_name
-            order.shipping_company_name = shipping_company_name if shipping_company_name else None
-            order.shipping_address = shipping_address
-            order.shipping_address_line2 = shipping_address_line2 if shipping_address_line2 else None
-            order.shipping_city = shipping_state_city
-            order.shipping_state = shipping_state_city
-            order.shipping_postal_code = shipping_postal_code
-            order.shipping_country = shipping_country
-            order.save()
-    
-    for item in cart_items:
-        OrderItem.objects.create(
-            order=order,
-            variant=item.variant,
-            product_name=item.variant.product.name,
-            quantity=item.quantity,
-            price=item.variant.price,
-            total=item.variant.price * item.quantity
-        )
-        
-        item.variant.stock -= item.quantity
-        item.variant.save()
-    
-    
-    cart_items.delete()
-    
+    try:
+        with transaction.atomic():
+            order_number = generate_order_number()
+            order = Order.objects.create(
+                buyer=buyer,
+                order_number=order_number,
+                first_name=first_name,
+                last_name=last_name,
+                company_name=company_name if company_name else None,
+                email=email,
+                phone=phone,
+                address=address,
+                address_line2=address_line2 if address_line2 else None,
+                city=state_city,
+                state=state_city,
+                postal_code=postal_code,
+                country=country,
+                ship_to_different_address=ship_to_different,
+                subtotal=subtotal,
+                total=total,
+                payment_method=payment_method,
+                order_notes=order_notes if order_notes else None,
+            )
+            if ship_to_different:
+                shipping_first_name = request.POST.get("c_diff_fname", "").strip()
+                shipping_last_name = request.POST.get("c_diff_lname", "").strip()
+                shipping_company_name = request.POST.get("c_diff_companyname", "").strip()
+                shipping_address = request.POST.get("c_diff_address", "").strip()
+                shipping_address_line2 = request.POST.get("c_diff_address_line2", "").strip()
+                shipping_state_city = request.POST.get("c_diff_state_country", "").strip()
+                shipping_postal_code = request.POST.get("c_diff_postal_zip", "").strip()
+                shipping_country = request.POST.get("c_diff_country", "").strip()
+                if all([shipping_first_name, shipping_last_name, shipping_address, shipping_state_city, shipping_postal_code, shipping_country]):
+                    order.shipping_first_name = shipping_first_name
+                    order.shipping_last_name = shipping_last_name
+                    order.shipping_company_name = shipping_company_name if shipping_company_name else None
+                    order.shipping_address = shipping_address
+                    order.shipping_address_line2 = shipping_address_line2 if shipping_address_line2 else None
+                    order.shipping_city = shipping_state_city
+                    order.shipping_state = shipping_state_city
+                    order.shipping_postal_code = shipping_postal_code
+                    order.shipping_country = shipping_country
+                    order.save()
+            for item in cart_items:
+                OrderItem.objects.create(
+                    order=order,
+                    variant=item.variant,
+                    product_name=item.variant.product.name,
+                    quantity=item.quantity,
+                    price=item.variant.price,
+                    total=item.variant.price * item.quantity
+                )
+                updated = ProductVariant.objects.filter(id=item.variant_id, stock__gte=item.quantity).update(stock=F('stock') - item.quantity)
+                if not updated:
+                    raise ValueError("Insufficient stock")
+            cart_items.delete()
+    except Exception:
+        return redirect("by_checkout")
     return redirect("by_thankyou")
 
 @never_cache
@@ -431,9 +415,7 @@ def by_cancel_order(request, order_id):
         
         return redirect("by_history")
     for item in order.items.all():
-        variant = item.variant
-        variant.stock += item.quantity
-        variant.save()
+        ProductVariant.objects.filter(id=item.variant_id).update(stock=F('stock') + item.quantity)
     order.status = "cancelled"
     order.save()
     messages.success(request, "Your order has been cancelled.")
@@ -458,6 +440,8 @@ def by_return_order(request, order_id):
     order.save()
     messages.success(request, "Return request submitted. Supplier will verify shortly.")
     return redirect("by_history")
+
+
 def by_logout(request):
     request.session.pop("buyer_id", None)
     request.session.pop("buyer_name", None)
