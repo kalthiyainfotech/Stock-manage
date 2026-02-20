@@ -13,6 +13,11 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+    <div id="globalLoader" class="fixed inset-0 z-[1000] bg-white/70 backdrop-blur-sm hidden">
+        <div class="h-full w-full flex items-center justify-center">
+            <div class="h-12 w-12 rounded-full border-4 border-slate-300 border-t-slate-900 animate-spin"></div>
+        </div>
+    </div>
     <aside id="sidebar" class="fixed top-0 left-0 z-40 h-screen w-64 bg-gradient-to-b from-slate-900 to-slate-800 shadow-xl transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
         <div class="flex h-16 items-center justify-between px-5 border-b border-white/10">
             <div class="flex items-center gap-3">
@@ -102,6 +107,14 @@
     </div>
 
     <script>
+        const __loaderEl = document.getElementById('globalLoader');
+        function showLoader(){ if(__loaderEl) __loaderEl.classList.remove('hidden'); }
+        function hideLoader(){ if(__loaderEl) __loaderEl.classList.add('hidden'); }
+        const __origFetch = window.fetch;
+        window.fetch = async function(...args){ showLoader(); try { const r = await __origFetch.apply(this, args); return r; } finally { hideLoader(); } };
+        window.addEventListener('beforeunload', () => { showLoader(); });
+        document.addEventListener('submit', () => { showLoader(); }, true);
+        document.addEventListener('DOMContentLoaded', () => { hideLoader(); });
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');

@@ -5,6 +5,7 @@ urlpatterns = [
     path("", by_index, name="by_index"),
     path("login/", by_login, name="by_login"),
     path("register/", by_register, name="by_register"),
+    path("profile/update/", by_update_profile, name="by_update_profile"),
     path("about-us/", by_about, name="by_about"),
     path("blog/", by_blog, name="by_blog"),
     path("cart/", by_cart, name="by_cart"),
