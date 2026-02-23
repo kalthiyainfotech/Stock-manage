@@ -51,7 +51,7 @@
                         </td>
                         <td class="px-4 py-3 align-middle">
                             <div class="text-sm">
-                                {{ order.items.count }} items
+                                {{ order.total_items|default:"0" }} items
                             </div>
                         </td>
                         <td class="px-4 py-3 align-middle text-right font-semibold">₹{{ order.total }}</td>

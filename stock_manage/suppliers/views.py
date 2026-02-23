@@ -5,7 +5,7 @@ from functools import wraps
 from django.views.decorators.cache import never_cache
 from buyers.models import Order
 from django.http import HttpResponseForbidden
-from django.db.models import F
+from django.db.models import F, Sum
 
 
 def supplier_login_required(view_func):
@@ -88,7 +88,7 @@ def sup_orders(request):
             "items",
             "items__variant",
             "items__variant__product"
-        ).order_by("-created_at")
+        ).annotate(total_items=Sum("items__quantity")).order_by("-created_at")
         choices_no_returns = [c for c in Order.ORDER_STATUS_CHOICES if c[0] not in ("return_requested", "returned")]
         context = {
             'supplier': supplier,
@@ -110,7 +110,7 @@ def sup_return_orders(request):
             "items",
             "items__variant",
             "items__variant__product"
-        ).order_by("-created_at")
+        ).annotate(total_items=Sum("items__quantity")).order_by("-created_at")
         context = {
             'supplier': supplier,
             'orders': orders,

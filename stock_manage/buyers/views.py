@@ -303,6 +303,7 @@ def place_order(request):
     ship_to_different = request.POST.get("c_ship_different_address") == "1"
     if not all([first_name, last_name, email, phone, address, state_city, postal_code, country]):
         return redirect("by_checkout")
+    
     subtotal = sum(item.variant.price * item.quantity for item in cart_items)
     total = subtotal
     try:
