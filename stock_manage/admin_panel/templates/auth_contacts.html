@@ -62,7 +62,7 @@
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="contactsTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for contact in contacts %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
@@ -105,5 +105,39 @@
 </main>
 
 {% endblock %}
+<script>
+const contactSearchInput = document.getElementById('contactSearch');
+const contactsTBody = document.getElementById('contactsTableBody');
+let noMatchRowContacts = null;
+function ensureNoMatchRowContacts() {
+    if (!noMatchRowContacts) {
+        noMatchRowContacts = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 6;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching contacts.';
+        noMatchRowContacts.appendChild(td);
+    }
+}
+if (contactSearchInput && contactsTBody) {
+    contactSearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(contactsTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRowContacts();
+        if (visibleCount === 0) {
+            if (noMatchRowContacts.parentElement !== contactsTBody) contactsTBody.appendChild(noMatchRowContacts);
+        } else {
+            if (noMatchRowContacts.parentElement === contactsTBody) contactsTBody.removeChild(noMatchRowContacts);
+        }
+    });
+}
+</script>
 
 

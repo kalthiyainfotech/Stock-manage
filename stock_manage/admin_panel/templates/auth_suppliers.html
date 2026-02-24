@@ -281,7 +281,7 @@
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="suppliersTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for supplier in suppliers %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
@@ -652,6 +652,39 @@ function openViewModal(
 
 function closeViewModal() {
     viewModal.classList.add('hidden');
+}
+
+const supplierSearchInput = document.getElementById('supplierSearch');
+const suppliersTBody = document.getElementById('suppliersTableBody');
+let noMatchRow = null;
+function ensureNoMatchRow() {
+    if (!noMatchRow) {
+        noMatchRow = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 7;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching suppliers.';
+        noMatchRow.appendChild(td);
+    }
+}
+if (supplierSearchInput && suppliersTBody) {
+    supplierSearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(suppliersTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRow();
+        if (visibleCount === 0) {
+            if (noMatchRow.parentElement !== suppliersTBody) suppliersTBody.appendChild(noMatchRow);
+        } else {
+            if (noMatchRow.parentElement === suppliersTBody) suppliersTBody.removeChild(noMatchRow);
+        }
+    });
 }
 </script>
 

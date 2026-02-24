@@ -23,6 +23,21 @@
                     Total <span class="font-semibold text-slate-900">{{ orders|length }}</span> orders.
                 </p>
             </div>
+            <div class="w-full sm:w-auto">
+                <label class="relative block">
+                    <span class="sr-only">Search orders</span>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input
+                        id="supplierOrderSearch"
+                        type="text"
+                        placeholder="Search by order, buyer, email, or status…"
+                        class="w-full sm:w-72 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
+                               text-slate-700 placeholder:text-slate-400 shadow-sm
+                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                </label>
+            </div>
         </div>
 
         <div class="overflow-x-auto border-t border-slate-100">
@@ -38,7 +53,7 @@
                         <th class="px-4 py-3 font-medium text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="supOrdersTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for order in orders %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3 align-middle font-semibold text-slate-800">
@@ -234,6 +249,38 @@ function closeDeleteModal(id) {
     if (!el) return;
     el.classList.add('hidden');
     el.classList.remove('flex');
+}
+const supplierOrderSearchInput = document.getElementById('supplierOrderSearch');
+const supOrdersTBody = document.getElementById('supOrdersTableBody');
+let noMatchRowSupOrders = null;
+function ensureNoMatchRowSupOrders() {
+    if (!noMatchRowSupOrders) {
+        noMatchRowSupOrders = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 7;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching orders.';
+        noMatchRowSupOrders.appendChild(td);
+    }
+}
+if (supplierOrderSearchInput && supOrdersTBody) {
+    supplierOrderSearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(supOrdersTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRowSupOrders();
+        if (visibleCount === 0) {
+            if (noMatchRowSupOrders.parentElement !== supOrdersTBody) supOrdersTBody.appendChild(noMatchRowSupOrders);
+        } else {
+            if (noMatchRowSupOrders.parentElement === supOrdersTBody) supOrdersTBody.removeChild(noMatchRowSupOrders);
+        }
+    });
 }
 </script>
 

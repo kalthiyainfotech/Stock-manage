@@ -288,7 +288,7 @@
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="workersTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for worker in workers %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
@@ -671,6 +671,39 @@ function openViewModal(
 
 function closeViewModal() {
     viewModal.classList.add('hidden');
+}
+
+const workerSearchInput = document.getElementById('workerSearch');
+const workersTBody = document.getElementById('workersTableBody');
+let noMatchRowWorkers = null;
+function ensureNoMatchRowWorkers() {
+    if (!noMatchRowWorkers) {
+        noMatchRowWorkers = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 7;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching workers.';
+        noMatchRowWorkers.appendChild(td);
+    }
+}
+if (workerSearchInput && workersTBody) {
+    workerSearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(workersTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRowWorkers();
+        if (visibleCount === 0) {
+            if (noMatchRowWorkers.parentElement !== workersTBody) workersTBody.appendChild(noMatchRowWorkers);
+        } else {
+            if (noMatchRowWorkers.parentElement === workersTBody) workersTBody.removeChild(noMatchRowWorkers);
+        }
+    });
 }
 </script>
 

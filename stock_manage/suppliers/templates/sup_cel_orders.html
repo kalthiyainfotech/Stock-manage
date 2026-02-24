@@ -24,6 +24,21 @@
                     Total <span class="font-semibold text-slate-900">{{ orders|length }}</span> return requests.
                 </p>
             </div>
+            <div class="w-full sm:w-auto">
+                <label class="relative block">
+                    <span class="sr-only">Search returns</span>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input
+                        id="supplierReturnSearch"
+                        type="text"
+                        placeholder="Search by order, buyer, email, or status…"
+                        class="w-full sm:w-72 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
+                               text-slate-700 placeholder:text-slate-400 shadow-sm
+                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                </label>
+            </div>
         </div>
 
         <div class="overflow-x-auto border-t border-slate-100">
@@ -39,7 +54,7 @@
                         <th class="px-4 py-3 font-medium text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="supReturnTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for order in orders %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3 align-middle font-semibold text-slate-800">
@@ -101,3 +116,37 @@
 </main>
 
 {% endblock sup_base %}
+<script>
+const supplierReturnSearchInput = document.getElementById('supplierReturnSearch');
+const supReturnTBody = document.getElementById('supReturnTableBody');
+let noMatchRowSupReturn = null;
+function ensureNoMatchRowSupReturn() {
+    if (!noMatchRowSupReturn) {
+        noMatchRowSupReturn = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 7;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching return orders.';
+        noMatchRowSupReturn.appendChild(td);
+    }
+}
+if (supplierReturnSearchInput && supReturnTBody) {
+    supplierReturnSearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(supReturnTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRowSupReturn();
+        if (visibleCount === 0) {
+            if (noMatchRowSupReturn.parentElement !== supReturnTBody) supReturnTBody.appendChild(noMatchRowSupReturn);
+        } else {
+            if (noMatchRowSupReturn.parentElement === supReturnTBody) supReturnTBody.removeChild(noMatchRowSupReturn);
+        }
+    });
+}
+</script>

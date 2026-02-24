@@ -10,6 +10,41 @@
     </div>
 
     <section class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
+        <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="space-y-0.5">
+                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                    Overview
+                </p>
+                <p class="text-sm text-slate-500">
+                    Showing
+                    <span class="font-semibold text-slate-900">
+                        {{ leaves.start_index }}–{{ leaves.end_index }}
+                    </span>
+                    of
+                    <span class="font-semibold text-slate-900">
+                        {{ leaves.paginator.count }}
+                    </span>
+                    leaves.
+                </p>
+            </div>
+
+            <div class="w-full sm:w-auto">
+                <label class="relative block">
+                    <span class="sr-only">Search leaves</span>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input
+                        id="leaveSearch"
+                        type="text"
+                        placeholder="Search by worker, category, or status…"
+                        class="w-full sm:w-64 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
+                               text-slate-700 placeholder:text-slate-400 shadow-sm
+                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                </label>
+            </div>
+        </div>
+
         <div class="overflow-x-auto border-t border-slate-100">
             <table class="min-w-full text-left text-sm text-slate-700">
                 <thead class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
@@ -20,7 +55,7 @@
                         <th class="px-4 py-3 font-medium text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="leavesTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for l in leaves %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900 truncate">
@@ -295,5 +330,37 @@ document.querySelectorAll('[data-leave-toggle]').forEach(el => {
         window.location.href = targetUrl;
     });
 });
+const leaveSearchInput = document.getElementById('leaveSearch');
+const leavesTBody = document.getElementById('leavesTableBody');
+let noMatchRowLeaves = null;
+function ensureNoMatchRowLeaves() {
+    if (!noMatchRowLeaves) {
+        noMatchRowLeaves = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching leaves.';
+        noMatchRowLeaves.appendChild(td);
+    }
+}
+if (leaveSearchInput && leavesTBody) {
+    leaveSearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(leavesTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRowLeaves();
+        if (visibleCount === 0) {
+            if (noMatchRowLeaves.parentElement !== leavesTBody) leavesTBody.appendChild(noMatchRowLeaves);
+        } else {
+            if (noMatchRowLeaves.parentElement === leavesTBody) leavesTBody.removeChild(noMatchRowLeaves);
+        }
+    });
+}
 </script>
 {% endblock %}

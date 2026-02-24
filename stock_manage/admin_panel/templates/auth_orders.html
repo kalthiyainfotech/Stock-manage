@@ -67,7 +67,7 @@
                         <th class="px-4 py-3 font-medium text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="ordersTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for order in orders %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
@@ -478,6 +478,38 @@ function openDeleteModal(deleteUrl) {
 
 function closeDeleteModal() {
     deleteModal.classList.add('hidden');
+}
+const orderSearchInput = document.getElementById('orderSearch');
+const ordersTBody = document.getElementById('ordersTableBody');
+let noMatchRowOrders = null;
+function ensureNoMatchRowOrders() {
+    if (!noMatchRowOrders) {
+        noMatchRowOrders = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 8;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching orders.';
+        noMatchRowOrders.appendChild(td);
+    }
+}
+if (orderSearchInput && ordersTBody) {
+    orderSearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(ordersTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRowOrders();
+        if (visibleCount === 0) {
+            if (noMatchRowOrders.parentElement !== ordersTBody) ordersTBody.appendChild(noMatchRowOrders);
+        } else {
+            if (noMatchRowOrders.parentElement === ordersTBody) ordersTBody.removeChild(noMatchRowOrders);
+        }
+    });
 }
 </script>
 

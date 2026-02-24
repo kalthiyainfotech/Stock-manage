@@ -179,7 +179,7 @@
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="blogsTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for blog in blogs %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
 
@@ -334,6 +334,39 @@ function openDeleteModal(url) {
 
 function closeDeleteModal() {
     deleteModal.classList.add('hidden');
+}
+
+const blogSearchInput = document.getElementById('blogSearch');
+const blogsTBody = document.getElementById('blogsTableBody');
+let noMatchRowBlogs = null;
+function ensureNoMatchRowBlogs() {
+    if (!noMatchRowBlogs) {
+        noMatchRowBlogs = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 7;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching blogs.';
+        noMatchRowBlogs.appendChild(td);
+    }
+}
+if (blogSearchInput && blogsTBody) {
+    blogSearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(blogsTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRowBlogs();
+        if (visibleCount === 0) {
+            if (noMatchRowBlogs.parentElement !== blogsTBody) blogsTBody.appendChild(noMatchRowBlogs);
+        } else {
+            if (noMatchRowBlogs.parentElement === blogsTBody) blogsTBody.removeChild(noMatchRowBlogs);
+        }
+    });
 }
 
 </script>

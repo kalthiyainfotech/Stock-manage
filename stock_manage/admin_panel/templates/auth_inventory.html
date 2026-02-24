@@ -286,7 +286,7 @@
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="inventoryTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for inventory in inventorys %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
 
@@ -1160,6 +1160,38 @@ function openViewModal(
 
 function closeViewModal() {
     viewModal.classList.add('hidden');
+}
+const inventorySearchInput = document.getElementById('inventorySearch');
+const inventoryTBody = document.getElementById('inventoryTableBody');
+let noMatchRowInventory = null;
+function ensureNoMatchRowInventory() {
+    if (!noMatchRowInventory) {
+        noMatchRowInventory = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 8;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching items.';
+        noMatchRowInventory.appendChild(td);
+    }
+}
+if (inventorySearchInput && inventoryTBody) {
+    inventorySearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(inventoryTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRowInventory();
+        if (visibleCount === 0) {
+            if (noMatchRowInventory.parentElement !== inventoryTBody) inventoryTBody.appendChild(noMatchRowInventory);
+        } else {
+            if (noMatchRowInventory.parentElement === inventoryTBody) inventoryTBody.removeChild(noMatchRowInventory);
+        }
+    });
 }
 </script>
 

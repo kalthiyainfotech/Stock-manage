@@ -65,7 +65,7 @@
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-100 bg-white">
+                <tbody id="buyersTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for buyer in buyers %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
@@ -279,6 +279,38 @@ function openViewModal(id, name, email) {
 
 function closeViewModal() {
     viewModal.classList.add('hidden');
+}
+const buyerSearchInput = document.getElementById('buyerSearch');
+const buyersTBody = document.getElementById('buyersTableBody');
+let noMatchRowBuyers = null;
+function ensureNoMatchRowBuyers() {
+    if (!noMatchRowBuyers) {
+        noMatchRowBuyers = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.className = 'px-4 py-6 text-center text-slate-500';
+        td.innerText = 'No matching buyers.';
+        noMatchRowBuyers.appendChild(td);
+    }
+}
+if (buyerSearchInput && buyersTBody) {
+    buyerSearchInput.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        const rows = Array.from(buyersTBody.querySelectorAll('tr'));
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const txt = row.textContent.toLowerCase();
+            const show = q === '' || txt.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visibleCount += 1;
+        });
+        ensureNoMatchRowBuyers();
+        if (visibleCount === 0) {
+            if (noMatchRowBuyers.parentElement !== buyersTBody) buyersTBody.appendChild(noMatchRowBuyers);
+        } else {
+            if (noMatchRowBuyers.parentElement === buyersTBody) buyersTBody.removeChild(noMatchRowBuyers);
+        }
+    });
 }
 </script>
 
