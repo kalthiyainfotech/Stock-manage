@@ -1,308 +1,120 @@
 {% load static %}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="author" content="Untree.co">
-  <link rel="shortcut icon" href="{% static "images/favicon.png" %}">
-
-  <meta name="description" content="" />
-  <meta name="keywords" content="bootstrap, bootstrap4" />
-
-		<link href="{% static "css/bootstrap.min.css" %} " rel="stylesheet">
-		<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-		<link href="{% static "css/tiny-slider.css" %}" rel="stylesheet">
-		<link href="{% static "css/by_style.css" %} " rel="stylesheet">
-		<title>Furni Products</title>
-	</head>
-
-	<body>
-        <div id="globalLoader" class="position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-none" style="z-index: 1050; backdrop-filter: blur(3px);">
-            <div class="d-flex h-100 w-100 align-items-center justify-content-center">
-                <div class="spinner-border text-dark" role="status" style="width: 2.75rem; height: 2.75rem; border-width: .3rem;">
-                    <span class="visually-hidden">Loading...</span>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f5f3ff', 100: '#ede9fe', 500: '#8b5cf6', 600: '#7c3aed', 900: '#4c1d95' }
+                    },
+                    animation: {
+                        float: 'float 3s ease-in-out infinite',
+                        'fade-in': 'fadeIn 1s ease-out forwards'
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/tiny-slider.css' %}" rel="stylesheet">
+    <link href="{% static 'css/by_style.css' %}" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans selection:bg-brand-500 selection:text-white">
+    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="{% url 'by_index' %}" class="text-2xl font-black text-brand-900 tracking-tighter">LUXE<span class="text-brand-500">.</span></a>
+                <div class="hidden md:flex space-x-8 items-center font-medium">
+                    <a href="{% url 'by_index' %}" class="text-gray-700 hover:text-brand-600 transition-all">Home</a>
+                    <a href="{% url 'by_shop' %}" class="text-gray-700 hover:text-brand-600 transition-all">Shop</a>
+                    <a href="{% url 'by_blog' %}" class="text-gray-700 hover:text-brand-600 transition-all">Blog</a>
+                    <a href="{% url 'by_about' %}" class="text-gray-700 hover:text-brand-600 transition-all">About</a>
+                    <a href="{% url 'by_contact' %}" class="text-gray-700 hover:text-brand-600 transition-all">Contact</a>
+                    <a href="{% url 'by_cart' %}" class="inline-flex items-center gap-2 bg-brand-600 text-white px-5 py-2 rounded-full hover:bg-brand-500 transition-all">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Cart</span>
+                    </a>
+                    {% if request.session.buyer_id %}
+                        <a href="{% url 'by_logout' %}" class="inline-flex items-center gap-2 text-white bg-gray-900 px-4 py-2 rounded-full hover:bg-gray-800 transition-all">
+                            <i class="fas fa-user"></i>
+                            <span>Logout</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'by_login' %}" class="inline-flex items-center gap-2 text-white bg-gray-900 px-4 py-2 rounded-full hover:bg-gray-800 transition-all">
+                            <i class="fas fa-user"></i>
+                            <span>Login</span>
+                        </a>
+                    {% endif %}
+                </div>
+                <button id="mobile-menu-btn" class="md:hidden p-3 rounded-lg hover:bg-brand-50 transition-all">
+                    <i class="fas fa-bars text-xl text-gray-700"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden origin-top bg-white shadow-lg">
+            <div class="px-4 py-3 space-y-2">
+                <a href="{% url 'by_index' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">Home</a>
+                <a href="{% url 'by_shop' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">Shop</a>
+                <a href="{% url 'by_blog' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">Blog</a>
+                <a href="{% url 'by_about' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">About</a>
+                <a href="{% url 'by_contact' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">Contact</a>
+                <div class="flex items-center gap-2 px-4 py-2">
+                    <a href="{% url 'by_cart' %}" class="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-2 rounded-full hover:bg-brand-500 transition-all">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Cart</span>
+                    </a>
+                    {% if request.session.buyer_id %}
+                        <a href="{% url 'by_logout' %}" class="inline-flex items-center gap-2 text-white bg-gray-900 px-4 py-2 rounded-full hover:bg-gray-800 transition-all">
+                            <i class="fas fa-user"></i>
+                            <span>Logout</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'by_login' %}" class="inline-flex items-center gap-2 text-white bg-gray-900 px-4 py-2 rounded-full hover:bg-gray-800 transition-all">
+                            <i class="fas fa-user"></i>
+                            <span>Login</span>
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
+    </nav>
 
-		<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark" arial-label="Furni navigation bar">
+    <div class="pt-24">
+        {% block buyer_layout %}{% endblock buyer_layout %}
+    </div>
 
-			<div class="container position-relative">
-				<a class="navbar-brand" href="{% url "by_index" %}">Furni<span>.</span></a>
-
-                <div class="d-flex d-md-none align-items-center ms-auto gap-2">
-                        {% if request.session.buyer_id %}
-                            <a class="nav-link px-2 text-white" href="{% url "by_logout" %}" title="Sign out" aria-label="Sign out">
-                                <i class="fa-solid fa-right-from-bracket"></i>
-                            </a>
-                            <a class="nav-link px-2" href="#" data-bs-toggle="modal" data-bs-target="#buyerProfileModal" title="Profile" aria-label="Profile">
-                                <img src="{% if current_buyer and current_buyer.profile_image %}{{ current_buyer.profile_image.url }}{% else %}{% static "images/user.svg" %}{% endif %}" alt="Profile" class="rounded-circle" style="width:26px;height:26px;object-fit:cover;">
-                            </a>
-                        {% else %}
-                            <a class="nav-link px-2" href="{% url "by_login" %}" title="Sign in" aria-label="Sign in">
-                                <img src="{% static "images/user.svg" %}" alt="Sign in" style="width:26px;height:26px;">
-                            </a>
-                        {% endif %}
-                    <button class="navbar-toggler ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                </div>
-
-				<div class="collapse navbar-collapse" id="navbarsFurni">
-
-    <ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
-        <li class="nav-item active">
-            <a class="nav-link" href="{% url "by_index" %}">Home</a>
-        </li>
-        <li><a class="nav-link" href="{% url "by_shop" %}">Shop</a></li>
-        <li><a class="nav-link" href="{% url "by_about" %}">About us</a></li>
-        <li><a class="nav-link" href="{% url "by_services" %}">Services</a></li>
-        <li><a class="nav-link" href="{% url "by_blog" %}">Blog</a></li>
-        <li><a class="nav-link" href="{% url "by_contact" %}">Contact us</a></li>
-
-        {% if request.session.buyer_id %}
-            <li class="d-none d-md-block">
-                <a class="nav-link" href="{% url "by_logout" %}" title="Sign out" aria-label="Sign out">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </a>
-            </li>
-        {% else %}
-            <li>
-                <a class="nav-link" href="{% url "by_login" %}">
-                    Sign In
-                </a>
-            </li>
-        {% endif %}
-    </ul>
-
-
-    <ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5 d-none d-md-flex">
-
-        {% if request.session.buyer_id %}
-            <li class="nav-item">
-                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#buyerProfileModal" title="Profile" aria-label="Profile">
-                    <img src="{% if current_buyer and current_buyer.profile_image %}{{ current_buyer.profile_image.url }}{% else %}{% static "images/user.svg" %}{% endif %}" alt="Profile" class="rounded-circle" style="width:26px;height:26px;object-fit:cover;">
-                </a>
-            </li>
-
-            <li>
-                <a class="nav-link" href="{% url "by_cart" %}">
-                    <img src="{% static "images/cart.svg" %}">
-                </a>
-            </li>
-
-        {% else %}
-            <li>
-                <a class="nav-link" href="{% url "by_login" %}">
-                    <img src="{% static "images/user.svg" %}">
-                </a>
-            </li>
-        {% endif %}
-
-    </ul>
-
-</div>
-
-			</div>
-				
-		</nav>
-
-        {% if request.session.buyer_id %}
-        <div class="modal fade" id="buyerProfileModal" tabindex="-1" aria-labelledby="buyerProfileModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="buyerProfileModalLabel">Your Profile</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="{% url 'by_update_profile' %}" method="post" enctype="multipart/form-data">
-                        <div class="modal-body">
-                            {% csrf_token %}
-                            <div class="row g-4 align-items-start">
-                                <div class="col-12 col-md-4 text-center">
-                                    <div class="position-relative d-inline-block">
-                                        <img id="profilePreview" src="{% if current_buyer and current_buyer.profile_image %}{{ current_buyer.profile_image.url }}{% else %}{% static "images/user.svg" %}{% endif %}" alt="Profile" class="rounded-circle border" style="width:120px;height:120px;object-fit:cover;">
-                                        <button type="button" class="btn btn-sm btn-dark position-absolute bottom-0 end-0" onclick="document.getElementById('profileImageInput').click()">Change</button>
-                                    </div>
-                                    <div class="mt-3">
-                                        <div class="fw-semibold">{{ current_buyer.name }}</div>
-                                        <div class="text-muted small">{{ current_buyer.email }}</div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-8">
-                                    <div class="row g-3">
-                                        <div class="col-12 col-md-6">
-                                            <label class="form-label">Name</label>
-                                            <input type="text" class="form-control" name="name" value="{{ current_buyer.name }}" required>
-                                        </div>
-                                        <div class="col-12 col-md-6">
-                                            <label class="form-label">Email</label>
-                                            <input type="email" class="form-control" name="email" value="{{ current_buyer.email }}" required>
-                                        </div>
-                                        <div class="col-12 col-md-6">
-                                            <label class="form-label">Gender</label>
-                                            <select class="form-select" name="gender">
-                                                <option value="" {% if not current_buyer.gender %}selected{% endif %}>Select</option>
-                                                <option value="Male" {% if current_buyer.gender == "Male" %}selected{% endif %}>Male</option>
-                                                <option value="Female" {% if current_buyer.gender == "Female" %}selected{% endif %}>Female</option>
-                                                <option value="Other" {% if current_buyer.gender == "Other" %}selected{% endif %}>Other</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-12 col-md-6">
-                                            <label class="form-label">Mobile</label>
-                                            <input type="text" class="form-control" name="phone" value="{{ current_buyer.phone }}" inputmode="numeric">
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label">Address</label>
-                                            <textarea class="form-control" name="address" rows="2">{{ current_buyer.address }}</textarea>
-                                        </div>
-                                        <input type="file" id="profileImageInput" class="d-none" name="profile_image" accept="image/*">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary w-100 w-md-auto">Save changes</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <footer class="bg-gray-900 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white text-center">
+            <h4 class="text-2xl font-black tracking-tighter mb-4 text-white">LUXE<span class="text-brand-500">.</span></h4>
+            <p class="text-gray-500 text-sm">&copy; 2026 LUXE E-Commerce. All rights reserved.</p>
         </div>
-        {% endif %}
+    </footer>
 
-        {% block buyer_layout %}
-        
-        {% endblock buyer_layout %}
-
-        		<footer class="footer-section">
-			<div class="container relative">
-
-
-				<div class="row">
-					<div class="col-lg-8">
-						<div class="subscription-form">
-							<h3 class="d-flex align-items-center"><span class="me-1"><img src="{% static "images/envelope-outline.svg" %}" alt="Image" class="img-fluid"></span><span>Subscribe to Newsletter</span></h3>
-
-							<form action="#" class="row g-3">
-								<div class="col-auto">
-									<input type="text" class="form-control" placeholder="Enter your name">
-								</div>
-								<div class="col-auto">
-									<input type="email" class="form-control" placeholder="Enter your email">
-								</div>
-								<div class="col-auto">
-									<button class="btn btn-primary">
-										<span class="fa fa-paper-plane"></span>
-									</button>
-								</div>
-							</form>
-
-						</div>
-					</div>
-				</div>
-
-				<div class="row g-5 mb-5">
-					<div class="col-lg-4">
-						<div class="mb-4 footer-logo-wrap"><a href="#" class="footer-logo">Furni<span>.</span></a></div>
-						<p class="mb-4">Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. Pellentesque habitant</p>
-
-						<ul class="list-unstyled custom-social">
-							<li><a href="#"><span class="fa fa-brands fa-facebook-f"></span></a></li>
-							<li><a href="#"><span class="fa fa-brands fa-twitter"></span></a></li>
-							<li><a href="#"><span class="fa fa-brands fa-instagram"></span></a></li>
-							<li><a href="#"><span class="fa fa-brands fa-linkedin"></span></a></li>
-						</ul>
-					</div>
-
-					<div class="col-lg-8">
-						<div class="row links-wrap">
-							<div class="col-6 col-sm-6 col-md-3">
-								<ul class="list-unstyled">
-									<li><a href="#">About us</a></li>
-									<li><a href="#">Services</a></li>
-									<li><a href="#">Blog</a></li>
-									<li><a href="#">Contact us</a></li>
-								</ul>
-							</div>
-
-							<div class="col-6 col-sm-6 col-md-3">
-								<ul class="list-unstyled">
-									<li><a href="#">Support</a></li>
-									<li><a href="#">Knowledge base</a></li>
-									<li><a href="#">Live chat</a></li>
-								</ul>
-							</div>
-
-							<div class="col-6 col-sm-6 col-md-3">
-								<ul class="list-unstyled">
-									<li><a href="#">Jobs</a></li>
-									<li><a href="#">Our team</a></li>
-									<li><a href="#">Leadership</a></li>
-									<li><a href="#">Privacy Policy</a></li>
-								</ul>
-							</div>
-
-							<div class="col-6 col-sm-6 col-md-3">
-								<ul class="list-unstyled">
-									<li><a href="#">Nordic Chair</a></li>
-									<li><a href="#">Kruzo Aero</a></li>
-									<li><a href="#">Ergonomic Chair</a></li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-				</div>
-
-				<div class="border-top copyright">
-					<div class="row pt-4">
-						<div class="col-lg-6">
-							<p class="mb-2 text-center text-lg-start">Copyright &copy;<script>document.write(new Date().getFullYear());</script>. All Rights Reserved. &mdash; Designed with love by <a href="https://untree.co">Untree.co</a> Distributed By <a hreff="https://themewagon.com">ThemeWagon</a>  <!-- License information: https://untree.co/license/ -->
-            </p>
-						</div>
-
-						<div class="col-lg-6 text-center text-lg-end">
-							<ul class="list-unstyled d-inline-flex ms-auto">
-								<li class="me-4"><a href="#">Terms &amp; Conditions</a></li>
-								<li><a href="#">Privacy Policy</a></li>
-							</ul>
-						</div>
-
-					</div>
-				</div>
-
-			</div>
-		</footer>
-		<!-- End Footer Section -->	
-
-
-		<script src="{% static "js/bootstrap.bundle.min.js" %}"></script>
-		<script src="{% static "js/tiny-slider.js" %}"></script>
-		<script src="{% static "js/custom.js" %}"></script>
-        <script>
-            const __loaderEl = document.getElementById('globalLoader');
-            function showLoader(){ if(__loaderEl) __loaderEl.classList.remove('d-none'); }
-            function hideLoader(){ if(__loaderEl) __loaderEl.classList.add('d-none'); }
-            const __origFetch = window.fetch;
-            window.fetch = async function(...args){ showLoader(); try { const r = await __origFetch.apply(this, args); return r; } finally { hideLoader(); } };
-            window.addEventListener('beforeunload', () => { showLoader(); });
-            document.addEventListener('submit', () => { showLoader(); }, true);
-            document.addEventListener('DOMContentLoaded', () => { hideLoader(); });
-            document.addEventListener('DOMContentLoaded', () => {
-                const input = document.getElementById('profileImageInput');
-                const img = document.getElementById('profilePreview');
-                if(input && img){
-                    input.addEventListener('change', (e) => {
-                        const f = e.target.files && e.target.files[0];
-                        if(f){ img.src = URL.createObjectURL(f); }
-                    });
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', () => {
+                if (mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.remove('hidden');
+                    setTimeout(() => { mobileMenu.classList.remove('opacity-0', 'scale-y-0'); mobileMenu.classList.add('opacity-100', 'scale-y-100'); }, 10);
+                } else {
+                    mobileMenu.classList.remove('opacity-100', 'scale-y-100'); mobileMenu.classList.add('opacity-0', 'scale-y-0');
+                    setTimeout(() => { mobileMenu.classList.add('hidden'); }, 300);
                 }
             });
-        </script>
-
-        
-	</body>
-
+        }
+    </script>
+</body>
 </html>

@@ -7,9 +7,11 @@ from .models import Buyer, CartItem, Order, OrderItem
 from admin_panel.models import ProductVariant, Blogs, Contact
 from django.utils import timezone
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, OuterRef, Subquery, Sum
+from django.core.paginator import Paginator
 import random
 import string
+from django.http import JsonResponse
 
 
 def buyer_login_required(view_func):
@@ -86,6 +88,55 @@ def by_blog(request):
     })
 
 @never_cache
+def by_home(request):
+    return render(request, 'by_home.html')
+
+@never_cache
+def by_product(request, variant_id):
+    try:
+        variant = ProductVariant.objects.select_related(
+            'product',
+            'product__brand',
+            'product__brand__subcetegory',
+            'product__brand__subcetegory__category',
+            'color',
+            'size'
+        ).get(id=variant_id, product__status=True)
+    except ProductVariant.DoesNotExist:
+        return redirect('by_shop')
+    product = variant.product
+    gallery = list(getattr(product, 'images', []).all()) if hasattr(product, 'images') else []
+    variants = ProductVariant.objects.select_related('color', 'size').filter(product=product)
+    colors = {}
+    sizes = {}
+    for v in variants:
+        colors.setdefault(v.color.id, {'id': v.color.id, 'name': v.color.name, 'variants': []})
+        sizes.setdefault(v.size.id, {'id': v.size.id, 'name': v.size.name, 'variants': []})
+        colors[v.color.id]['variants'].append(v.id)
+        sizes[v.size.id]['variants'].append(v.id)
+    specs = []
+    try:
+        from admin_panel.models import VariantSpec
+        specs = list(VariantSpec.objects.filter(variant=variant).values('name', 'value'))
+    except Exception:
+        specs = []
+    discount_percent = None
+    try:
+        if product.base_price and product.base_price > variant.price:
+            discount_percent = int(round((float(product.base_price) - float(variant.price)) / float(product.base_price) * 100))
+    except Exception:
+        discount_percent = None
+    context = {
+        'variant': variant,
+        'product': product,
+        'gallery': gallery,
+        'colors': colors.values(),
+        'sizes': sizes.values(),
+        'specs': specs,
+        'discount_percent': discount_percent,
+    }
+    return render(request, 'by_product.html', context)
+@never_cache
 def by_contact(request):
     if request.method == "POST":
         first_name = request.POST.get("fname", "").strip()
@@ -108,13 +159,11 @@ def by_contact(request):
 
     return render(request, 'by_contact.html')
 
-@never_cache
-def by_services(request):
-    return render(request,'by_services.html')
+
 
 @never_cache
 def by_shop(request):
-    products = ProductVariant.objects.select_related(
+    base_qs = ProductVariant.objects.select_related(
         'product',
         'product__brand',
         'product__brand__subcetegory',
@@ -124,8 +173,71 @@ def by_shop(request):
         stock__gt=0
     ).order_by('-id')
 
+    price_min = base_qs.order_by('price').values_list('price', flat=True).first() or 0
+    price_max = base_qs.order_by('-price').values_list('price', flat=True).first() or 0
+
+    category_id = request.GET.get('category')
+    min_price = request.GET.get('min')
+    max_price = request.GET.get('max')
+    brands_selected = request.GET.getlist('brands')
+    sort = request.GET.get('sort') or 'recommended'
+
+    qs = base_qs
+    if category_id:
+        qs = qs.filter(product__brand__subcetegory__category_id=category_id)
+    if min_price:
+        try:
+            qs = qs.filter(price__gte=float(min_price))
+        except ValueError:
+            pass
+    if max_price:
+        try:
+            qs = qs.filter(price__lte=float(max_price))
+        except ValueError:
+            pass
+    if brands_selected:
+        qs = qs.filter(product__brand__id__in=brands_selected)
+
+    categories = base_qs.values('product__brand__subcetegory__category__id', 'product__brand__subcetegory__category__name').distinct()
+    brands = base_qs.values('product__brand__id', 'product__brand__name').distinct()
+
+    sales_sub = Subquery(
+        OrderItem.objects.filter(variant_id=OuterRef('pk'))
+        .values('variant_id')
+        .annotate(s=Sum('quantity'))
+        .values('s')[:1]
+    )
+    qs = qs.annotate(sales=sales_sub)
+    if sort == 'best':
+        qs = qs.order_by(F('sales').desc(nulls_last=True))
+    elif sort == 'price_asc':
+        qs = qs.order_by('price')
+    elif sort == 'price_desc':
+        qs = qs.order_by('-price')
+    else:
+        qs = qs.order_by('-id')
+
+    top_sellers = OrderItem.objects.values('variant_id').annotate(s=Sum('quantity')).order_by('-s')[:12]
+    best_ids = {row['variant_id'] for row in top_sellers}
+
+    paginator = Paginator(qs, 9)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     return render(request, 'by_shop.html', {
-        'products': products
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'total': qs.count(),
+        'categories': categories,
+        'brands': brands,
+        'brands_selected': brands_selected,
+        'sort': sort,
+        'best_ids': best_ids,
+        'selected_category': category_id,
+        'price_min': price_min,
+        'price_max': price_max,
+        'selected_min_price': min_price or price_min,
+        'selected_max_price': max_price or price_max,
     })
 
 
@@ -148,6 +260,15 @@ def add_to_cart(request, variant_id):
         
         return redirect("by_shop")
 
+    quantity_to_add = 1
+    if request.method == "POST":
+        try:
+            qty = int(request.POST.get("quantity", "1"))
+            if qty > 0:
+                quantity_to_add = qty
+        except Exception:
+            quantity_to_add = 1
+
     cart_item, created = CartItem.objects.get_or_create(
         buyer=buyer,
         variant=variant,
@@ -156,12 +277,12 @@ def add_to_cart(request, variant_id):
 
     if created:
         
-        cart_item.quantity = 1
+        cart_item.quantity = min(quantity_to_add, variant.stock if variant.stock else quantity_to_add)
         cart_item.save()
     else:
         
         if cart_item.quantity < variant.stock:
-            cart_item.quantity += 1
+            cart_item.quantity = min(cart_item.quantity + quantity_to_add, variant.stock)
             cart_item.save()
         else:
             
@@ -169,6 +290,24 @@ def add_to_cart(request, variant_id):
 
     
     return redirect("by_cart")
+
+
+@never_cache
+def add_to_wishlist(request, variant_id):
+    buyer_id = request.session.get("buyer_id")
+    if not buyer_id:
+        return redirect("by_login")
+    try:
+        buyer = Buyer.objects.get(id=buyer_id)
+    except Buyer.DoesNotExist:
+        return redirect("by_login")
+    try:
+        variant = ProductVariant.objects.get(id=variant_id, product__status=True)
+    except ProductVariant.DoesNotExist:
+        return redirect("by_shop")
+    from .models import WishlistItem
+    WishlistItem.objects.get_or_create(buyer=buyer, variant=variant)
+    return redirect("by_product", variant_id=variant.id)
 
 
 @never_cache
@@ -201,6 +340,29 @@ def by_cart(request):
                     
                     item.quantity = 1
                     item.save()
+        cart_items = CartItem.objects.select_related(
+            "variant",
+            "variant__product"
+        ).filter(buyer=buyer)
+        subtotal = 0
+        items_payload = []
+        for item in cart_items:
+            if item.quantity < 1:
+                item.quantity = 1
+                item.save()
+            item.total_price = item.variant.price * item.quantity
+            subtotal += item.total_price
+            items_payload.append({
+                "id": item.id,
+                "quantity": item.quantity,
+                "line_total": float(item.total_price),
+            })
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({
+                "subtotal": float(subtotal),
+                "total": float(subtotal),
+                "items": items_payload
+            })
         return redirect("by_cart")
 
     cart_items = CartItem.objects.select_related(

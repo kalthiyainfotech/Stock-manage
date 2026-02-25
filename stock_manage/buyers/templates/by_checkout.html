@@ -1,340 +1,238 @@
 {% extends "by_base.html" %}
 {% block buyer_layout %}
 
-			<div class="hero">
-				<div class="container">
-					<div class="row justify-content-between">
-						<div class="col-lg-5">
-							<div class="intro-excerpt">
-								<h1>Checkout</h1>
-							</div>
-						</div>
-						<div class="col-lg-7">
-							
-						</div>
-					</div>
-				</div>
-			</div>
+    <div class="bg-white border-b border-gray-100 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-center">
+            <div class="text-3xl font-black text-brand-900 mx-auto tracking-tighter">
+                LUXE<span class="text-brand-500">.</span>
+            </div>
+            <a href="{% url 'by_cart' %}"
+                class="absolute left-8 lg:left-12 text-gray-500 hover:text-brand-600 font-medium hidden sm:flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Back to Cart
+            </a>
+            <div class="absolute right-8 lg:right-12 hidden sm:flex items-center gap-2 text-gray-400">
+                <i class="fas fa-lock text-brand-500"></i> Secure Checkout
+            </div>
+        </div>
+    </div>
 
-		<div class="untree_co-section">
-		    <div class="container">
-		      <form method="post" action="{% url 'by_place_order' %}">
-		        {% csrf_token %}
-		      
-		      <div class="row">
-		        <div class="col-md-6 mb-5 mb-md-0">
-		          <h2 class="h3 mb-3 text-black">Billing Details</h2>
-		          <div class="p-3 p-lg-5 border bg-white">
-		            <div class="form-group">
-		              <label for="c_country" class="text-black">Country <span class="text-danger">*</span></label>
-		              <select id="c_country" name="c_country" class="form-control" required>
-		                <option value="">Select a country</option>    
-		                <option value="India" {% if buyer.country == 'India' %}selected{% endif %}>India</option>    
-		                <option value="Bangladesh">Bangladesh</option>    
-		                <option value="Algeria">Algeria</option>    
-		                <option value="Afghanistan">Afghanistan</option>    
-		                <option value="Ghana">Ghana</option>    
-		                <option value="Albania">Albania</option>    
-		                <option value="Bahrain">Bahrain</option>    
-		                <option value="Colombia">Colombia</option>    
-		                <option value="Dominican Republic">Dominican Republic</option>    
-		              </select>
-		            </div>
-		            <div class="form-group row">
-		              <div class="col-md-6">
-		                <label for="c_fname" class="text-black">First Name <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_fname" name="c_fname" value="{% if buyer.name %}{{ buyer.name }}{% endif %}" required>
-		              </div>
-		              <div class="col-md-6">
-		                <label for="c_lname" class="text-black">Last Name <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_lname" name="c_lname" required>
-		              </div>
-		            </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row gap-8 lg:gap-16">
 
-		            <div class="form-group row">
-		              <div class="col-md-12">
-		                <label for="c_companyname" class="text-black">Company Name </label>
-		                <input type="text" class="form-control" id="c_companyname" name="c_companyname">
-		              </div>
-		            </div>
+        <!-- Main Form -->
+        <main class="w-full lg:w-3/5">
+            <form>
+                <!-- Express Checkout -->
+                <div class="mb-10 text-center">
+                    <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">Express Checkout</h2>
+                    <div class="flex gap-4 justify-center">
+                        <button type="button"
+                            class="flex-1 py-3 bg-[#5A31F4] text-white rounded-xl font-bold hover:bg-[#4621CE] transition shadow flex items-center justify-center gap-2 max-w-[200px]">Shop<span
+                                class="font-normal opacity-80">Pay</span></button>
+                        <button type="button"
+                            class="flex-1 py-3 bg-[#FFC439] text-[#003087] rounded-xl font-bold hover:bg-[#F4B625] transition shadow flex items-center justify-center gap-2 max-w-[200px] italic">PayPal</button>
+                        <button type="button"
+                            class="flex-1 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition shadow flex items-center justify-center gap-2 max-w-[200px]"><i
+                                class="fab fa-google"></i> Pay</button>
+                    </div>
+                </div>
 
-		            <div class="form-group row">
-		              <div class="col-md-12">
-		                <label for="c_address" class="text-black">Address <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_address" name="c_address" placeholder="Street address" value="{% if buyer.address %}{{ buyer.address }}{% endif %}" required>
-		              </div>
-		            </div>
+                <div class="flex items-center gap-4 mb-10">
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                    <span class="text-gray-400 text-sm font-medium">OR</span>
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                </div>
 
-		            <div class="form-group mt-3">
-		              <input type="text" class="form-control" name="c_address_line2" placeholder="Apartment, suite, unit etc. (optional)">
-		            </div>
+                <!-- Contact Info -->
+                <section class="mb-12">
+                    <div class="flex justify-between items-end mb-6">
+                        <h2 class="text-2xl font-black text-gray-900">Contact Information</h2>
+                        <span class="text-sm text-gray-500">Already have an account? <a href="#"
+                                class="text-brand-600 font-bold hover:underline">Log in</a></span>
+                    </div>
+                    <div class="space-y-4">
+                        <input type="email" placeholder="Email address"
+                            class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                        <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer pl-1 group">
+                            <input type="checkbox"
+                                class="w-4 h-4 text-brand-500 rounded border-gray-300 focus:ring-brand-500" checked>
+                            <span class="group-hover:text-gray-900 transition-colors">Email me with news and
+                                offers</span>
+                        </label>
+                    </div>
+                </section>
 
-		            <div class="form-group row">
-		              <div class="col-md-6">
-		                <label for="c_state_country" class="text-black">State / City <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_state_country" name="c_state_country" value="{% if buyer.state %}{{ buyer.state }}{% elif buyer.city %}{{ buyer.city }}{% endif %}" required>
-		              </div>
-		              <div class="col-md-6">
-		                <label for="c_postal_zip" class="text-black">Postal / Zip <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_postal_zip" name="c_postal_zip" value="{% if buyer.pincode %}{{ buyer.pincode }}{% endif %}" required>
-		              </div>
-		            </div>
+                <!-- Shipping Address -->
+                <section class="mb-12">
+                    <h2 class="text-2xl font-black text-gray-900 mb-6">Shipping Address</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <select
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow text-gray-700">
+                                <option>United States</option>
+                                <option>Canada</option>
+                                <option>United Kingdom</option>
+                                <option>Australia</option>
+                            </select>
+                        </div>
+                        <div><input type="text" placeholder="First name"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                        </div>
+                        <div><input type="text" placeholder="Last name"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                        </div>
+                        <div class="md:col-span-2"><input type="text" placeholder="Address"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                        </div>
+                        <div class="md:col-span-2"><input type="text" placeholder="Apartment, suite, etc. (optional)"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                        </div>
+                        <div><input type="text" placeholder="City"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <select
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow text-gray-700">
+                                <option>State</option>
+                                <option>NY</option>
+                                <option>CA</option>
+                            </select>
+                            <input type="text" placeholder="ZIP code"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                        </div>
+                        <div class="md:col-span-2"><input type="tel" placeholder="Phone"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                        </div>
+                    </div>
+                </section>
 
-		            <div class="form-group row mb-5">
-		              <div class="col-md-6">
-		                <label for="c_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
-		                <input type="email" class="form-control" id="c_email_address" name="c_email_address" value="{{ buyer.email }}" required>
-		              </div>
-		              <div class="col-md-6">
-		                <label for="c_phone" class="text-black">Phone <span class="text-danger">*</span></label>
-		                <input type="text" class="form-control" id="c_phone" name="c_phone" placeholder="Phone Number" value="{{ buyer.phone }}" required>
-		              </div>
-		            </div>
+                <!-- Payment Info -->
+                <section class="mb-12">
+                    <h2 class="text-2xl font-black text-gray-900 mb-2">Payment</h2>
+                    <p class="text-sm text-gray-500 mb-6">All transactions are secure and encrypted.</p>
 
-		            <div class="form-group">
-		              <label for="c_create_account" class="text-black" data-bs-toggle="collapse" href="#create_an_account" role="button" aria-expanded="false" aria-controls="create_an_account"><input type="checkbox" value="1" id="c_create_account"> Create an account?</label>
-		              <div class="collapse" id="create_an_account">
-		                <div class="py-2 mb-4">
-		                  <p class="mb-3">Create an account by entering the information below. If you are a returning customer please login at the top of the page.</p>
-		                  <div class="form-group">
-		                    <label for="c_account_password" class="text-black">Account Password</label>
-		                    <input type="email" class="form-control" id="c_account_password" name="c_account_password" placeholder="">
-		                  </div>
-		                </div>
-		              </div>
-		            </div>
+                    <div class="border border-gray-200 rounded-2xl bg-white overflow-hidden shadow-sm">
+                        <!-- Credit Card Option -->
+                        <div
+                            class="p-4 border-b border-gray-200 bg-brand-50 flex justify-between items-center cursor-pointer">
+                            <label class="flex items-center gap-3 cursor-pointer w-full font-bold text-gray-900">
+                                <input type="radio" name="payment" checked
+                                    class="w-5 h-5 text-brand-500 focus:ring-brand-500 border-gray-300">
+                                Credit card
+                            </label>
+                            <div class="flex gap-2 text-2xl text-gray-400">
+                                <i class="fab fa-cc-visa text-blue-800"></i>
+                                <i class="fab fa-cc-mastercard text-red-600"></i>
+                                <i class="fab fa-cc-amex text-blue-500"></i>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-white grid grid-cols-2 gap-4">
+                            <div class="col-span-2 relative">
+                                <input type="text" placeholder="Card number"
+                                    class="w-full pl-5 pr-12 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                                <i class="fas fa-lock absolute right-4 top-5 text-gray-400"></i>
+                            </div>
+                            <div class="col-span-2"><input type="text" placeholder="Name on card"
+                                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                            </div>
+                            <div><input type="text" placeholder="Expiration date (MM / YY)"
+                                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                            </div>
+                            <div class="relative">
+                                <input type="text" placeholder="Security code"
+                                    class="w-full pl-5 pr-12 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
+                                <i
+                                    class="far fa-question-circle absolute right-4 top-5 text-gray-400 cursor-pointer hover:text-gray-600"></i>
+                            </div>
+                        </div>
 
+                        <!-- PayPal Option -->
+                        <div
+                            class="p-4 bg-white hover:bg-gray-50 flex justify-between items-center cursor-pointer group transition-colors">
+                            <label
+                                class="flex items-center gap-3 cursor-pointer w-full font-medium text-gray-700 group-hover:text-gray-900">
+                                <input type="radio" name="payment"
+                                    class="w-5 h-5 text-brand-500 focus:ring-brand-500 border-gray-300">
+                                PayPal
+                            </label>
+                            <div class="text-2xl text-blue-800">
+                                <i class="fab fa-paypal"></i>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
-		            <div class="form-group">
-		              <label for="c_ship_different_address" class="text-black" data-bs-toggle="collapse" href="#ship_different_address" role="button" aria-expanded="false" aria-controls="ship_different_address"><input type="checkbox" value="1" id="c_ship_different_address"> Ship To A Different Address?</label>
-		              <div class="collapse" id="ship_different_address">
-		                <div class="py-2">
+                <button type="button"
+                    class="w-full py-5 bg-brand-500 text-white font-black text-lg rounded-xl hover:bg-brand-600 transition-all shadow-xl shadow-brand-500/30 hover:-translate-y-1 mb-6 flex justify-center items-center gap-3">
+                    <i class="fas fa-lock text-sm"></i> Pay $129.99
+                </button>
+            </form>
+        </main>
 
-		                  <div class="form-group">
-		                    <label for="c_diff_country" class="text-black">Country <span class="text-danger">*</span></label>
-		                    <select id="c_diff_country" name="c_diff_country" class="form-control">
-		                      <option value="">Select a country</option>    
-		                      <option value="India">India</option>    
-		                      <option value="Bangladesh">Bangladesh</option>    
-		                      <option value="Algeria">Algeria</option>    
-		                      <option value="Afghanistan">Afghanistan</option>    
-		                      <option value="Ghana">Ghana</option>    
-		                      <option value="Albania">Albania</option>    
-		                      <option value="Bahrain">Bahrain</option>    
-		                      <option value="Colombia">Colombia</option>    
-		                      <option value="Dominican Republic">Dominican Republic</option>    
-		                    </select>
-		                  </div>
+        <!-- Order Summary Sidebar -->
+        <aside class="w-full lg:w-2/5 mt-10 lg:mt-0">
+            <div class="bg-gray-100 rounded-3xl p-6 sm:p-8 lg:sticky lg:top-8 border border-gray-200">
+                <h3 class="text-xl font-bold mb-6 text-gray-900">Order Summary</h3>
 
+                <!-- Items -->
+                <div class="space-y-4 mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=150&q=80"
+                                alt="Tee" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
+                            <span
+                                class="absolute -top-2 -right-2 bg-gray-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">1</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-800 text-sm">Classic White Tee</h4>
+                            <p class="text-xs text-gray-500">M / White</p>
+                        </div>
+                        <span class="font-bold text-gray-900">$29.99</span>
+                    </div>
 
-		                  <div class="form-group row">
-		                    <div class="col-md-6">
-		                      <label for="c_diff_fname" class="text-black">First Name <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_fname" name="c_diff_fname">
-		                    </div>
-		                    <div class="col-md-6">
-		                      <label for="c_diff_lname" class="text-black">Last Name <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_lname" name="c_diff_lname">
-		                    </div>
-		                  </div>
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=150&q=80"
+                                alt="Jacket" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
+                            <span
+                                class="absolute -top-2 -right-2 bg-gray-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">1</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-bold text-gray-800 text-sm">Autumn Jacket</h4>
+                            <p class="text-xs text-gray-500">L / Brown</p>
+                        </div>
+                        <span class="font-bold text-gray-900">$89.50</span>
+                    </div>
+                </div>
 
-		                  <div class="form-group row">
-		                    <div class="col-md-12">
-		                      <label for="c_diff_companyname" class="text-black">Company Name </label>
-		                      <input type="text" class="form-control" id="c_diff_companyname" name="c_diff_companyname">
-		                    </div>
-		                  </div>
+                <!-- Totals -->
+                <div class="space-y-3 pt-6 border-t border-gray-300 text-sm">
+                    <div class="flex justify-between text-gray-600">
+                        <span>Subtotal</span>
+                        <span class="font-medium">$119.49</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Shipping</span>
+                        <span class="font-medium text-brand-600">Free</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>Taxes</span>
+                        <span class="font-medium">$10.50</span>
+                    </div>
+                </div>
 
-		                  <div class="form-group row  mb-3">
-		                    <div class="col-md-12">
-		                      <label for="c_diff_address" class="text-black">Address <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_address" name="c_diff_address" placeholder="Street address">
-		                    </div>
-		                  </div>
+                <!-- Total -->
+                <div class="pt-6 mt-6 border-t border-gray-300">
+                    <div class="flex justify-between items-end">
+                        <span class="text-lg font-bold text-gray-900">Total</span>
+                        <div class="text-right">
+                            <span class="text-xs text-gray-500 mr-2">USD</span>
+                            <span class="text-3xl font-black text-gray-900">$129.99</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
-		                  <div class="form-group">
-		                    <input type="text" class="form-control" name="c_diff_address_line2" placeholder="Apartment, suite, unit etc. (optional)">
-		                  </div>
-
-		                  <div class="form-group row">
-		                    <div class="col-md-6">
-		                      <label for="c_diff_state_country" class="text-black">State / Country <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_state_country" name="c_diff_state_country">
-		                    </div>
-		                    <div class="col-md-6">
-		                      <label for="c_diff_postal_zip" class="text-black">Posta / Zip <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_postal_zip" name="c_diff_postal_zip">
-		                    </div>
-		                  </div>
-
-		                  <div class="form-group row mb-5">
-		                    <div class="col-md-6">
-		                      <label for="c_diff_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_email_address" name="c_diff_email_address">
-		                    </div>
-		                    <div class="col-md-6">
-		                      <label for="c_diff_phone" class="text-black">Phone <span class="text-danger">*</span></label>
-		                      <input type="text" class="form-control" id="c_diff_phone" name="c_diff_phone" placeholder="Phone Number">
-		                    </div>
-		                  </div>
-
-		                </div>
-
-		              </div>
-		            </div>
-
-		            <div class="form-group">
-		              <label for="c_order_notes" class="text-black">Order Notes</label>
-		              <textarea name="c_order_notes" id="c_order_notes" cols="30" rows="5" class="form-control" placeholder="Write your notes here..."></textarea>
-		            </div>
-
-		          </div>
-		        </div>
-		        <div class="col-md-6">
-
-		          <div class="row mb-5">
-		            <div class="col-md-12">
-		              <h2 class="h3 mb-3 text-black">Your Order</h2>
-		              <div class="p-3 p-lg-5 border bg-white">
-		                <table class="table site-block-order-table mb-5">
-		                  <thead>
-		                    <th>Product</th>
-		                    <th>Total</th>
-		                  </thead>
-		                  <tbody>
-		                    {% for item in cart_items %}
-		                    <tr>
-		                      <td>{{ item.variant.product.name }} <strong class="mx-2">x</strong> {{ item.quantity }}</td>
-		                      <td>₹{{ item.total_price|floatformat:2 }}</td>
-		                    </tr>
-		                    {% empty %}
-		                    <tr>
-		                      <td colspan="2" class="text-center">Your cart is empty.</td>
-		                    </tr>
-		                    {% endfor %}
-		                    <tr>
-		                      <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-		                      <td class="text-black"><strong>₹{{ subtotal|floatformat:2 }}</strong></td>
-		                    </tr>
-		                    <tr>
-		                      <td class="text-black font-weight-bold"><strong>Order Total</strong></td>
-		                      <td class="text-black font-weight-bold"><strong>₹{{ total|floatformat:2 }}</strong></td>
-		                    </tr>
-		                  </tbody>
-		                </table>
-
-		                <h3 class="h6 mb-3 text-black">Payment Method <span class="text-danger">*</span></h3>
-		                
-		                <div class="border p-3 mb-3 payment-method-option">
-		                  <label class="d-block mb-0" style="cursor: pointer;">
-		                    <input type="radio" name="payment_method" value="upi" id="payment_upi" required style="margin-right: 8px;">
-		                    <strong>UPI / GPay / PhonePe / Paytm</strong>
-		                  </label>
-		                  <div class="py-2 mt-2">
-		                    <p class="mb-0 text-muted">Pay using UPI apps like Google Pay, PhonePe, Paytm, or any UPI app. Scan the QR code below to complete payment.</p>
-		                  </div>
-		                  <div id="upi_qr_section" style="display: none; margin-top: 15px; text-align: center;">
-		                    <div class="border p-3 bg-light">
-		                      <p class="mb-2"><strong>Scan QR Code to Pay</strong></p>
-		                      <div id="upi_qr_code" style="background: white; padding: 20px; display: inline-block; border: 2px solid #ddd; border-radius: 8px;">
-		                        <img id="qr_code_image" src="" alt="UPI QR Code" style="width: 200px; height: 200px; display: none; border: 1px solid #ddd; border-radius: 4px;">
-		                        <div id="qr_placeholder" style="width: 200px; height: 200px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 1px solid #ddd; border-radius: 4px;">
-		                          <div style="text-align: center;">
-		                            <div style="font-size: 48px; margin-bottom: 10px;">📱</div>
-		                            <div style="font-size: 12px; color: #666;">Loading QR Code...</div>
-		                          </div>
-		                        </div>
-		                      </div>
-		                      <p class="mt-3 mb-0" style="font-size: 14px; color: #666;">
-		                        <strong>UPI ID:</strong> <span id="upi_id_display">yourstore@paytm</span><br>
-		                        <strong>Amount:</strong> ₹<span id="upi_amount">{{ total|floatformat:2 }}</span>
-		                      </p>
-		                      <p class="mt-2 mb-0" style="font-size: 12px; color: #999;">
-		                        Scan with GPay, PhonePe, Paytm or any UPI app
-		                      </p>
-		                    </div>
-		                  </div>
-		                </div>
-
-		                <div class="border p-3 mb-5 payment-method-option">
-		                  <label class="d-block mb-0" style="cursor: pointer;">
-		                    <input type="radio" name="payment_method" value="cash_on_delivery" id="payment_cod" checked required style="margin-right: 8px;">
-		                    <strong>Cash on Delivery (COD)</strong>
-		                  </label>
-		                  <div class="py-2 mt-2">
-		                    <p class="mb-0 text-muted">Pay cash when your order is delivered. Additional charges may apply for COD orders.</p>
-		                  </div>
-		                </div>
-
-		                <div class="form-group">
-		                  <button type="submit" class="btn btn-black btn-lg py-3 btn-block">Place Order</button>
-		                </div>
-
-		              </div>
-		            </div>
-		          </div>
-
-		        </div>
-		      </div>
-		      </form>
-		    </div>
-		  </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var upiRadio = document.getElementById('payment_upi');
-    var codRadio = document.getElementById('payment_cod');
-    var upiQrSection = document.getElementById('upi_qr_section');
-    var upiAmount = document.getElementById('upi_amount');
-    var qrImage = document.getElementById('qr_code_image');
-    var qrPlaceholder = document.getElementById('qr_placeholder');
-    var totalAmount = {{ total }};
-    var upiId = 'mystore@paytm'; 
-    
-    if (upiAmount) {
-        upiAmount.textContent = totalAmount.toFixed(2);
-    }
-    
-    function generateQRCode() {
-		
-        var merchantName = 'My Store';
-        var upiPaymentUrl = 'upi://pay?pa=' + encodeURIComponent(upiId) + 
-                           '&pn=' + encodeURIComponent(merchantName) + 
-                           '&am=' + totalAmount.toFixed(2) + 
-                           '&cu=INR';
-        
-        var qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(upiPaymentUrl);
-        
-        if (qrImage) {
-            qrImage.src = qrCodeUrl;
-            qrImage.onload = function() {
-                qrImage.style.display = 'block';
-                if (qrPlaceholder) {
-                    qrPlaceholder.style.display = 'none';
-                }
-            };
-            qrImage.onerror = function() {
-                if (qrPlaceholder) {
-                    qrPlaceholder.innerHTML = '<div style="text-align: center;"><div style="font-size: 48px; margin-bottom: 10px;">📱</div><div style="font-size: 12px; color: #666;">UPI QR Code</div><div style="font-size: 10px; color: #999; margin-top: 5px;">' + upiId + '</div></div>';
-                }
-            };
-        }
-    }
-    
-    function handlePaymentMethodChange() {
-        if (upiRadio.checked) {
-            upiQrSection.style.display = 'block';
-            generateQRCode();
-        } else {
-            upiQrSection.style.display = 'none';
-        }
-    }
-    
-    upiRadio.addEventListener('change', handlePaymentMethodChange);
-    codRadio.addEventListener('change', handlePaymentMethodChange);
-    
-    handlePaymentMethodChange();
-});
-</script>
+    </div>
 
 {% endblock buyer_layout %}

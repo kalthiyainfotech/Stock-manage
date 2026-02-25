@@ -1,68 +1,155 @@
 {% extends "by_base.html" %}
-{% load static %}
 {% block buyer_layout %}
+{% load static %}
+<div class="pt-28 pb-10 bg-brand-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-4">Shop Collection</h1>
+        <p class="text-gray-500">Discover your unique style from our premium selection</p>
+    </div>
+</div>
 
-		<style>
-			/* Shop grid image sizing */
-			.shop-product-img {
-				width: 100%;
-				height: 230px;
-				object-fit: cover;
-				border-radius: 8px;
-				display: block;
-			}
-		</style>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row gap-8">
+    <aside class="w-full lg:w-1/4">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-24">
+            <h3 class="font-bold text-lg mb-4 pb-2 border-b border-gray-100 flex justify-between items-center">
+                Filters
+                <a href="{% url 'by_shop' %}" class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-100"
+                   title="Reset filters">
+                    <i class="fas fa-rotate-right"></i>
+                </a>
+            </h3>
+            <form method="get" class="space-y-6">
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-3">Categories</h4>
+                    <select name="category" class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm focus:ring-brand-500 focus:border-brand-500">
+                        <option value="">All</option>
+                        {% for c in categories %}
+                        <option value="{{ c.product__brand__subcetegory__category__id }}" {% if selected_category|stringformat:"s" == c.product__brand__subcetegory__category__id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.product__brand__subcetegory__category__name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-3">Brands</h4>
+                    <div class="space-y-2 max-h-52 overflow-y-auto pr-1">
+                        {% for b in brands %}
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="brands" value="{{ b.product__brand__id }}" {% if b.product__brand__id|stringformat:"s" in brands_selected %}checked{% endif %} class="rounded text-brand-600">
+                            <span>{{ b.product__brand__name }}</span>
+                        </label>
+                        {% endfor %}
+                        {% if not brands %}
+                        <p class="text-xs text-gray-400">No brands</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-3">Price (₹)</h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="number" name="min" value="{{ selected_min_price }}" min="{{ price_min }}" max="{{ price_max }}" class="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm focus:ring-brand-500 focus:border-brand-500" placeholder="Min">
+                        <input type="number" name="max" value="{{ selected_max_price }}" min="{{ price_min }}" max="{{ price_max }}" class="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm focus:ring-brand-500 focus:border-brand-500" placeholder="Max">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Range: ₹{{ price_min }} - ₹{{ price_max }}</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-3">Sort</h4>
+                    <select name="sort" class="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm focus:ring-brand-500 focus:border-brand-500">
+                        <option value="recommended" {% if sort == 'recommended' %}selected{% endif %}>Recommended</option>
+                        <option value="best" {% if sort == 'best' %}selected{% endif %}>Best Selling</option>
+                        <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-brand-600 transition-colors">Apply Filters</button>
+            </form>
+        </div>
+    </aside>
 
-			<div class="hero">
-				<div class="container">
-					<div class="row justify-content-between">
-						<div class="col-lg-5">
-							<div class="intro-excerpt">
-								<h1>Shop</h1>
-							</div>
-						</div>
-						<div class="col-lg-7">
-							
-						</div>
-					</div>
-				</div>
-			</div>
+    <main class="w-full lg:w-3/4">
+        <div class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <p class="text-sm text-gray-500">Showing <span class="font-bold text-gray-900">{{ page_obj.start_index }}-{{ page_obj.end_index }}</span> of <span class="font-bold text-gray-900">{{ total }}</span> products</p>
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500">Sort by:</span>
+                <select class="border-gray-200 rounded-lg text-sm focus:ring-brand-500 outline-none p-2 bg-gray-50">
+                    <option>Recommended</option>
+                    <option>Newest Arrivals</option>
+                </select>
+            </div>
+        </div>
 
-		
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in page_obj %}
+            <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 relative">
+                {% if item.id in best_ids %}
+                <span class="absolute top-4 left-4 bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full shadow">BEST</span>
+                {% endif %}
+                <div class="absolute top-4 right-4 z-10 flex flex-col gap-2 translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                    <button class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:bg-brand-500 hover:text-white transition-colors"><i class="far fa-heart"></i></button>
+                    <button class="w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:bg-brand-500 hover:text-white transition-colors"><i class="fas fa-search"></i></button>
+                </div>
+                <a href="{% url 'by_product' item.id %}" class="block relative h-64 overflow-hidden bg-gray-100">
+                    {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    {% else %}
+                    <img src="{% static 'images/product-1.png' %}" alt="{{ item.product.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    {% endif %}
+                </a>
+                <div class="p-5">
+                    <div class="flex text-yellow-400 text-xs mb-2">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <a href="{% url 'by_product' item.id %}"><h3 class="font-bold text-lg text-gray-800 mb-1 hover:text-brand-600 transition-colors">{{ item.product.name }}</h3></a>
+                    <p class="text-gray-500 text-sm mb-4">{{ item.product.brand.name }}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-black text-gray-900">₹{{ item.price }}</span>
+                        {% if request.session.buyer_id %}
+                        <a href="{% url 'by_add_to_cart' item.id %}" class="w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-brand-600 transition-colors flex items-center justify-center shadow-lg group-hover:rotate-12">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'by_login' %}" class="w-10 h-10 rounded-full bg-gray-300 text-white flex items-center justify-center shadow-lg cursor-not-allowed" title="Login to add">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-1 sm:col-span-2 lg:col-span-3">
+                <p class="text-center text-gray-500">No products available right now.</p>
+            </div>
+            {% endfor %}
+        </div>
 
-		<div class="untree_co-section product-section before-footer-section">
-		    <div class="container">
-		      	<div class="row">
-
-					{% for item in products %}
-					<div class="col-12 col-md-4 col-lg-3 mb-5">
-						<a class="product-item" href="{% url 'by_add_to_cart' item.id %}">
-							{% if item.product.image %}
-								<img src="{{ item.product.image.url }}" class="img-fluid product-thumbnail shop-product-img">
-							{% else %}
-								<img src="{% static 'images/product-1.png' %}" class="img-fluid product-thumbnail shop-product-img">
-							{% endif %}
-							<h3 class="product-title">{{ item.product.name }}</h3>
-							<p class="mb-1 text-muted small">
-								{{ item.product.brand.name }}
-							</p>
-							<strong class="product-price">
-								₹{{ item.price }}
-							</strong>
-
-							<span class="icon-cross">
-								<img src="{% static 'images/cross.svg' %}" class="img-fluid">
-							</span>
-						</a>
-					</div>
-					{% empty %}
-					<div class="col-12">
-						<p class="text-center text-muted">No products available right now.</p>
-					</div>
-					{% endfor %}
-
-		      	</div>
-		    </div>
-		</div>
-
+        {% if paginator.num_pages > 1 %}
+        <div class="flex justify-center mt-12">
+            <nav class="flex items-center gap-2">
+                {% if page_obj.has_previous %}
+                <a class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-brand-600 hover:border-brand-500 transition-colors"
+                   href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_min_price %}&min={{ selected_min_price }}{% endif %}{% if selected_max_price %}&max={{ selected_max_price }}{% endif %}{% for bid in brands_selected %}&brands={{ bid }}{% endfor %}{% if sort %}&sort={{ sort }}{% endif %}">
+                    <i class="fas fa-chevron-left text-xs"></i>
+                </a>
+                {% endif %}
+                {% for num in paginator.page_range %}
+                {% if num == page_obj.number %}
+                <span class="w-10 h-10 flex items-center justify-center rounded-xl bg-brand-500 text-white font-bold shadow-md">{{ num }}</span>
+                {% else %}
+                <a class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-brand-600 hover:border-brand-500 transition-colors font-bold"
+                   href="?page={{ num }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_min_price %}&min={{ selected_min_price }}{% endif %}{% if selected_max_price %}&max={{ selected_max_price }}{% endif %}{% for bid in brands_selected %}&brands={{ bid }}{% endfor %}{% if sort %}&sort={{ sort }}{% endif %}">
+                    {{ num }}
+                </a>
+                {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <a class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-brand-600 hover:border-brand-500 transition-colors"
+                   href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_min_price %}&min={{ selected_min_price }}{% endif %}{% if selected_max_price %}&max={{ selected_max_price }}{% endif %}{% for bid in brands_selected %}&brands={{ bid }}{% endfor %}{% if sort %}&sort={{ sort }}{% endif %}">
+                    <i class="fas fa-chevron-right text-xs"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </main>
+</div>
 {% endblock buyer_layout %}

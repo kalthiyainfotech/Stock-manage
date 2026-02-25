@@ -435,6 +435,10 @@ def add_inventory(request):
             if request.FILES.get('product_picture'):
                 product.image = request.FILES.get('product_picture')
             product.save()
+        # extra gallery images
+        for img in request.FILES.getlist('extra_images'):
+            if img:
+                ProductImage.objects.create(product=product, image=img)
 
         color_name = request.POST.get('color', '').strip()
         if not color_name:
@@ -562,6 +566,10 @@ def edit_inventory(request, id):
             product.image = request.FILES.get('product_picture')
 
         product.save()
+        # optional gallery additions
+        for img in request.FILES.getlist('extra_images'):
+            if img:
+                ProductImage.objects.create(product=product, image=img)
 
         color_name = request.POST.get('color', '').strip()
         if not color_name:

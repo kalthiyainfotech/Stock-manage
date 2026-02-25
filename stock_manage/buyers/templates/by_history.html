@@ -1,201 +1,181 @@
 {% extends "by_base.html" %}
-{% load static %}
 {% block buyer_layout %}
 
-		<style>
-			.order-card {
-				border: 1px solid #e9ecef;
-				border-radius: 12px;
-				background: #fff;
-				padding: 16px;
-				margin-bottom: 16px;
-			}
-			.order-header {
-				display: flex;
-				flex-wrap: wrap;
-				justify-content: space-between;
-				align-items: center;
-				gap: 12px;
-			}
-			.order-meta {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 16px;
-				font-size: 14px;
-				color: #6c757d;
-			}
-			.order-product-img {
-				width: 60px;
-				height: 60px;
-				object-fit: cover;
-				border-radius: 8px;
-			}
-			@media (max-width: 576px) {
-				.order-product-img {
-					width: 48px;
-					height: 48px;
-				}
-			}
-		</style>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col md:flex-row gap-8">
+        <!-- Sidebar -->
+        <aside class="w-full md:w-64 flex-shrink-0">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                <div class="flex items-center gap-4 mb-8">
+                    <div
+                        class="w-12 h-12 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xl">
+                        JD</div>
+                    <div>
+                        <h3 class="font-bold text-gray-900">John Doe</h3>
+                        <p class="text-xs text-gray-500">Premium Member</p>
+                    </div>
+                </div>
+                <nav class="space-y-2">
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors font-medium"><i
+                            class="far fa-user w-5 text-center"></i> Profile</a>
+                    <a href="{% url 'by_history' %}"
+                        class="flex items-center gap-3 px-4 py-3 bg-brand-50 text-brand-600 rounded-xl transition-colors font-medium"><i
+                            class="fas fa-box w-5 text-center"></i> Order History</a>
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors font-medium"><i
+                            class="far fa-heart w-5 text-center"></i> Wishlist</a>
+                    <a href="#"
+                        class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors font-medium"><i
+                            class="fas fa-cog w-5 text-center"></i> Settings</a>
+                </nav>
+            </div>
+        </aside>
 
-		<div class="hero">
-			<div class="container">
-				<div class="row justify-content-between">
-					<div class="col-lg-5">
-						<div class="intro-excerpt">
-							<h1>Order History</h1>
-						</div>
-					</div>
-					<div class="col-lg-7">
-					</div>
-				</div>
-			</div>
-		</div>
+        <!-- Main Content -->
+        <main class="flex-1">
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
+                    <div>
+                        <h1 class="text-2xl font-black text-gray-900 mb-1">Order History</h1>
+                        <p class="text-gray-500 text-sm">View and track your previous orders</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select
+                            class="px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-brand-500 text-gray-600 bg-gray-50">
+                            <option>Last 6 months</option>
+                            <option>2026</option>
+                            <option>2025</option>
+                        </select>
+                    </div>
+                </div>
 
-		<div class="untree_co-section before-footer-section">
-			<div class="container">
-				<div class="row">
-					<div class="col-12">
-						{% if orders %}
-							{% for order in orders %}
-								<div class="order-card">
-									<div class="order-header">
-										<div>
-											<div class="h6 mb-1">Order {{ order.order_number }}</div>
-											<div class="order-meta">
-												<span>Placed {{ order.created_at|date:"M d, Y H:i" }}</span>
-												<span>Payment: {{ order.get_payment_method_display }}</span>
-												<span>Total: ₹{{ order.total }}</span>
-											</div>
-										</div>
-										<div>
-											<span class="badge 
-												{% if order.status == 'pending' %} bg-secondary 
-												{% elif order.status == 'processing' %} bg-warning text-dark
-												{% elif order.status == 'shipped' %} bg-info text-dark
-												{% elif order.status == 'delivered' %} bg-success
-												{% elif order.status == 'return_requested' %} bg-primary
-												{% elif order.status == 'returned' %} bg-dark
-												{% elif order.status == 'cancelled' %} bg-danger
-												{% else %} bg-light text-dark
-												{% endif %}">
-												{{ order.get_status_display }}
-											</span>
-											<button class="btn btn-sm btn-outline-dark ms-2" 
-												type="button" 
-												data-bs-toggle="collapse" 
-												data-bs-target="#orderItems{{ forloop.counter }}" 
-												aria-expanded="false" 
-												aria-controls="orderItems{{ forloop.counter }}">
-												View items
-											</button>
-											{% if order.status == 'pending' or order.status == 'processing' %}
-											<button class="btn btn-sm btn-outline-danger ms-2" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ forloop.counter }}">
-												<i class="fa-regular fa-circle-xmark"></i>
-												Cancel
-											</button>
-											{% endif %}
-											{% if order.status == 'delivered' %}
-											<button class="btn btn-sm btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#returnOrderModal{{ forloop.counter }}">
-												<i class="fa-solid fa-rotate-left"></i>
-												Request Return
-											</button>
-											{% endif %}
-											
-										</div>
-									</div>
-									{% if order.status == 'pending' or order.status == 'processing' %}
-									<div class="modal fade" id="cancelOrderModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
-										<div class="modal-dialog modal-dialog-centered">
-											<div class="modal-content">
-												<div class="modal-header">
-													<h6 class="modal-title">Cancel Order</h6>
-													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-												</div>
-												<div class="modal-body">
-													Are you sure you want to cancel Order {{ order.order_number }}?
-												</div>
-												<div class="modal-footer">
-													<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">No</button>
-													<form method="post" action="{% url 'by_cancel_order' order.id %}">
-														{% csrf_token %}
-														<button type="submit" class="btn btn-danger btn-sm">Yes, Cancel</button>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
-									{% endif %}
-									{% if order.status == 'delivered' %}
-									<div class="modal fade" id="returnOrderModal{{ forloop.counter }}" tabindex="-1" aria-hidden="true">
-										<div class="modal-dialog modal-dialog-centered">
-											<div class="modal-content">
-												<div class="modal-header">
-													<h6 class="modal-title">Request Return</h6>
-													<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-												</div>
-												<div class="modal-body">
-													Are you sure you want to request a return for Order {{ order.order_number }}?
-												</div>
-												<div class="modal-footer">
-													<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">No</button>
-													<form method="post" action="{% url 'by_return_order' order.id %}">
-														{% csrf_token %}
-														<button type="submit" class="btn btn-primary btn-sm">Yes, Request Return</button>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
-									{% endif %}
+                <!-- Order List -->
+                <div class="space-y-6">
+                    <!-- Order item 1 -->
+                    <div
+                        class="border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-300">
+                        <div
+                            class="bg-gray-50 p-4 sm:p-6 flex flex-wrap justify-between items-center gap-4 border-b border-gray-100">
+                            <div class="flex gap-8">
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Order Placed</p>
+                                    <p class="font-bold text-gray-900 text-sm">October 15, 2026</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Total</p>
+                                    <p class="font-bold text-gray-900 text-sm">$129.50</p>
+                                </div>
+                                <div class="hidden sm:block">
+                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Ship To</p>
+                                    <p class="font-bold text-brand-600 text-sm cursor-pointer hover:underline">John Doe
+                                        <i class="fas fa-chevron-down text-xs ml-1"></i></p>
+                                </div>
+                            </div>
+                            <div class="text-right flex-1 sm:flex-none">
+                                <p class="text-xs text-gray-500 font-medium uppercase mb-1">Order #</p>
+                                <p class="font-bold text-gray-900 text-sm">LUXE-892374-X</p>
+                            </div>
+                        </div>
+                        <div class="p-4 sm:p-6 bg-white">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-gray-900 flex items-center gap-2"><i
+                                            class="fas fa-check-circle text-green-500 text-lg"></i> Delivered</h3>
+                                    <p class="text-sm text-gray-500 mt-1">Your package was delivered on Oct 18, 2026</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        class="px-4 py-2 border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors">Track
+                                        Info</button>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-center">
+                                <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=150&q=80"
+                                        class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex-1">
+                                    <a href="{% url 'by_shop' %}"
+                                        class="font-bold text-gray-900 hover:text-brand-600 transition-colors line-clamp-1">Autumn
+                                        Jacket</a>
+                                    <p class="text-sm text-gray-500 mt-1">Brown / L</p>
+                                    <div class="mt-2 text-sm flex gap-4">
+                                        <button class="text-brand-600 font-medium hover:underline">Buy it again</button>
+                                        <button class="text-gray-500 hover:text-gray-900 transition-colors">Write
+                                            review</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-									<div class="collapse mt-3" id="orderItems{{ forloop.counter }}">
-										<div class="table-responsive">
-											<table class="table align-middle">
-												<thead>
-													<tr>
-														<th>Image</th>
-														<th>Product</th>
-														<th class="text-end">Price</th>
-														<th class="text-center">Qty</th>
-														<th class="text-end">Total</th>
-													</tr>
-												</thead>
-												<tbody>
-													{% for item in order.items.all %}
-														<tr>
-															<td style="width:80px">
-																{% if item.variant.product.image %}
-																	<img src="{{ item.variant.product.image.url }}" class="order-product-img" alt="{{ item.product_name }}">
-																{% else %}
-																	<img src="{% static 'images/product-1.png' %}" class="order-product-img" alt="{{ item.product_name }}">
-																{% endif %}
-															</td>
-															<td>
-																<div class="fw-semibold">{{ item.product_name }}</div>
-																<div class="text-muted small">
-																	{{ item.variant.color.name }} / {{ item.variant.size.name }}
-																</div>
-															</td>
-															<td class="text-end">₹{{ item.price }}</td>
-															<td class="text-center">{{ item.quantity }}</td>
-															<td class="text-end">₹{{ item.total }}</td>
-														</tr>
-													{% endfor %}
-												</tbody>
-											</table>
-										</div>
-									</div>
-								</div>
-							{% endfor %}
-						{% else %}
-							<div class="text-center text-muted py-5">
-								No orders yet.
-							</div>
-						{% endif %}
-					</div>
-				</div>
-			</div>
-		</div>
-
+                    <!-- Order item 2 -->
+                    <div
+                        class="border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-300">
+                        <div
+                            class="bg-gray-50 p-4 sm:p-6 flex flex-wrap justify-between items-center gap-4 border-b border-gray-100">
+                            <div class="flex gap-8">
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Order Placed</p>
+                                    <p class="font-bold text-gray-900 text-sm">September 02, 2026</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Total</p>
+                                    <p class="font-bold text-gray-900 text-sm">$45.00</p>
+                                </div>
+                            </div>
+                            <div class="text-right flex-1 sm:flex-none">
+                                <p class="text-xs text-gray-500 font-medium uppercase mb-1">Order #</p>
+                                <p class="font-bold text-gray-900 text-sm">LUXE-811453-A</p>
+                            </div>
+                        </div>
+                        <div class="p-4 sm:p-6 bg-white">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-gray-900 flex items-center gap-2"><i
+                                            class="fas fa-check-circle text-green-500 text-lg"></i> Delivered</h3>
+                                </div>
+                            </div>
+                            <div class="flex gap-4 items-center">
+                                <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=150&q=80"
+                                        class="w-full h-full object-cover">
+                                </div>
+                                <div class="flex-1">
+                                    <a href="{% url 'by_shop' %}"
+                                        class="font-bold text-gray-900 hover:text-brand-600 transition-colors line-clamp-1">Casual
+                                        Denim Shirt</a>
+                                    <p class="text-sm text-gray-500 mt-1">Light Blue / M</p>
+                                    <div class="mt-2 text-sm flex gap-4"><button
+                                            class="text-brand-600 font-medium hover:underline">Buy it again</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- Footer -->
+    <footer class="bg-gray-900 mt-10 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white text-center">
+            <h4 class="text-2xl font-black tracking-tighter mb-4 text-white">LUXE<span class="text-brand-500">.</span>
+            </h4>
+            <p class="text-gray-500 text-sm">&copy; 2026 LUXE E-Commerce. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => {
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+                setTimeout(() => { mobileMenu.classList.remove('opacity-0', 'scale-y-0'); mobileMenu.classList.add('opacity-100', 'scale-y-100'); }, 10);
+            } else {
+                mobileMenu.classList.remove('opacity-100', 'scale-y-100'); mobileMenu.classList.add('opacity-0', 'scale-y-0');
+                setTimeout(() => { mobileMenu.classList.add('hidden'); }, 300);
+            }
+        });
+    </script>
 {% endblock buyer_layout %}

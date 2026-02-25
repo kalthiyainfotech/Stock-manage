@@ -1,145 +1,116 @@
 {% extends "by_base.html" %}
-{% load static %}
 {% block buyer_layout %}
-
-		<style>
-			.blog-thumbnail-img {
-				width: 100%;
-				height: 230px;
-				object-fit: cover;
-				border-radius: 8px;
-				display: block;
-			}
-		</style>
-
-		<!-- Start Hero Section -->
-			<div class="hero">
-				<div class="container">
-					<div class="row justify-content-between">
-						<div class="col-lg-5">
-							<div class="intro-excerpt">
-								<h1>Blog</h1>
-								<p class="mb-4">Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique.</p>
-								<p><a href="" class="btn btn-secondary me-2">Shop Now</a><a href="#" class="btn btn-white-outline">Explore</a></p>
-							</div>
-						</div>
-						<div class="col-lg-7">
-							<div class="hero-img-wrap">
-								<img src="{% static "images/couch.png" %}" class="img-fluid">
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-		
-
-		<div class="blog-section">
-			<div class="container">
-				
-				
-				<div class="row">
-					{% for blog in blogs %}
-					<div class="col-12 col-sm-6 col-md-4 mb-5" data-blog-id="{{ blog.id }}">
-						<div class="post-entry">
-							<a href="#" class="post-thumbnail">
-								{% if blog.image %}
-									<img src="{{ blog.image.url }}" alt="Image" class="img-fluid blog-thumbnail-img">
-								{% else %}
-									<img src="{% static "images/post-1.jpg" %}" alt="Image" class="img-fluid blog-thumbnail-img">
-								{% endif %}
-							</a>
-							<div class="post-content-entry">
-								<h3>
-									<a href="#">
-										{{ blog.des|truncatechars:40 }}
-									</a>
-								</h3>
-								<div class="meta">
-									<span>by <a href="#">{{ blog.by }}</a></span>
-									<span>on <a href="#">{{ blog.date }}</a></span>
-								</div>
-							</div>
-						</div>
-					</div>
-					{% empty %}
-					<div class="col-12">
-						<p class="text-center text-muted">No blogs available right now.</p>
-					</div>
-					{% endfor %}
-
-				</div>
-			</div>
-		</div>
-
-
-		
-
-		
-
-	<script>
-	(function() {
-		var rowEl = document.querySelector('.blog-section .container .row');
-		if (!rowEl) return;
-		var fallbackImage = "{% static 'images/post-1.jpg' %}";
-		function truncateText(t, n) {
-			if (!t) return '';
-			return t.length > n ? t.slice(0, n - 1) + '…' : t;
-		}
-		var protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-		var wsUrl = protocol + '://' + window.location.host + '/ws/blogs/';
-		var socket = new WebSocket(wsUrl);
-		socket.onmessage = function(e) {
-			try {
-				var msg = JSON.parse(e.data);
-				if (msg && msg.type === 'blog_added' && msg.blog) {
-					var b = msg.blog;
-					var imgUrl = b.image_url || fallbackImage;
-					var col = document.createElement('div');
-					col.className = 'col-12 col-sm-6 col-md-4 mb-5';
-					col.setAttribute('data-blog-id', b.id);
-					col.innerHTML = '' +
-						'<div class="post-entry">' +
-							'<a href="#" class="post-thumbnail">' +
-								'<img src="' + imgUrl + '" alt="Image" class="img-fluid blog-thumbnail-img">' +
-							'</a>' +
-							'<div class="post-content-entry">' +
-								'<h3><a href="#">' + truncateText(b.des || '', 40) + '</a></h3>' +
-								'<div class="meta">' +
-									'<span>by <a href="#">' + (b.by || '') + '</a></span>' +
-									'<span>on <a href="#">' + (b.date || '') + '</a></span>' +
-								'</div>' +
-							'</div>' +
-						'</div>';
-					rowEl.insertBefore(col, rowEl.firstChild);
-				} else if (msg && msg.type === 'blog_updated' && msg.blog) {
-					var b = msg.blog;
-					var imgUrl = b.image_url || fallbackImage;
-					var card = rowEl.querySelector('[data-blog-id=\"' + b.id + '\"]');
-					if (card) {
-						card.innerHTML = '' +
-							'<div class="post-entry">' +
-								'<a href="#" class="post-thumbnail">' +
-									'<img src="' + imgUrl + '" alt="Image" class="img-fluid blog-thumbnail-img">' +
-								'</a>' +
-								'<div class="post-content-entry">' +
-									'<h3><a href=\"#\">' + truncateText(b.des || '', 40) + '</a></h3>' +
-									'<div class="meta">' +
-										'<span>by <a href=\"#\">' + (b.by || '') + '</a></span>' +
-										'<span>on <a href=\"#\">' + (b.date || '') + '</a></span>' +
-									'</div>' +
-								'</div>' +
-							'</div>';
-					}
-				} else if (msg && msg.type === 'blog_deleted' && typeof msg.id !== 'undefined') {
-					var card = rowEl.querySelector('[data-blog-id=\"' + msg.id + '\"]');
-					if (card && card.parentElement) {
-						card.parentElement.removeChild(card);
-					}
-				}
-			} catch (_) {}
-		};
-	})();
-	</script>
-
-	{% endblock buyer_layout %}
+    <div class="pt-32 pb-16 bg-brand-50 relative overflow-hidden">
+        <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-brand-500 rounded-full blur-3xl opacity-10"></div>
+        <div class="absolute -top-20 -right-20 w-64 h-64 bg-pink-500 rounded-full blur-3xl opacity-10"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">The Luxe Journal</h1>
+            <p class="text-gray-500 max-w-xl mx-auto text-lg hover:text-gray-800 transition-colors">Style tips, modern
+                fashion news, and stories straight from our designers.</p>
+        </div>
+    </div>
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+        <div class="mb-16">
+            <div
+                class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-500 flex flex-col md:flex-row group">
+                <div class="w-full md:w-1/2 overflow-hidden h-72 md:h-auto">
+                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80"
+                        alt="Featured"
+                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                </div>
+                <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                    <div class="flex items-center gap-3 text-sm text-gray-500 mb-4">
+                        <span class="bg-brand-50 text-brand-600 font-bold px-3 py-1 rounded-full">Fashion</span>
+                        <span><i class="far fa-calendar-alt mr-1"></i> Oct 12, 2026</span>
+                    </div>
+                    <a href="#">
+                        <h2 class="text-3xl font-black text-gray-900 mb-4 hover:text-brand-600 transition-colors">The
+                            Ultimate Guide to Autumn Layering</h2>
+                    </a>
+                    <p class="text-gray-600 mb-8 leading-relaxed">Discover how to stay warm without sacrificing style.
+                        Our head designer shares top secrets to mastering the art of layering this fall season...</p>
+                    <a href="#"
+                        class="inline-flex items-center font-bold text-gray-900 border-b-2 border-brand-500 pb-1 hover:text-brand-600 transition-colors self-start">Read
+                        Article <i class="fas fa-arrow-right ml-2 text-sm"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <article
+                class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"
+                        alt="Blog Post"
+                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute top-4 left-4"><span
+                            class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">Trends</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i
+                                class="far fa-calendar-alt mr-1"></i> Sep 28, 2026</span></div>
+                    <a href="#">
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-3 hover:text-brand-600 transition-colors leading-tight">
+                            10 Wardrobe Essentials Every Woman Needs</h3>
+                    </a>
+                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">Build a versatile collection that carries you
+                        from work to weekend with effortless grace...</p>
+                    <a href="#"
+                        class="text-brand-600 font-bold text-sm hover:text-brand-800 transition-colors flex items-center">Read
+                        More <i class="fas fa-chevron-right text-[10px] ml-2"></i></a>
+                </div>
+            </article>
+            <article
+                class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=800&q=80"
+                        alt="Blog Post"
+                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute top-4 left-4"><span
+                            class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">Men's
+                            Style</span></div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i
+                                class="far fa-calendar-alt mr-1"></i> Sep 15, 2026</span></div>
+                    <a href="#">
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-3 hover:text-brand-600 transition-colors leading-tight">
+                            Mastering the Casual Friday Look</h3>
+                    </a>
+                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">The delicate balance between professional and
+                        relaxed revealed in our latest men's style guide...</p>
+                    <a href="#"
+                        class="text-brand-600 font-bold text-sm hover:text-brand-800 transition-colors flex items-center">Read
+                        More <i class="fas fa-chevron-right text-[10px] ml-2"></i></a>
+                </div>
+            </article>
+            <article
+                class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+                <div class="relative h-64 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80"
+                        alt="Blog Post"
+                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="absolute top-4 left-4"><span
+                            class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">Accessories</span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i
+                                class="far fa-calendar-alt mr-1"></i> Sep 02, 2026</span></div>
+                    <a href="#">
+                        <h3
+                            class="text-xl font-bold text-gray-900 mb-3 hover:text-brand-600 transition-colors leading-tight">
+                            The Power of Statement Sneakers</h3>
+                    </a>
+                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">How to elevate a simple outfit instantly using
+                        bold, comfortable footwear options...</p>
+                    <a href="#"
+                        class="text-brand-600 font-bold text-sm hover:text-brand-800 transition-colors flex items-center">Read
+                        More <i class="fas fa-chevron-right text-[10px] ml-2"></i></a>
+                </div>
+            </article>
+        </div>
+    </main>
+{% endblock buyer_layout %}

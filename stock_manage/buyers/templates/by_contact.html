@@ -1,117 +1,175 @@
 {% extends "by_base.html" %}
-{% load static %}
 {% block buyer_layout %}
+    <div class="pt-32 pb-16 bg-brand-50 relative overflow-hidden">
+        <!-- Deco -->
+        <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-brand-500 rounded-full blur-3xl opacity-10"></div>
+        <div class="absolute -top-20 -right-20 w-64 h-64 bg-pink-500 rounded-full blur-3xl opacity-10"></div>
 
-			<div class="hero">
-				<div class="container">
-					<div class="row justify-content-between">
-						<div class="col-lg-5">
-							<div class="intro-excerpt">
-								<h1>Contact</h1>
-								<p class="mb-4">Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique.</p>
-								<p><a href="" class="btn btn-secondary me-2">Shop Now</a><a href="#" class="btn btn-white-outline">Explore</a></p>
-							</div>
-						</div>
-						<div class="col-lg-7">
-							<div class="hero-img-wrap">
-								<img src="{% static "images/couch.png" %}" class="img-fluid">
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">Get in Touch</h1>
+            <p class="text-gray-500 max-w-xl mx-auto text-lg hover:text-gray-800 transition-colors">We'd love to hear
+                from you. Whether you have a question about products, pricing, or anything else, our team is ready to
+                answer all your questions.</p>
+        </div>
+    </div>
 
-		
-		<div class="untree_co-section">
-      <div class="container">
+    <!-- Contact Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 group">
+        <div class="flex flex-col lg:flex-row gap-12 lg:gap-20">
 
-        <div class="block">
-          <div class="row justify-content-center">
-
-
-            <div class="col-md-8 col-lg-8 pb-4">
-
-
-              <div class="row mb-5">
-                <div class="col-lg-4">
-                  <div  class="service no-shadow align-items-center link horizontal d-flex active" data-aos="fade-left" data-aos-delay="0">
-                    <div class="service-icon color-1 mb-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
-                        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
-                      </svg>
-                    </div> 
-                    <div class="service-contents">
-                      <p>B302, Saundarya Sky Heights behind to D-mart, Mota Varachha, Surat, Gujarat 394105</p>
-                    </div> 
-                  </div> 
-                </div>
-
-                <div class="col-lg-4">
-                  <div  class="service no-shadow align-items-center link horizontal d-flex active" data-aos="fade-left" data-aos-delay="0">
-                    <div class="service-icon color-1 mb-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-fill" viewBox="0 0 16 16">
-                        <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555zM0 4.697v7.104l5.803-3.558L0 4.697zM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757zm3.436-.586L16 11.801V4.697l-5.803 3.546z"/>
-                      </svg>
-                    </div> 
-                    <div class="service-contents">
-                      <p>info@patel.com</p>
-                    </div> 
-                  </div> 
-                </div>
-
-                <div class="col-lg-4">
-                  <div  class="service no-shadow align-items-center link horizontal d-flex active" data-aos="fade-left" data-aos-delay="0">
-                    <div class="service-icon color-1 mb-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone-fill" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/>
-                      </svg>
-                    </div> 
-                    <div class="service-contents">
-                      <p>+91 12345 67890</p>
-                    </div> 
-                  </div> 
-                </div>
-              </div>
-
-              <form method="POST" action="{% url 'by_contact' %}">
-                {% csrf_token %}
-                <div class="row">
-                  <div class="col-6">
-                    <div class="form-group">
-                      <label class="text-black" for="fname">First name</label>
-                      <input type="text" class="form-control" id="fname" name="fname">
+            <!-- Contact Info -->
+            <div class="w-full lg:w-1/3">
+                <div class="space-y-10">
+                    <div>
+                        <h2 class="text-3xl font-black text-gray-900 mb-6 group-hover:text-brand-600 transition-colors">
+                            Contact Information</h2>
+                        <p class="text-gray-500 mb-8 leading-relaxed">Fill up the form and our Team will get back to you
+                            within 24 hours.</p>
                     </div>
-                  </div>
-                  <div class="col-6">
-                    <div class="form-group">
-                      <label class="text-black" for="lname">Last name</label>
-                      <input type="text" class="form-control" id="lname" name="lname">
+
+                    <!-- Info Blocks -->
+                    <div class="space-y-6">
+                        <div
+                            class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow group/item cursor-pointer">
+                            <div
+                                class="w-12 h-12 bg-brand-50 text-brand-500 rounded-xl flex items-center justify-center text-xl shrink-0 group-hover/item:text-white group-hover/item:bg-brand-500 transition-colors">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div>
+                                <h4
+                                    class="font-bold text-gray-900 text-lg group-hover/item:text-brand-600 transition-colors">
+                                    Phone Number</h4>
+                                <p class="text-gray-500 text-sm mt-1">+1 (800) 123-4567<br>+1 (800) 987-6543</p>
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow group/item cursor-pointer">
+                            <div
+                                class="w-12 h-12 bg-brand-50 text-brand-500 rounded-xl flex items-center justify-center text-xl shrink-0 group-hover/item:text-white group-hover/item:bg-brand-500 transition-colors">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h4
+                                    class="font-bold text-gray-900 text-lg group-hover/item:text-brand-600 transition-colors">
+                                    Email Address</h4>
+                                <p class="text-gray-500 text-sm mt-1 mb-1">support@luxe.com</p>
+                                <a href="mailto:contact@luxe.com"
+                                    class="text-brand-500 font-bold hover:underline text-sm">Send us an email</a>
+                            </div>
+                        </div>
+
+                        <div
+                            class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow group/item cursor-pointer">
+                            <div
+                                class="w-12 h-12 bg-brand-50 text-brand-500 rounded-xl flex items-center justify-center text-xl shrink-0 group-hover/item:text-white group-hover/item:bg-brand-500 transition-colors">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h4
+                                    class="font-bold text-gray-900 text-lg group-hover/item:text-brand-600 transition-colors">
+                                    Our Location</h4>
+                                <p class="text-gray-500 text-sm mt-1">123 Fashion Avenue, Suite 400<br>New York, NY
+                                    10001<br>United States</p>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label class="text-black" for="email">Email address</label>
-                  <input type="email" class="form-control" id="email" name="email">
-                </div>
 
-                <div class="form-group mb-5">
-                  <label class="text-black" for="message">Message</label>
-                  <textarea class="form-control" id="message" name="message" cols="30" rows="5"></textarea>
+                    <!-- Social Media -->
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-4 text-lg">Follow Us</h4>
+                        <div class="flex gap-4">
+                            <a href="#"
+                                class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-500 hover:text-white hover:border-brand-500 shadow-sm transition-all hover:-translate-y-1"><i
+                                    class="fab fa-facebook-f"></i></a>
+                            <a href="#"
+                                class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-blue-400 hover:text-white hover:border-blue-400 shadow-sm transition-all hover:-translate-y-1"><i
+                                    class="fab fa-twitter"></i></a>
+                            <a href="#"
+                                class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-pink-600 hover:text-white hover:border-pink-600 shadow-sm transition-all hover:-translate-y-1"><i
+                                    class="fab fa-instagram"></i></a>
+                            <a href="#"
+                                class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 shadow-sm transition-all hover:-translate-y-1"><i
+                                    class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
                 </div>
-
-                <button type="submit" class="btn btn-primary-hover-outline">Send Message</button>
-              </form>
-
             </div>
 
-          </div>
+            <!-- Contact Form -->
+            <div class="w-full lg:w-2/3">
+                <div
+                    class="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow duration-500 relative overflow-hidden">
+                    <div class="absolute -top-32 -right-32 w-64 h-64 bg-brand-50 rounded-full blur-3xl z-0"></div>
+                    <form class="relative z-10" method="post" action="{% url 'by_contact' %}">
+                        {% csrf_token %}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">First Name</label>
+                                <input type="text" name="fname" placeholder="John"
+                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Last Name</label>
+                                <input type="text" name="lname" placeholder="Doe"
+                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
+                                <input type="email" name="email" placeholder="john.doe@example.com"
+                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
+                                <input type="tel" placeholder="+1 (555) 000-0000"
+                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Subject</label>
+                                <div class="relative">
+                                    <select
+                                        class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium appearance-none text-gray-600">
+                                        <option>General Inquiry</option>
+                                        <option>Order Status</option>
+                                        <option>Returns & Refunds</option>
+                                        <option>Product Information</option>
+                                        <option>Other</option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                                        <i class="fas fa-chevron-down text-sm"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Message</label>
+                                <textarea rows="5" name="message" placeholder="Write your message here..."
+                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium resize-none"></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                            class="group px-5 py-3 text-sm bg-gray-900 border border-gray-900 text-white font-semibold rounded-lg hover:bg-brand-600 hover:border-brand-600 transition-all shadow-md flex items-center justify-center gap-2 w-auto">
+                            <span>Send Message</span>
+                            <i class="fas fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
 
         </div>
-
-      </div>
-
-
     </div>
-  </div>
 
-  {% endblock buyer_layout %}
+    <!-- Map Section (Placeholder) -->
+    <div class="w-full h-96 bg-gray-300 relative">
+        <div class="absolute inset-0 bg-gray-200 flex items-center justify-center mix-blend-multiply">
+            <div class="text-center group cursor-pointer p-8 rounded-full hover:bg-white/50 transition-colors">
+                <i
+                    class="fas fa-map-marker-alt text-4xl text-brand-500 drop-shadow-lg group-hover:scale-125 transition-transform duration-300 group-hover:-translate-y-2 group-hover:text-red-500 animate-bounce cursor-pointer"></i>
+                <h3 class="font-bold text-gray-800 text-xl font-sans mt-2 shadow-white">123 Fashion Ave</h3>
+            </div>
+        </div>
+        <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1500&q=80"
+            class="w-full h-full object-cover opacity-60">
+    </div>
+{% endblock buyer_layout %}

@@ -108,3 +108,23 @@ class OrderItem(models.Model):
     
     def __str__(self):
         return f"{self.product_name} x {self.quantity} - Order {self.order.order_number}"
+
+
+class WishlistItem(models.Model):
+    buyer = models.ForeignKey(
+        Buyer,
+        on_delete=models.CASCADE,
+        related_name="wishlist_items"
+    )
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.CASCADE,
+        related_name="wishlisted_by"
+    )
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("buyer", "variant")
+
+    def __str__(self):
+        return f"{self.buyer.email} - wishlist - {self.variant}"

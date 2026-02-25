@@ -212,6 +212,23 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-medium text-slate-700">Gallery (multiple)</label>
+                            <div
+                                class="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
+                                <div
+                                    class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-xs">
+                                    <i class="fa-solid fa-images"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" name="extra_images" multiple
+                                        class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
+                                    <p class="mt-0.5 text-[11px] text-slate-400">
+                                        Add multiple images; first shows as default, others as gallery.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-2 border-t border-slate-100">
@@ -359,19 +376,17 @@
                                 </button>
 
                                 <button
-                                    onclick="openEditModal(
-                                        '{% url 'edit_inventory' inventory.id %}',
-                                        '{{ inventory.product.brand.subcetegory.category.name }}',
-                                        '{{ inventory.product.brand.subcetegory.name }}',
-                                        '{{ inventory.product.brand.name }}',
-                                        '{{ inventory.product.name }}',
-                                        `{{ inventory.product.description|default_if_none:'' }}`,
-                                        '{{ inventory.color.name }}',
-                                        '{{ inventory.size.name }}',
-                                        '{{ inventory.price }}',
-                                        '{{ inventory.stock }}',
-                                        `[{% for s in inventory.specs.all %}{\"name\":\"{{ s.name|escapejs }}\",\"value\":\"{{ s.value|escapejs }}\"}{% if not forloop.last %},{% endif %}{% endfor %}]`
-                                    )"
+                                    data-edit-url="{% url 'edit_inventory' inventory.id %}"
+                                    data-category="{{ inventory.product.brand.subcetegory.category.name|escapejs }}"
+                                    data-subcategory="{{ inventory.product.brand.subcetegory.name|escapejs }}"
+                                    data-brand="{{ inventory.product.brand.name|escapejs }}"
+                                    data-product="{{ inventory.product.name|escapejs }}"
+                                    data-description="{{ inventory.product.description|default_if_none:''|escapejs }}"
+                                    data-color="{{ inventory.color.name|escapejs }}"
+                                    data-size="{{ inventory.size.name|escapejs }}"
+                                    data-price="{{ inventory.price }}"
+                                    data-stock="{{ inventory.stock }}"
+                                    data-specs='[{% for s in inventory.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition"
                                     title="Edit">
                                     <i class="fa-solid fa-pen-to-square text-xs"></i>
@@ -904,9 +919,8 @@ productSelect.addEventListener('change', function() {
 });
 
 function loadSubcategories(categoryName) {
-    if (!categoryName) return;
-    
-    fetch(`{% url 'get_subcategories' %}?category_name=${encodeURIComponent(categoryName)}`)
+    if (!categoryName) return Promise.resolve();
+    return fetch(`{% url 'get_subcategories' %}?category_name=${encodeURIComponent(categoryName)}`)
         .then(response => response.json())
         .then(data => {
             subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
@@ -918,23 +932,19 @@ function loadSubcategories(categoryName) {
             });
             subcategorySelect.innerHTML += '<option value="__new__">+ Add New Subcategory</option>';
             subcategorySelect.disabled = false;
-            
             brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
             productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
             brandSelect.disabled = true;
             productSelect.disabled = true;
-        })
-        .catch(error => {
-            console.error('Error loading subcategories:', error);
+        }).catch(() => {
             subcategorySelect.disabled = false;
         });
 }
 
 function loadBrands(subcategoryName) {
     const categoryName = categorySelect.value;
-    if (!subcategoryName || !categoryName) return;
-    
-    fetch(`{% url 'get_brands' %}?category_name=${encodeURIComponent(categoryName)}&subcategory_name=${encodeURIComponent(subcategoryName)}`)
+    if (!subcategoryName || !categoryName) return Promise.resolve();
+    return fetch(`{% url 'get_brands' %}?category_name=${encodeURIComponent(categoryName)}&subcategory_name=${encodeURIComponent(subcategoryName)}`)
         .then(response => response.json())
         .then(data => {
             brandSelect.innerHTML = '<option value="">Select Brand</option>';
@@ -946,12 +956,9 @@ function loadBrands(subcategoryName) {
             });
             brandSelect.innerHTML += '<option value="__new__">+ Add New Brand</option>';
             brandSelect.disabled = false;
-            
             productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
             productSelect.disabled = true;
-        })
-        .catch(error => {
-            console.error('Error loading brands:', error);
+        }).catch(() => {
             brandSelect.disabled = false;
         });
 }
@@ -959,9 +966,8 @@ function loadBrands(subcategoryName) {
 function loadProducts(brandName) {
     const categoryName = categorySelect.value;
     const subcategoryName = subcategorySelect.value;
-    if (!brandName || !subcategoryName || !categoryName) return;
-    
-    fetch(`{% url 'get_products' %}?category_name=${encodeURIComponent(categoryName)}&subcategory_name=${encodeURIComponent(subcategoryName)}&brand_name=${encodeURIComponent(brandName)}`)
+    if (!brandName || !subcategoryName || !categoryName) return Promise.resolve();
+    return fetch(`{% url 'get_products' %}?category_name=${encodeURIComponent(categoryName)}&subcategory_name=${encodeURIComponent(subcategoryName)}&brand_name=${encodeURIComponent(brandName)}`)
         .then(response => response.json())
         .then(data => {
             productSelect.innerHTML = '<option value="">Select Product</option>';
@@ -973,9 +979,7 @@ function loadProducts(brandName) {
             });
             productSelect.innerHTML += '<option value="__new__">+ Add New Product</option>';
             productSelect.disabled = false;
-        })
-        .catch(error => {
-            console.error('Error loading products:', error);
+        }).catch(() => {
             productSelect.disabled = false;
         });
 }
@@ -1076,7 +1080,7 @@ inventoryForm.addEventListener('submit', function(e) {
     }
 });
 
-function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, specsJson) {
+async function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, specsJson) {
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
 
@@ -1085,22 +1089,16 @@ function openEditModal(editUrl, category, subcategory, brand, product, descripti
 
     categorySelect.value = category;
     if (category) {
-        loadSubcategories(category);
-        setTimeout(() => {
-            subcategorySelect.value = subcategory;
-            if (subcategory) {
-                loadBrands(subcategory);
-                setTimeout(() => {
-                    brandSelect.value = brand;
-                    if (brand) {
-                        loadProducts(brand);
-                        setTimeout(() => {
-                            productSelect.value = product;
-                        }, 300);
-                    }
-                }, 300);
+        await loadSubcategories(category);
+        subcategorySelect.value = subcategory || '';
+        if (subcategory) {
+            await loadBrands(subcategory);
+            brandSelect.value = brand || '';
+            if (brand) {
+                await loadProducts(brand);
+                productSelect.value = product || '';
             }
-        }, 300);
+        }
     }
     
     inventoryForm.description.value = description;
@@ -1118,7 +1116,34 @@ function openEditModal(editUrl, category, subcategory, brand, product, descripti
         }
     } catch (e) {
     }
+    newCategoryInput.classList.add('hidden');
+    newSubcategoryInput.classList.add('hidden');
+    newBrandInput.classList.add('hidden');
+    newProductInput.classList.add('hidden');
+    newCategoryInput.removeAttribute('name');
+    newSubcategoryInput.removeAttribute('name');
+    newBrandInput.removeAttribute('name');
+    newProductInput.removeAttribute('name');
 }
+
+document.querySelectorAll('button[title="Edit"]').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const d = this.dataset;
+        openEditModal(
+            d.editUrl || '',
+            d.category || '',
+            d.subcategory || '',
+            d.brand || '',
+            d.product || '',
+            d.description || '',
+            d.color || '',
+            d.size || '',
+            d.price || '',
+            d.stock || '',
+            d.specs || '[]'
+        );
+    });
+});
 
 function openDeleteModal(deleteUrl) {
     deleteModal.classList.remove('hidden');

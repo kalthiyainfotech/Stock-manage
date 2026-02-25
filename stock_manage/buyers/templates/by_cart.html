@@ -1,292 +1,203 @@
 {% extends "by_base.html" %}
-{% load static %}
 {% block buyer_layout %}
+{% load static %}
 
-			<div class="hero">
-				<div class="container">
-					<div class="row justify-content-between">
-						<div class="col-lg-5">
-							<div class="intro-excerpt">
-								<h1>Cart</h1>
-							</div>
-						</div>
-						<div class="col-lg-7">
-							
-						</div>
-					</div>
-				</div>
-			</div>
+    <!-- Page Header -->
+    <div class="pt-16 pb-8 bg-brand-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-3xl md:text-5xl font-black text-gray-900 mb-2">Your Bag</h1>
+            <p class="text-gray-500">{{ cart_items|length }} items in your cart</p>
+        </div>
+    </div>
 
-		
+    <!-- Cart Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row gap-8">
 
-		<div class="untree_co-section before-footer-section">
-            <div class="container">
-              <div class="row mb-5">
-                <form class="col-md-12" method="post">
-                  {% csrf_token %}
-                  <div class="site-blocks-table">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th class="product-thumbnail">Image</th>
-                          <th class="product-name">Product</th>
-                          <th class="product-price">Price</th>
-                          <th class="product-quantity" style="text-align: center;">Quantity</th>
-                          <th class="product-total">Total</th>
-                          <th class="product-remove">Remove</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for item in cart_items %}
-                        <tr data-item-id="{{ item.id }}">
-                          <td class="product-thumbnail">
-                            {% if item.variant.product.image %}
-                              <img src="{{ item.variant.product.image.url }}" alt="Image" class="img-fluid">
-                            {% else %}
-                              <img src="{% static 'images/product-1.png' %}" alt="Image" class="img-fluid">
-                            {% endif %}
-                          </td>
-                          <td class="product-name">
-                            <h2 class="h5 text-black">{{ item.variant.product.name }}</h2>
-                          </td>
-                          <td class="item-price" data-price="{{ item.variant.price }}">₹{{ item.variant.price }}</td>
-                          <td style="text-align: center;">
-                            <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px; margin: 0 auto;" data-item-id="{{ item.id }}" data-max-stock="{{ item.variant.stock }}">
-                              <div class="input-group-prepend">
-                                <button class="btn btn-outline-black decrease" type="button" data-item-id="{{ item.id }}">&minus;</button>
-                              </div>
-                              <input type="hidden" name="quantity_{{ item.id }}" id="quantity_{{ item.id }}" value="{{ item.quantity }}">
-                              <input type="text" class="form-control text-center quantity-amount" value="{{ item.quantity }}" readonly data-item-id="{{ item.id }}">
-                              <div class="input-group-append">
-                                <button class="btn btn-outline-black increase" type="button" data-item-id="{{ item.id }}">&plus;</button>
-                              </div>
+        <!-- Cart Items -->
+        <main class="w-full lg:w-2/3">
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                <!-- Header -->
+                <div
+                    class="hidden sm:grid grid-cols-12 gap-4 pb-4 border-b border-gray-100 text-sm font-bold text-gray-400 uppercase tracking-wider mb-6">
+                    <div class="col-span-6">Product</div>
+                    <div class="col-span-3 text-center">Quantity</div>
+                    <div class="col-span-2 text-right">Price</div>
+                    <div class="col-span-1"></div>
+                </div>
+
+                <form method="post">
+                    {% for item in cart_items %}
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center py-6 border-b border-gray-100 group">
+                        <div class="col-span-1 sm:col-span-6 flex gap-4">
+                            <a href="{% url 'by_product' item.variant.id %}" class="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0">
+                                {% if item.variant.product.image %}
+                                <img src="{{ item.variant.product.image.url }}"
+                                     alt="{{ item.variant.product.name }}"
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                {% else %}
+                                <img src="{% static 'images/product-1.png' %}"
+                                     alt="{{ item.variant.product.name }}"
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                {% endif %}
+                            </a>
+                            <div class="flex flex-col justify-center">
+                                <a href="{% url 'by_product' item.variant.id %}"
+                                    class="font-bold text-lg text-gray-900 hover:text-brand-600 transition-colors mb-1">
+                                    {{ item.variant.product.name }}
+                                </a>
+                                <p class="text-gray-500 text-sm mb-1">Size: {{ item.variant.size.name }} | Color: {{ item.variant.color.name }}</p>
+                                <p class="text-brand-500 font-bold block sm:hidden">₹{{ item.variant.price }}</p>
                             </div>
-                          </td>
-                          <td class="item-total-cell">₹<span class="item-total">{{ item.total_price }}</span></td>
-                          <td><a href="{% url 'by_remove_from_cart' item.id %}" class="btn btn-black btn-sm">X</a></td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                          <td colspan="6" class="text-center">Your cart is empty.</td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                  </div>
+                        </div>
+                        <div class="col-span-1 sm:col-span-3 flex justify-start sm:justify-center">
+                            <div class="flex items-center border border-gray-200 rounded-xl bg-gray-50 w-28 justify-between p-1">
+                                <button type="button"
+                                    class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand-600 hover:bg-white rounded-lg transition-colors qty-minus"
+                                    data-target="quantity_{{ item.id }}"><i class="fas fa-minus text-xs"></i></button>
+                                <input name="quantity_{{ item.id }}" id="quantity_{{ item.id }}" type="text" value="{{ item.quantity }}"
+                                    class="w-10 text-center font-bold text-gray-900 outline-none">
+                                <button type="button"
+                                    class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand-600 hover:bg-white rounded-lg transition-colors qty-plus"
+                                    data-target="quantity_{{ item.id }}" data-max="{{ item.variant.stock }}"><i class="fas fa-plus text-xs"></i></button>
+                            </div>
+                        </div>
+                        <div class="hidden sm:block sm:col-span-2 text-right">
+                            <span class="font-black text-gray-900 text-lg" id="line-total-{{ item.id }}">₹{{ item.total_price }}</span>
+                        </div>
+                        <div class="col-span-1 flex justify-end">
+                            <a href="{% url 'by_remove_from_cart' item.id %}"
+                                class="w-10 h-10 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors"
+                                title="Remove">
+                                <i class="far fa-trash-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-center text-gray-500 py-6">Your cart is empty.</p>
+                    {% endfor %}
                 </form>
-              </div>
-        
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="row mb-5">
-                    <div class="col-md-12">
-                      <button type="button" class="btn btn-outline-black btn-sm btn-block" onclick="window.location='{% url "by_shop" %}'">Continue Shopping</button>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6 pl-5">
-                  <div class="row justify-content-end">
-                    <div class="col-md-7">
-                      <div class="row">
-                        <div class="col-md-12 text-right border-bottom mb-5">
-                          <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <div class="col-md-6">
-                          <span class="text-black">Subtotal</span>
-                        </div>
-                        <div class="col-md-6 text-right">
-                          <strong class="text-black">₹<span id="cart-subtotal">{{ subtotal }}</span></strong>
-                        </div>
-                      </div>
-                      <div class="row mb-5">
-                        <div class="col-md-6">
-                          <span class="text-black">Total</span>
-                        </div>
-                        <div class="col-md-6 text-right">
-                          <strong class="text-black">₹<span id="cart-total">{{ total }}</span></strong>
-                        </div>
-                      </div>
-        
-                      <div class="row">
-                        <div class="col-md-12">
-                          <button class="btn btn-black btn-lg py-3 btn-block" onclick="window.location='{% url "by_checkout" %}'">Proceed To Checkout</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
-<script>
-(function() {
-    'use strict';
-    
-    function initCartQuantity() {
-        var allQuantityInputs = document.querySelectorAll('.quantity-amount');
-        allQuantityInputs.forEach(function(input) {
-            var quantity = parseInt(input.value);
-            if (isNaN(quantity) || quantity < 1) {
-                quantity = 1;
-                input.value = 1;
-                var itemId = input.getAttribute('data-item-id');
-                var hiddenInput = document.getElementById('quantity_' + itemId);
-                if (hiddenInput) {
-                    hiddenInput.value = 1;
-                }
-            }
-        });
-        
-        var quantityContainers = document.querySelectorAll('.quantity-container');
-        quantityContainers.forEach(function(container) {
-            var newContainer = container.cloneNode(true);
-            container.parentNode.replaceChild(newContainer, container);
-        });
-        
-        var increaseButtons = document.querySelectorAll('.quantity-container .increase');
-        var decreaseButtons = document.querySelectorAll('.quantity-container .decrease');
-        
-        function updateTotals() {
-            var subtotal = 0;
-            var rows = document.querySelectorAll('tbody tr[data-item-id]');
-            
-            rows.forEach(function(row) {
-                var price = parseFloat(row.querySelector('.item-price').getAttribute('data-price'));
-                var quantityInput = row.querySelector('.quantity-amount');
-                var quantity = parseInt(quantityInput.value) || 1;
-                
-                if (quantity < 1) {
-                    quantity = 1;
-                    quantityInput.value = 1;
-                    var hiddenInput = row.querySelector('input[type="hidden"][id^="quantity_"]');
-                    if (hiddenInput) {
-                        hiddenInput.value = 1;
-                    }
-                }
-                
-                var itemTotal = price * quantity;
-                
-                var totalCell = row.querySelector('.item-total');
-                if (totalCell) {
-                    totalCell.textContent = itemTotal.toFixed(2);
-                }
-                
-                subtotal += itemTotal;
-            });
-            
-            var subtotalElement = document.getElementById('cart-subtotal');
-            var totalElement = document.getElementById('cart-total');
-            if (subtotalElement) {
-                subtotalElement.textContent = subtotal.toFixed(2);
-            }
-            if (totalElement) {
-                totalElement.textContent = subtotal.toFixed(2);
-            }
+                <!-- Return to shop -->
+                <div class="mt-8">
+                    <a href="{% url 'by_shop' %}"
+                        class="text-brand-600 font-bold flex items-center gap-2 hover:text-brand-800 transition-colors">
+                        <i class="fas fa-arrow-left"></i> Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Order Summary -->
+        <aside class="w-full lg:w-1/3">
+            <div class="bg-gray-900 text-white rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+                <!-- Deco -->
+                <div
+                    class="absolute top-0 right-0 w-40 h-40 bg-brand-500 rounded-full blur-3xl opacity-20 -mr-10 -mt-10">
+                </div>
+
+                <h3 class="text-2xl font-black mb-6 relative z-10">Order Summary</h3>
+
+                <div class="space-y-4 mb-6 border-b border-gray-800 pb-6 relative z-10 text-gray-300">
+                    <div class="flex justify-between">
+                        <p>Subtotal ({{ cart_items|length }} items)</p>
+                        <p class="font-bold text-white" id="subtotal-amount">₹{{ subtotal }}</p>
+                    </div>
+                    <div class="flex justify-between">
+                        <p>Shipping</p>
+                        <p class="font-bold text-white">Free</p>
+                    </div>
+                    <div class="flex justify-between">
+                        <p>Estimated Tax</p>
+                        <p class="font-bold text-white">₹0.00</p>
+                    </div>
+                </div>
+
+                <!-- Promo -->
+                <div class="mb-6 relative z-10">
+                    <div class="flex bg-white/10 p-1 rounded-xl backdrop-blur-sm">
+                        <input type="text" placeholder="Promo code"
+                            class="w-full bg-transparent px-4 py-3 text-white placeholder-gray-400 outline-none text-sm">
+                        <button
+                            class="bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-3 rounded-lg transition-colors text-sm">Apply</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-end mb-8 relative z-10">
+                    <div>
+                        <p class="text-gray-400 text-sm mb-1">Total</p>
+                        <p class="text-3xl font-black text-white" id="total-amount">₹{{ total }}</p>
+                    </div>
+                </div>
+
+                <a href="{% url 'by_checkout' %}"
+                    class="block w-full py-5 bg-white text-gray-900 text-center font-black rounded-xl hover:bg-brand-50 transition-colors shadow-lg shadow-white/10 relative z-10 hover:scale-[1.02] transform duration-300">
+                    Proceed to Checkout
+                </a>
+
+                <!-- Trust badges -->
+                <div class="mt-8 flex justify-center gap-4 text-gray-500 text-2xl relative z-10">
+                    <i class="fab fa-cc-visa hover:text-white transition-colors"></i>
+                    <i class="fab fa-cc-mastercard hover:text-white transition-colors"></i>
+                    <i class="fab fa-cc-paypal hover:text-white transition-colors"></i>
+                    <i class="fab fa-cc-amex hover:text-white transition-colors"></i>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
         }
-        
-        increaseButtons.forEach(function(button) {
-            var newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-            
-            newButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                var itemId = this.getAttribute('data-item-id');
-                var quantityInput = document.querySelector('.quantity-amount[data-item-id="' + itemId + '"]');
-                var hiddenInput = document.getElementById('quantity_' + itemId);
-                var quantityContainer = this.closest('.quantity-container');
-                var maxStock = parseInt(quantityContainer.getAttribute('data-max-stock')) || 999;
-                var currentQuantity = parseInt(quantityInput.value) || 1;
-                
-                if (currentQuantity < 1) {
-                    currentQuantity = 1;
-                    quantityInput.value = 1;
-                    if (hiddenInput) {
-                        hiddenInput.value = 1;
+        const postUrl = "{% url 'by_cart' %}";
+        function updateCart(itemId, newQty) {
+            const formData = new FormData();
+            formData.append(`quantity_${itemId}`, String(newQty));
+            return fetch(postUrl, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken') || ''
+                },
+                body: formData
+            }).then(r => r.json()).then(data => {
+                if (data && typeof data.subtotal !== 'undefined') {
+                    const subEl = document.getElementById('subtotal-amount');
+                    const totEl = document.getElementById('total-amount');
+                    if (subEl) subEl.textContent = `₹${data.subtotal}`;
+                    if (totEl) totEl.textContent = `₹${data.total}`;
+                    const item = data.items.find(i => i.id === itemId);
+                    const lineEl = document.getElementById(`line-total-${itemId}`);
+                    if (item && lineEl) {
+                        lineEl.textContent = `₹${item.line_total}`;
                     }
                 }
-                
-                if (currentQuantity < maxStock) {
-                    var newQuantity = currentQuantity + 1;
-                    quantityInput.value = newQuantity;
-                    if (hiddenInput) {
-                        hiddenInput.value = newQuantity;
-                    }
-                    updateTotals();
-                } else {
-                    alert('Only ' + maxStock + ' items available in stock');
-                }
+            }).catch(() => {});
+        }
+        document.querySelectorAll('.qty-minus').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.target;
+                const input = document.getElementById(id);
+                const val = parseInt(input.value || '1') - 1;
+                const newVal = Math.max(1, val);
+                input.value = newVal;
+                const itemId = parseInt(id.replace('quantity_', ''));
+                updateCart(itemId, newVal);
             });
         });
-        
-        decreaseButtons.forEach(function(button) {
-            var newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-            
-            newButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                var itemId = this.getAttribute('data-item-id');
-                var quantityInput = document.querySelector('.quantity-amount[data-item-id="' + itemId + '"]');
-                var hiddenInput = document.getElementById('quantity_' + itemId);
-                var currentQuantity = parseInt(quantityInput.value) || 1;
-                
-                if (currentQuantity < 1) {
-                    currentQuantity = 1;
-                    quantityInput.value = 1;
-                    if (hiddenInput) {
-                        hiddenInput.value = 1;
-                    }
-                    return;
-                }
-                
-                if (currentQuantity > 1) {
-                    var newQuantity = currentQuantity - 1;
-                    if (newQuantity < 1) {
-                        newQuantity = 1;
-                    }
-                    quantityInput.value = newQuantity;
-                    if (hiddenInput) {
-                        hiddenInput.value = newQuantity;
-                    }
-                    updateTotals();
-                }
+        document.querySelectorAll('.qty-plus').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.target;
+                const input = document.getElementById(id);
+                const max = parseInt(btn.dataset.max || '0');
+                const val = parseInt(input.value || '1') + 1;
+                const newVal = max ? Math.min(max, val) : val;
+                input.value = newVal;
+                const itemId = parseInt(id.replace('quantity_', ''));
+                updateCart(itemId, newVal);
             });
         });
-        
-        updateTotals();
-    }
-    
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(initCartQuantity, 200);
-        });
-    } else {
-        setTimeout(initCartQuantity, 200);
-    }
-    
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-            var allQuantityInputs = document.querySelectorAll('.quantity-amount');
-            allQuantityInputs.forEach(function(input) {
-                var quantity = parseInt(input.value);
-                if (isNaN(quantity) || quantity < 1) {
-                    input.value = 1;
-                    var itemId = input.getAttribute('data-item-id');
-                    var hiddenInput = document.getElementById('quantity_' + itemId);
-                    if (hiddenInput) {
-                        hiddenInput.value = 1;
-                    }
-                }
-            });
-        }, 100);
-    });
-})();
-</script>
-		
+    </script>
 {% endblock buyer_layout %}
