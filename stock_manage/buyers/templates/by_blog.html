@@ -40,7 +40,7 @@
 				
 				<div class="row">
 					{% for blog in blogs %}
-					<div class="col-12 col-sm-6 col-md-4 mb-5">
+					<div class="col-12 col-sm-6 col-md-4 mb-5" data-blog-id="{{ blog.id }}">
 						<div class="post-entry">
 							<a href="#" class="post-thumbnail">
 								{% if blog.image %}
@@ -76,5 +76,70 @@
 		
 
 		
+
+	<script>
+	(function() {
+		var rowEl = document.querySelector('.blog-section .container .row');
+		if (!rowEl) return;
+		var fallbackImage = "{% static 'images/post-1.jpg' %}";
+		function truncateText(t, n) {
+			if (!t) return '';
+			return t.length > n ? t.slice(0, n - 1) + '…' : t;
+		}
+		var protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+		var wsUrl = protocol + '://' + window.location.host + '/ws/blogs/';
+		var socket = new WebSocket(wsUrl);
+		socket.onmessage = function(e) {
+			try {
+				var msg = JSON.parse(e.data);
+				if (msg && msg.type === 'blog_added' && msg.blog) {
+					var b = msg.blog;
+					var imgUrl = b.image_url || fallbackImage;
+					var col = document.createElement('div');
+					col.className = 'col-12 col-sm-6 col-md-4 mb-5';
+					col.setAttribute('data-blog-id', b.id);
+					col.innerHTML = '' +
+						'<div class="post-entry">' +
+							'<a href="#" class="post-thumbnail">' +
+								'<img src="' + imgUrl + '" alt="Image" class="img-fluid blog-thumbnail-img">' +
+							'</a>' +
+							'<div class="post-content-entry">' +
+								'<h3><a href="#">' + truncateText(b.des || '', 40) + '</a></h3>' +
+								'<div class="meta">' +
+									'<span>by <a href="#">' + (b.by || '') + '</a></span>' +
+									'<span>on <a href="#">' + (b.date || '') + '</a></span>' +
+								'</div>' +
+							'</div>' +
+						'</div>';
+					rowEl.insertBefore(col, rowEl.firstChild);
+				} else if (msg && msg.type === 'blog_updated' && msg.blog) {
+					var b = msg.blog;
+					var imgUrl = b.image_url || fallbackImage;
+					var card = rowEl.querySelector('[data-blog-id=\"' + b.id + '\"]');
+					if (card) {
+						card.innerHTML = '' +
+							'<div class="post-entry">' +
+								'<a href="#" class="post-thumbnail">' +
+									'<img src="' + imgUrl + '" alt="Image" class="img-fluid blog-thumbnail-img">' +
+								'</a>' +
+								'<div class="post-content-entry">' +
+									'<h3><a href=\"#\">' + truncateText(b.des || '', 40) + '</a></h3>' +
+									'<div class="meta">' +
+										'<span>by <a href=\"#\">' + (b.by || '') + '</a></span>' +
+										'<span>on <a href=\"#\">' + (b.date || '') + '</a></span>' +
+									'</div>' +
+								'</div>' +
+							'</div>';
+					}
+				} else if (msg && msg.type === 'blog_deleted' && typeof msg.id !== 'undefined') {
+					var card = rowEl.querySelector('[data-blog-id=\"' + msg.id + '\"]');
+					if (card && card.parentElement) {
+						card.parentElement.removeChild(card);
+					}
+				}
+			} catch (_) {}
+		};
+	})();
+	</script>
 
 	{% endblock buyer_layout %}

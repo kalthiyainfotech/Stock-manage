@@ -10,6 +10,8 @@ from buyers.models import Buyer, Order
 from decimal import Decimal
 import calendar
 from datetime import date
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 def auth_login(request):
     if request.user.is_authenticated:
@@ -724,12 +726,22 @@ def auth_blogs(request):
 @login_required(login_url='auth_login')
 def add_blogs(request):
     if request.method == "POST":
-        Blogs.objects.create(
+        blog = Blogs.objects.create(
             image=request.FILES.get('image'),
             des=request.POST.get('des'),
             by=request.POST.get('by'),
             date=request.POST.get('date'),
         )
+        layer = get_channel_layer()
+        if layer:
+            data = {
+                "id": blog.id,
+                "des": blog.des,
+                "by": blog.by,
+                "date": str(blog.date),
+                "image_url": blog.image.url if blog.image else None,
+            }
+            async_to_sync(layer.group_send)("blogs", {"type": "blog_added", "blog": data})
     return redirect('auth_blogs')
 
 
@@ -747,6 +759,16 @@ def edit_blogs(request, id):
             blog.image = request.FILES.get('image')
 
         blog.save()
+        layer = get_channel_layer()
+        if layer:
+            data = {
+                "id": blog.id,
+                "des": blog.des,
+                "by": blog.by,
+                "date": str(blog.date),
+                "image_url": blog.image.url if blog.image else None,
+            }
+            async_to_sync(layer.group_send)("blogs", {"type": "blog_updated", "blog": data})
 
     return redirect('auth_blogs')
 
@@ -754,7 +776,12 @@ def edit_blogs(request, id):
 @never_cache
 @login_required(login_url='auth_login')
 def delete_blogs(request, id):
+    b = Blogs.objects.filter(id=id).first()
+    bid = b.id if b else id
     Blogs.objects.filter(id=id).delete()
+    layer = get_channel_layer()
+    if layer:
+        async_to_sync(layer.group_send)("blogs", {"type": "blog_deleted", "id": bid})
     return redirect('auth_blogs')
 
 
