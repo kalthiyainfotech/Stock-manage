@@ -190,7 +190,7 @@ def add_worker(request):
         )
         return redirect('auth_workers')
 
-    return redirect('auth_workers')
+    return redirect('auth_workers') 
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -505,8 +505,27 @@ def auth_inventory(request):
 
     categories = Category.objects.filter(status=True).order_by('name')
 
+    groups_map = {}
+    groups = []
+    for v in inventory:
+        pid = v.product_id
+        g = groups_map.get(pid)
+        if not g:
+            g = {
+                'product': v.product,
+                'variants': [],
+                'colors': set(),
+                'sizes': set(),
+            }
+            groups_map[pid] = g
+            groups.append(g)
+        g['variants'].append(v)
+        g['colors'].add(v.color.name)
+        g['sizes'].add(v.size.name)
+
     return render(request, 'auth_inventory.html', {
-        'inventorys': inventory,  
+        'inventorys': inventory,
+        'inventory_groups': groups,
         'categories': categories
     })
 
@@ -833,8 +852,3 @@ def auth_order(request):
 def delete_order(request, id):
     Order.objects.filter(id=id).delete()
     return redirect('auth_order')
-
-
-
-
-

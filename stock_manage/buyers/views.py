@@ -185,6 +185,8 @@ def by_shop(request):
     qs = base_qs
     if category_id:
         qs = qs.filter(product__brand__subcetegory__category_id=category_id)
+        price_min = qs.order_by('price').values_list('price', flat=True).first() or price_min
+        price_max = qs.order_by('-price').values_list('price', flat=True).first() or price_max
     if min_price:
         try:
             qs = qs.filter(price__gte=float(min_price))
@@ -198,8 +200,27 @@ def by_shop(request):
     if brands_selected:
         qs = qs.filter(product__brand__id__in=brands_selected)
 
-    categories = base_qs.values('product__brand__subcetegory__category__id', 'product__brand__subcetegory__category__name').distinct()
-    brands = base_qs.values('product__brand__id', 'product__brand__name').distinct()
+    raw_categories = list(base_qs.values('product__brand__subcetegory__category__id', 'product__brand__subcetegory__category__name').distinct())
+    seen_cat_names = set()
+    categories = []
+    for c in raw_categories:
+        cn = (c.get('product__brand__subcetegory__category__name') or '').strip().lower()
+        if cn in seen_cat_names:
+            continue
+        seen_cat_names.add(cn)
+        categories.append({
+            'id': c.get('product__brand__subcetegory__category__id'),
+            'name': c.get('product__brand__subcetegory__category__name')
+        })
+    raw_brands = list(qs.values('product__brand__id', 'product__brand__name').distinct())
+    seen_names = set()
+    brands = []
+    for b in raw_brands:
+        n = (b.get('product__brand__name') or '').strip().lower()
+        if n in seen_names:
+            continue
+        seen_names.add(n)
+        brands.append(b)
 
     sales_sub = Subquery(
         OrderItem.objects.filter(variant_id=OuterRef('pk'))

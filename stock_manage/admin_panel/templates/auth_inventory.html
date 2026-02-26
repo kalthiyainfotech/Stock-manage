@@ -129,9 +129,12 @@
 
                             <div class="space-y-1.5">
                                 <label class="text-xs font-medium text-slate-700">Color</label>
-                                <input type="text" name="color"
-                                    placeholder="Color"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <div class="flex items-center gap-2">
+                                    <input id="colorPicker" type="color" class="h-10 w-10 rounded-md border border-slate-200">
+                                    <input type="text" name="color"
+                                        placeholder="Color"
+                                        class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                </div>
                             </div>
 
                             <div class="space-y-1.5">
@@ -304,106 +307,134 @@
                 </thead>
 
                 <tbody id="inventoryTableBody" class="divide-y divide-slate-100 bg-white">
-                    {% for inventory in inventorys %}
+                    {% for group in inventory_groups %}
+                    {% with first=group.variants.0 %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
-
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
                             {{ forloop.counter }}
                         </td>
-
                         <td class="px-4 py-3 align-middle text-center">
-                            {% if inventory.product.image %}
+                            {% if first.product.image %}
                             <div class="flex justify-center">
-                                <img src="{{ inventory.product.image.url }}"
+                                <img src="{{ first.product.image.url }}"
                                      class="h-10 w-10 rounded-full object-cover ring-2 ring-slate-100 shadow-xs">
                             </div>
                             {% else %}
                             <div class="flex justify-center">
-                                <div class="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-xs font-medium text-slate-500 ring-1 ring-slate-200">
-                                    N/A
-                                </div>
+                                <div class="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-xs font-medium text-slate-500 ring-1 ring-slate-200">N/A</div>
                             </div>
                             {% endif %}
                         </td>
-
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-700">
-                            {{ inventory.product.brand.subcetegory.category.name }}
+                            {{ first.product.brand.subcetegory.category.name }}
                         </td>
-
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
-                            {{ inventory.color.name }}
+                            <div class="flex flex-wrap gap-2">
+                                {% for v in group.variants %}
+                                <button
+                                    type="button"
+                                    class="inline-block w-4 h-4 rounded-full border border-slate-300 hover:ring-2 hover:ring-slate-300 edit-variant-color-btn"
+                                    title="Edit Variant: {{ v.color.name }}"
+                                    style="background-color: {{ v.color.name }}"
+                                    data-edit-url="{% url 'edit_inventory' v.id %}"
+                                    data-category="{{ v.product.brand.subcetegory.category.name|escapejs }}"
+                                    data-subcategory="{{ v.product.brand.subcetegory.name|escapejs }}"
+                                    data-brand="{{ v.product.brand.name|escapejs }}"
+                                    data-product="{{ v.product.name|escapejs }}"
+                                    data-description="{{ v.product.description|default_if_none:''|escapejs }}"
+                                    data-color="{{ v.color.name|escapejs }}"
+                                    data-size="{{ v.size.name|escapejs }}"
+                                    data-price="{{ v.price }}"
+                                    data-stock="{{ v.stock }}"
+                                    data-specs='[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                ></button>
+                                {% endfor %}
+                            </div>
                         </td>
-
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
-                            {{ inventory.size.name }}
+                            <div class="flex flex-wrap gap-2">
+                                {% for v in group.variants %}
+                                <button
+                                    type="button"
+                                    class="px-2 py-0.5 rounded border text-[11px] hover:bg-slate-100 edit-variant-size-btn"
+                                    title="Edit Variant: {{ v.size.name }}"
+                                    data-edit-url="{% url 'edit_inventory' v.id %}"
+                                    data-category="{{ v.product.brand.subcetegory.category.name|escapejs }}"
+                                    data-subcategory="{{ v.product.brand.subcetegory.name|escapejs }}"
+                                    data-brand="{{ v.product.brand.name|escapejs }}"
+                                    data-product="{{ v.product.name|escapejs }}"
+                                    data-description="{{ v.product.description|default_if_none:''|escapejs }}"
+                                    data-color="{{ v.color.name|escapejs }}"
+                                    data-size="{{ v.size.name|escapejs }}"
+                                    data-price="{{ v.price }}"
+                                    data-stock="{{ v.stock }}"
+                                    data-specs='[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                >
+                                    {{ v.size.name }}
+                                </button>
+                                {% endfor %}
+                            </div>
                         </td>
-
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-700 text-center">
-                            {{ inventory.stock }}
+                            {{ first.stock }}
                         </td>
-
                         <td class="px-4 py-3 align-middle text-center">
-                            <span
-                                class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
+                            <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
                                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                                 Active
                             </span>
                         </td>
-
                         <td class="px-4 py-3 align-middle text-center">
                             <div class="inline-flex items-center justify-center gap-2">
-
                                 <button
                                     onclick="openViewModal(
-                                        '{{ inventory.id }}',
-                                        '{{ inventory.product.name }}',
-                                        '{{ inventory.product.brand.name }}',
-                                        '{{ inventory.product.brand.subcetegory.category.name }}',
-                                        '{{ inventory.product.brand.subcetegory.name }}',
-                                        '{{ inventory.color.name }}',
-                                        '{{ inventory.size.name }}',
-                                        '{{ inventory.stock }}',
-                                        '{{ inventory.price }}',
-                                        `{{ inventory.product.description|default_if_none:'' }}`,
+                                        '{{ first.id }}',
+                                        '{{ first.product.name }}',
+                                        '{{ first.product.brand.name }}',
+                                        '{{ first.product.brand.subcetegory.category.name }}',
+                                        '{{ first.product.brand.subcetegory.name }}',
+                                        '{{ first.color.name }}',
+                                        '{{ first.size.name }}',
+                                        '{{ first.stock }}',
+                                        '{{ first.price }}',
+                                        `{{ first.product.description|default_if_none:'' }}`,
                                         'Active',
-                                        '{% if inventory.product.image %}{{ inventory.product.image.url }}{% endif %}',
-                                        `{% for s in inventory.specs.all %}{{ s.name|escapejs }}: {{ s.value|escapejs }}{% if not forloop.last %}\n{% endif %}{% endfor %}`
+                                        '{% if first.product.image %}{{ first.product.image.url }}{% endif %}',
+                                        `{% for s in first.specs.all %}{{ s.name|escapejs }}: {{ s.value|escapejs }}{% if not forloop.last %}\n{% endif %}{% endfor %}`
                                     )"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
                                     title="View">
                                     <i class="fa-solid fa-eye text-xs"></i>
                                     <span class="sr-only">View</span>
                                 </button>
-
+                                <div class="relative inline-block">
+                                    <button
+                                        type="button"
+                                        class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition"
+                                        title="Edit"
+                                        data-category="{{ first.product.brand.subcetegory.category.name|escapejs }}"
+                                        data-subcategory="{{ first.product.brand.subcetegory.name|escapejs }}"
+                                        data-brand="{{ first.product.brand.name|escapejs }}"
+                                        data-product="{{ first.product.name|escapejs }}"
+                                        data-description="{{ first.product.description|default_if_none:''|escapejs }}"
+                                        data-variants='[{% for v in group.variants %}{"editUrl":"{% url 'edit_inventory' v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                    >
+                                        <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                        <span class="sr-only">Edit</span>
+                                    </button>
+                                </div>
                                 <button
-                                    data-edit-url="{% url 'edit_inventory' inventory.id %}"
-                                    data-category="{{ inventory.product.brand.subcetegory.category.name|escapejs }}"
-                                    data-subcategory="{{ inventory.product.brand.subcetegory.name|escapejs }}"
-                                    data-brand="{{ inventory.product.brand.name|escapejs }}"
-                                    data-product="{{ inventory.product.name|escapejs }}"
-                                    data-description="{{ inventory.product.description|default_if_none:''|escapejs }}"
-                                    data-color="{{ inventory.color.name|escapejs }}"
-                                    data-size="{{ inventory.size.name|escapejs }}"
-                                    data-price="{{ inventory.price }}"
-                                    data-stock="{{ inventory.stock }}"
-                                    data-specs='[{% for s in inventory.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
-                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition"
-                                    title="Edit">
-                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                    <span class="sr-only">Edit</span>
-                                </button>
-
-                                <button
-                                    onclick="openDeleteModal('{% url 'delete_inventory' inventory.id %}')"
+                                    type="button"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
-                                    title="Delete">
+                                    title="Delete"
+                                    data-delete-variants='[{% for v in group.variants %}{"deleteUrl":"{% url 'delete_inventory' v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }}}{% if not forloop.last %},{% endif %}{% endfor %}]'>
                                     <i class="fa-solid fa-trash text-xs"></i>
                                     <span class="sr-only">Delete</span>
                                 </button>
-
                             </div>
                         </td>
                     </tr>
+                    {% endwith %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -567,6 +598,43 @@
 
 
 
+<div id="variantPickerModal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">
+    <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl shadow-slate-300/40">
+        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Choose Variant</h2>
+            <button id="closeVariantPicker"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">✕</button>
+        </div>
+        <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4 space-y-3">
+            <input id="variantSearch"
+                   type="text"
+                   placeholder="Search by color or size"
+                   class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+            <div id="variantPickerList" class="max-h-72 overflow-y-auto divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white"></div>
+        </div>
+    </div>
+    <div class="sr-only" id="variantPickerBackdrop"></div>
+</div>
+
+<div id="variantDeletePickerModal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">
+    <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl shadow-slate-300/40">
+        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
+            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Delete Variant</h2>
+            <button id="closeVariantDeletePicker"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">✕</button>
+        </div>
+        <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4 space-y-3">
+            <input id="variantDeleteSearch"
+                   type="text"
+                   placeholder="Search by color or size"
+                   class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/40">
+            <div id="variantDeletePickerList" class="max-h-72 overflow-y-auto divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white"></div>
+        </div>
+    </div>
+    <div class="sr-only" id="variantDeletePickerBackdrop"></div>
+</div>
 
 <script>
 
@@ -591,6 +659,7 @@ const newProductInput = document.getElementById('newProductInput');
 
 const specsContainer = document.getElementById('specsContainer');
 const addSpecRowBtn = document.getElementById('addSpecRowBtn');
+const colorPicker = document.getElementById('colorPicker');
 
 function addSpecRow(name = '', value = '') {
     const row = document.createElement('div');
@@ -664,6 +733,8 @@ document.getElementById('openinventoryModal').onclick = () => {
     
     resetDropdowns();
     resetSpecs();
+    if (colorPicker) colorPicker.value = '#000000';
+    if (inventoryForm.color) inventoryForm.color.value = '';
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
 };
@@ -1103,6 +1174,14 @@ async function openEditModal(editUrl, category, subcategory, brand, product, des
     
     inventoryForm.description.value = description;
     inventoryForm.color.value = color;
+    if (colorPicker) {
+        const v = (color || '').trim();
+        if (/^#([A-Fa-f0-9]{6})$/.test(v)) {
+            colorPicker.value = v;
+        } else {
+            colorPicker.value = '#000000';
+        }
+    }
     inventoryForm.size.value = size;
     inventoryForm.price.value = price;
     inventoryForm.stock.value = stock;
@@ -1126,7 +1205,177 @@ async function openEditModal(editUrl, category, subcategory, brand, product, des
     newProductInput.removeAttribute('name');
 }
 
+if (colorPicker && inventoryForm.color) {
+    colorPicker.addEventListener('input', function () {
+        inventoryForm.color.value = this.value;
+    });
+    inventoryForm.color.addEventListener('input', function () {
+        const v = (this.value || '').trim();
+        if (/^#([A-Fa-f0-9]{6})$/.test(v)) {
+            colorPicker.value = v;
+        }
+    });
+}
+
+const variantPickerModal = document.getElementById('variantPickerModal');
+const variantPickerList = document.getElementById('variantPickerList');
+const variantSearch = document.getElementById('variantSearch');
+const closeVariantPicker = document.getElementById('closeVariantPicker');
+
+function showVariantPicker() {
+    variantPickerModal.classList.remove('hidden');
+    variantPickerModal.classList.add('flex');
+}
+function hideVariantPicker() {
+    variantPickerModal.classList.add('hidden');
+    variantPickerModal.classList.remove('flex');
+    variantPickerList.innerHTML = '';
+    if (variantSearch) variantSearch.value = '';
+}
+if (closeVariantPicker) {
+    closeVariantPicker.onclick = hideVariantPicker;
+}
+variantPickerModal.addEventListener('click', function(e) {
+    const card = e.target.closest('.rounded-2xl');
+    if (!card) hideVariantPicker();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideVariantPicker();
+});
+
+function renderVariantItems(common, variants) {
+    variantPickerList.innerHTML = '';
+    const norm = (s) => (s || '').toLowerCase();
+    const q = norm(variantSearch ? variantSearch.value : '');
+    const filtered = Array.isArray(variants) ? variants.filter(v => q === '' || norm(v.color).includes(q) || norm(v.size).includes(q)) : [];
+    if (!filtered.length) {
+        const empty = document.createElement('div');
+        empty.className = 'px-4 py-10 text-center text-slate-500';
+        empty.innerText = 'No matching variants';
+        variantPickerList.appendChild(empty);
+        return;
+    }
+    filtered.forEach(v => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition';
+        btn.innerHTML = `
+            <span class="inline-block h-4 w-4 rounded-full border border-slate-300" style="background-color: ${(v.color || '').replace(/"/g, '&quot;')}"></span>
+            <span class="px-2 py-0.5 rounded border text-[11px]">${(v.size || '').replace(/"/g, '&quot;')}</span>
+            <span class="ml-auto text-[11px] text-slate-500">Price ${v.price} • Stock ${v.stock}</span>
+        `;
+        btn.addEventListener('click', function() {
+            openEditModal(
+                v.editUrl || '',
+                common.category || '',
+                common.subcategory || '',
+                common.brand || '',
+                common.product || '',
+                common.description || '',
+                v.color || '',
+                v.size || '',
+                v.price || '',
+                v.stock || '',
+                JSON.stringify(v.specs || [])
+            );
+            hideVariantPicker();
+        });
+        variantPickerList.appendChild(btn);
+    });
+}
+
 document.querySelectorAll('button[title="Edit"]').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const d = this.dataset;
+        let variants = [];
+        try { variants = JSON.parse(d.variants || '[]'); } catch (e) {}
+        const common = {
+            category: d.category || '',
+            subcategory: d.subcategory || '',
+            brand: d.brand || '',
+            product: d.product || '',
+            description: d.description || ''
+        };
+        showVariantPicker();
+        renderVariantItems(common, variants);
+        if (variantSearch) {
+            variantSearch.oninput = function() {
+                renderVariantItems(common, variants);
+            };
+        }
+    });
+});
+
+const variantDeletePickerModal = document.getElementById('variantDeletePickerModal');
+const variantDeletePickerList = document.getElementById('variantDeletePickerList');
+const variantDeleteSearch = document.getElementById('variantDeleteSearch');
+const closeVariantDeletePicker = document.getElementById('closeVariantDeletePicker');
+
+function showVariantDeletePicker() {
+    variantDeletePickerModal.classList.remove('hidden');
+    variantDeletePickerModal.classList.add('flex');
+}
+function hideVariantDeletePicker() {
+    variantDeletePickerModal.classList.add('hidden');
+    variantDeletePickerModal.classList.remove('flex');
+    variantDeletePickerList.innerHTML = '';
+    if (variantDeleteSearch) variantDeleteSearch.value = '';
+}
+if (closeVariantDeletePicker) {
+    closeVariantDeletePicker.onclick = hideVariantDeletePicker;
+}
+variantDeletePickerModal.addEventListener('click', function(e) {
+    const card = e.target.closest('.rounded-2xl');
+    if (!card) hideVariantDeletePicker();
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideVariantDeletePicker();
+});
+
+function renderDeleteVariantItems(variants) {
+    variantDeletePickerList.innerHTML = '';
+    const norm = (s) => (s || '').toLowerCase();
+    const q = norm(variantDeleteSearch ? variantDeleteSearch.value : '');
+    const filtered = Array.isArray(variants) ? variants.filter(v => q === '' || norm(v.color).includes(q) || norm(v.size).includes(q)) : [];
+    if (!filtered.length) {
+        const empty = document.createElement('div');
+        empty.className = 'px-4 py-10 text-center text-slate-500';
+        empty.innerText = 'No matching variants';
+        variantDeletePickerList.appendChild(empty);
+        return;
+    }
+    filtered.forEach(v => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition';
+        btn.innerHTML = `
+            <span class="inline-block h-4 w-4 rounded-full border border-slate-300" style="background-color: ${(v.color || '').replace(/"/g, '&quot;')}"></span>
+            <span class="px-2 py-0.5 rounded border text-[11px]">${(v.size || '').replace(/"/g, '&quot;')}</span>
+            <span class="ml-auto text-[11px] text-slate-500">Price ${v.price} • Stock ${v.stock}</span>
+        `;
+        btn.addEventListener('click', function() {
+            openDeleteModal(v.deleteUrl || '');
+            hideVariantDeletePicker();
+        });
+        variantDeletePickerList.appendChild(btn);
+    });
+}
+
+document.querySelectorAll('button[title="Delete"]').forEach(btn => {
+    btn.addEventListener('click', function () {
+        let variants = [];
+        try { variants = JSON.parse(this.dataset.deleteVariants || '[]'); } catch (e) {}
+        showVariantDeletePicker();
+        renderDeleteVariantItems(variants);
+        if (variantDeleteSearch) {
+            variantDeleteSearch.oninput = function() {
+                renderDeleteVariantItems(variants);
+            };
+        }
+    });
+});
+// Edit by clicking on color chips
+document.querySelectorAll('.edit-variant-color-btn').forEach(btn => {
     btn.addEventListener('click', function () {
         const d = this.dataset;
         openEditModal(
@@ -1145,6 +1394,25 @@ document.querySelectorAll('button[title="Edit"]').forEach(btn => {
     });
 });
 
+// Edit by clicking on size chips
+document.querySelectorAll('.edit-variant-size-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const d = this.dataset;
+        openEditModal(
+            d.editUrl || '',
+            d.category || '',
+            d.subcategory || '',
+            d.brand || '',
+            d.product || '',
+            d.description || '',
+            d.color || '',
+            d.size || '',
+            d.price || '',
+            d.stock || '',
+            d.specs || '[]'
+        );
+    });
+});
 function openDeleteModal(deleteUrl) {
     deleteModal.classList.remove('hidden');
     deleteModal.classList.add('flex');
