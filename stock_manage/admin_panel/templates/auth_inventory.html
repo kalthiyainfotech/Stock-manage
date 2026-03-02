@@ -196,6 +196,26 @@
 
                     <div class="space-y-3">
                         <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            Color-wise Storage Variants
+                        </h3>
+                        <div class="rounded-lg border border-slate-200 p-3 bg-slate-50/60">
+                            <div class="flex items-center justify-between gap-3 mb-2">
+                                <p class="text-sm font-medium text-slate-800">Add multiple color+storage combinations</p>
+                                <button type="button" id="addVariantRowBtn"
+                                    class="text-xs px-3 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50">
+                                    + Add Variant
+                                </button>
+                            </div>
+                            <div id="variantRows" class="space-y-2">
+                            </div>
+                            <p class="mt-2 text-xs text-slate-500">
+                                Leave the single Color/Size fields above empty when using multiple variants.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                             Media
                         </h3>
                         <div class="space-y-1.5">
@@ -660,6 +680,8 @@ const newProductInput = document.getElementById('newProductInput');
 const specsContainer = document.getElementById('specsContainer');
 const addSpecRowBtn = document.getElementById('addSpecRowBtn');
 const colorPicker = document.getElementById('colorPicker');
+const variantRows = document.getElementById('variantRows');
+const addVariantRowBtn = document.getElementById('addVariantRowBtn');
 
 function addSpecRow(name = '', value = '') {
     const row = document.createElement('div');
@@ -698,6 +720,84 @@ addSpecRowBtn.addEventListener('click', function() {
     addSpecRow();
 });
 
+function addVariantRow(initial = {}) {
+    const row = document.createElement('div');
+    row.className = 'grid grid-cols-1 sm:grid-cols-7 gap-2 variant-row items-end';
+    const colorVal = (initial.color || '').replace(/"/g, '&quot;');
+    const sizeVal = (initial.size || '').replace(/"/g, '&quot;');
+    const priceVal = (initial.price || '');
+    const stockVal = (initial.stock || '');
+    row.innerHTML = `
+        <div class="sm:col-span-2 space-y-1.5">
+            <label class="text-xs font-medium text-slate-700">Color</label>
+            <div class="flex items-center gap-2">
+                <input type="color" class="h-10 w-10 rounded-md border border-slate-200 variant-color-picker" value="${/^#([A-Fa-f0-9]{6})$/.test(colorVal) ? colorVal : '#000000'}">
+                <input type="text" name="variant_color" placeholder="Color (e.g., #ff6600 or Blue)" value="${colorVal}"
+                    class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 variant-color-input">
+            </div>
+        </div>
+        <div class="space-y-1.5">
+            <label class="text-xs font-medium text-slate-700">Storage / Size</label>
+            <input type="text" name="variant_size" placeholder="e.g., 128GB" value="${sizeVal}"
+                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+        </div>
+        <div class="space-y-1.5">
+            <label class="text-xs font-medium text-slate-700">Price</label>
+            <input type="number" name="variant_price" placeholder="Price" step="0.01" value="${priceVal}"
+                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+        </div>
+        <div class="space-y-1.5">
+            <label class="text-xs font-medium text-slate-700">Stock</label>
+            <input type="number" name="variant_stock" placeholder="Stock quantity" value="${stockVal}"
+                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+        </div>
+        <div class="space-y-1.5">
+            <label class="text-xs font-medium text-slate-700">Color Image</label>
+            <input type="file" name="variant_image"
+                class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
+        </div>
+        <div class="space-y-1.5">
+            <label class="text-xs font-medium text-white">.</label>
+            <button type="button" class="removeVariantRowBtn px-3 py-2 rounded border border-slate-300 bg-white hover:bg-slate-50 w-full">
+                ✕ Remove
+            </button>
+        </div>
+    `;
+    variantRows.appendChild(row);
+}
+
+variantRows.addEventListener('click', function (e) {
+    const btn = e.target.closest('.removeVariantRowBtn');
+    if (btn) {
+        const row = btn.closest('.variant-row');
+        if (row) row.remove();
+        return;
+    }
+});
+
+variantRows.addEventListener('input', function (e) {
+    const picker = e.target.closest('.variant-color-picker');
+    const input = e.target.closest('.variant-color-input');
+    if (picker) {
+        const row = picker.closest('.variant-row');
+        const txt = row.querySelector('.variant-color-input');
+        txt.value = picker.value;
+    } else if (input) {
+        const v = (input.value || '').trim();
+        const row = input.closest('.variant-row');
+        const pic = row.querySelector('.variant-color-picker');
+        if (/^#([A-Fa-f0-9]{6})$/.test(v)) {
+            pic.value = v;
+        }
+    }
+});
+
+if (addVariantRowBtn) {
+    addVariantRowBtn.addEventListener('click', function () {
+        addVariantRow();
+    });
+}
+
 document.getElementById('openinventoryModal').onclick = () => {
     inventoryForm.reset();
     inventoryForm.action = "{% url 'add_inventory' %}";
@@ -735,6 +835,7 @@ document.getElementById('openinventoryModal').onclick = () => {
     resetSpecs();
     if (colorPicker) colorPicker.value = '#000000';
     if (inventoryForm.color) inventoryForm.color.value = '';
+    if (variantRows) variantRows.innerHTML = '';
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
 };

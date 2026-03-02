@@ -29,20 +29,23 @@
                     {% if product.image %}
                     <button
                         class="gallery-btn bg-gray-100 rounded-xl overflow-hidden h-24 border-2 border-brand-500 shadow-sm"
-                        data-src="{{ product.image.url }}">
+                        data-src="{{ product.image.url }}"
+                        data-color-ids="{% for c in colors %}{% if not forloop.first %},{% endif %}{{ c.id }}{% endfor %}">
                         <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
                     </button>
                     {% endif %}
-                    {% for img in gallery %}
+                    {% for gi in gallery_annotated %}
                     <button
                         class="gallery-btn bg-gray-100 rounded-xl overflow-hidden h-24 border-2 border-transparent hover:border-gray-300 transition-colors"
-                        data-src="{{ img.image.url }}">
-                        <img src="{{ img.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                        data-src="{{ gi.url }}"
+                        data-color-ids="{{ gi.color_ids|join:',' }}">
+                        <img src="{{ gi.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
                     </button>
                     {% empty %}
                     <button
                         class="gallery-btn bg-gray-100 rounded-xl overflow-hidden h-24 border-2 border-brand-500 shadow-sm"
-                        data-src="{% static 'images/product-1.png' %}">
+                        data-src="{% static 'images/product-1.png' %}"
+                        data-color-ids="{% for c in colors %}{% if not forloop.first %},{% endif %}{{ c.id }}{% endfor %}">
                         <img src="{% static 'images/product-1.png' %}" alt="{{ product.name }}" class="w-full h-full object-cover">
                     </button>
                     {% endfor %}
@@ -85,18 +88,26 @@
                 <div class="mb-6">
                     <h4 class="font-bold text-gray-900 mb-3">Color</h4>
                     <div class="mb-3">
-                        <div class="w-8 h-8 rounded-full border-2 border-gray-400 relative overflow-hidden">
-                            <span id="current-color-swatch" class="absolute inset-0 rounded-full" style="background-color: {{ variant.color.name }}"></span>
+                        <div class="flex flex-wrap gap-2">
+                            {% for c in colors %}
+                            <button
+                                class="color-option w-8 h-8 rounded-full border-2 {% if c.id == variant.color.id %}border-brand-500{% else %}border-gray-200{% endif %}"
+                                title="{{ c.name }}"
+                                data-color-id="{{ c.id }}"
+                                data-variants="{{ c.variants|join:',' }}"
+                                style="background-color: {{ c.name }};"
+                            ></button>
+                            {% endfor %}
                         </div>
                     </div>
                     
                 </div>
 
-                <!-- Size Selection -->
+                <!-- Storage Selection -->
                 <div class="mb-8">
                     <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-bold text-gray-900">Select Size</h4>
-                        <button class="text-brand-600 text-sm font-medium hover:underline">Size Guide</button>
+                        <h4 class="font-bold text-gray-900">Select Storage</h4>
+                        <button class="text-brand-600 text-sm font-medium hover:underline">Storage Guide</button>
                     </div>
                     <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
                         {% for s in sizes %}
@@ -210,16 +221,39 @@
     </footer>
 
     <script>
+        const SIZE_MAP = {{ size_map|safe }};
+        const VARIANTS_INFO = {{ variants_info|safe }};
+        const DEFAULT_COLOR_ID = {{ variant.color.id }};
         const mainImg = document.getElementById('main-product-image');
-        const galleryBtns = document.querySelectorAll('.gallery-btn');
+        const galleryBtns = Array.from(document.querySelectorAll('.gallery-btn'));
         const colorButtons = document.querySelectorAll('.color-option');
-        const sizeButtons = document.querySelectorAll('.size-option');
-        let selectedColorVariants = [];
-        let selectedSizeVariants = [];
+        const sizeButtons = Array.from(document.querySelectorAll('.size-option'));
+        let currentColorId = DEFAULT_COLOR_ID;
         const productUrlTemplate = "{% url 'by_product' 0 %}";
 
+        function updateGallery(colorId) {
+            const firstVisible = galleryBtns.find(b => {
+                const ids = (b.dataset.colorIds || '').split(',').map(x => parseInt(x));
+                const visible = ids.includes(colorId);
+                b.style.display = visible ? '' : 'none';
+                if (visible) {
+                    b.classList.remove('border-transparent');
+                }
+                return visible;
+            });
+            if (firstVisible) {
+                mainImg.src = firstVisible.getAttribute('data-src');
+                galleryBtns.forEach(b => {
+                    b.classList.remove('border-brand-500');
+                    b.classList.add('border-transparent');
+                });
+                firstVisible.classList.remove('border-transparent');
+                firstVisible.classList.add('border-brand-500');
+            }
+        }
         galleryBtns.forEach(btn => {
             btn.addEventListener('click', function () {
+                if (this.style.display === 'none') return;
                 mainImg.src = this.getAttribute('data-src');
                 galleryBtns.forEach(b => {
                     b.classList.remove('border-brand-500');
@@ -235,18 +269,35 @@
             window.location.href = productUrlTemplate.replace('0', id);
         }
 
-        function intersect(a, b) {
-            const setB = new Set(b);
-            for (let i = 0; i < a.length; i++) {
-                if (setB.has(a[i])) return a[i];
-            }
-            return null;
+        function updateStorageButtons(colorId) {
+            currentColorId = colorId;
+            sizeButtons.forEach(btn => {
+                const sizeId = parseInt(btn.dataset.sizeId);
+                const entry = (SIZE_MAP[colorId] || {})[sizeId];
+                if (!entry) {
+                    btn.setAttribute('disabled', 'true');
+                    btn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-100', 'text-gray-400');
+                    btn.classList.remove('hover:border-brand-500', 'hover:text-brand-600', 'bg-gray-900', 'text-white');
+                    btn.dataset.variants = '';
+                } else {
+                    const vid = entry.id;
+                    const stock = entry.stock;
+                    btn.dataset.variants = String(vid);
+                    if (!stock || stock < 1) {
+                        btn.setAttribute('disabled', 'true');
+                        btn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-100', 'text-gray-400');
+                        btn.classList.remove('hover:border-brand-500', 'hover:text-brand-600', 'bg-gray-900', 'text-white');
+                    } else {
+                        btn.removeAttribute('disabled');
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-100', 'text-gray-400');
+                        btn.classList.add('hover:border-brand-500', 'hover:text-brand-600');
+                    }
+                }
+            });
         }
 
         colorButtons.forEach(btn => {
             btn.addEventListener('click', function () {
-                const variants = (this.dataset.variants || '').split(',').filter(Boolean).map(v => parseInt(v));
-                selectedColorVariants = variants;
                 colorButtons.forEach(b => {
                     b.classList.remove('border-brand-500');
                     b.classList.add('border-gray-200');
@@ -258,19 +309,22 @@
                     const bg = this.getAttribute('title') || this.style.backgroundColor || '';
                     sw.style.backgroundColor = bg;
                 }
-                const id = intersect(selectedColorVariants, selectedSizeVariants.length ? selectedSizeVariants : selectedColorVariants);
-                goToVariant(id);
+                const colorId = parseInt(this.dataset.colorId);
+                updateStorageButtons(colorId);
+                updateGallery(colorId);
             });
         });
 
         sizeButtons.forEach(btn => {
             btn.addEventListener('click', function () {
-                const variants = (this.dataset.variants || '').split(',').filter(Boolean).map(v => parseInt(v));
-                selectedSizeVariants = variants;
-                const id = intersect(selectedSizeVariants, selectedColorVariants.length ? selectedColorVariants : selectedSizeVariants);
+                const sizeId = parseInt(this.dataset.sizeId);
+                const entry = (SIZE_MAP[currentColorId] || {})[sizeId];
+                const id = entry ? entry.id : null;
                 goToVariant(id);
             });
         });
+        updateStorageButtons(DEFAULT_COLOR_ID);
+        updateGallery(DEFAULT_COLOR_ID);
         // Quantity controls
         (function(){
             const minus = document.getElementById('qty-minus');

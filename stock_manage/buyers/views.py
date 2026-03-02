@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from .models import Buyer, CartItem, Order, OrderItem
-from admin_panel.models import ProductVariant, Blogs, Contact
+from admin_panel.models import ProductVariant, Blogs, Contact, ProductColorImage
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import F, OuterRef, Subquery, Sum
@@ -109,11 +109,75 @@ def by_product(request, variant_id):
     variants = ProductVariant.objects.select_related('color', 'size').filter(product=product)
     colors = {}
     sizes = {}
+    # extra info maps to support UI logic
+    variants_info = {}
+    size_map = {}
     for v in variants:
         colors.setdefault(v.color.id, {'id': v.color.id, 'name': v.color.name, 'variants': []})
         sizes.setdefault(v.size.id, {'id': v.size.id, 'name': v.size.name, 'variants': []})
         colors[v.color.id]['variants'].append(v.id)
         sizes[v.size.id]['variants'].append(v.id)
+        variants_info[v.id] = {
+            'id': v.id,
+            'color_id': v.color.id,
+            'size_id': v.size.id,
+            'stock': v.stock,
+            'price': float(v.price),
+        }
+        size_map.setdefault(v.color.id, {}).setdefault(v.size.id, {'id': v.id, 'stock': v.stock})
+    # Filter visible colors (exclude placeholders)
+    def _valid_color_entry(entry):
+        n = (entry.get('name') or '').strip().lower()
+        return bool(n) and n != 'default'
+    visible_colors = {cid: c for cid, c in colors.items() if _valid_color_entry(c)}
+    # Prefer explicit color-bound images when available
+    def _norm(s):
+        return (s or '').strip().lower().replace('#', '').replace(' ', '')
+    images_by_color = {}
+    color_norms = {cid: _norm(c['name']) for cid, c in visible_colors.items()}
+    for cid in visible_colors.keys():
+        images_by_color[cid] = []
+    explicit_color_images = list(ProductColorImage.objects.filter(product=product).select_related('color'))
+    if explicit_color_images:
+        for ci in explicit_color_images:
+            if ci.color_id in images_by_color:
+                images_by_color[ci.color_id].append(ci)
+    else:
+        # Fallback to filename heuristic if explicit color images not present
+        for img in gallery:
+            name = ''
+            try:
+                name = getattr(img.image, 'name', '') or ''
+            except Exception:
+                name = ''
+            n = _norm(name)
+            for cid, cn in color_norms.items():
+                if cn and cn in n:
+                    images_by_color[cid].append(img)
+    # Flatten annotation for client-side filtering
+    gallery_annotated = []
+    if explicit_color_images:
+        for ci in explicit_color_images:
+            gallery_annotated.append({
+                'url': getattr(ci.image, 'url', ''),
+                'color_ids': [ci.color_id]
+            })
+    else:
+        for img in gallery:
+            name = ''
+            try:
+                name = getattr(img.image, 'name', '') or ''
+            except Exception:
+                name = ''
+            n = _norm(name)
+            cids = []
+            for cid, cn in color_norms.items():
+                if cn and cn in n:
+                    cids.append(cid)
+            gallery_annotated.append({
+                'url': getattr(img.image, 'url', ''),
+                'color_ids': cids
+            })
     specs = []
     try:
         from admin_panel.models import VariantSpec
@@ -130,10 +194,14 @@ def by_product(request, variant_id):
         'variant': variant,
         'product': product,
         'gallery': gallery,
-        'colors': colors.values(),
+        'colors': visible_colors.values(),
         'sizes': sizes.values(),
         'specs': specs,
         'discount_percent': discount_percent,
+        'variants_info': variants_info,
+        'size_map': size_map,
+        'images_by_color': images_by_color,
+        'gallery_annotated': gallery_annotated,
     }
     return render(request, 'by_product.html', context)
 @never_cache

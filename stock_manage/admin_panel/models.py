@@ -101,6 +101,15 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"{self.product.name} image"
 
+class ProductColorImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='color_images')
+    color = models.ForeignKey('Color', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='products/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.product.name} - {self.color.name}"
+
 class Color(models.Model):
     name = models.CharField(max_length=50)
 
