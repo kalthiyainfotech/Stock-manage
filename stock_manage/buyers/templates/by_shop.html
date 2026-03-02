@@ -92,7 +92,7 @@
                     {% if item.product.image %}
                     <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                     {% else %}
-                    <img src="{% static 'images/product-1.png' %}" alt="{{ item.product.name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <div class="w-full h-full bg-gray-200"></div>
                     {% endif %}
                 </a>
                 <div class="p-5">

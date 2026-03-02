@@ -20,7 +20,7 @@
             <div class="w-full lg:w-1/2 flex flex-col gap-4">
                 <div class="bg-gray-100 rounded-3xl overflow-hidden shadow-md relative group h-64 sm:h-80 md:h-[500px]">
                     <img id="main-product-image"
-                        src="{% if product.image %}{{ product.image.url }}{% elif gallery and gallery.0 %}{{ gallery.0.image.url }}{% else %}{% static 'images/product-1.png' %}{% endif %}"
+                        src="{% if product.image %}{{ product.image.url }}{% elif gallery and gallery.0 %}{{ gallery.0.image.url }}{% else %}{% endif %}"
                         alt="{{ product.name }}"
                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-125 cursor-zoom-in">
                     <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -40,13 +40,6 @@
                         data-src="{{ gi.url }}"
                         data-color-ids="{{ gi.color_ids|join:',' }}">
                         <img src="{{ gi.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
-                    </button>
-                    {% empty %}
-                    <button
-                        class="gallery-btn bg-gray-100 rounded-xl overflow-hidden h-24 border-2 border-brand-500 shadow-sm"
-                        data-src="{% static 'images/product-1.png' %}"
-                        data-color-ids="{% for c in colors %}{% if not forloop.first %},{% endif %}{{ c.id }}{% endfor %}">
-                        <img src="{% static 'images/product-1.png' %}" alt="{{ product.name }}" class="w-full h-full object-cover">
                     </button>
                     {% endfor %}
                 </div>

@@ -194,25 +194,7 @@
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Color-wise Storage Variants
-                        </h3>
-                        <div class="rounded-lg border border-slate-200 p-3 bg-slate-50/60">
-                            <div class="flex items-center justify-between gap-3 mb-2">
-                                <p class="text-sm font-medium text-slate-800">Add multiple color+storage combinations</p>
-                                <button type="button" id="addVariantRowBtn"
-                                    class="text-xs px-3 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50">
-                                    + Add Variant
-                                </button>
-                            </div>
-                            <div id="variantRows" class="space-y-2">
-                            </div>
-                            <p class="mt-2 text-xs text-slate-500">
-                                Leave the single Color/Size fields above empty when using multiple variants.
-                            </p>
-                        </div>
-                    </div>
+                    
 
                     <div class="space-y-3">
                         <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -732,8 +714,7 @@ function addVariantRow(initial = {}) {
             <label class="text-xs font-medium text-slate-700">Color</label>
             <div class="flex items-center gap-2">
                 <input type="color" class="h-10 w-10 rounded-md border border-slate-200 variant-color-picker" value="${/^#([A-Fa-f0-9]{6})$/.test(colorVal) ? colorVal : '#000000'}">
-                <input type="text" name="variant_color" placeholder="Color (e.g., #ff6600 or Blue)" value="${colorVal}"
-                    class="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 variant-color-input">
+                <input type="hidden" name="variant_color" value="${/^#([A-Fa-f0-9]{6})$/.test(colorVal) ? colorVal : '#000000'}" class="variant-color-hidden">
             </div>
         </div>
         <div class="space-y-1.5">
@@ -766,33 +747,30 @@ function addVariantRow(initial = {}) {
     variantRows.appendChild(row);
 }
 
-variantRows.addEventListener('click', function (e) {
-    const btn = e.target.closest('.removeVariantRowBtn');
-    if (btn) {
-        const row = btn.closest('.variant-row');
-        if (row) row.remove();
-        return;
-    }
-});
-
-variantRows.addEventListener('input', function (e) {
-    const picker = e.target.closest('.variant-color-picker');
-    const input = e.target.closest('.variant-color-input');
-    if (picker) {
-        const row = picker.closest('.variant-row');
-        const txt = row.querySelector('.variant-color-input');
-        txt.value = picker.value;
-    } else if (input) {
-        const v = (input.value || '').trim();
-        const row = input.closest('.variant-row');
-        const pic = row.querySelector('.variant-color-picker');
-        if (/^#([A-Fa-f0-9]{6})$/.test(v)) {
-            pic.value = v;
+if (variantRows) {
+    variantRows.addEventListener('click', function (e) {
+        const btn = e.target.closest('.removeVariantRowBtn');
+        if (btn) {
+            const row = btn.closest('.variant-row');
+            if (row) row.remove();
+            return;
         }
-    }
-});
+    });
+}
 
-if (addVariantRowBtn) {
+if (variantRows) {
+    variantRows.addEventListener('input', function (e) {
+        const picker = e.target.closest('.variant-color-picker');
+        const hidden = e.target.closest('.variant-color-hidden');
+        if (picker) {
+            const row = picker.closest('.variant-row');
+            const hid = row.querySelector('.variant-color-hidden');
+            if (hid) hid.value = picker.value;
+        }
+    });
+}
+
+if (addVariantRowBtn && variantRows) {
     addVariantRowBtn.addEventListener('click', function () {
         addVariantRow();
     });

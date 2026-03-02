@@ -1,181 +1,109 @@
 {% extends "by_base.html" %}
 {% block buyer_layout %}
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col md:flex-row gap-8">
-        <!-- Sidebar -->
-        <aside class="w-full md:w-64 flex-shrink-0">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <div class="flex items-center gap-4 mb-8">
-                    <div
-                        class="w-12 h-12 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xl">
-                        JD</div>
-                    <div>
-                        <h3 class="font-bold text-gray-900">John Doe</h3>
-                        <p class="text-xs text-gray-500">Premium Member</p>
-                    </div>
-                </div>
-                <nav class="space-y-2">
-                    <a href="#"
-                        class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors font-medium"><i
-                            class="far fa-user w-5 text-center"></i> Profile</a>
-                    <a href="{% url 'by_history' %}"
-                        class="flex items-center gap-3 px-4 py-3 bg-brand-50 text-brand-600 rounded-xl transition-colors font-medium"><i
-                            class="fas fa-box w-5 text-center"></i> Order History</a>
-                    <a href="#"
-                        class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors font-medium"><i
-                            class="far fa-heart w-5 text-center"></i> Wishlist</a>
-                    <a href="#"
-                        class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors font-medium"><i
-                            class="fas fa-cog w-5 text-center"></i> Settings</a>
-                </nav>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1">
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-8">
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
-                    <div>
-                        <h1 class="text-2xl font-black text-gray-900 mb-1">Order History</h1>
-                        <p class="text-gray-500 text-sm">View and track your previous orders</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <select
-                            class="px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-brand-500 text-gray-600 bg-gray-50">
-                            <option>Last 6 months</option>
-                            <option>2026</option>
-                            <option>2025</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Order List -->
-                <div class="space-y-6">
-                    <!-- Order item 1 -->
-                    <div
-                        class="border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-300">
-                        <div
-                            class="bg-gray-50 p-4 sm:p-6 flex flex-wrap justify-between items-center gap-4 border-b border-gray-100">
-                            <div class="flex gap-8">
-                                <div>
-                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Order Placed</p>
-                                    <p class="font-bold text-gray-900 text-sm">October 15, 2026</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Total</p>
-                                    <p class="font-bold text-gray-900 text-sm">$129.50</p>
-                                </div>
-                                <div class="hidden sm:block">
-                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Ship To</p>
-                                    <p class="font-bold text-brand-600 text-sm cursor-pointer hover:underline">John Doe
-                                        <i class="fas fa-chevron-down text-xs ml-1"></i></p>
-                                </div>
-                            </div>
-                            <div class="text-right flex-1 sm:flex-none">
-                                <p class="text-xs text-gray-500 font-medium uppercase mb-1">Order #</p>
-                                <p class="font-bold text-gray-900 text-sm">LUXE-892374-X</p>
-                            </div>
-                        </div>
-                        <div class="p-4 sm:p-6 bg-white">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="font-bold text-gray-900 flex items-center gap-2"><i
-                                            class="fas fa-check-circle text-green-500 text-lg"></i> Delivered</h3>
-                                    <p class="text-sm text-gray-500 mt-1">Your package was delivered on Oct 18, 2026</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button
-                                        class="px-4 py-2 border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 transition-colors">Track
-                                        Info</button>
-                                </div>
-                            </div>
-                            <div class="flex gap-4 items-center">
-                                <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=150&q=80"
-                                        class="w-full h-full object-cover">
-                                </div>
-                                <div class="flex-1">
-                                    <a href="{% url 'by_shop' %}"
-                                        class="font-bold text-gray-900 hover:text-brand-600 transition-colors line-clamp-1">Autumn
-                                        Jacket</a>
-                                    <p class="text-sm text-gray-500 mt-1">Brown / L</p>
-                                    <div class="mt-2 text-sm flex gap-4">
-                                        <button class="text-brand-600 font-medium hover:underline">Buy it again</button>
-                                        <button class="text-gray-500 hover:text-gray-900 transition-colors">Write
-                                            review</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Order item 2 -->
-                    <div
-                        class="border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-300">
-                        <div
-                            class="bg-gray-50 p-4 sm:p-6 flex flex-wrap justify-between items-center gap-4 border-b border-gray-100">
-                            <div class="flex gap-8">
-                                <div>
-                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Order Placed</p>
-                                    <p class="font-bold text-gray-900 text-sm">September 02, 2026</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-medium uppercase mb-1">Total</p>
-                                    <p class="font-bold text-gray-900 text-sm">$45.00</p>
-                                </div>
-                            </div>
-                            <div class="text-right flex-1 sm:flex-none">
-                                <p class="text-xs text-gray-500 font-medium uppercase mb-1">Order #</p>
-                                <p class="font-bold text-gray-900 text-sm">LUXE-811453-A</p>
-                            </div>
-                        </div>
-                        <div class="p-4 sm:p-6 bg-white">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="font-bold text-gray-900 flex items-center gap-2"><i
-                                            class="fas fa-check-circle text-green-500 text-lg"></i> Delivered</h3>
-                                </div>
-                            </div>
-                            <div class="flex gap-4 items-center">
-                                <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=150&q=80"
-                                        class="w-full h-full object-cover">
-                                </div>
-                                <div class="flex-1">
-                                    <a href="{% url 'by_shop' %}"
-                                        class="font-bold text-gray-900 hover:text-brand-600 transition-colors line-clamp-1">Casual
-                                        Denim Shirt</a>
-                                    <p class="text-sm text-gray-500 mt-1">Light Blue / M</p>
-                                    <div class="mt-2 text-sm flex gap-4"><button
-                                            class="text-brand-600 font-medium hover:underline">Buy it again</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-    <!-- Footer -->
-    <footer class="bg-gray-900 mt-10 pt-16 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white text-center">
-            <h4 class="text-2xl font-black tracking-tighter mb-4 text-white">LUXE<span class="text-brand-500">.</span>
-            </h4>
-            <p class="text-gray-500 text-sm">&copy; 2026 LUXE E-Commerce. All rights reserved.</p>
+{% load static %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="flex flex-col lg:flex-row gap-8">
+    <aside class="w-full lg:w-1/4">
+      <div class="bg-white rounded-2xl border border-gray-100 p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+            {{ request.session.buyer_name|default:"" |slice:":1" }}
+          </div>
+          <div>
+            <div class="font-bold text-gray-900">{{ request.session.buyer_name|default:"Your Account" }}</div>
+            <div class="text-xs text-gray-500">{{ request.session.buyer_email|default:"" }}</div>
+          </div>
         </div>
-    </footer>
-    <script>
-        const menuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        menuBtn.addEventListener('click', () => {
-            if (mobileMenu.classList.contains('hidden')) {
-                mobileMenu.classList.remove('hidden');
-                setTimeout(() => { mobileMenu.classList.remove('opacity-0', 'scale-y-0'); mobileMenu.classList.add('opacity-100', 'scale-y-100'); }, 10);
-            } else {
-                mobileMenu.classList.remove('opacity-100', 'scale-y-100'); mobileMenu.classList.add('opacity-0', 'scale-y-0');
-                setTimeout(() => { mobileMenu.classList.add('hidden'); }, 300);
-            }
-        });
-    </script>
+        <nav class="space-y-2">
+          <a href="{% url 'by_history' %}" class="block px-4 py-3 rounded-xl bg-brand-50 text-brand-700 font-bold">Order History</a>
+          <a href="{% url 'by_cart' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Cart</a>
+          <a href="{% url 'by_shop' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Shop</a>
+          <a href="{% url 'by_logout' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Logout</a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="w-full lg:w-3/4">
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-black text-gray-900">Order History</h1>
+          <div class="text-xs text-gray-500">All: {{ status_counts.all }} · Pending: {{ status_counts.pending }} · Delivered: {{ status_counts.delivered }}</div>
+        </div>
+        <div class="space-y-6">
+          {% for order in orders %}
+          <div class="rounded-2xl border border-gray-200 bg-gray-50">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 sm:p-6 border-b border-gray-200">
+              <div class="space-y-1">
+                <div class="text-xs text-gray-500">Order Placed</div>
+                <div class="font-bold text-gray-900">{{ order.created_at|date:"F d, Y" }}</div>
+              </div>
+              <div class="space-y-1">
+                <div class="text-xs text-gray-500">Total</div>
+                <div class="font-bold text-gray-900">₹{{ order.total|floatformat:2 }}</div>
+              </div>
+              <div class="space-y-1">
+                <div class="text-xs text-gray-500">Order #</div>
+                <div class="font-bold text-gray-900">{{ order.order_number }}</div>
+              </div>
+              <div>
+                {% if order.status == "delivered" %}
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold"><i class="fas fa-check-circle"></i> Delivered</span>
+                {% elif order.status == "processing" %}
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold"><i class="fas fa-sync-alt"></i> Processing</span>
+                {% elif order.status == "cancelled" %}
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-bold"><i class="fas fa-times-circle"></i> Cancelled</span>
+                {% else %}
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold"><i class="fas fa-clock"></i> Pending</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="p-4 sm:p-6 space-y-4">
+              {% for it in order.items.all %}
+              <div class="flex items-center gap-4">
+                <div class="relative">
+                  {% if it.variant.product.image %}
+                  <img src="{{ it.variant.product.image.url }}" alt="{{ it.product_name }}" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
+                  {% else %}
+                  <div class="w-16 h-16 rounded-xl bg-gray-200 shadow-sm"></div>
+                  {% endif %}
+                </div>
+                <div class="flex-1">
+                  <div class="font-bold text-gray-900 text-sm">{{ it.product_name }}</div>
+                  <div class="text-xs text-gray-500">{{ it.variant.color.name }} / {{ it.variant.size.name }}</div>
+                  <div class="text-xs text-gray-500">Qty {{ it.quantity }}</div>
+                </div>
+                <div class="text-right">
+                  <div class="font-bold text-gray-900">₹{{ it.price|floatformat:2 }}</div>
+                </div>
+              </div>
+              {% endfor %}
+              <div class="flex flex-wrap items-center justify-end gap-3 mt-2">
+                <a href="{% url 'by_shop' %}" class="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-800 text-sm font-bold hover:border-brand-500 hover:text-brand-600">Buy again</a>
+                {% if order.status == "pending" or order.status == "processing" %}
+                <form action="{% url 'by_cancel_order' order.id %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-bold hover:bg-brand-600">Cancel</button>
+                </form>
+                {% endif %}
+                {% if order.status == "delivered" %}
+                <form action="{% url 'by_return_order' order.id %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-800 text-sm font-bold hover:border-brand-500 hover:text-brand-600">Return</button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="text-center py-16">
+            <div class="text-2xl font-black text-gray-900 mb-2">No orders yet</div>
+            <p class="text-gray-600 mb-6">When you place orders, they will appear here.</p>
+            <a href="{% url 'by_shop' %}" class="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-gray-900 text-white font-bold hover:bg-brand-600">Go to Shop</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
 {% endblock buyer_layout %}

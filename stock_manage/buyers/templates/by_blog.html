@@ -1,5 +1,6 @@
 {% extends "by_base.html" %}
 {% block buyer_layout %}
+{% load static %}
     <div class="pt-32 pb-16 bg-brand-50 relative overflow-hidden">
         <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-brand-500 rounded-full blur-3xl opacity-10"></div>
         <div class="absolute -top-20 -right-20 w-64 h-64 bg-pink-500 rounded-full blur-3xl opacity-10"></div>
@@ -9,108 +10,114 @@
                 fashion news, and stories straight from our designers.</p>
         </div>
     </div>
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-        <div class="mb-16">
-            <div
-                class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-500 flex flex-col md:flex-row group">
-                <div class="w-full md:w-1/2 overflow-hidden h-72 md:h-auto">
-                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80"
-                        alt="Featured"
-                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="blogs-grid">
+            {% for b in blogs %}
+            <article data-id="{{ b.id }}" data-by="{{ b.by }}" data-date="{{ b.date }}" data-image-url="{% if b.image %}{{ b.image.url }}{% endif %}" data-des="{{ b.des|escape }}" class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+                <div class="relative h-64 overflow-hidden">
+                    {% if b.image %}<img src="{{ b.image.url }}" alt="Blog Post" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    {% else %}<div class="w-full h-full bg-gray-200"></div>{% endif %}
+                    <div class="absolute top-4 left-4"><span class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">By {{ b.by }}</span></div>
                 </div>
-                <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-                    <div class="flex items-center gap-3 text-sm text-gray-500 mb-4">
-                        <span class="bg-brand-50 text-brand-600 font-bold px-3 py-1 rounded-full">Fashion</span>
-                        <span><i class="far fa-calendar-alt mr-1"></i> Oct 12, 2026</span>
-                    </div>
-                    <a href="#">
-                        <h2 class="text-3xl font-black text-gray-900 mb-4 hover:text-brand-600 transition-colors">The
-                            Ultimate Guide to Autumn Layering</h2>
-                    </a>
-                    <p class="text-gray-600 mb-8 leading-relaxed">Discover how to stay warm without sacrificing style.
-                        Our head designer shares top secrets to mastering the art of layering this fall season...</p>
-                    <a href="#"
-                        class="inline-flex items-center font-bold text-gray-900 border-b-2 border-brand-500 pb-1 hover:text-brand-600 transition-colors self-start">Read
-                        Article <i class="fas fa-arrow-right ml-2 text-sm"></i></a>
+                <div class="p-6">
+                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i class="far fa-calendar-alt mr-1"></i> {{ b.date }}</span></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3 leading-tight">{{ b.des|slice:":60" }}{% if b.des|length > 60 %}…{% endif %}</h3>
+                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">{{ b.des }}</p>
                 </div>
+            </article>
+            {% empty %}
+            <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">No blogs yet.</div>
+            {% endfor %}
+        </div>
+        <div class="flex items-center justify-between mt-8">
+            <div class="text-xs text-gray-500">Page {{ page_obj.number }} of {{ paginator.num_pages }}</div>
+            <div class="flex items-center gap-2">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 text-xs hover:border-brand-500 hover:text-brand-600">Previous</a>
+                {% else %}
+                    <span class="px-3 py-2 rounded-lg border border-gray-200 bg-gray-100 text-gray-400 text-xs">Previous</span>
+                {% endif %}
+                {% for num in paginator.page_range %}
+                    {% if num == page_obj.number %}
+                        <span class="px-3 py-2 rounded-lg bg-gray-900 text-white text-xs">{{ num }}</span>
+                    {% else %}
+                        <a href="?page={{ num }}" class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 text-xs hover:border-brand-500 hover:text-brand-600">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-800 text-xs hover:border-brand-500 hover:text-brand-600">Next</a>
+                {% else %}
+                    <span class="px-3 py-2 rounded-lg border border-gray-200 bg-gray-100 text-gray-400 text-xs">Next</span>
+                {% endif %}
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            <article
-                class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
-                <div class="relative h-64 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80"
-                        alt="Blog Post"
-                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                    <div class="absolute top-4 left-4"><span
-                            class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">Trends</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i
-                                class="far fa-calendar-alt mr-1"></i> Sep 28, 2026</span></div>
-                    <a href="#">
-                        <h3
-                            class="text-xl font-bold text-gray-900 mb-3 hover:text-brand-600 transition-colors leading-tight">
-                            10 Wardrobe Essentials Every Woman Needs</h3>
-                    </a>
-                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">Build a versatile collection that carries you
-                        from work to weekend with effortless grace...</p>
-                    <a href="#"
-                        class="text-brand-600 font-bold text-sm hover:text-brand-800 transition-colors flex items-center">Read
-                        More <i class="fas fa-chevron-right text-[10px] ml-2"></i></a>
-                </div>
-            </article>
-            <article
-                class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
-                <div class="relative h-64 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=800&q=80"
-                        alt="Blog Post"
-                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                    <div class="absolute top-4 left-4"><span
-                            class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">Men's
-                            Style</span></div>
-                </div>
-                <div class="p-6">
-                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i
-                                class="far fa-calendar-alt mr-1"></i> Sep 15, 2026</span></div>
-                    <a href="#">
-                        <h3
-                            class="text-xl font-bold text-gray-900 mb-3 hover:text-brand-600 transition-colors leading-tight">
-                            Mastering the Casual Friday Look</h3>
-                    </a>
-                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">The delicate balance between professional and
-                        relaxed revealed in our latest men's style guide...</p>
-                    <a href="#"
-                        class="text-brand-600 font-bold text-sm hover:text-brand-800 transition-colors flex items-center">Read
-                        More <i class="fas fa-chevron-right text-[10px] ml-2"></i></a>
-                </div>
-            </article>
-            <article
-                class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
-                <div class="relative h-64 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80"
-                        alt="Blog Post"
-                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                    <div class="absolute top-4 left-4"><span
-                            class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">Accessories</span>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i
-                                class="far fa-calendar-alt mr-1"></i> Sep 02, 2026</span></div>
-                    <a href="#">
-                        <h3
-                            class="text-xl font-bold text-gray-900 mb-3 hover:text-brand-600 transition-colors leading-tight">
-                            The Power of Statement Sneakers</h3>
-                    </a>
-                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">How to elevate a simple outfit instantly using
-                        bold, comfortable footwear options...</p>
-                    <a href="#"
-                        class="text-brand-600 font-bold text-sm hover:text-brand-800 transition-colors flex items-center">Read
-                        More <i class="fas fa-chevron-right text-[10px] ml-2"></i></a>
-                </div>
-            </article>
-        </div>
     </main>
+
+    <script>
+    (function() {
+        const grid = document.getElementById('blogs-grid');
+        function ensureMax(n) {
+            if (!grid) return;
+            const cards = Array.from(grid.querySelectorAll('article[data-id]'));
+            if (cards.length > n) {
+                cards.slice(n).forEach(el => el.remove());
+            }
+        }
+        function cardHtml(blog) {
+            const img = blog.image_url ? blog.image_url : "";
+            const short = (blog.des || '').length > 60 ? (blog.des || '').slice(0,60) + '…' : (blog.des || '');
+            const imgTag = img ? `<img src="${img}" alt="Blog Post" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">` : `<div class="w-full h-full bg-gray-200"></div>`;
+            return `
+            <article data-id="${blog.id}" data-by="${blog.by || ''}" data-date="${blog.date || ''}" data-image-url="${img}" data-des="${(blog.des || '').replace(/"/g, '&quot;')}" class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+                <div class="relative h-64 overflow-hidden">
+                    ${imgTag}
+                    <div class="absolute top-4 left-4"><span class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">By ${blog.by || ''}</span></div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i class="far fa-calendar-alt mr-1"></i> ${blog.date || ''}</span></div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3 leading-tight">${short}</h3>
+                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">${blog.des || ''}</p>
+                </div>
+            </article>`;
+        }
+        function blogFromCard(el) {
+            if (!el) return null;
+            return {
+                id: el.getAttribute('data-id'),
+                by: el.getAttribute('data-by') || '',
+                date: el.getAttribute('data-date') || '',
+                image_url: el.getAttribute('data-image-url') || '',
+                des: el.getAttribute('data-des') || ''
+            };
+        }
+        function onAdded(blog) {
+            const existing = grid.querySelector(`article[data-id="${blog.id}"]`);
+            if (existing) existing.outerHTML = cardHtml(blog);
+            else grid.insertAdjacentHTML('afterbegin', cardHtml(blog));
+            ensureMax(3);
+        }
+        function onUpdated(blog) {
+            const card = grid.querySelector(`article[data-id="${blog.id}"]`);
+            if (card) {
+                card.outerHTML = cardHtml(blog);
+            }
+        }
+        function onDeleted(id) {
+            const card = grid.querySelector(`article[data-id="${id}"]`);
+            if (card) card.remove();
+        }
+        try {
+            const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+            const socket = new WebSocket(`${proto}://${location.host}/ws/blogs/`);
+            socket.onmessage = (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    if (data.type === 'blog_added') onAdded(data.blog);
+                    else if (data.type === 'blog_updated') onUpdated(data.blog);
+                    else if (data.type === 'blog_deleted') onDeleted(data.id);
+                } catch (err) {}
+            };
+        } catch (err) {}
+    })();
+    </script>
 {% endblock buyer_layout %}

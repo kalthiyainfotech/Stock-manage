@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from .models import Buyer, CartItem, Order, OrderItem
-from admin_panel.models import ProductVariant, Blogs, Contact, ProductColorImage
+from admin_panel.models import ProductVariant, Blogs, Contact
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import F, OuterRef, Subquery, Sum
@@ -74,7 +74,30 @@ def by_login(request):
 
 @never_cache
 def by_index(request):
-    return render(request,'by_index.html')
+    from admin_panel.models import Category, Product, ProductImage
+    categories_qs = Category.objects.filter(status=True).order_by('name')
+    cards = []
+    for c in categories_qs:
+        image_url = None
+        p = Product.objects.filter(brand__subcetegory__category=c, status=True).order_by('-id').first()
+        if p and p.image:
+            try:
+                image_url = p.image.url
+            except Exception:
+                image_url = None
+        if not image_url and p:
+            pi = ProductImage.objects.filter(product=p).order_by('-id').first()
+            if pi and pi.image:
+                try:
+                    image_url = pi.image.url
+                except Exception:
+                    image_url = None
+        cards.append({
+            'id': c.id,
+            'name': c.name,
+            'image_url': image_url
+        })
+    return render(request,'by_index.html', {'home_categories': cards})
 
 @never_cache
 def by_about(request):
@@ -82,9 +105,14 @@ def by_about(request):
 
 @never_cache
 def by_blog(request):
-    blogs = Blogs.objects.all().order_by('-id')
+    blogs_list = Blogs.objects.all().order_by('-id')
+    paginator = Paginator(blogs_list, 3)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     return render(request, 'by_blog.html', {
-        'blogs': blogs
+        'blogs': page_obj,
+        'paginator': paginator,
+        'page_obj': page_obj,
     })
 
 @never_cache
@@ -137,47 +165,33 @@ def by_product(request, variant_id):
     color_norms = {cid: _norm(c['name']) for cid, c in visible_colors.items()}
     for cid in visible_colors.keys():
         images_by_color[cid] = []
-    explicit_color_images = list(ProductColorImage.objects.filter(product=product).select_related('color'))
-    if explicit_color_images:
-        for ci in explicit_color_images:
-            if ci.color_id in images_by_color:
-                images_by_color[ci.color_id].append(ci)
-    else:
-        # Fallback to filename heuristic if explicit color images not present
-        for img in gallery:
+    for img in gallery:
+        name = ''
+        try:
+            name = getattr(img.image, 'name', '') or ''
+        except Exception:
             name = ''
-            try:
-                name = getattr(img.image, 'name', '') or ''
-            except Exception:
-                name = ''
-            n = _norm(name)
-            for cid, cn in color_norms.items():
-                if cn and cn in n:
-                    images_by_color[cid].append(img)
+        n = _norm(name)
+        for cid, cn in color_norms.items():
+            if cn and cn in n:
+                images_by_color[cid].append(img)
     # Flatten annotation for client-side filtering
     gallery_annotated = []
-    if explicit_color_images:
-        for ci in explicit_color_images:
-            gallery_annotated.append({
-                'url': getattr(ci.image, 'url', ''),
-                'color_ids': [ci.color_id]
-            })
-    else:
-        for img in gallery:
+    for img in gallery:
+        name = ''
+        try:
+            name = getattr(img.image, 'name', '') or ''
+        except Exception:
             name = ''
-            try:
-                name = getattr(img.image, 'name', '') or ''
-            except Exception:
-                name = ''
-            n = _norm(name)
-            cids = []
-            for cid, cn in color_norms.items():
-                if cn and cn in n:
-                    cids.append(cid)
-            gallery_annotated.append({
-                'url': getattr(img.image, 'url', ''),
-                'color_ids': cids
-            })
+        n = _norm(name)
+        cids = []
+        for cid, cn in color_norms.items():
+            if cn and cn in n:
+                cids.append(cid)
+        gallery_annotated.append({
+            'url': getattr(img.image, 'url', ''),
+            'color_ids': cids
+        })
     specs = []
     try:
         from admin_panel.models import VariantSpec

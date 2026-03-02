@@ -1,0 +1,68 @@
+{% extends "by_base.html" %}
+{% block buyer_layout %}
+{% load static %}
+<div class="bg-white border-b border-gray-100 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-center">
+    <div class="text-3xl font-black text-brand-900 mx-auto tracking-tighter">
+      LUXE<span class="text-brand-500">.</span>
+    </div>
+    <div class="absolute right-8 lg:right-12 hidden sm:flex items-center gap-2 text-gray-400">
+      <i class="fas fa-shield-alt text-brand-500"></i> Order Confirmed
+    </div>
+  </div>
+</div>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="bg-gray-50 rounded-3xl p-8 sm:p-12 border border-gray-200 text-center">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-green-100 text-green-600 mb-6">
+      <i class="fas fa-check text-2xl"></i>
+    </div>
+    <h1 class="text-3xl md:text-4xl font-black text-gray-900 mb-3">Thank you for your order</h1>
+    <p class="text-gray-600 max-w-2xl mx-auto">
+      Your order has been placed successfully. We’ve sent a confirmation email. You can track your orders anytime from your account.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+      <div class="rounded-2xl bg-white border border-gray-200 p-6 text-left">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+            <i class="fas fa-truck"></i>
+          </span>
+          <h3 class="font-bold text-gray-900">Delivery</h3>
+        </div>
+        <p class="text-sm text-gray-600">Estimated delivery within 3–7 working days.</p>
+      </div>
+      <div class="rounded-2xl bg-white border border-gray-200 p-6 text-left">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+            <i class="fas fa-receipt"></i>
+          </span>
+          <h3 class="font-bold text-gray-900">Receipt</h3>
+        </div>
+        <p class="text-sm text-gray-600">A copy of your order details has been emailed.</p>
+      </div>
+      <div class="rounded-2xl bg-white border border-gray-200 p-6 text-left">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+            <i class="fas fa-headset"></i>
+          </span>
+          <h3 class="font-bold text-gray-900">Support</h3>
+        </div>
+        <p class="text-sm text-gray-600">Need help? Our team is here for you 24/7.</p>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
+      <a href="{% url 'by_history' %}" class="w-full sm:w-auto px-6 py-4 rounded-2xl bg-gray-900 text-white font-bold hover:bg-brand-600 transition">
+        View Orders
+      </a>
+      <a href="{% url 'by_shop' %}" class="w-full sm:w-auto px-6 py-4 rounded-2xl border border-gray-300 bg-white text-gray-800 font-bold hover:border-brand-500 hover:text-brand-600 transition">
+        Continue Shopping
+      </a>
+      <a href="{% url 'by_index' %}" class="w-full sm:w-auto px-6 py-4 rounded-2xl border border-gray-300 bg-white text-gray-800 font-bold hover:border-brand-500 hover:text-brand-600 transition">
+        Go to Home
+      </a>
+    </div>
+  </div>
+</main>
+{% endblock buyer_layout %}

@@ -1,4 +1,8 @@
 from django.db import models
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 class Suppliers(models.Model):
     name = models.CharField(max_length=100)
@@ -53,6 +57,43 @@ class Category(models.Model):
     def __str__(self):
         return self.name
     
+@receiver(post_save, sender=Category)
+def category_post_save(sender, instance, created, **kwargs):
+    try:
+        layer = get_channel_layer()
+        image_url = None
+        try:
+            p = Product.objects.filter(brand__subcetegory__category=instance, status=True).order_by('-id').first()
+            if p and p.image:
+                try:
+                    image_url = p.image.url
+                except Exception:
+                    image_url = None
+            if not image_url and p:
+                pi = ProductImage.objects.filter(product=p).order_by('-id').first()
+                if pi and pi.image:
+                    try:
+                        image_url = pi.image.url
+                    except Exception:
+                        image_url = None
+        except Exception:
+            image_url = None
+        payload = {"id": instance.id, "name": instance.name, "status": instance.status, "image_url": image_url}
+        if created:
+            async_to_sync(layer.group_send)("categories", {"type": "category_added", "category": payload})
+        else:
+            async_to_sync(layer.group_send)("categories", {"type": "category_updated", "category": payload})
+    except Exception:
+        pass
+    
+@receiver(post_delete, sender=Category)
+def category_post_delete(sender, instance, **kwargs):
+    try:
+        layer = get_channel_layer()
+        async_to_sync(layer.group_send)("categories", {"type": "category_deleted", "id": instance.id})
+    except Exception:
+        pass
+    
 class Subcetegory(models.Model):
     category = models.ForeignKey(
         Category,
@@ -101,14 +142,7 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"{self.product.name} image"
 
-class ProductColorImage(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='color_images')
-    color = models.ForeignKey('Color', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='products/')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.product.name} - {self.color.name}"
+ 
 
 class Color(models.Model):
     name = models.CharField(max_length=50)

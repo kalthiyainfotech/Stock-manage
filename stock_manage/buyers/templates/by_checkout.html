@@ -1,5 +1,6 @@
 {% extends "by_base.html" %}
 {% block buyer_layout %}
+{% load static %}
 
     <div class="bg-white border-b border-gray-100 py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-center">
@@ -20,27 +21,11 @@
 
         <!-- Main Form -->
         <main class="w-full lg:w-3/5">
-            <form>
-                <!-- Express Checkout -->
-                <div class="mb-10 text-center">
-                    <h2 class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">Express Checkout</h2>
-                    <div class="flex gap-4 justify-center">
-                        <button type="button"
-                            class="flex-1 py-3 bg-[#5A31F4] text-white rounded-xl font-bold hover:bg-[#4621CE] transition shadow flex items-center justify-center gap-2 max-w-[200px]">Shop<span
-                                class="font-normal opacity-80">Pay</span></button>
-                        <button type="button"
-                            class="flex-1 py-3 bg-[#FFC439] text-[#003087] rounded-xl font-bold hover:bg-[#F4B625] transition shadow flex items-center justify-center gap-2 max-w-[200px] italic">PayPal</button>
-                        <button type="button"
-                            class="flex-1 py-3 bg-black text-white rounded-xl font-bold hover:bg-gray-800 transition shadow flex items-center justify-center gap-2 max-w-[200px]"><i
-                                class="fab fa-google"></i> Pay</button>
-                    </div>
-                </div>
+            <form action="{% url 'by_place_order' %}" method="post">
+                {% csrf_token %}
+                
 
-                <div class="flex items-center gap-4 mb-10">
-                    <div class="h-px bg-gray-200 flex-1"></div>
-                    <span class="text-gray-400 text-sm font-medium">OR</span>
-                    <div class="h-px bg-gray-200 flex-1"></div>
-                </div>
+               
 
                 <!-- Contact Info -->
                 <section class="mb-12">
@@ -50,7 +35,7 @@
                                 class="text-brand-600 font-bold hover:underline">Log in</a></span>
                     </div>
                     <div class="space-y-4">
-                        <input type="email" placeholder="Email address"
+                        <input name="c_email_address" type="email" placeholder="Email address" value="{{ buyer.email }}"
                             class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
                         <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer pl-1 group">
                             <input type="checkbox"
@@ -66,40 +51,33 @@
                     <h2 class="text-2xl font-black text-gray-900 mb-6">Shipping Address</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
-                            <select
+                            <select name="c_country"
                                 class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow text-gray-700">
+                                <option>India</option>
                                 <option>United States</option>
-                                <option>Canada</option>
                                 <option>United Kingdom</option>
+                                <option>Canada</option>
                                 <option>Australia</option>
                             </select>
                         </div>
-                        <div><input type="text" placeholder="First name"
+                        <div><input name="c_fname" type="text" placeholder="First name" value="{{ buyer.name|default:'' }}"
                                 class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
                         </div>
-                        <div><input type="text" placeholder="Last name"
+                        <div><input name="c_lname" type="text" placeholder="Last name"
                                 class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
                         </div>
-                        <div class="md:col-span-2"><input type="text" placeholder="Address"
+                        <div class="md:col-span-2"><input name="c_address" type="text" placeholder="Address" value="{{ buyer.address|default:'' }}"
                                 class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
                         </div>
-                        <div class="md:col-span-2"><input type="text" placeholder="Apartment, suite, etc. (optional)"
+                        <div class="md:col-span-2"><input name="c_address_line2" type="text" placeholder="Apartment, suite, etc. (optional)"
                                 class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
                         </div>
-                        <div><input type="text" placeholder="City"
+                        <div><input name="c_state_country" type="text" placeholder="City / State" value="{{ buyer.city|default:'' }}"
                                 class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <select
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow text-gray-700">
-                                <option>State</option>
-                                <option>NY</option>
-                                <option>CA</option>
-                            </select>
-                            <input type="text" placeholder="ZIP code"
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                        </div>
-                        <div class="md:col-span-2"><input type="tel" placeholder="Phone"
+                        <div><input name="c_postal_zip" type="text" placeholder="ZIP / Postal code" value="{{ buyer.pincode|default:'' }}"
+                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
+                        <div class="md:col-span-2"><input name="c_phone" type="tel" placeholder="Phone" value="{{ buyer.phone|default:'' }}"
                                 class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
                         </div>
                     </div>
@@ -110,60 +88,50 @@
                     <h2 class="text-2xl font-black text-gray-900 mb-2">Payment</h2>
                     <p class="text-sm text-gray-500 mb-6">All transactions are secure and encrypted.</p>
 
-                    <div class="border border-gray-200 rounded-2xl bg-white overflow-hidden shadow-sm">
-                        <!-- Credit Card Option -->
-                        <div
-                            class="p-4 border-b border-gray-200 bg-brand-50 flex justify-between items-center cursor-pointer">
-                            <label class="flex items-center gap-3 cursor-pointer w-full font-bold text-gray-900">
-                                <input type="radio" name="payment" checked
-                                    class="w-5 h-5 text-brand-500 focus:ring-brand-500 border-gray-300">
-                                Credit card
-                            </label>
-                            <div class="flex gap-2 text-2xl text-gray-400">
-                                <i class="fab fa-cc-visa text-blue-800"></i>
-                                <i class="fab fa-cc-mastercard text-red-600"></i>
-                                <i class="fab fa-cc-amex text-blue-500"></i>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <label class="block cursor-pointer">
+                            <input type="radio" name="payment_method" value="cash_on_delivery" class="sr-only peer" checked>
+                            <div class="p-5 rounded-2xl border border-gray-200 bg-white shadow-sm peer-checked:border-brand-500 peer-checked:shadow-md flex items-center justify-center gap-3 h-16">
+                                <i class="fas fa-truck text-gray-600"></i>
+                                <span class="font-bold text-gray-900">Cash on Delivery</span>
                             </div>
-                        </div>
-                        <div class="p-6 bg-white grid grid-cols-2 gap-4">
-                            <div class="col-span-2 relative">
-                                <input type="text" placeholder="Card number"
-                                    class="w-full pl-5 pr-12 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                                <i class="fas fa-lock absolute right-4 top-5 text-gray-400"></i>
+                        </label>
+                        <label class="block cursor-pointer">
+                            <input type="radio" name="payment_method" value="upi" class="sr-only peer">
+                            <div class="p-5 rounded-2xl border border-gray-200 bg-white shadow-sm peer-checked:border-brand-500 peer-checked:shadow-md flex items-center justify-center gap-3 h-16">
+                                <i class="fab fa-google text-black"></i>
+                                <span class="font-bold text-gray-900">Google Pay</span>
                             </div>
-                            <div class="col-span-2"><input type="text" placeholder="Name on card"
-                                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                            </div>
-                            <div><input type="text" placeholder="Expiration date (MM / YY)"
-                                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                            </div>
-                            <div class="relative">
-                                <input type="text" placeholder="Security code"
-                                    class="w-full pl-5 pr-12 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                                <i
-                                    class="far fa-question-circle absolute right-4 top-5 text-gray-400 cursor-pointer hover:text-gray-600"></i>
-                            </div>
-                        </div>
+                        </label>
+                    </div>
 
-                        <!-- PayPal Option -->
-                        <div
-                            class="p-4 bg-white hover:bg-gray-50 flex justify-between items-center cursor-pointer group transition-colors">
-                            <label
-                                class="flex items-center gap-3 cursor-pointer w-full font-medium text-gray-700 group-hover:text-gray-900">
-                                <input type="radio" name="payment"
-                                    class="w-5 h-5 text-brand-500 focus:ring-brand-500 border-gray-300">
-                                PayPal
-                            </label>
-                            <div class="text-2xl text-blue-800">
-                                <i class="fab fa-paypal"></i>
-                            </div>
+                    <div class="mt-6">
+                        <label class="flex items-center gap-2 text-sm text-gray-700">
+                            <input type="checkbox" name="c_ship_different_address" value="1" class="w-4 h-4 text-brand-500 rounded border-gray-300 focus:ring-brand-500">
+                            Ship to a different address
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div><input name="c_diff_fname" type="text" placeholder="Shipping First name"
+                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
+                            <div><input name="c_diff_lname" type="text" placeholder="Shipping Last name"
+                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
+                            <div class="md:col-span-2"><input name="c_diff_address" type="text" placeholder="Shipping Address"
+                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
+                            <div class="md:col-span-2"><input name="c_diff_address_line2" type="text" placeholder="Shipping Address line 2"
+                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
+                            <div><input name="c_diff_state_country" type="text" placeholder="Shipping City / State"
+                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
+                            <div><input name="c_diff_postal_zip" type="text" placeholder="Shipping ZIP / Postal code"
+                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
+                            <div class="md:col-span-2"><input name="c_diff_country" type="text" placeholder="Shipping Country"
+                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
                         </div>
                     </div>
                 </section>
 
-                <button type="button"
-                    class="w-full py-5 bg-brand-500 text-white font-black text-lg rounded-xl hover:bg-brand-600 transition-all shadow-xl shadow-brand-500/30 hover:-translate-y-1 mb-6 flex justify-center items-center gap-3">
-                    <i class="fas fa-lock text-sm"></i> Pay $129.99
+                <button type="submit"
+                    class="w-full py-6 sm:py-7 bg-[#2D0FB1] text-white font-extrabold text-base sm:text-lg rounded-2xl hover:bg-[#250b93] transition-all shadow-xl shadow-[#2D0FB1]/40 hover:-translate-y-[2px] mb-6 flex justify-center items-center gap-3">
+                    <i class="fas fa-lock text-sm"></i> Pay ₹{{ total|floatformat:2 }}
                 </button>
             </form>
         </main>
@@ -175,40 +143,30 @@
 
                 <!-- Items -->
                 <div class="space-y-4 mb-8">
+                    {% for item in cart_items %}
                     <div class="flex items-center gap-4">
                         <div class="relative">
-                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=150&q=80"
-                                alt="Tee" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
-                            <span
-                                class="absolute -top-2 -right-2 bg-gray-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">1</span>
+                            {% if item.variant.product.image %}
+                            <img src="{{ item.variant.product.image.url }}" alt="{{ item.variant.product.name }}" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
+                            {% else %}
+                            <div class="w-16 h-16 rounded-xl bg-gray-200 shadow-sm"></div>
+                            {% endif %}
+                            <span class="absolute -top-2 -right-2 bg-gray-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">{{ item.quantity }}</span>
                         </div>
                         <div class="flex-1">
-                            <h4 class="font-bold text-gray-800 text-sm">Classic White Tee</h4>
-                            <p class="text-xs text-gray-500">M / White</p>
+                            <h4 class="font-bold text-gray-800 text-sm">{{ item.variant.product.name }}</h4>
+                            <p class="text-xs text-gray-500">{{ item.variant.size.name }} / {{ item.variant.color.name }}</p>
                         </div>
-                        <span class="font-bold text-gray-900">$29.99</span>
+                        <span class="font-bold text-gray-900">₹{{ item.variant.price|floatformat:2 }}</span>
                     </div>
-
-                    <div class="flex items-center gap-4">
-                        <div class="relative">
-                            <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=150&q=80"
-                                alt="Jacket" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
-                            <span
-                                class="absolute -top-2 -right-2 bg-gray-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">1</span>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-gray-800 text-sm">Autumn Jacket</h4>
-                            <p class="text-xs text-gray-500">L / Brown</p>
-                        </div>
-                        <span class="font-bold text-gray-900">$89.50</span>
-                    </div>
+                    {% endfor %}
                 </div>
 
                 <!-- Totals -->
                 <div class="space-y-3 pt-6 border-t border-gray-300 text-sm">
                     <div class="flex justify-between text-gray-600">
                         <span>Subtotal</span>
-                        <span class="font-medium">$119.49</span>
+                        <span class="font-medium">₹{{ subtotal|floatformat:2 }}</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span>Shipping</span>
@@ -216,7 +174,7 @@
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span>Taxes</span>
-                        <span class="font-medium">$10.50</span>
+                        <span class="font-medium">₹0.00</span>
                     </div>
                 </div>
 
@@ -225,8 +183,8 @@
                     <div class="flex justify-between items-end">
                         <span class="text-lg font-bold text-gray-900">Total</span>
                         <div class="text-right">
-                            <span class="text-xs text-gray-500 mr-2">USD</span>
-                            <span class="text-3xl font-black text-gray-900">$129.99</span>
+                            <span class="text-xs text-gray-500 mr-2">INR</span>
+                            <span class="text-3xl font-black text-gray-900">₹{{ total|floatformat:2 }}</span>
                         </div>
                     </div>
                 </div>

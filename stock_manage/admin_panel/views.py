@@ -390,9 +390,15 @@ def add_inventory(request):
             messages.error(request, "Category is required")
             return redirect('auth_inventory')
         
-        category, _ = Category.objects.get_or_create(
+        category, created_category = Category.objects.get_or_create(
             name=category_name
         )
+        if created_category:
+            layer = get_channel_layer()
+            async_to_sync(layer.group_send)("categories", {
+                "type": "category_added",
+                "category": {"id": category.id, "name": category.name}
+            })
 
         subcategory_name = request.POST.get('new_subcategory') or request.POST.get('subcategory')
         if not subcategory_name:
@@ -440,88 +446,35 @@ def add_inventory(request):
             if img:
                 ProductImage.objects.create(product=product, image=img)
 
-        # Support creating multiple color-wise storage variants in one submit
-        variant_colors = [c.strip() for c in request.POST.getlist('variant_color') if (c or '').strip()]
-        variant_sizes = [s.strip() for s in request.POST.getlist('variant_size') if (s or '').strip()]
-        variant_prices = request.POST.getlist('variant_price')
-        variant_stocks = request.POST.getlist('variant_stock')
-        created_count = 0
-        if variant_colors and variant_sizes:
-            rows = max(len(variant_colors), len(variant_sizes), len(variant_prices), len(variant_stocks))
-            for i in range(rows):
-                color_name = (variant_colors[i] if i < len(variant_colors) else '').strip() or 'Default'
-                size_name = (variant_sizes[i] if i < len(variant_sizes) else '').strip() or 'Default'
-                try:
-                    price_val = float(variant_prices[i]) if i < len(variant_prices) and variant_prices[i] else 0
-                except Exception:
-                    price_val = 0
-                try:
-                    stock_val = int(variant_stocks[i]) if i < len(variant_stocks) and variant_stocks[i] else 0
-                except Exception:
-                    stock_val = 0
-                color, _ = Color.objects.get_or_create(name=color_name)
-                size, _ = Size.objects.get_or_create(name=size_name)
-                sku = f"{product.id}-{color.id}-{size.id}"
-                variant, created = ProductVariant.objects.get_or_create(
-                    product=product,
-                    color=color,
-                    size=size,
-                    defaults={'price': price_val, 'stock': stock_val, 'sku': sku}
-                )
-                if not created:
-                    variant.price = price_val
-                    variant.stock = stock_val
-                    variant.sku = sku
-                    variant.save()
-                # optional per-color image at the same index
-                try:
-                    from .models import ProductColorImage
-                    variant_images = request.FILES.getlist('variant_image')
-                    if i < len(variant_images) and variant_images[i]:
-                        ProductColorImage.objects.create(product=product, color=color, image=variant_images[i])
-                except Exception:
-                    pass
-                # apply shared specs to each created/updated variant
-                spec_names = request.POST.getlist('spec_name')
-                spec_values = request.POST.getlist('spec_value')
-                VariantSpec.objects.filter(variant=variant).delete()
-                for name, value in zip(spec_names, spec_values):
-                    name = (name or '').strip()
-                    value = (value or '').strip()
-                    if name and value:
-                        VariantSpec.objects.create(variant=variant, name=name, value=value)
-                created_count += 1
-            messages.success(request, f"Inventory saved: {created_count} variant(s) created/updated")
-        else:
-            # Fallback: single variant fields
-            color_name = request.POST.get('color', '').strip() or 'Default'
-            size_name = request.POST.get('size', '').strip() or 'Default'
-            color, _ = Color.objects.get_or_create(name=color_name)
-            size, _ = Size.objects.get_or_create(name=size_name)
-            sku = f"{product.id}-{color.id}-{size.id}"
-            variant, created = ProductVariant.objects.get_or_create(
-                product=product,
-                color=color,
-                size=size,
-                defaults={
-                    'price': request.POST.get('price') or 0,
-                    'stock': request.POST.get('stock') or 0,
-                    'sku': sku
-                }
-            )
-            if not created:
-                variant.price = request.POST.get('price') or 0
-                variant.stock = request.POST.get('stock') or 0
-                variant.save()
-            spec_names = request.POST.getlist('spec_name')
-            spec_values = request.POST.getlist('spec_value')
-            VariantSpec.objects.filter(variant=variant).delete()
-            for name, value in zip(spec_names, spec_values):
-                name = (name or '').strip()
-                value = (value or '').strip()
-                if name and value:
-                    VariantSpec.objects.create(variant=variant, name=name, value=value)
-            messages.success(request, "Inventory added successfully")
+        # Single variant fields only (removed multi-row handling)
+        color_name = request.POST.get('color', '').strip() or 'Default'
+        size_name = request.POST.get('size', '').strip() or 'Default'
+        color, _ = Color.objects.get_or_create(name=color_name)
+        size, _ = Size.objects.get_or_create(name=size_name)
+        sku = f"{product.id}-{color.id}-{size.id}"
+        variant, created = ProductVariant.objects.get_or_create(
+            product=product,
+            color=color,
+            size=size,
+            defaults={
+                'price': request.POST.get('price') or 0,
+                'stock': request.POST.get('stock') or 0,
+                'sku': sku
+            }
+        )
+        if not created:
+            variant.price = request.POST.get('price') or 0
+            variant.stock = request.POST.get('stock') or 0
+            variant.save()
+        spec_names = request.POST.getlist('spec_name')
+        spec_values = request.POST.getlist('spec_value')
+        VariantSpec.objects.filter(variant=variant).delete()
+        for name, value in zip(spec_names, spec_values):
+            name = (name or '').strip()
+            value = (value or '').strip()
+            if name and value:
+                VariantSpec.objects.create(variant=variant, name=name, value=value)
+        messages.success(request, "Inventory added successfully")
         return redirect('auth_inventory')
 
     return redirect('auth_inventory')
@@ -587,9 +540,15 @@ def edit_inventory(request, id):
             messages.error(request, "Category is required")
             return redirect('auth_inventory')
         
-        category, _ = Category.objects.get_or_create(
+        category, created_category = Category.objects.get_or_create(
             name=category_name
         )
+        if created_category:
+            layer = get_channel_layer()
+            async_to_sync(layer.group_send)("categories", {
+                "type": "category_added",
+                "category": {"id": category.id, "name": category.name}
+            })
 
         subcategory_name = request.POST.get('new_subcategory') or request.POST.get('subcategory')
         if not subcategory_name:

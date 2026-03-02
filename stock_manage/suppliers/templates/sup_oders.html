@@ -185,7 +185,7 @@
                             {% if item.variant.product.image %}
                                 <img src="{{ item.variant.product.image.url }}" class="h-12 w-12 object-cover">
                             {% else %}
-                                <img src="{% static 'images/product-1.png' %}" class="h-12 w-12 object-cover">
+                                <div class="h-12 w-12 bg-slate-200"></div>
                             {% endif %}
                         </div>
                         <div class="flex-1">
