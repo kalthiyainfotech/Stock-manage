@@ -2,7 +2,7 @@ from django.urls import path
 from admin_panel.views import *
 
 urlpatterns = [
-    path('auth_login/',auth_login,name='auth_login'),
+    path('',auth_login,name='auth_login'),
     path('auth_dashboard/',auth_dashboard,name='auth_dashboard'),
     path('auth_logout/',auth_logout,name='auth_logout'),
     path('auth_suppliers/',auth_suppliers,name='auth_suppliers'),
