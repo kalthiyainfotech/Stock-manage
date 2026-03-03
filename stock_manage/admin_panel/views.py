@@ -474,6 +474,22 @@ def add_inventory(request):
             value = (value or '').strip()
             if name and value:
                 VariantSpec.objects.create(variant=variant, name=name, value=value)
+
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": variant.id,
+                "product_name": product.name,
+                "brand_name": brand.name,
+                "category_name": category.name,
+                "price": float(variant.price),
+                "stock": variant.stock,
+            }
+            async_to_sync(layer.group_send)("inventory", {
+                "type": "inventory_added",
+                "inventory": payload,
+            })
+
         messages.success(request, "Inventory added successfully")
         return redirect('auth_inventory')
 
@@ -621,6 +637,21 @@ def edit_inventory(request, id):
             if name and value:
                 VariantSpec.objects.create(variant=inventory, name=name, value=value)
 
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": inventory.id,
+                "product_name": product.name,
+                "brand_name": product.brand.name,
+                "category_name": product.brand.subcetegory.category.name,
+                "price": float(inventory.price),
+                "stock": inventory.stock,
+            }
+            async_to_sync(layer.group_send)("inventory", {
+                "type": "inventory_updated",
+                "inventory": payload,
+            })
+
         messages.success(request, "Inventory updated successfully")
         return redirect('auth_inventory')
 
@@ -632,7 +663,16 @@ def edit_inventory(request, id):
 @login_required(login_url='auth_login')
 def delete_inventory(request, id):
     inventory = ProductVariant.objects.get(id=id)
+    inv_id = inventory.id
     inventory.delete()
+
+    layer = get_channel_layer()
+    if layer:
+        async_to_sync(layer.group_send)("inventory", {
+            "type": "inventory_deleted",
+            "id": inv_id,
+        })
+
     return redirect('auth_inventory')
 
 

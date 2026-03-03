@@ -56,31 +56,7 @@
         </div>
     </section>
 
-    <section class="py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16 animate-fade-in">
-                <h2 class="text-3xl md:text-4xl font-black mb-4">Shop by Category</h2>
-                <div class="w-24 h-1 bg-brand-500 mx-auto rounded-full"></div>
-            </div>
-
-            <div id="home-categories-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {% for cat in home_categories %}
-                <a href="{% url 'by_shop' %}?category={{ cat.id }}" data-cat-id="{{ cat.id }}" class="group relative h-80 rounded-2xl overflow-hidden cursor-pointer shadow-lg">
-                    {% if cat.image_url %}
-                    <img src="{{ cat.image_url }}" alt="{{ cat.name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                    {% endif %}
-                    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
-                    <div class="absolute bottom-0 left-0 p-8 w-full transition-transform duration-300 group-hover:-translate-y-2">
-                        <h3 class="text-white text-2xl font-bold mb-2">{{ cat.name }}</h3>
-                        <p class="text-gray-200 text-sm flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            Discover Collection <i class="fas fa-chevron-right ml-2 text-xs"></i>
-                        </p>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
+    
     <script>
         (function () {
             var grid = document.getElementById('home-categories-grid');

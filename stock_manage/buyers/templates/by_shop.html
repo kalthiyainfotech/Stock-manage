@@ -152,4 +152,26 @@
         {% endif %}
     </main>
 </div>
+
+<script>
+(function () {
+    const loc = window.location;
+    const scheme = loc.protocol === 'https:' ? 'wss' : 'ws';
+    const socketUrl = scheme + '://' + loc.host + '/ws/inventory/';
+    try {
+        const socket = new WebSocket(socketUrl);
+        socket.onmessage = function (event) {
+            try {
+                const data = JSON.parse(event.data);
+                if (data && (data.type === 'inventory_added' || data.type === 'inventory_updated' || data.type === 'inventory_deleted')) {
+                    window.location.reload();
+                }
+            } catch (e) {
+            }
+        };
+    } catch (e) {
+    }
+})();
+</script>
+
 {% endblock buyer_layout %}
