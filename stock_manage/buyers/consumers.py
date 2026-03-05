@@ -80,3 +80,30 @@ class InventoryConsumer(AsyncJsonWebsocketConsumer):
             "type": "inventory_deleted",
             "id": event.get("id"),
         })
+
+
+class OrderConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add("orders", self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard("orders", self.channel_name)
+
+    async def order_added(self, event):
+        await self.send_json({
+            "type": "order_added",
+            "order": event.get("order"),
+        })
+
+    async def order_updated(self, event):
+        await self.send_json({
+            "type": "order_updated",
+            "order": event.get("order"),
+        })
+
+    async def order_deleted(self, event):
+        await self.send_json({
+            "type": "order_deleted",
+            "id": event.get("id"),
+        })

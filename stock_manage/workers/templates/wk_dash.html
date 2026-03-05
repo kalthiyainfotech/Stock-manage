@@ -284,6 +284,68 @@
     });
 
     renderCalendar();
+    (function () {
+        try {
+            const loc = window.location;
+            const scheme = loc.protocol === 'https:' ? 'wss' : 'ws';
+            const socketUrl = scheme + '://' + loc.host + '/ws/holidays/';
+            const socket = new WebSocket(socketUrl);
+            socket.onmessage = function (event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    const yr = currentDate.getFullYear();
+                    const mo = currentDate.getMonth() + 1;
+                    function isForCurrentMonth(dateStr) {
+                        if (!dateStr) return false;
+                        const parts = dateStr.split('-');
+                        if (parts.length < 2) return false;
+                        return Number(parts[0]) === yr && Number(parts[1]) === mo;
+                    }
+                    if (data.type === 'holiday_added' && data.holiday) {
+                        const h = data.holiday;
+                        if (isForCurrentMonth(h.date)) {
+                            holidaysByDate.set(h.date, h);
+                            renderCalendar();
+                        }
+                    } else if (data.type === 'holiday_updated' && data.holiday) {
+                        const h = data.holiday;
+                        if (isForCurrentMonth(h.date)) {
+                            holidaysByDate.set(h.date, h);
+                            renderCalendar();
+                        }
+                    } else if (data.type === 'holiday_deleted') {
+                        const d = data.date;
+                        if (isForCurrentMonth(d)) {
+                            holidaysByDate.delete(d);
+                            renderCalendar();
+                        }
+                    }
+                } catch (e) {}
+            };
+        } catch (e) {}
+    })();
+    (function () {
+        try {
+            const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+            const socket = new WebSocket(`${proto}://${location.host}/ws/leaves/`);
+            socket.onmessage = function (e) {
+                try {
+                    const data = JSON.parse(e.data);
+                    const wid = {{ worker.id }};
+                    function isMine(leave) {
+                        return leave && Number(leave.worker_id) === Number(wid);
+                    }
+                    if (data.type === 'leave_added' && isMine(data.leave)) {
+                        renderCalendar();
+                    } else if (data.type === 'leave_updated' && isMine(data.leave)) {
+                        renderCalendar();
+                    } else if (data.type === 'leave_deleted' && Number(data.worker_id) === Number(wid)) {
+                        renderCalendar();
+                    }
+                } catch (_) {}
+            };
+        } catch (_) {}
+    })();
 </script>
 
 {% endblock wk_base %}

@@ -1,8 +1,12 @@
 from django.urls import path
-from buyers.consumers import BlogConsumer, CategoryConsumer, InventoryConsumer
+from buyers.consumers import BlogConsumer, CategoryConsumer, InventoryConsumer, OrderConsumer
+from workers.consumers import HolidayConsumer, LeavesConsumer
 
 websocket_urlpatterns = [
     path('ws/blogs/', BlogConsumer.as_asgi()),
     path('ws/categories/', CategoryConsumer.as_asgi()),
     path('ws/inventory/', InventoryConsumer.as_asgi()),
-]
+    path('ws/holidays/', HolidayConsumer.as_asgi()),
+    path('ws/leaves/', LeavesConsumer.as_asgi()),
+    path('ws/orders/', OrderConsumer.as_asgi()),
+    ]

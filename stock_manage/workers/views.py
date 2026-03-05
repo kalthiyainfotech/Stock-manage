@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from admin_panel.models import Workers, Holiday, Leave
 from functools import wraps
 from django.views.decorators.cache import never_cache
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 
 def worker_login_required(view_func):
@@ -148,7 +150,7 @@ def add_leave(request):
     if request.method == "POST":
         worker_id = request.session.get('worker_id')
         worker = Workers.objects.get(id=worker_id)
-        Leave.objects.create(
+        leave = Leave.objects.create(
             worker=worker,
             start_date=request.POST.get('start_date'),
             end_date=request.POST.get('end_date'),
@@ -158,6 +160,25 @@ def add_leave(request):
             reason=request.POST.get('reason', ''),
             status='Pending'
         )
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": leave.id,
+                "worker_id": worker.id,
+                "worker_name": worker.name,
+                "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
+                "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
+                "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),
+                "end_time": (leave.end_time.strftime("%H:%M") if hasattr(leave.end_time, "strftime") else (leave.end_time if leave.end_time else None)),
+                "category": leave.category,
+                "reason": leave.reason or "",
+                "status": leave.status,
+                "total_minutes": leave.total_minutes,
+            }
+            async_to_sync(layer.group_send)("leaves", {
+                "type": "leave_added",
+                "leave": payload,
+            })
     return redirect('wk_leave')
 
 @never_cache
@@ -182,6 +203,25 @@ def edit_leave(request, id):
             leave.category = category
         leave.reason = request.POST.get('reason', leave.reason)
         leave.save()
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": leave.id,
+                "worker_id": worker.id,
+                "worker_name": worker.name,
+                "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
+                "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
+                "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),
+                "end_time": (leave.end_time.strftime("%H:%M") if hasattr(leave.end_time, "strftime") else (leave.end_time if leave.end_time else None)),
+                "category": leave.category,
+                "reason": leave.reason or "",
+                "status": leave.status,
+                "total_minutes": leave.total_minutes,
+            }
+            async_to_sync(layer.group_send)("leaves", {
+                "type": "leave_updated",
+                "leave": payload,
+            })
     return redirect('wk_leave')
 
 @never_cache
@@ -196,5 +236,19 @@ def delete_leave(request, id):
     if leave.status != 'Pending':
         messages.error(request, "Only pending leave can be deleted")
         return redirect('wk_leave')
-    Leave.objects.filter(id=id, worker=worker).delete()
+    obj = Leave.objects.filter(id=id, worker=worker).first()
+    if obj:
+        obj_id = obj.id
+        sd = getattr(obj.start_date, "isoformat", lambda: str(obj.start_date))()
+        ed = getattr(obj.end_date, "isoformat", lambda: str(obj.end_date))()
+        obj.delete()
+        layer = get_channel_layer()
+        if layer:
+            async_to_sync(layer.group_send)("leaves", {
+                "type": "leave_deleted",
+                "id": obj_id,
+                "worker_id": worker.id,
+                "start_date": sd,
+                "end_date": ed,
+            })
     return redirect('wk_leave')

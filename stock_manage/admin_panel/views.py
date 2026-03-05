@@ -242,11 +242,23 @@ def auth_holiday(request):
 @login_required(login_url='auth_login')
 def add_holiday(request):
     if request.method == "POST":
-        Holiday.objects.create(
+        h = Holiday.objects.create(
             name=request.POST['name'],
             date=request.POST['date'],
             description=request.POST.get('description', '')
         )
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": h.id,
+                "name": h.name,
+                "date": getattr(h.date, "isoformat", lambda: str(h.date))(),
+                "description": h.description or "",
+            }
+            async_to_sync(layer.group_send)("holidays", {
+                "type": "holiday_added",
+                "holiday": payload,
+            })
         return redirect('auth_holiday')
     return redirect('auth_holiday')
 
@@ -259,12 +271,34 @@ def edit_holiday(request, id):
         holiday.date = request.POST['date']
         holiday.description = request.POST.get('description', '')
         holiday.save()
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": holiday.id,
+                "name": holiday.name,
+                "date": getattr(holiday.date, "isoformat", lambda: str(holiday.date))(),
+                "description": holiday.description or "",
+            }
+            async_to_sync(layer.group_send)("holidays", {
+                "type": "holiday_updated",
+                "holiday": payload,
+            })
     return redirect('auth_holiday')
 
 @never_cache
 @login_required(login_url='auth_login')
 def delete_holiday(request, id):
-    Holiday.objects.filter(id=id).delete()
+    obj = get_object_or_404(Holiday, id=id)
+    obj_id = obj.id
+    obj_date = getattr(obj.date, "isoformat", lambda: str(obj.date))()
+    obj.delete()
+    layer = get_channel_layer()
+    if layer:
+        async_to_sync(layer.group_send)("holidays", {
+            "type": "holiday_deleted",
+            "id": obj_id,
+            "date": obj_date,
+        })
     return redirect('auth_holiday')
 
 @never_cache
@@ -339,6 +373,25 @@ def approve_leave(request, id):
     leave = get_object_or_404(Leave, id=id)
     leave.status = 'Approved'
     leave.save()
+    layer = get_channel_layer()
+    if layer:
+        payload = {
+            "id": leave.id,
+            "worker_id": leave.worker.id,
+            "worker_name": leave.worker.name,
+            "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
+            "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
+            "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),
+            "end_time": (leave.end_time.strftime("%H:%M") if hasattr(leave.end_time, "strftime") else (leave.end_time if leave.end_time else None)),
+            "category": leave.category,
+            "reason": leave.reason or "",
+            "status": leave.status,
+            "total_minutes": leave.total_minutes,
+        }
+        async_to_sync(layer.group_send)("leaves", {
+            "type": "leave_updated",
+            "leave": payload,
+        })
     return redirect('auth_leaves')
 
 @never_cache
@@ -347,6 +400,25 @@ def reject_leave(request, id):
     leave = get_object_or_404(Leave, id=id)
     leave.status = 'Rejected'
     leave.save()
+    layer = get_channel_layer()
+    if layer:
+        payload = {
+            "id": leave.id,
+            "worker_id": leave.worker.id,
+            "worker_name": leave.worker.name,
+            "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
+            "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
+            "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),
+            "end_time": (leave.end_time.strftime("%H:%M") if hasattr(leave.end_time, "strftime") else (leave.end_time if leave.end_time else None)),
+            "category": leave.category,
+            "reason": leave.reason or "",
+            "status": leave.status,
+            "total_minutes": leave.total_minutes,
+        }
+        async_to_sync(layer.group_send)("leaves", {
+            "type": "leave_updated",
+            "leave": payload,
+        })
     return redirect('auth_leaves')
 
 @never_cache
@@ -366,12 +438,46 @@ def edit_leave_admin(request, id):
         if status in ['Pending', 'Approved', 'Rejected']:
             leave.status = status
         leave.save()
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": leave.id,
+                "worker_id": leave.worker.id,
+                "worker_name": leave.worker.name,
+                "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
+                "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
+                "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),
+                "end_time": (leave.end_time.strftime("%H:%M") if hasattr(leave.end_time, "strftime") else (leave.end_time if leave.end_time else None)),
+                "category": leave.category,
+                "reason": leave.reason or "",
+                "status": leave.status,
+                "total_minutes": leave.total_minutes,
+            }
+            async_to_sync(layer.group_send)("leaves", {
+                "type": "leave_updated",
+                "leave": payload,
+            })
     return redirect('auth_leaves')
 
 @never_cache
 @login_required(login_url='auth_login')
 def delete_leave_admin(request, id):
-    Leave.objects.filter(id=id).delete()
+    obj = Leave.objects.filter(id=id).first()
+    if obj:
+        obj_id = obj.id
+        wid = obj.worker.id
+        sd = getattr(obj.start_date, "isoformat", lambda: str(obj.start_date))()
+        ed = getattr(obj.end_date, "isoformat", lambda: str(obj.end_date))()
+        obj.delete()
+        layer = get_channel_layer()
+        if layer:
+            async_to_sync(layer.group_send)("leaves", {
+                "type": "leave_deleted",
+                "id": obj_id,
+                "worker_id": wid,
+                "start_date": sd,
+                "end_date": ed,
+            })
     return redirect('auth_leaves')
 
 
@@ -780,7 +886,7 @@ def delete_buyer(request, id):
 def auth_blogs(request):
     blogs_list = Blogs.objects.all().order_by('-id')
 
-    paginator = Paginator(blogs_list, 5)
+    paginator = Paginator(blogs_list, 10)
     page_number = request.GET.get('page')
     blogs = paginator.get_page(page_number)
 
@@ -890,5 +996,12 @@ def auth_order(request):
 @never_cache
 @login_required(login_url='auth_login')
 def delete_order(request, id):
+    exists = Order.objects.filter(id=id).first()
     Order.objects.filter(id=id).delete()
+    layer = get_channel_layer()
+    if layer and exists:
+        async_to_sync(layer.group_send)("orders", {
+            "type": "order_deleted",
+            "id": exists.id,
+        })
     return redirect('auth_order')

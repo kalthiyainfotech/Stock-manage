@@ -170,7 +170,6 @@
                     class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
                     <tr>
                         <th class="px-4 py-3 font-medium text-center">No.</th>
-                        <th class="px-4 py-3 font-medium text-center">ID</th>
                         <th class="px-4 py-3 font-medium text-center">Image</th>
                         <th class="px-4 py-3 font-medium">Description</th>
                         <th class="px-4 py-3 font-medium">By</th>
@@ -186,9 +185,7 @@
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
                             {{ forloop.counter }}
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm font-medium text-slate-700 text-center">
-                            #{{ blog.id }}
-                        </td>
+                        
 
                         <td class="px-4 py-3 align-middle text-center">
                             {% if blog.image %}
@@ -250,6 +247,34 @@
         </div>
 
     </section>
+
+    {% if blogs.paginator.num_pages > 1 %}
+    <div class="flex items-center justify-between mt-6">
+        <div class="text-xs text-slate-500">
+            Showing <span class="font-semibold text-slate-900">{{ blogs.start_index }}–{{ blogs.end_index }}</span> of
+            <span class="font-semibold text-slate-900">{{ blogs.paginator.count }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+            {% if blogs.has_previous %}
+            <a href="?page={{ blogs.previous_page_number }}" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 text-xs hover:border-slate-500 hover:text-slate-900">Previous</a>
+            {% else %}
+            <span class="px-3 py-2 rounded-lg border border-slate-200 bg-slate-100 text-slate-400 text-xs">Previous</span>
+            {% endif %}
+            {% for num in blogs.paginator.page_range %}
+            {% if num == blogs.number %}
+            <span class="px-3 py-2 rounded-lg bg-slate-900 text-white text-xs">{{ num }}</span>
+            {% else %}
+            <a href="?page={{ num }}" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 text-xs hover:border-slate-500 hover:text-slate-900">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+            {% if blogs.has_next %}
+            <a href="?page={{ blogs.next_page_number }}" class="px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-800 text-xs hover:border-slate-500 hover:text-slate-900">Next</a>
+            {% else %}
+            <span class="px-3 py-2 rounded-lg border border-slate-200 bg-slate-100 text-slate-400 text-xs">Next</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
 </main>
 

@@ -57,7 +57,7 @@
                 </thead>
                 <tbody id="leavesTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for l in leaves %}
-                    <tr class="hover:bg-slate-50/80 transition-colors">
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-leave-id="{{ l.id }}">
                         <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900 truncate">
                             {{ l.worker.name }}
                         </td>
@@ -247,6 +247,100 @@
     </div>
 </div>
 
+<script>
+function adminPillClass(status) {
+    if (status === 'Approved') return 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100';
+    if (status === 'Rejected') return 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-rose-50 text-rose-700 ring-1 ring-rose-100';
+    return 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-amber-50 text-amber-700 ring-1 ring-amber-100';
+}
+function adminCategoryClass(cat) {
+    if (cat === 'Sick') return 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-amber-50 text-amber-700 ring-1 ring-amber-100';
+    if (cat === 'Emergency') return 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-indigo-50 text-indigo-700 ring-1 ring-indigo-100';
+    return 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-slate-50 text-slate-700 ring-1 ring-slate-100';
+}
+function adminRowHtml(leave) {
+    const approveUrl = `/admin_panel/leave/approve/${leave.id}/`;
+    const rejectUrl = `/admin_panel/leave/reject/${leave.id}/`;
+    const editUrl = `/admin_panel/leave/edit/${leave.id}/`;
+    const deleteUrl = `/admin_panel/leave/delete/${leave.id}/`;
+    const stClass = adminPillClass(leave.status || 'Pending');
+    const catClass = adminCategoryClass(leave.category || 'Casual');
+    const st = leave.status || 'Pending';
+    const startTime = leave.start_time || '';
+    const endTime = leave.end_time || '';
+    const startDate = leave.start_date || '';
+    const endDate = leave.end_date || '';
+    const reason = leave.reason || '';
+    const workerName = leave.worker_name || '';
+    return `<tr class="hover:bg-slate-50/80 transition-colors" data-leave-id="${leave.id}">
+        <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900 truncate">${workerName}</td>
+        <td class="px-4 py-3 align-middle"><span class="${catClass}">${leave.category || 'Casual'}</span></td>
+        <td class="px-4 py-3 align-middle text-center"><span class="${stClass}">${st}</span></td>
+        <td class="px-4 py-3 align-middle text-center">
+            <div class="inline-flex items-center justify-center gap-2">
+                <button onclick="openLeaveView('${workerName.replace(/'/g, "\\'")}','${startDate}','${endDate}','${startTime}','${endTime}','${leave.category || ''}','${reason.replace(/'/g, "\\'")}','${st}')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition" title="View"><i class="fa-solid fa-eye text-xs"></i><span class="sr-only">View</span></button>
+                <button type="button" data-leave-toggle data-approve-url="${approveUrl}" data-reject-url="${rejectUrl}" data-initial="${st}" class="relative h-7 w-14 rounded-full bg-gray-300 transition-colors align-middle"><span data-knob class="absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow transition-transform"></span></button>
+                <button onclick="openLeaveEdit('${editUrl}','${startDate}','${endDate}','${startTime}','${endTime}','${leave.category || ''}','${reason.replace(/'/g, "\\'")}','${st}')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition" title="Edit"><i class="fa-solid fa-pen-to-square text-xs"></i><span class="sr-only">Edit</span></button>
+                <button onclick="openLeaveDelete('${deleteUrl}')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition" title="Delete"><i class="fa-solid fa-trash text-xs"></i><span class="sr-only">Delete</span></button>
+            </div>
+        </td>
+    </tr>`;
+}
+(function () {
+    function bindToggle(el) {
+        const initial = (el.dataset.initial || '').trim();
+        const on = initial === 'Approved';
+        const knob = el.querySelector('[data-knob]');
+        function setState(active, rejected) {
+            el.classList.remove('bg-gray-200','bg-emerald-500','bg-rose-500','bg-gray-300');
+            if (active) {
+                el.classList.add('bg-emerald-500');
+                knob.classList.add('translate-x-7');
+            } else {
+                knob.classList.remove('translate-x-7');
+                if (rejected) el.classList.add('bg-rose-500'); else el.classList.add('bg-gray-300');
+            }
+        }
+        setState(on, initial === 'Rejected');
+        el.addEventListener('click', () => {
+            const isActive = knob.classList.contains('translate-x-7');
+            const targetUrl = isActive ? el.dataset.rejectUrl : el.dataset.approveUrl;
+            fetch(targetUrl).catch(()=>{});
+        });
+    }
+    document.querySelectorAll('[data-leave-toggle]').forEach(bindToggle);
+    try {
+        const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+        const socket = new WebSocket(`${proto}://${location.host}/ws/leaves/`);
+        const tbody = document.getElementById('leavesTableBody');
+        function upsertRow(leave) {
+            if (!tbody) return;
+            const existing = tbody.querySelector(`tr[data-leave-id="${leave.id}"]`);
+            const html = adminRowHtml(leave);
+            if (existing) {
+                existing.outerHTML = html;
+            } else {
+                tbody.insertAdjacentHTML('afterbegin', html);
+            }
+            const toggle = tbody.querySelector(`tr[data-leave-id="${leave.id}"] [data-leave-toggle]`);
+            if (toggle) bindToggle(toggle);
+        }
+        function removeRow(id) {
+            if (!tbody) return;
+            const row = tbody.querySelector(`tr[data-leave-id="${id}"]`);
+            if (row) row.remove();
+        }
+        socket.onmessage = function (e) {
+            try {
+                const data = JSON.parse(e.data);
+                if (data.type === 'leave_added' && data.leave) upsertRow(data.leave);
+                else if (data.type === 'leave_updated' && data.leave) upsertRow(data.leave);
+                else if (data.type === 'leave_deleted' && data.id) removeRow(data.id);
+            } catch (_) {}
+        };
+    } catch (_) {}
+})();
+</script>
 <div id="leaveDeleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">
     <div class="w-full max-w-sm bg-white rounded-lg shadow-lg p-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-3">Confirm Delete</h2>

@@ -155,7 +155,7 @@
                 </thead>
                 <tbody id="leavesTableBody" class="divide-y divide-slate-100">
                     {% for l in leaves %}
-                    <tr data-leave-row class="hover:bg-slate-50">
+                    <tr data-leave-row data-leave-id="{{ l.id }}" class="hover:bg-slate-50">
                         <td class="px-4 py-3 align-middle text-slate-700">{{ l.start_date }} → {{ l.end_date }}</td>
                         <td class="px-4 py-3 align-middle text-slate-700">
                             {% if l.start_time or l.end_time %}
@@ -362,6 +362,80 @@ function recalcTotal() {
     leaveStartTime.addEventListener(evt, recalcTotal);
     leaveEndTime.addEventListener(evt, recalcTotal);
 });
+    (function () {
+        function catClass(cat) {
+            if (cat === 'Sick') return 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 ring-1 ring-amber-200';
+            if (cat === 'Emergency') return 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold bg-indigo-100 text-indigo-800 ring-1 ring-indigo-200';
+            return 'inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-800 ring-1 ring-slate-200';
+        }
+        function statusPill(status) {
+            if (status === 'Approved') return '<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Approved</span>';
+            if (status === 'Rejected') return '<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-rose-50 text-rose-700 ring-1 ring-rose-100"><span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>Rejected</span>';
+            return '<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-amber-50 text-amber-700 ring-1 ring-amber-100"><span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>Pending</span>';
+        }
+        function fmt12(t) {
+            if (!t) return '';
+            const parts = String(t).split(':'); const h = parseInt(parts[0],10); const m = parts[1] || '00';
+            const am = h < 12; const hh = h % 12 || 12; return `${hh}:${m} ${am?'AM':'PM'}`;
+        }
+        function totalHm(total, sd, ed) {
+            const h = Math.floor((total || 0) / 60); const m = (total || 0) % 60;
+            let days = '';
+            if (sd && ed && sd !== ed) {
+                const a = new Date(sd+'T00:00:00'); const b = new Date(ed+'T00:00:00');
+                const diff = Math.round((b - a) / 86400000) + 1;
+                if (diff > 1) days = ` (${diff} days)`;
+            }
+            return `${h}h ${m}m${days}`;
+        }
+        function rowHtml(leave) {
+            const times = (leave.start_time || leave.end_time) ? `${fmt12(leave.start_time)} → ${fmt12(leave.end_time)}` : (leave.start_date === leave.end_date ? '09:00 AM → 06:00 PM' : 'Full day');
+            const total = totalHm(leave.total_minutes, leave.start_date, leave.end_date);
+            const cat = leave.category || 'Casual';
+            const status = leave.status || 'Pending';
+            const editUrl = `/workers/leave/edit/${leave.id}/`;
+            const deleteUrl = `/workers/leave/delete/${leave.id}/`;
+            const actions = status === 'Pending'
+                ? `<button onclick="openLeaveEdit('${editUrl}','${leave.start_date}','${leave.end_date}','${leave.start_time || ''}','${leave.end_time || ''}','${cat}','${(leave.reason || '').replace(/'/g,"\\'") }')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition" title="Edit"><i class="fa-solid fa-pen-to-square text-xs"></i><span class="sr-only">Edit</span></button>
+                   <button onclick="openLeaveDelete('${deleteUrl}')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition" title="Delete"><i class="fa-solid fa-trash text-xs"></i><span class="sr-only">Delete</span></button>`
+                : `<span class="text-xs text-slate-400">Locked</span>`;
+            return `<tr data-leave-row data-leave-id="${leave.id}" class="hover:bg-slate-50">
+                <td class="px-4 py-3 align-middle text-slate-700">${leave.start_date} → ${leave.end_date}</td>
+                <td class="px-4 py-3 align-middle text-slate-700">${times}</td>
+                <td class="px-4 py-3 align-middle text-slate-700">${total}</td>
+                <td class="px-4 py-3 align-middle"><span class="${catClass(cat)}">${cat}</span></td>
+                <td class="px-4 py-3 align-middle text-slate-700">${leave.reason || '—'}</td>
+                <td class="px-4 py-3 align-middle text-center">${statusPill(status)}</td>
+                <td class="px-4 py-3 align-middle text-center"><div class="inline-flex items-center justify-center gap-2">${actions}</div></td>
+            </tr>`;
+        }
+        try {
+            const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+            const socket = new WebSocket(`${proto}://${location.host}/ws/leaves/`);
+            const tbody = document.getElementById('leavesTableBody');
+            const wid = {{ worker.id }};
+            function isMine(leave) { return leave && Number(leave.worker_id) === Number(wid); }
+            function upsertRow(leave) {
+                if (!tbody) return;
+                const existing = tbody.querySelector(`tr[data-leave-id="${leave.id}"]`);
+                const html = rowHtml(leave);
+                if (existing) existing.outerHTML = html; else tbody.insertAdjacentHTML('afterbegin', html);
+            }
+            function removeRow(id) {
+                if (!tbody) return;
+                const row = tbody.querySelector(`tr[data-leave-id="${id}"]`);
+                if (row) row.remove();
+            }
+            socket.onmessage = function (e) {
+                try {
+                    const data = JSON.parse(e.data);
+                    if (data.type === 'leave_added' && isMine(data.leave)) upsertRow(data.leave);
+                    else if (data.type === 'leave_updated' && isMine(data.leave)) upsertRow(data.leave);
+                    else if (data.type === 'leave_deleted' && Number(data.worker_id) === Number(wid)) removeRow(data.id);
+                } catch (_) {}
+            };
+        } catch (_) {}
+    })();
 </script>
 
 {% endblock wk_base %}

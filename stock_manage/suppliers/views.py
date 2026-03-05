@@ -6,6 +6,8 @@ from django.views.decorators.cache import never_cache
 from buyers.models import Order
 from django.http import HttpResponseForbidden
 from django.db.models import F, Sum
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 
 def supplier_login_required(view_func):
@@ -140,6 +142,22 @@ def sup_update_order_status(request, order_id):
             for item in order.items.all():
                 item.variant.__class__.objects.filter(id=item.variant_id).update(stock=F('stock') + item.quantity)
         messages.success(request, f"Order {order.order_number} updated to {order.get_status_display()}")
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": order.id,
+                "order_number": order.order_number,
+                "buyer_id": order.buyer_id,
+                "buyer_name": f"{order.first_name} {order.last_name}",
+                "email": order.email,
+                "total": float(order.total),
+                "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
+                "status": order.status,
+            }
+            async_to_sync(layer.group_send)("orders", {
+                "type": "order_updated",
+                "order": payload,
+            })
     except Order.DoesNotExist:
         messages.error(request, "Order not found")
     return redirect('supplier_orders')
@@ -154,6 +172,12 @@ def sup_delete_order(request, order_id):
         order_number = order.order_number
         order.delete()
         messages.success(request, f"Order {order_number} deleted")
+        layer = get_channel_layer()
+        if layer:
+            async_to_sync(layer.group_send)("orders", {
+                "type": "order_deleted",
+                "id": order_id,
+            })
     except Order.DoesNotExist:
         messages.error(request, "Order not found")
     return redirect('supplier_orders')

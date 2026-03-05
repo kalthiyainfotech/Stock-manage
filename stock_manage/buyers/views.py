@@ -12,6 +12,8 @@ from django.core.paginator import Paginator
 import random
 import string
 from django.http import JsonResponse
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 
 def buyer_login_required(view_func):
@@ -105,14 +107,9 @@ def by_about(request):
 
 @never_cache
 def by_blog(request):
-    blogs_list = Blogs.objects.all().order_by('-id')
-    paginator = Paginator(blogs_list, 3)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    blogs = Blogs.objects.all().order_by('-id')
     return render(request, 'by_blog.html', {
-        'blogs': page_obj,
-        'paginator': paginator,
-        'page_obj': page_obj,
+        'blogs': blogs,
     })
 
 @never_cache
@@ -627,6 +624,22 @@ def place_order(request):
                 if not updated:
                     raise ValueError("Insufficient stock")
             cart_items.delete()
+            layer = get_channel_layer()
+            if layer:
+                payload = {
+                    "id": order.id,
+                    "order_number": order.order_number,
+                    "buyer_id": buyer.id,
+                    "buyer_name": buyer.name,
+                    "email": order.email,
+                    "total": float(order.total),
+                    "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
+                    "status": order.status,
+                }
+                async_to_sync(layer.group_send)("orders", {
+                    "type": "order_added",
+                    "order": payload,
+                })
     except Exception:
         return redirect("by_checkout")
     return redirect("by_thankyou")
@@ -684,6 +697,22 @@ def by_cancel_order(request, order_id):
         ProductVariant.objects.filter(id=item.variant_id).update(stock=F('stock') + item.quantity)
     order.status = "cancelled"
     order.save()
+    layer = get_channel_layer()
+    if layer:
+        payload = {
+            "id": order.id,
+            "order_number": order.order_number,
+            "buyer_id": order.buyer_id,
+            "buyer_name": order.buyer.name,
+            "email": order.email,
+            "total": float(order.total),
+            "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
+            "status": order.status,
+        }
+        async_to_sync(layer.group_send)("orders", {
+            "type": "order_updated",
+            "order": payload,
+        })
     messages.success(request, "Your order has been cancelled.")
     return redirect("by_history")
 
@@ -704,6 +733,22 @@ def by_return_order(request, order_id):
         return redirect("by_history")
     order.status = "return_requested"
     order.save()
+    layer = get_channel_layer()
+    if layer:
+        payload = {
+            "id": order.id,
+            "order_number": order.order_number,
+            "buyer_id": order.buyer_id,
+            "buyer_name": order.buyer.name,
+            "email": order.email,
+            "total": float(order.total),
+            "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
+            "status": order.status,
+        }
+        async_to_sync(layer.group_send)("orders", {
+            "type": "order_updated",
+            "order": payload,
+        })
     messages.success(request, "Return request submitted. Supplier will verify shortly.")
     return redirect("by_history")
 

@@ -56,7 +56,7 @@
                 </thead>
                 <tbody id="supReturnTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for order in orders %}
-                    <tr class="hover:bg-slate-50/80 transition-colors">
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-order-id="{{ order.id }}">
                         <td class="px-4 py-3 align-middle font-semibold text-slate-800">
                             {{ order.order_number }}
                         </td>
@@ -149,4 +149,51 @@ if (supplierReturnSearchInput && supReturnTBody) {
         }
     });
 }
+(function () {
+    function pill(status) {
+        var base = 'inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs ';
+        var dot = '';
+        if (status === 'return_requested') { base += 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'; dot='bg-amber-500'; }
+        else if (status === 'returned') { base += 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'; dot='bg-emerald-500'; }
+        else { base += 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'; dot='bg-slate-400'; }
+        return '<span class="'+base+'"><span class="h-1.5 w-1.5 rounded-full '+dot+'"></span>'+status+'</span>';
+    }
+    function rowHtml(o) {
+        if (!(o.status === 'return_requested' || o.status === 'returned')) return '';
+        return '<tr class="hover:bg-slate-50/80 transition-colors" data-order-id="'+o.id+'">'+
+            '<td class="px-4 py-3 align-middle font-semibold text-slate-800">'+(o.order_number||'')+'</td>'+
+            '<td class="px-4 py-3 align-middle"><div class="text-slate-800">'+(o.buyer_name||'')+'</div><div class="text-xs text-slate-500">'+(o.email||'')+'</div></td>'+
+            '<td class="px-4 py-3 align-middle"><div class="text-sm">— items</div></td>'+
+            '<td class="px-4 py-3 align-middle text-right font-semibold">₹'+(o.total||0)+'</td>'+
+            '<td class="px-4 py-3 align-middle whitespace-nowrap">'+(o.created_at||'')+'</td>'+
+            '<td class="px-4 py-3 align-middle text-center">'+pill(o.status||'')+'</td>'+
+            '<td class="px-4 py-3 align-middle text-center"><span class="text-xs text-slate-500">Actions</span></td>'+
+        '</tr>';
+    }
+    try {
+        var proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+        var socket = new WebSocket(proto+'://'+location.host+'/ws/orders/');
+        var tbody = document.getElementById('supReturnTableBody');
+        function upsert(o) {
+            if (!tbody || !o || !o.id) return;
+            var row = tbody.querySelector('tr[data-order-id="'+o.id+'"]');
+            var html = rowHtml(o);
+            if (html === '') { if (row) row.remove(); return; }
+            if (row) row.outerHTML = html; else tbody.insertAdjacentHTML('afterbegin', html);
+        }
+        function remove(id) {
+            if (!tbody) return;
+            var row = tbody.querySelector('tr[data-order-id="'+id+'"]');
+            if (row) row.remove();
+        }
+        socket.onmessage = function (e) {
+            try {
+                var data = JSON.parse(e.data);
+                if (data.type === 'order_updated' && data.order) upsert(data.order);
+                else if (data.type === 'order_deleted' && data.id) remove(data.id);
+                else if (data.type === 'order_added' && data.order) upsert(data.order);
+            } catch (_) {}
+        };
+    } catch (_) {}
+})();
 </script>
