@@ -2,20 +2,7 @@
 {% block buyer_layout %}
 {% load static %}
 
-    <div class="bg-white border-b border-gray-100 py-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center text-center">
-            <div class="text-3xl font-black text-brand-900 mx-auto tracking-tighter">
-                LUXE<span class="text-brand-500">.</span>
-            </div>
-            <a href="{% url 'by_cart' %}"
-                class="absolute left-8 lg:left-12 text-gray-500 hover:text-brand-600 font-medium hidden sm:flex items-center gap-2">
-                <i class="fas fa-arrow-left"></i> Back to Cart
-            </a>
-            <div class="absolute right-8 lg:right-12 hidden sm:flex items-center gap-2 text-gray-400">
-                <i class="fas fa-lock text-brand-500"></i> Secure Checkout
-            </div>
-        </div>
-    </div>
+    
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row gap-8 lg:gap-16">
 
@@ -31,8 +18,7 @@
                 <section class="mb-12">
                     <div class="flex justify-between items-end mb-6">
                         <h2 class="text-2xl font-black text-gray-900">Contact Information</h2>
-                        <span class="text-sm text-gray-500">Already have an account? <a href="#"
-                                class="text-brand-600 font-bold hover:underline">Log in</a></span>
+                        
                     </div>
                     <div class="space-y-4">
                         <input name="c_email_address" type="email" placeholder="Email address" value="{{ buyer.email }}"

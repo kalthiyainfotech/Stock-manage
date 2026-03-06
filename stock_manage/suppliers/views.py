@@ -153,6 +153,7 @@ def sup_update_order_status(request, order_id):
                 "total": float(order.total),
                 "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
                 "status": order.status,
+                "total_items": sum(i.quantity for i in order.items.all()),
             }
             async_to_sync(layer.group_send)("orders", {
                 "type": "order_updated",

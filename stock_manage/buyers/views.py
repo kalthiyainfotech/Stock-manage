@@ -3,11 +3,11 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.cache import never_cache
 from functools import wraps
-from .models import Buyer, CartItem, Order, OrderItem
+from .models import Buyer, CartItem, Order, OrderItem, WishlistItem
 from admin_panel.models import ProductVariant, Blogs, Contact
 from django.utils import timezone
 from django.db import transaction
-from django.db.models import F, OuterRef, Subquery, Sum
+from django.db.models import F, OuterRef, Subquery, Sum, Q
 from django.core.paginator import Paginator
 import random
 import string
@@ -101,9 +101,7 @@ def by_index(request):
         })
     return render(request,'by_index.html', {'home_categories': cards})
 
-@never_cache
-def by_about(request):
-    return render(request,'by_about.html')
+
 
 @never_cache
 def by_blog(request):
@@ -256,6 +254,7 @@ def by_shop(request):
     price_max = base_qs.order_by('-price').values_list('price', flat=True).first() or 0
 
     category_id = request.GET.get('category')
+    q = (request.GET.get('q') or '').strip()
     min_price = request.GET.get('min')
     max_price = request.GET.get('max')
     brands_selected = request.GET.getlist('brands')
@@ -266,6 +265,11 @@ def by_shop(request):
         qs = qs.filter(product__brand__subcetegory__category_id=category_id)
         price_min = qs.order_by('price').values_list('price', flat=True).first() or price_min
         price_max = qs.order_by('-price').values_list('price', flat=True).first() or price_max
+    if q:
+        qs = qs.filter(
+            Q(product__name__icontains=q) |
+            Q(product__brand__name__icontains=q)
+        )
     if min_price:
         try:
             qs = qs.filter(price__gte=float(min_price))
@@ -334,10 +338,79 @@ def by_shop(request):
         'sort': sort,
         'best_ids': best_ids,
         'selected_category': category_id,
+        'q': q,
         'price_min': price_min,
         'price_max': price_max,
         'selected_min_price': min_price or price_min,
         'selected_max_price': max_price or price_max,
+    })
+
+
+@never_cache
+def by_shop_api(request):
+    base_qs = ProductVariant.objects.select_related(
+        'product',
+        'product__brand',
+        'product__brand__subcetegory',
+        'product__brand__subcetegory__category'
+    ).filter(
+        product__status=True,
+        stock__gt=0
+    )
+    category_id = request.GET.get('category')
+    q = (request.GET.get('q') or '').strip()
+
+    qs = base_qs
+    if category_id:
+        qs = qs.filter(product__brand__subcetegory__category_id=category_id)
+    if q:
+        qs = qs.filter(
+            Q(product__name__icontains=q) |
+            Q(product__brand__name__icontains=q)
+        )
+
+    sales_sub = Subquery(
+        OrderItem.objects.filter(variant_id=OuterRef('pk'))
+        .values('variant_id')
+        .annotate(s=Sum('quantity'))
+        .values('s')[:1]
+    )
+    qs = qs.annotate(sales=sales_sub).order_by('-id')
+
+    top_sellers = OrderItem.objects.values('variant_id').annotate(s=Sum('quantity')).order_by('-s')[:12]
+    best_ids = {row['variant_id'] for row in top_sellers}
+
+    paginator = Paginator(qs, 9)
+    page = int(request.GET.get('page', 1) or 1)
+    page_obj = paginator.get_page(page)
+
+    items = []
+    for v in page_obj:
+        p = v.product
+        img = None
+        try:
+            img = p.image.url if getattr(p, 'image', None) else None
+        except Exception:
+            img = None
+        items.append({
+            "id": v.id,
+            "price": float(v.price),
+            "product_name": p.name,
+            "brand_name": getattr(p.brand, 'name', ''),
+            "image_url": img,
+            "is_best": v.id in best_ids,
+        })
+    return JsonResponse({
+        "items": items,
+        "meta": {
+            "total": qs.count(),
+            "start": page_obj.start_index() if items else 0,
+            "end": page_obj.end_index() if items else 0,
+            "page": page_obj.number,
+            "pages": paginator.num_pages,
+            "has_next": page_obj.has_next(),
+            "has_prev": page_obj.has_previous(),
+        }
     })
 
 
@@ -407,7 +480,31 @@ def add_to_wishlist(request, variant_id):
         return redirect("by_shop")
     from .models import WishlistItem
     WishlistItem.objects.get_or_create(buyer=buyer, variant=variant)
-    return redirect("by_product", variant_id=variant.id)
+    return redirect("by_wishlist")
+
+
+@never_cache
+@buyer_login_required
+def by_wishlist(request):
+    buyer_id = request.session.get("buyer_id")
+    buyer = Buyer.objects.get(id=buyer_id)
+    items = WishlistItem.objects.select_related(
+        "variant",
+        "variant__product",
+        "variant__product__brand"
+    ).filter(buyer=buyer).order_by("-added_at")
+    return render(request, "by_wishlist.html", {
+        "wishlist_items": items
+    })
+
+
+@never_cache
+@buyer_login_required
+def remove_wishlist_item(request, item_id):
+    buyer_id = request.session.get("buyer_id")
+    if request.method == "POST":
+        WishlistItem.objects.filter(id=item_id, buyer_id=buyer_id).delete()
+    return redirect("by_wishlist")
 
 
 @never_cache
@@ -635,6 +732,7 @@ def place_order(request):
                     "total": float(order.total),
                     "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
                     "status": order.status,
+                    "total_items": sum(i.quantity for i in order.items.all()),
                 }
                 async_to_sync(layer.group_send)("orders", {
                     "type": "order_added",
@@ -708,6 +806,7 @@ def by_cancel_order(request, order_id):
             "total": float(order.total),
             "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
             "status": order.status,
+            "total_items": sum(i.quantity for i in order.items.all()),
         }
         async_to_sync(layer.group_send)("orders", {
             "type": "order_updated",
@@ -744,6 +843,7 @@ def by_return_order(request, order_id):
             "total": float(order.total),
             "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
             "status": order.status,
+            "total_items": sum(i.quantity for i in order.items.all()),
         }
         async_to_sync(layer.group_send)("orders", {
             "type": "order_updated",
@@ -752,6 +852,33 @@ def by_return_order(request, order_id):
     messages.success(request, "Return request submitted. Supplier will verify shortly.")
     return redirect("by_history")
 
+@never_cache
+@buyer_login_required
+def by_order_items_api(request, order_id):
+    buyer_id = request.session.get("buyer_id")
+    try:
+        order = Order.objects.select_related("buyer").prefetch_related(
+            "items",
+            "items__variant",
+            "items__variant__product",
+            "items__variant__color",
+            "items__variant__size",
+        ).get(id=order_id, buyer_id=buyer_id)
+    except Order.DoesNotExist:
+        return JsonResponse({"items": []})
+    items = []
+    for it in order.items.all():
+        img = getattr(getattr(it.variant.product, "image", None), "url", None)
+        items.append({
+            "product_name": it.product_name,
+            "quantity": it.quantity,
+            "price": float(it.price),
+            "total": float(it.total),
+            "image_url": img,
+            "color": getattr(getattr(it.variant, "color", None), "name", ""),
+            "size": getattr(getattr(it.variant, "size", None), "name", ""),
+        })
+    return JsonResponse({"items": items})
 
 def by_logout(request):
     request.session.pop("buyer_id", None)

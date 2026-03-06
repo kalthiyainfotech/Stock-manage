@@ -74,16 +74,16 @@
                         </td>
                         <td class="px-4 py-3 align-middle text-center">
                             <span class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs
-                                {% if order.status == 'pending' %} bg-slate-100 text-slate-700 ring-1 ring-slate-200
-                                {% elif order.status == 'processing' %} bg-amber-50 text-amber-700 ring-1 ring-amber-200
-                                {% elif order.status == 'shipped' %} bg-sky-50 text-sky-700 ring-1 ring-sky-200
+                                {% if order.status == 'pending' %} bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200
+                                {% elif order.status == 'processing' %} bg-sky-50 text-sky-700 ring-1 ring-sky-200
+                                {% elif order.status == 'shipped' %} bg-purple-50 text-purple-700 ring-1 ring-purple-200
                                 {% elif order.status == 'delivered' %} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
                                 {% elif order.status == 'cancelled' %} bg-rose-50 text-rose-700 ring-1 ring-rose-200
                                 {% endif %}">
                                 <span class="h-1.5 w-1.5 rounded-full
-                                    {% if order.status == 'pending' %} bg-slate-400
-                                    {% elif order.status == 'processing' %} bg-amber-500
-                                    {% elif order.status == 'shipped' %} bg-sky-500
+                                    {% if order.status == 'pending' %} bg-yellow-500
+                                    {% elif order.status == 'processing' %} bg-sky-500
+                                    {% elif order.status == 'shipped' %} bg-purple-500
                                     {% elif order.status == 'delivered' %} bg-emerald-500
                                     {% elif order.status == 'cancelled' %} bg-rose-500
                                     {% endif %}">
@@ -287,9 +287,9 @@ if (supplierOrderSearchInput && supOrdersTBody) {
     function pill(status) {
         var base = 'inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs ';
         var dot = '';
-        if (status === 'pending') { base += 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'; dot='bg-slate-400'; }
-        else if (status === 'processing') { base += 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'; dot='bg-amber-500'; }
-        else if (status === 'shipped') { base += 'bg-sky-50 text-sky-700 ring-1 ring-sky-200'; dot='bg-sky-500'; }
+        if (status === 'pending') { base += 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200'; dot='bg-yellow-500'; }
+        else if (status === 'processing') { base += 'bg-sky-50 text-sky-700 ring-1 ring-sky-200'; dot='bg-sky-500'; }
+        else if (status === 'shipped') { base += 'bg-purple-50 text-purple-700 ring-1 ring-purple-200'; dot='bg-purple-500'; }
         else if (status === 'delivered') { base += 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'; dot='bg-emerald-500'; }
         else if (status === 'cancelled') { base += 'bg-rose-50 text-rose-700 ring-1 ring-rose-200'; dot='bg-rose-500'; }
         else { base += 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'; dot='bg-slate-400'; }
@@ -297,15 +297,57 @@ if (supplierOrderSearchInput && supOrdersTBody) {
     }
     function rowHtml(o) {
         if (o.status === 'return_requested' || o.status === 'returned') return '';
+        var select = '<select data-status-select class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">'+
+            '<option value="pending" '+(o.status==='pending'?'selected':'')+'>Pending</option>'+
+            '<option value="processing" '+(o.status==='processing'?'selected':'')+'>Processing</option>'+
+            '<option value="shipped" '+(o.status==='shipped'?'selected':'')+'>Shipped</option>'+
+            '<option value="delivered" '+(o.status==='delivered'?'selected':'')+'>Delivered</option>'+
+            '<option value="cancelled" '+(o.status==='cancelled'?'selected':'')+'>Cancelled</option>'+
+        '</select>';
+        var updateBtn = '<button data-update-btn class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800"><i class="fa-solid fa-rotate"></i><span>Update</span></button>';
+        var viewBtn = '<button data-view-btn class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 transition" title="View"><i class="fa-solid fa-eye text-xs"></i><span class="sr-only">View</span></button>';
+        var delBtn = '<button data-delete-btn class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-white text-rose-700 hover:bg-rose-50 transition" title="Delete"><i class="fa-solid fa-trash text-xs"></i><span class="sr-only">Delete</span></button>';
         return '<tr class="hover:bg-slate-50/80 transition-colors" data-order-id="'+o.id+'">'+
             '<td class="px-4 py-3 align-middle font-semibold text-slate-800">'+(o.order_number||'')+'</td>'+
             '<td class="px-4 py-3 align-middle"><div class="text-slate-800">'+(o.buyer_name||'')+'</div><div class="text-xs text-slate-500">'+(o.email||'')+'</div></td>'+
-            '<td class="px-4 py-3 align-middle"><div class="text-sm">— items</div></td>'+
+            '<td class="px-4 py-3 align-middle"><div class="text-sm">'+(o.total_items||0)+' items</div></td>'+
             '<td class="px-4 py-3 align-middle text-right font-semibold">₹'+(o.total||0)+'</td>'+
             '<td class="px-4 py-3 align-middle whitespace-nowrap">'+(o.created_at||'')+'</td>'+
             '<td class="px-4 py-3 align-middle text-center">'+pill(o.status||'')+'</td>'+
-            '<td class="px-4 py-3 align-middle text-center"><span class="text-xs text-slate-500">Actions</span></td>'+
+            '<td class="px-4 py-3 align-middle text-center"><div class="inline-flex items-center gap-2 justify-center">'+select+updateBtn+viewBtn+delBtn+'</div></td>'+
         '</tr>';
+    }
+    function getCsrf() {
+        var name = 'csrftoken'; var cookies = document.cookie ? document.cookie.split(';') : [];
+        for (var i=0;i<cookies.length;i++){ var c=cookies[i].trim(); if (c.substring(0,name.length+1)===(name+'=')) return decodeURIComponent(c.substring(name.length+1)); }
+        return '';
+    }
+    async function updateStatus(id, status) {
+        try {
+            await fetch('/suppliers/supplier/order/'+id+'/update-status/', { method:'POST', headers: { 'X-CSRFToken': getCsrf() }, body: new URLSearchParams({ status: status }) });
+        } catch (_) {}
+    }
+    async function deleteOrder(id) {
+        try {
+            await fetch('/suppliers/supplier/order/'+id+'/delete/', { method:'POST', headers: { 'X-CSRFToken': getCsrf() } });
+        } catch (_) {}
+    }
+    function ensureModal(o) {
+        var mid = 'liveOrderModal-'+o.id;
+        if (document.getElementById(mid)) return;
+        var html = '<div id="'+mid+'" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">'+
+            '<div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-y-auto">'+
+            '<div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 bg-slate-50/60 rounded-t-2xl">'+
+            '<div><h2 class="text-base font-semibold text-slate-900">Order '+(o.order_number||'')+'</h2>'+
+            '<p class="mt-0.5 text-xs text-slate-500">'+(o.buyer_name||'')+' • '+(o.email||'')+'</p></div>'+
+            '<button onclick="(function(){var el=document.getElementById(\''+mid+'\'); if(el){el.classList.add(\'hidden\'); el.classList.remove(\'flex\');}})()" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">✕</button>'+
+            '</div>'+
+            '<div class="p-4 space-y-2"><div class="text-sm text-slate-600">Placed: '+(o.created_at||'')+'</div>'+
+            '<div class="text-sm text-slate-600">Status: '+(o.status||'')+'</div>'+
+            '<div class="text-sm font-semibold text-slate-900">Total: ₹'+(o.total||0)+'</div></div>'+
+            '</div></div>';
+        document.body.insertAdjacentHTML('beforeend', html);
+        return mid;
     }
     try {
         var proto = (location.protocol === 'https:') ? 'wss' : 'ws';
@@ -321,7 +363,25 @@ if (supplierOrderSearchInput && supOrdersTBody) {
             var row = tbody.querySelector('tr[data-order-id="'+o.id+'"]');
             var html = rowHtml(o);
             if (html === '') { if (row) row.remove(); return; }
-            if (row) row.outerHTML = html; else tbody.insertAdjacentHTML('afterbegin', html);
+            if (row) {
+                row.outerHTML = html;
+                row = tbody.querySelector('tr[data-order-id="'+o.id+'"]');
+            } else {
+                tbody.insertAdjacentHTML('afterbegin', html);
+                row = tbody.querySelector('tr[data-order-id="'+o.id+'"]');
+            }
+            if (row) {
+                var select = row.querySelector('[data-status-select]');
+                var updateBtn = row.querySelector('[data-update-btn]');
+                var viewBtn = row.querySelector('[data-view-btn]');
+                var delBtn = row.querySelector('[data-delete-btn]');
+                if (updateBtn && select) updateBtn.onclick = function(){ updateStatus(o.id, select.value); };
+                if (delBtn) delBtn.onclick = function(){ deleteOrder(o.id); };
+                if (viewBtn) {
+                    var mid = ensureModal(o);
+                    viewBtn.onclick = function(){ var el = document.getElementById(mid); if (el){ el.classList.remove('hidden'); el.classList.add('flex'); } };
+                }
+            }
         }
         function remove(id) {
             if (!tbody) return;

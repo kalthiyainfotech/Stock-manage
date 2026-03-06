@@ -111,10 +111,10 @@
                                     {% elif order.status == 'return_requested' %} bg-amber-50 text-amber-700 ring-1 ring-amber-200
                                     {% elif order.status == 'returned' %} bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
                                     {% endif %}">
-                                    <span class="h-1.5 w-1.5 rounded-full
-                                        {% if order.status == 'pending' %} bg-slate-400
-                                        {% elif order.status == 'processing' %} bg-amber-500
-                                        {% elif order.status == 'shipped' %} bg-sky-500
+                                <span class="h-1.5 w-1.5 rounded-full
+                                        {% if order.status == 'pending' %} bg-yellow-500
+                                        {% elif order.status == 'processing' %} bg-sky-500
+                                        {% elif order.status == 'shipped' %} bg-purple-500
                                         {% elif order.status == 'delivered' %} bg-emerald-500
                                         {% elif order.status == 'cancelled' %} bg-rose-500
                                         {% elif order.status == 'return_requested' %} bg-amber-500

@@ -98,6 +98,10 @@
                                     bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100
                                 {% elif order.status == 'cancelled' %}
                                     bg-rose-50 text-rose-800 ring-1 ring-rose-100
+                                {% elif order.status == 'return_requested' %}
+                                    bg-amber-50 text-amber-800 ring-1 ring-amber-100
+                                {% elif order.status == 'returned' %}
+                                    bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100
                                 {% else %}
                                     bg-slate-50 text-slate-700 ring-1 ring-slate-100
                                 {% endif %}">
@@ -112,6 +116,10 @@
                                         bg-emerald-500
                                     {% elif order.status == 'cancelled' %}
                                         bg-rose-500
+                                    {% elif order.status == 'return_requested' %}
+                                        bg-amber-500
+                                    {% elif order.status == 'returned' %}
+                                        bg-emerald-500
                                     {% else %}
                                         bg-slate-400
                                     {% endif %}"></span>
@@ -235,17 +243,19 @@
     function pill(status) {
         var base = 'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ';
         var dot = '';
-        if (status === 'pending') { base += 'bg-yellow-50 text-yellow-800 ring-1 ring-yellow-100'; dot = 'bg-yellow-400'; }
-        else if (status === 'processing') { base += 'bg-sky-50 text-sky-800 ring-1 ring-sky-100'; dot = 'bg-sky-400'; }
-        else if (status === 'shipped') { base += 'bg-purple-50 text-purple-800 ring-1 ring-purple-100'; dot = 'bg-purple-400'; }
+        if (status === 'pending') { base += 'bg-yellow-50 text-yellow-800 ring-1 ring-yellow-100'; dot = 'bg-yellow-500'; }
+        else if (status === 'processing') { base += 'bg-sky-50 text-sky-800 ring-1 ring-sky-100'; dot = 'bg-sky-500'; }
+        else if (status === 'shipped') { base += 'bg-purple-50 text-purple-800 ring-1 ring-purple-100'; dot = 'bg-purple-500'; }
         else if (status === 'delivered') { base += 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'; dot = 'bg-emerald-500'; }
         else if (status === 'cancelled') { base += 'bg-rose-50 text-rose-800 ring-1 ring-rose-100'; dot = 'bg-rose-500'; }
+        else if (status === 'return_requested') { base += 'bg-amber-50 text-amber-800 ring-1 ring-amber-100'; dot = 'bg-amber-500'; }
+        else if (status === 'returned') { base += 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100'; dot = 'bg-emerald-500'; }
         else { base += 'bg-slate-50 text-slate-700 ring-1 ring-slate-100'; dot = 'bg-slate-400'; }
         return '<span class="' + base + '"><span class="h-1.5 w-1.5 rounded-full ' + dot + '"></span>' + (status || '') + '</span>';
     }
     function rowHtml(o) {
-        var viewBtn = '<button onclick="openViewModal(\''+o.id+'\',\''+o.order_number+'\',\''+(o.buyer_name||'')+'\',\'\',\''+(o.email||'')+'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\''+(o.total||0)+'\',\''+(o.total||0)+'\',\'\',\''+(o.status||'')+'\',\''+(o.created_at||'')+'\',\'N/A\',\'0\',\'\',\'\',\'\',\'\',\'\',\'\',\'\')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition" title="View"><i class=\'fa-solid fa-eye text-xs\'></i><span class=\'sr-only\'>View</span></button>';
-        var delBtn = '<button onclick="openDeleteModal(\'orders/delete/'+o.id+'/\')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition" title="Delete"><i class="fa-solid fa-trash text-xs"></i><span class="sr-only">Delete</span></button>';
+        var viewBtn = '<button onclick="openViewModal(\''+o.id+'\',\''+o.order_number+'\',\''+(o.buyer_name||'')+'\',\'\',\''+(o.email||'')+'\',\'\',\'\',\'\',\'\',\'\',\'\',\'\',\''+(o.total||0)+'\',\''+(o.total||0)+'\',\'\',\''+(o.status||'')+'\',\''+(o.created_at||'')+'\',\'\',\'0\',\'\',\'\',\'\',\'\',\'\',\'\',\'\')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition" title="View"><i class=\'fa-solid fa-eye text-xs\'></i><span class=\'sr-only\'>View</span></button>';
+        var delBtn = '<button onclick="openDeleteModal(\'/admin_panel/orders/delete/'+o.id+'/\')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition" title="Delete"><i class="fa-solid fa-trash text-xs"></i><span class="sr-only">Delete</span></button>';
         return '<tr class="hover:bg-slate-50/80 transition-colors" data-order-id="'+o.id+'">'+
             '<td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">#</td>'+
             '<td class="px-4 py-3 align-middle text-xs sm:text-sm font-semibold text-blue-600">'+(o.order_number||'')+'</td>'+
@@ -492,22 +502,41 @@ function openViewModal(
 
     const itemsTable = document.getElementById('viewOrderItems');
     itemsTable.innerHTML = '';
-    if (itemsString) {
-        const items = itemsString.split('|||');
-        items.forEach(itemStr => {
-            if (itemStr) {
-                const [productName, quantity, price, itemTotal] = itemStr.split('|');
+    async function fillItemsFromApi(orderId) {
+        try {
+            const res = await fetch('/admin_panel/orders/items/'+orderId+'/');
+            if (!res.ok) return;
+            const data = await res.json();
+            (data.items || []).forEach(it => {
                 const row = document.createElement('tr');
                 row.className = 'border-b';
                 row.innerHTML = `
-                    <td class="px-4 py-2">${productName}</td>
-                    <td class="px-4 py-2">${quantity}</td>
-                    <td class="px-4 py-2">₹${price}</td>
-                    <td class="px-4 py-2 font-semibold">₹${itemTotal}</td>
+                    <td class="px-4 py-2">${it.product_name || ''}</td>
+                    <td class="px-4 py-2">${it.quantity || 0}</td>
+                    <td class="px-4 py-2">₹${typeof it.price === 'number' ? it.price.toFixed(2) : it.price}</td>
+                    <td class="px-4 py-2 font-semibold">₹${typeof it.total === 'number' ? it.total.toFixed(2) : it.total}</td>
                 `;
                 itemsTable.appendChild(row);
-            }
+            });
+        } catch (_) {}
+    }
+    if (itemsString) {
+        const items = itemsString.split('|||');
+        items.forEach(itemStr => {
+            if (!itemStr) return;
+            const [productName, quantity, price, itemTotal] = itemStr.split('|');
+            const row = document.createElement('tr');
+            row.className = 'border-b';
+            row.innerHTML = `
+                <td class="px-4 py-2">${productName}</td>
+                <td class="px-4 py-2">${quantity}</td>
+                <td class="px-4 py-2">₹${price}</td>
+                <td class="px-4 py-2 font-semibold">₹${itemTotal}</td>
+            `;
+            itemsTable.appendChild(row);
         });
+    } else {
+        fillItemsFromApi(id);
     }
 
     document.getElementById('viewSubtotal').innerText = '₹' + subtotal;

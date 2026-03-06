@@ -1005,3 +1005,31 @@ def delete_order(request, id):
             "id": exists.id,
         })
     return redirect('auth_order')
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def admin_order_items_api(request, order_id):
+    try:
+        order = Order.objects.select_related("buyer").prefetch_related(
+            "items",
+            "items__variant",
+            "items__variant__product",
+            "items__variant__color",
+            "items__variant__size",
+        ).get(id=order_id)
+    except Order.DoesNotExist:
+        return JsonResponse({"items": []})
+    items = []
+    for it in order.items.all():
+        img = getattr(getattr(it.variant.product, "image", None), "url", None) if getattr(it, "variant", None) and getattr(it.variant, "product", None) else None
+        items.append({
+            "product_name": it.product_name,
+            "quantity": it.quantity,
+            "price": float(it.price),
+            "total": float(it.total),
+            "image_url": img,
+            "color": getattr(getattr(it.variant, "color", None), "name", ""),
+            "size": getattr(getattr(it.variant, "size", None), "name", ""),
+        })
+    return JsonResponse({"items": items})

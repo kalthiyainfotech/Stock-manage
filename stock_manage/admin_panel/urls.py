@@ -51,5 +51,6 @@ urlpatterns = [
 
     path('orders/',auth_order,name='auth_order'),
     path('orders/delete/<int:id>/', delete_order, name='delete_order'),
+    path('orders/items/<int:order_id>/', admin_order_items_api, name='admin_order_items_api'),
 
 ]

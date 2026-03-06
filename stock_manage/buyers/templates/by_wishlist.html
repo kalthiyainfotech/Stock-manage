@@ -1,0 +1,69 @@
+{% extends "by_base.html" %}
+{% block buyer_layout %}
+{% load static %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="flex flex-col lg:flex-row gap-8">
+    <aside class="w-full lg:w-1/4">
+      <div class="bg-white rounded-2xl border border-gray-100 p-6">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+            {{ request.session.buyer_name|default:"" |slice:":1" }}
+          </div>
+          <div>
+            <div class="font-bold text-gray-900">{{ request.session.buyer_name|default:"Your Account" }}</div>
+            <div class="text-xs text-gray-500">{{ request.session.buyer_email|default:"" }}</div>
+          </div>
+        </div>
+        <nav class="space-y-2">
+          <a href="{% url 'by_history' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Order History</a>
+          <a href="{% url 'by_cart' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Cart</a>
+          <a href="{% url 'by_wishlist' %}" class="block px-4 py-3 rounded-xl bg-brand-50 text-brand-700 font-bold">Wishlist</a>
+          <a href="{% url 'by_shop' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Shop</a>
+          <a href="{% url 'by_logout' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Logout</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="w-full lg:w-3/4">
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-black text-gray-900">Wishlist</h1>
+          <div class="text-xs text-gray-500">Total: {{ wishlist_items|length }}</div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+          {% for wi in wishlist_items %}
+          <div class="rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden">
+            <a href="{% url 'by_product' wi.variant.id %}" class="block h-48 bg-gray-100">
+              {% if wi.variant.product.image %}
+              <img src="{{ wi.variant.product.image.url }}" alt="{{ wi.variant.product.name }}" class="w-full h-full object-cover">
+              {% else %}
+              <div class="w-full h-full bg-gray-200"></div>
+              {% endif %}
+            </a>
+            <div class="p-4 flex items-start justify-between gap-3">
+              <div>
+                <div class="font-bold text-gray-900">{{ wi.variant.product.name }}</div>
+                <div class="text-xs text-gray-500">{{ wi.variant.product.brand.name }}</div>
+                <div class="text-sm font-semibold text-gray-900 mt-1">₹{{ wi.variant.price }}</div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <a href="{% url 'by_add_to_cart' wi.variant.id %}" class="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-bold hover:bg-brand-600">Add to Cart</a>
+                <form method="post" action="{% url 'by_wishlist_remove' wi.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-800 text-xs font-bold hover:border-rose-400 hover:text-rose-600">Remove</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="col-span-1 sm:col-span-2 py-16 text-center">
+            <div class="text-2xl font-black text-gray-900 mb-2">No items in wishlist</div>
+            <p class="text-gray-600 mb-6">Browse the shop and add items to your wishlist.</p>
+            <a href="{% url 'by_shop' %}" class="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-gray-900 text-white font-bold hover:bg-brand-600">Go to Shop</a>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock buyer_layout %}
