@@ -4,7 +4,7 @@ from admin_panel.models import Suppliers
 from functools import wraps
 from django.views.decorators.cache import never_cache
 from buyers.models import Order
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.db.models import F, Sum
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -79,6 +79,21 @@ def sup_dash(request):
     except Suppliers.DoesNotExist:
         messages.error(request, "Supplier account not found", extra_tags="supplier")
         return redirect('supplier_login')
+
+@never_cache
+@supplier_login_required
+def sup_dash_stats_api(request):
+    delivered_count = Order.objects.filter(status="delivered").count()
+    shipped_count = Order.objects.filter(status="shipped").count()
+    return_requested_count = Order.objects.filter(status="return_requested").count()
+    total_orders = Order.objects.count()
+    
+    return JsonResponse({
+        "total_orders": total_orders,
+        "delivered_count": delivered_count,
+        "shipped_count": shipped_count,
+        "return_requested_count": return_requested_count,
+    })
 
 @never_cache
 @supplier_login_required

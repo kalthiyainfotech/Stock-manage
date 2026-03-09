@@ -25,8 +25,6 @@ def buyer_login_required(view_func):
         return view_func(request, *args, **kwargs)
     return wrapper
 
-
-
 def by_register(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -49,7 +47,6 @@ def by_register(request):
 
     return render(request, "by_register.html")
 
-
 def by_login(request):
     if request.method == "POST":
         email = request.POST.get("email")
@@ -71,8 +68,6 @@ def by_login(request):
             messages.error(request, "Buyer not found", extra_tags="buyer")
 
     return render(request, "by_login.html")
-
-
 
 @never_cache
 def by_index(request):
@@ -100,8 +95,6 @@ def by_index(request):
             'image_url': image_url
         })
     return render(request,'by_index.html', {'home_categories': cards})
-
-
 
 @never_cache
 def by_blog(request):
@@ -148,12 +141,10 @@ def by_product(request, variant_id):
             'price': float(v.price),
         }
         size_map.setdefault(v.color.id, {}).setdefault(v.size.id, {'id': v.id, 'stock': v.stock})
-    # Filter visible colors (exclude placeholders)
     def _valid_color_entry(entry):
         n = (entry.get('name') or '').strip().lower()
         return bool(n) and n != 'default'
     visible_colors = {cid: c for cid, c in colors.items() if _valid_color_entry(c)}
-    # Prefer explicit color-bound images when available
     def _norm(s):
         return (s or '').strip().lower().replace('#', '').replace(' ', '')
     images_by_color = {}
@@ -170,7 +161,6 @@ def by_product(request, variant_id):
         for cid, cn in color_norms.items():
             if cn and cn in n:
                 images_by_color[cid].append(img)
-    # Flatten annotation for client-side filtering
     gallery_annotated = []
     for img in gallery:
         name = ''
@@ -213,6 +203,7 @@ def by_product(request, variant_id):
         'gallery_annotated': gallery_annotated,
     }
     return render(request, 'by_product.html', context)
+
 @never_cache
 def by_contact(request):
     if request.method == "POST":
@@ -235,8 +226,6 @@ def by_contact(request):
         return redirect("by_contact")
 
     return render(request, 'by_contact.html')
-
-
 
 @never_cache
 def by_shop(request):
@@ -324,6 +313,11 @@ def by_shop(request):
     top_sellers = OrderItem.objects.values('variant_id').annotate(s=Sum('quantity')).order_by('-s')[:12]
     best_ids = {row['variant_id'] for row in top_sellers}
 
+    buyer_id = request.session.get('buyer_id')
+    wishlist_ids = set()
+    if buyer_id:
+        wishlist_ids = set(WishlistItem.objects.filter(buyer_id=buyer_id).values_list('variant_id', flat=True))
+
     paginator = Paginator(qs, 9)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
@@ -337,6 +331,7 @@ def by_shop(request):
         'brands_selected': brands_selected,
         'sort': sort,
         'best_ids': best_ids,
+        'wishlist_ids': wishlist_ids,
         'selected_category': category_id,
         'q': q,
         'price_min': price_min,
@@ -344,7 +339,6 @@ def by_shop(request):
         'selected_min_price': min_price or price_min,
         'selected_max_price': max_price or price_max,
     })
-
 
 @never_cache
 def by_shop_api(request):
@@ -380,6 +374,11 @@ def by_shop_api(request):
     top_sellers = OrderItem.objects.values('variant_id').annotate(s=Sum('quantity')).order_by('-s')[:12]
     best_ids = {row['variant_id'] for row in top_sellers}
 
+    buyer_id = request.session.get('buyer_id')
+    wishlist_ids = set()
+    if buyer_id:
+        wishlist_ids = set(WishlistItem.objects.filter(buyer_id=buyer_id).values_list('variant_id', flat=True))
+
     paginator = Paginator(qs, 9)
     page = int(request.GET.get('page', 1) or 1)
     page_obj = paginator.get_page(page)
@@ -399,6 +398,7 @@ def by_shop_api(request):
             "brand_name": getattr(p.brand, 'name', ''),
             "image_url": img,
             "is_best": v.id in best_ids,
+            "in_wishlist": v.id in wishlist_ids,
         })
     return JsonResponse({
         "items": items,
@@ -413,6 +413,26 @@ def by_shop_api(request):
         }
     })
 
+@never_cache
+def toggle_wishlist_api(request, variant_id):
+    buyer_id = request.session.get("buyer_id")
+    if not buyer_id:
+        return JsonResponse({"status": "error", "message": "Login required"}, status=401)
+    
+    try:
+        buyer = Buyer.objects.get(id=buyer_id)
+        variant = ProductVariant.objects.get(id=variant_id, product__status=True)
+        
+        wish_item = WishlistItem.objects.filter(buyer=buyer, variant=variant).first()
+        if wish_item:
+            wish_item.delete()
+            return JsonResponse({"status": "removed", "in_wishlist": False})
+        else:
+            WishlistItem.objects.create(buyer=buyer, variant=variant)
+            return JsonResponse({"status": "added", "in_wishlist": True})
+            
+    except (Buyer.DoesNotExist, ProductVariant.DoesNotExist):
+        return JsonResponse({"status": "error", "message": "Not found"}, status=404)
 
 @never_cache
 def add_to_cart(request, variant_id):
@@ -464,7 +484,6 @@ def add_to_cart(request, variant_id):
     
     return redirect("by_cart")
 
-
 @never_cache
 def add_to_wishlist(request, variant_id):
     buyer_id = request.session.get("buyer_id")
@@ -482,7 +501,6 @@ def add_to_wishlist(request, variant_id):
     WishlistItem.objects.get_or_create(buyer=buyer, variant=variant)
     return redirect("by_wishlist")
 
-
 @never_cache
 @buyer_login_required
 def by_wishlist(request):
@@ -497,7 +515,6 @@ def by_wishlist(request):
         "wishlist_items": items
     })
 
-
 @never_cache
 @buyer_login_required
 def remove_wishlist_item(request, item_id):
@@ -505,7 +522,6 @@ def remove_wishlist_item(request, item_id):
     if request.method == "POST":
         WishlistItem.objects.filter(id=item_id, buyer_id=buyer_id).delete()
     return redirect("by_wishlist")
-
 
 @never_cache
 @buyer_login_required
@@ -584,14 +600,12 @@ def by_cart(request):
 
     return render(request, "by_cart.html", context)
 
-
 @never_cache
 @buyer_login_required
 def remove_from_cart(request, item_id):
     buyer_id = request.session.get("buyer_id")
     CartItem.objects.filter(id=item_id, buyer_id=buyer_id).delete()
     return redirect("by_cart")
-
 
 @never_cache
 @buyer_login_required
@@ -625,13 +639,11 @@ def by_checkout(request):
     
     return render(request, 'by_checkout.html', context)
 
-
 def generate_order_number():
     """Generate unique order number"""
     timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
     random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
     return f"ORD-{timestamp}-{random_str}"
-
 
 @never_cache
 @buyer_login_required
@@ -766,9 +778,6 @@ def by_history(request):
         "status_counts": status_counts
     })
 
-
-
-
 @never_cache
 @buyer_login_required
 def by_thankyou(request):
@@ -886,7 +895,6 @@ def by_logout(request):
     request.session.pop("buyer_email", None)
     messages.success(request, "Logged out successfully.", extra_tags="buyer")
     return redirect('by_index')
-
 
 @never_cache
 @buyer_login_required

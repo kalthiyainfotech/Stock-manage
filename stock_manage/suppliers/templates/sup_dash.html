@@ -29,7 +29,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Total Orders</p>
-                    <p class="mt-1 text-2xl font-bold text-slate-900">{{ orders|length }}</p>
+                    <p class="mt-1 text-2xl font-bold text-slate-900" id="stat-total-orders">{{ orders|length }}</p>
                 </div>
                 <span class="h-10 w-10 rounded-lg bg-slate-900 text-white flex items-center justify-center">
                     <i class="fa-solid fa-layer-group"></i>
@@ -40,7 +40,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Delivered</p>
-                    <p class="mt-1 text-2xl font-bold text-emerald-700">{{ delivered_count }}</p>
+                    <p class="mt-1 text-2xl font-bold text-emerald-700" id="stat-delivered">{{ delivered_count }}</p>
                 </div>
                 <span class="h-10 w-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
                     <i class="fa-solid fa-circle-check"></i>
@@ -51,7 +51,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">In Transit</p>
-                    <p class="mt-1 text-2xl font-bold text-sky-700">{{ shipped_count }}</p>
+                    <p class="mt-1 text-2xl font-bold text-sky-700" id="stat-shipped">{{ shipped_count }}</p>
                 </div>
                 <span class="h-10 w-10 rounded-lg bg-sky-600 text-white flex items-center justify-center">
                     <i class="fa-solid fa-truck-fast"></i>
@@ -62,7 +62,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">Return Requests</p>
-                    <p class="mt-1 text-2xl font-bold text-amber-700">{{ return_requested_count }}</p>
+                    <p class="mt-1 text-2xl font-bold text-amber-700" id="stat-returns">{{ return_requested_count }}</p>
                 </div>
                 <span class="h-10 w-10 rounded-lg bg-amber-600 text-white flex items-center justify-center">
                     <i class="fa-solid fa-rotate-left"></i>
@@ -91,9 +91,9 @@
                             <th class="px-4 py-3 font-medium text-center">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 bg-white">
+                    <tbody class="divide-y divide-slate-100 bg-white" id="recent-orders-table">
                         {% for order in orders|slice:":8" %}
-                        <tr class="hover:bg-slate-50/80 transition-colors">
+                        <tr class="hover:bg-slate-50/80 transition-colors order-row" data-id="{{ order.id }}">
                             <td class="px-4 py-3 align-middle font-semibold text-slate-800">{{ order.order_number }}</td>
                             <td class="px-4 py-3 align-middle">
                                 <div class="text-slate-800">{{ order.first_name }} {{ order.last_name }}</div>
@@ -101,7 +101,7 @@
                             </td>
                             <td class="px-4 py-3 align-middle text-right font-semibold">₹{{ order.total }}</td>
                             <td class="px-4 py-3 align-middle whitespace-nowrap">{{ order.created_at|date:"M d, Y H:i" }}</td>
-                            <td class="px-4 py-3 align-middle text-center">
+                            <td class="px-4 py-3 align-middle text-center status-cell">
                                 <span class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs
                                     {% if order.status == 'pending' %} bg-slate-100 text-slate-700 ring-1 ring-slate-200
                                     {% elif order.status == 'processing' %} bg-amber-50 text-amber-700 ring-1 ring-amber-200
@@ -126,7 +126,7 @@
                             </td>
                         </tr>
                         {% empty %}
-                        <tr>
+                        <tr id="no-orders-row">
                             <td colspan="5" class="px-4 py-10 text-center text-slate-500">No orders found.</td>
                         </tr>
                         {% endfor %}
@@ -171,5 +171,129 @@
         </div>
     </section>
 </main>
+
+<script>
+(function() {
+    const loc = window.location;
+    const scheme = loc.protocol === 'https:' ? 'wss' : 'ws';
+    const socketUrl = scheme + '://' + loc.host + '/ws/orders/';
+    const socket = new WebSocket(socketUrl);
+
+    const statsApi = "{% url 'sup_dash_stats_api' %}";
+
+    function updateStats() {
+        fetch(statsApi)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('stat-total-orders').textContent = data.total_orders;
+                document.getElementById('stat-delivered').textContent = data.delivered_count;
+                document.getElementById('stat-shipped').textContent = data.shipped_count;
+                document.getElementById('stat-returns').textContent = data.return_requested_count;
+            })
+            .catch(err => console.error('Error updating stats:', err));
+    }
+
+    function getStatusDisplay(status) {
+        const displays = {
+            'pending': 'Pending',
+            'processing': 'Processing',
+            'shipped': 'Shipped',
+            'delivered': 'Delivered',
+            'cancelled': 'Cancelled',
+            'return_requested': 'Return Requested',
+            'returned': 'Returned'
+        };
+        return displays[status] || status;
+    }
+
+    function getStatusBadge(status) {
+        let bgClass = '', textClass = '', ringClass = '', dotClass = '';
+        
+        if (status === 'pending') {
+            bgClass = 'bg-slate-100'; textClass = 'text-slate-700'; ringClass = 'ring-slate-200'; dotClass = 'bg-yellow-500';
+        } else if (status === 'processing') {
+            bgClass = 'bg-amber-50'; textClass = 'text-amber-700'; ringClass = 'ring-amber-200'; dotClass = 'bg-sky-500';
+        } else if (status === 'shipped') {
+            bgClass = 'bg-sky-50'; textClass = 'text-sky-700'; ringClass = 'ring-sky-200'; dotClass = 'bg-purple-500';
+        } else if (status === 'delivered') {
+            bgClass = 'bg-emerald-50'; textClass = 'text-emerald-700'; ringClass = 'ring-emerald-200'; dotClass = 'bg-emerald-500';
+        } else if (status === 'cancelled') {
+            bgClass = 'bg-rose-50'; textClass = 'text-rose-700'; ringClass = 'ring-rose-200'; dotClass = 'bg-rose-500';
+        } else if (status === 'return_requested') {
+            bgClass = 'bg-amber-50'; textClass = 'text-amber-700'; ringClass = 'ring-amber-200'; dotClass = 'bg-amber-500';
+        } else if (status === 'returned') {
+            bgClass = 'bg-emerald-50'; textClass = 'text-emerald-700'; ringClass = 'ring-emerald-200'; dotClass = 'bg-emerald-500';
+        }
+
+        return `
+            <span class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-xs ${bgClass} ${textClass} ring-1 ${ringClass}">
+                <span class="h-1.5 w-1.5 rounded-full ${dotClass}"></span>
+                ${getStatusDisplay(status)}
+            </span>
+        `;
+    }
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const tableBody = document.getElementById('recent-orders-table');
+        const noOrdersRow = document.getElementById('no-orders-row');
+
+        if (data.type === 'order_added') {
+            if (noOrdersRow) noOrdersRow.remove();
+            
+            const order = data.order;
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-50/80 transition-colors order-row';
+            row.setAttribute('data-id', order.id);
+            row.innerHTML = `
+                <td class="px-4 py-3 align-middle font-semibold text-slate-800">${order.order_number}</td>
+                <td class="px-4 py-3 align-middle">
+                    <div class="text-slate-800">${order.buyer_name}</div>
+                    <div class="text-xs text-slate-500">${order.email}</div>
+                </td>
+                <td class="px-4 py-3 align-middle text-right font-semibold">₹${order.total}</td>
+                <td class="px-4 py-3 align-middle whitespace-nowrap">${order.created_at}</td>
+                <td class="px-4 py-3 align-middle text-center status-cell">
+                    ${getStatusBadge(order.status)}
+                </td>
+            `;
+            tableBody.prepend(row);
+            
+            // Limit to 8 rows
+            if (tableBody.children.length > 8) {
+                tableBody.lastElementChild.remove();
+            }
+            updateStats();
+        } 
+        else if (data.type === 'order_updated') {
+            const order = data.order;
+            const existingRow = tableBody.querySelector(`.order-row[data-id="${order.id}"]`);
+            if (existingRow) {
+                const statusCell = existingRow.querySelector('.status-cell');
+                statusCell.innerHTML = getStatusBadge(order.status);
+            }
+            updateStats();
+        }
+        else if (data.type === 'order_deleted') {
+            const existingRow = tableBody.querySelector(`.order-row[data-id="${data.id}"]`);
+            if (existingRow) {
+                existingRow.remove();
+                if (tableBody.children.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr id="no-orders-row">
+                            <td colspan="5" class="px-4 py-10 text-center text-slate-500">No orders found.</td>
+                        </tr>
+                    `;
+                }
+            }
+            updateStats();
+        }
+    };
+
+    socket.onclose = function(e) {
+        console.error('Order socket closed unexpectedly');
+    };
+})();
+</script>
 
 {% endblock sup_base %}

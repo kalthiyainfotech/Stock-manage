@@ -18,6 +18,7 @@ urlpatterns = [
     path("contact/", by_contact, name="by_contact"),
     path("shop/", by_shop, name="by_shop"),
     path("shop/api/", by_shop_api, name="by_shop_api"),
+    path("wishlist/toggle/<int:variant_id>/", toggle_wishlist_api, name="by_toggle_wishlist_api"),
     path("thankyou/", by_thankyou, name="by_thankyou"),
     path("logout/", by_logout, name="by_logout"),
     path("cart/remove/<int:item_id>/", remove_from_cart, name="by_remove_from_cart"),

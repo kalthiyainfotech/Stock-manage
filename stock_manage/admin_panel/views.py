@@ -31,7 +31,6 @@ def auth_login(request):
 
     return render(request, 'auth_login.html')
 
-
 @never_cache
 @login_required(login_url='auth_login')
 def auth_logout(request):
@@ -62,13 +61,6 @@ def auth_dashboard(request):
         'recent_orders': recent_orders,
         'recent_contacts': recent_contacts,
     })
-
-
-
-
-
-
-# Suppliers Views
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -146,15 +138,6 @@ def delete_supplier(request, id):
     Suppliers.objects.filter(id=id).delete()
     return redirect('auth_suppliers')
 
-
-
-
-
-
-
-
-# Workers Views
-
 @never_cache
 @login_required(login_url='auth_login')
 def auth_workers(request):
@@ -166,7 +149,6 @@ def auth_workers(request):
     return render(request,'auth_workers.html',{
         'workers': workers
     })
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -225,7 +207,6 @@ def edit_worker(request, id):
 def delete_worker(request, id):
     Workers.objects.filter(id=id).delete()
     return redirect('auth_workers')
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -480,12 +461,6 @@ def delete_leave_admin(request, id):
             })
     return redirect('auth_leaves')
 
-
-
-
-
-
-
 @never_cache
 @login_required(login_url='auth_login')
 def add_inventory(request):
@@ -601,8 +576,6 @@ def add_inventory(request):
 
     return redirect('auth_inventory')
 
-
-
 @never_cache
 @login_required(login_url='auth_login')
 def auth_inventory(request):
@@ -644,7 +617,6 @@ def auth_inventory(request):
         'inventory_groups': groups,
         'categories': categories
     })
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -763,8 +735,6 @@ def edit_inventory(request, id):
 
     return redirect('auth_inventory')
 
-
-
 @never_cache
 @login_required(login_url='auth_login')
 def delete_inventory(request, id):
@@ -780,7 +750,6 @@ def delete_inventory(request, id):
         })
 
     return redirect('auth_inventory')
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -798,7 +767,6 @@ def get_subcategories(request):
         except Category.DoesNotExist:
             return JsonResponse([], safe=False)
     return JsonResponse([], safe=False)
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -822,7 +790,6 @@ def get_brands(request):
         except (Category.DoesNotExist, Subcetegory.DoesNotExist):
             return JsonResponse([], safe=False)
     return JsonResponse([], safe=False)
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -853,10 +820,6 @@ def get_products(request):
             return JsonResponse([], safe=False)
     return JsonResponse([], safe=False)
 
-
-
-
-
 @never_cache
 @login_required(login_url='auth_login')
 def auth_buyers(request):
@@ -873,14 +836,6 @@ def delete_buyer(request, id):
     buyer.delete()
     return redirect('auth_buyers')
 
-
-
-
-
-
-
-# Blogs
-
 @never_cache
 @login_required(login_url='auth_login')
 def auth_blogs(request):
@@ -893,7 +848,6 @@ def auth_blogs(request):
     return render(request, 'auth_blogs.html', {
         'blogs': blogs
     })
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -916,7 +870,6 @@ def add_blogs(request):
             }
             async_to_sync(layer.group_send)("blogs", {"type": "blog_added", "blog": data})
     return redirect('auth_blogs')
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -945,7 +898,6 @@ def edit_blogs(request, id):
 
     return redirect('auth_blogs')
 
-
 @never_cache
 @login_required(login_url='auth_login')
 def delete_blogs(request, id):
@@ -956,7 +908,6 @@ def delete_blogs(request, id):
     if layer:
         async_to_sync(layer.group_send)("blogs", {"type": "blog_deleted", "id": bid})
     return redirect('auth_blogs')
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -971,13 +922,11 @@ def auth_contacts(request):
         'contacts': contacts
     })
 
-
 @never_cache
 @login_required(login_url='auth_login')
 def delete_contact(request, id):
     Contact.objects.filter(id=id).delete()
     return redirect('auth_contacts')
-
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -992,7 +941,6 @@ def auth_order(request):
         'orders': orders
     })
 
-
 @never_cache
 @login_required(login_url='auth_login')
 def delete_order(request, id):
@@ -1005,7 +953,6 @@ def delete_order(request, id):
             "id": exists.id,
         })
     return redirect('auth_order')
-
 
 @never_cache
 @login_required(login_url='auth_login')
