@@ -7,7 +7,7 @@ from .models import Buyer, CartItem, Order, OrderItem, WishlistItem
 from admin_panel.models import ProductVariant, Blogs, Contact
 from django.utils import timezone
 from django.db import transaction
-from django.db.models import F, OuterRef, Subquery, Sum, Q
+from django.db.models import F, OuterRef, Subquery, Sum, Q, Max
 from django.core.paginator import Paginator
 import random
 import string
@@ -139,44 +139,56 @@ def by_product(request, variant_id):
             'size_id': v.size.id,
             'stock': v.stock,
             'price': float(v.price),
+            'image_url': getattr(v.image, 'url', '') if getattr(v, 'image', None) else '',
         }
         size_map.setdefault(v.color.id, {}).setdefault(v.size.id, {'id': v.id, 'stock': v.stock})
+
     def _valid_color_entry(entry):
         n = (entry.get('name') or '').strip().lower()
         return bool(n) and n != 'default'
+
     visible_colors = {cid: c for cid, c in colors.items() if _valid_color_entry(c)}
-    def _norm(s):
-        return (s or '').strip().lower().replace('#', '').replace(' ', '')
-    images_by_color = {}
-    color_norms = {cid: _norm(c['name']) for cid, c in visible_colors.items()}
-    for cid in visible_colors.keys():
-        images_by_color[cid] = []
-    for img in gallery:
-        name = ''
-        try:
-            name = getattr(img.image, 'name', '') or ''
-        except Exception:
-            name = ''
-        n = _norm(name)
-        for cid, cn in color_norms.items():
-            if cn and cn in n:
-                images_by_color[cid].append(img)
+
+    from admin_panel.models import VariantImage
+    
     gallery_annotated = []
+    # Add Product generic gallery mapped to all colors as fallback
+    all_cids = list(visible_colors.keys())
     for img in gallery:
-        name = ''
         try:
-            name = getattr(img.image, 'name', '') or ''
+            gallery_annotated.append({
+                'url': getattr(img.image, 'url', ''),
+                'color_ids': all_cids
+            })
         except Exception:
-            name = ''
-        n = _norm(name)
-        cids = []
-        for cid, cn in color_norms.items():
-            if cn and cn in n:
-                cids.append(cid)
-        gallery_annotated.append({
-            'url': getattr(img.image, 'url', ''),
-            'color_ids': cids
-        })
+            pass
+
+    for v in variants:
+        cids = [v.color.id]
+        if getattr(v, 'image', None):
+            try:
+                gallery_annotated.append({
+                    'url': getattr(v.image, 'url', ''),
+                    'color_ids': cids
+                })
+            except Exception:
+                pass
+        for vi in VariantImage.objects.filter(variant=v):
+            if vi.image:
+                try:
+                    gallery_annotated.append({
+                        'url': getattr(vi.image, 'url', ''),
+                        'color_ids': cids
+                    })
+                except Exception:
+                    pass
+    
+    # Optional backward-compatible dictionary depending on template structure
+    images_by_color = {cid: [] for cid in visible_colors.keys()}
+    for item in gallery_annotated:
+        for cid in item.get('color_ids', []):
+            if cid in images_by_color:
+                images_by_color[cid].append(item['url'])
     specs = []
     try:
         from admin_panel.models import VariantSpec
@@ -229,14 +241,18 @@ def by_contact(request):
 
 @never_cache
 def by_shop(request):
+    unique_variant_ids = ProductVariant.objects.filter(
+        product__status=True,
+        stock__gt=0
+    ).values('product_id').annotate(first_id=Max('id')).values('first_id')
+
     base_qs = ProductVariant.objects.select_related(
         'product',
         'product__brand',
         'product__brand__subcetegory',
         'product__brand__subcetegory__category'
     ).filter(
-        product__status=True,
-        stock__gt=0
+        id__in=unique_variant_ids
     ).order_by('-id')
 
     price_min = base_qs.order_by('price').values_list('price', flat=True).first() or 0
@@ -342,14 +358,18 @@ def by_shop(request):
 
 @never_cache
 def by_shop_api(request):
+    unique_variant_ids = ProductVariant.objects.filter(
+        product__status=True,
+        stock__gt=0
+    ).values('product_id').annotate(first_id=Max('id')).values('first_id')
+
     base_qs = ProductVariant.objects.select_related(
         'product',
         'product__brand',
         'product__brand__subcetegory',
         'product__brand__subcetegory__category'
     ).filter(
-        product__status=True,
-        stock__gt=0
+        id__in=unique_variant_ids
     )
     category_id = request.GET.get('category')
     q = (request.GET.get('q') or '').strip()

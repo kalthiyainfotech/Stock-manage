@@ -527,49 +527,116 @@ def add_inventory(request):
             if img:
                 ProductImage.objects.create(product=product, image=img)
 
-        # Single variant fields only (removed multi-row handling)
-        color_name = request.POST.get('color', '').strip() or 'Default'
-        size_name = request.POST.get('size', '').strip() or 'Default'
-        color, _ = Color.objects.get_or_create(name=color_name)
-        size, _ = Size.objects.get_or_create(name=size_name)
-        sku = f"{product.id}-{color.id}-{size.id}"
-        variant, created = ProductVariant.objects.get_or_create(
-            product=product,
-            color=color,
-            size=size,
-            defaults={
-                'price': request.POST.get('price') or 0,
-                'stock': request.POST.get('stock') or 0,
-                'sku': sku
-            }
-        )
-        if not created:
-            variant.price = request.POST.get('price') or 0
-            variant.stock = request.POST.get('stock') or 0
-            variant.save()
+        indexes = request.POST.getlist('variant_index')
+        colors = request.POST.getlist('variant_color')
+        sizes = request.POST.getlist('variant_size')
+        prices = request.POST.getlist('variant_price')
+        stocks = request.POST.getlist('variant_stock')
+
         spec_names = request.POST.getlist('spec_name')
         spec_values = request.POST.getlist('spec_value')
-        VariantSpec.objects.filter(variant=variant).delete()
-        for name, value in zip(spec_names, spec_values):
-            name = (name or '').strip()
-            value = (value or '').strip()
-            if name and value:
-                VariantSpec.objects.create(variant=variant, name=name, value=value)
-
+        
         layer = get_channel_layer()
-        if layer:
-            payload = {
-                "id": variant.id,
-                "product_name": product.name,
-                "brand_name": brand.name,
-                "category_name": category.name,
-                "price": float(variant.price),
-                "stock": variant.stock,
-            }
-            async_to_sync(layer.group_send)("inventory", {
-                "type": "inventory_added",
-                "inventory": payload,
-            })
+
+        if colors:
+            for i in range(len(colors)):
+                idx = indexes[i] if i < len(indexes) else i
+                color_name = colors[i].strip() or 'Default'
+                size_name = sizes[i].strip() if i < len(sizes) else 'Default'
+                size_name = size_name or 'Default'
+                price_val = prices[i] if i < len(prices) and prices[i] else 0
+                stock_val = stocks[i] if i < len(stocks) and stocks[i] else 0
+
+                color, _ = Color.objects.get_or_create(name=color_name)
+                size, _ = Size.objects.get_or_create(name=size_name)
+                sku = f"{product.id}-{color.id}-{size.id}"
+
+                variant, created = ProductVariant.objects.get_or_create(
+                    product=product,
+                    color=color,
+                    size=size,
+                    defaults={
+                        'price': price_val,
+                        'stock': stock_val,
+                        'sku': sku
+                    }
+                )
+                if not created:
+                    variant.price = price_val
+                    variant.stock = stock_val
+                    variant.save()
+                    
+                v_image = request.FILES.get(f'variant_image_{idx}')
+                if v_image:
+                    variant.image = v_image
+                    variant.save()
+                    
+                v_galleries = request.FILES.getlist(f'variant_gallery_{idx}')
+                for gi in v_galleries:
+                    if gi:
+                        VariantImage.objects.create(variant=variant, image=gi)
+
+                VariantSpec.objects.filter(variant=variant).delete()
+                for name, value in zip(spec_names, spec_values):
+                    name = (name or '').strip()
+                    value = (value or '').strip()
+                    if name and value:
+                        VariantSpec.objects.create(variant=variant, name=name, value=value)
+
+                if layer:
+                    payload = {
+                        "id": variant.id,
+                        "product_name": product.name,
+                        "brand_name": brand.name,
+                        "category_name": category.name,
+                        "price": float(variant.price),
+                        "stock": variant.stock,
+                    }
+                    async_to_sync(layer.group_send)("inventory", {
+                        "type": "inventory_added",
+                        "inventory": payload,
+                    })
+        else:
+            # Fallback for single variant
+            color_name = request.POST.get('color', '').strip() or 'Default'
+            size_name = request.POST.get('size', '').strip() or 'Default'
+            color, _ = Color.objects.get_or_create(name=color_name)
+            size, _ = Size.objects.get_or_create(name=size_name)
+            sku = f"{product.id}-{color.id}-{size.id}"
+            variant, created = ProductVariant.objects.get_or_create(
+                product=product,
+                color=color,
+                size=size,
+                defaults={
+                    'price': request.POST.get('price') or 0,
+                    'stock': request.POST.get('stock') or 0,
+                    'sku': sku
+                }
+            )
+            if not created:
+                variant.price = request.POST.get('price') or 0
+                variant.stock = request.POST.get('stock') or 0
+                variant.save()
+            VariantSpec.objects.filter(variant=variant).delete()
+            for name, value in zip(spec_names, spec_values):
+                name = (name or '').strip()
+                value = (value or '').strip()
+                if name and value:
+                    VariantSpec.objects.create(variant=variant, name=name, value=value)
+
+            if layer:
+                payload = {
+                    "id": variant.id,
+                    "product_name": product.name,
+                    "brand_name": brand.name,
+                    "category_name": category.name,
+                    "price": float(variant.price),
+                    "stock": variant.stock,
+                }
+                async_to_sync(layer.group_send)("inventory", {
+                    "type": "inventory_added",
+                    "inventory": payload,
+                })
 
         messages.success(request, "Inventory added successfully")
         return redirect('auth_inventory')
@@ -684,14 +751,23 @@ def edit_inventory(request, id):
             if img:
                 ProductImage.objects.create(product=product, image=img)
 
-        color_name = request.POST.get('color', '').strip()
+        color_names = request.POST.getlist('variant_color')
+        size_names = request.POST.getlist('variant_size')
+        price_vals = request.POST.getlist('variant_price')
+        stock_vals = request.POST.getlist('variant_stock')
+
+        # Fallback to single fields if variant_color list is empty
+        color_name = (color_names[0] if color_names else request.POST.get('color', '')).strip()
+        size_name = (size_names[0] if size_names else request.POST.get('size', '')).strip()
+        price_val = (price_vals[0] if price_vals else request.POST.get('price')) or 0
+        stock_val = (stock_vals[0] if stock_vals else request.POST.get('stock')) or 0
+
         if not color_name:
             color_name = 'Default'
         color, _ = Color.objects.get_or_create(
             name=color_name
         )
 
-        size_name = request.POST.get('size', '').strip()
         if not size_name:
             size_name = 'Default'
         size, _ = Size.objects.get_or_create(
@@ -701,10 +777,22 @@ def edit_inventory(request, id):
         inventory.product = product
         inventory.color = color
         inventory.size = size
-        inventory.price = request.POST.get('price') or 0
-        inventory.stock = request.POST.get('stock') or 0
+        inventory.price = price_val
+        inventory.stock = stock_val
         inventory.sku = f"{product.id}-{color.id}-{size.id}"
         inventory.save()
+        
+        indexes = request.POST.getlist('variant_index')
+        idx = indexes[0] if indexes else 0
+        v_image = request.FILES.get(f'variant_image_{idx}')
+        if v_image:
+            inventory.image = v_image
+            inventory.save()
+            
+        v_galleries = request.FILES.getlist(f'variant_gallery_{idx}')
+        for gi in v_galleries:
+            if gi:
+                VariantImage.objects.create(variant=inventory, image=gi)
 
         spec_names = request.POST.getlist('spec_name')
         spec_values = request.POST.getlist('spec_value')
