@@ -512,20 +512,13 @@ def add_inventory(request):
             defaults={
                 'description': request.POST.get('description', ''),
                 'base_price': request.POST.get('price') or 0,
-                'image': request.FILES.get('product_picture')
             }
         )
         
         if not _:
             product.description = request.POST.get('description', '')
             product.base_price = request.POST.get('price') or 0
-            if request.FILES.get('product_picture'):
-                product.image = request.FILES.get('product_picture')
             product.save()
-        # extra gallery images
-        for img in request.FILES.getlist('extra_images'):
-            if img:
-                ProductImage.objects.create(product=product, image=img)
 
         indexes = request.POST.getlist('variant_index')
         colors = request.POST.getlist('variant_color')
@@ -570,6 +563,10 @@ def add_inventory(request):
                 if v_image:
                     variant.image = v_image
                     variant.save()
+                    # If product has no image, use the first variant's image as default
+                    if not product.image:
+                        product.image = v_image
+                        product.save()
                     
                 v_galleries = request.FILES.getlist(f'variant_gallery_{idx}')
                 for gi in v_galleries:
@@ -617,6 +614,21 @@ def add_inventory(request):
                 variant.price = request.POST.get('price') or 0
                 variant.stock = request.POST.get('stock') or 0
                 variant.save()
+
+            v_image = request.FILES.get('variant_image_0')
+            if v_image:
+                variant.image = v_image
+                variant.save()
+                # If product has no image, use the first variant's image as default
+                if not product.image:
+                    product.image = v_image
+                    product.save()
+            
+            v_galleries = request.FILES.getlist('variant_gallery_0')
+            for gi in v_galleries:
+                if gi:
+                    VariantImage.objects.create(variant=variant, image=gi)
+
             VariantSpec.objects.filter(variant=variant).delete()
             for name, value in zip(spec_names, spec_values):
                 name = (name or '').strip()
@@ -741,15 +753,7 @@ def edit_inventory(request, id):
         product.name = product_name
         product.description = request.POST.get('description', '')
         product.base_price = request.POST.get('price') or 0
-
-        if request.FILES.get('product_picture'):
-            product.image = request.FILES.get('product_picture')
-
         product.save()
-        # optional gallery additions
-        for img in request.FILES.getlist('extra_images'):
-            if img:
-                ProductImage.objects.create(product=product, image=img)
 
         color_names = request.POST.getlist('variant_color')
         size_names = request.POST.getlist('variant_size')
@@ -788,6 +792,10 @@ def edit_inventory(request, id):
         if v_image:
             inventory.image = v_image
             inventory.save()
+            # If product has no image, use the edited variant's image as default
+            if not product.image:
+                product.image = v_image
+                product.save()
             
         v_galleries = request.FILES.getlist(f'variant_gallery_{idx}')
         for gi in v_galleries:

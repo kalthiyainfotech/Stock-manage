@@ -26,19 +26,12 @@
                     <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </div>
                 <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
-                    {% if product.image %}
-                    <button
-                        class="gallery-btn bg-gray-100 rounded-xl overflow-hidden h-24 border-2 border-brand-500 shadow-sm"
-                        data-src="{{ product.image.url }}"
-                        data-color-ids="{% for c in colors %}{% if not forloop.first %},{% endif %}{{ c.id }}{% endfor %}">
-                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
-                    </button>
-                    {% endif %}
                     {% for gi in gallery_annotated %}
                     <button
-                        class="gallery-btn bg-gray-100 rounded-xl overflow-hidden h-24 border-2 border-transparent hover:border-gray-300 transition-colors"
+                        class="gallery-btn bg-gray-100 rounded-xl overflow-hidden h-24 border-2 {% if gi.is_main %}border-brand-500{% else %}border-transparent{% endif %} hover:border-gray-300 transition-colors"
                         data-src="{{ gi.url }}"
-                        data-color-ids="{{ gi.color_ids|join:',' }}">
+                        data-color-ids="{{ gi.color_ids|join:',' }}"
+                        data-is-main="{% if gi.is_main %}true{% else %}false{% endif %}">
                         <img src="{{ gi.url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
                     </button>
                     {% endfor %}
@@ -224,24 +217,40 @@
         let currentColorId = DEFAULT_COLOR_ID;
         const productUrlTemplate = "{% url 'by_product' 0 %}";
 
-        function updateGallery(colorId) {
-            const firstVisible = galleryBtns.find(b => {
+        function updateGallery(colorId, isInitialLoad = false) {
+            let activeBtn = null;
+
+            galleryBtns.forEach(b => {
                 const ids = (b.dataset.colorIds || '').split(',').map(x => parseInt(x));
                 const visible = ids.includes(colorId);
+                const isMain = b.dataset.isMain === 'true';
+                
                 b.style.display = visible ? '' : 'none';
+                
                 if (visible) {
-                    b.classList.remove('border-transparent');
-                }
-                return visible;
-            });
-            if (firstVisible) {
-                mainImg.src = firstVisible.getAttribute('data-src');
-                galleryBtns.forEach(b => {
                     b.classList.remove('border-brand-500');
                     b.classList.add('border-transparent');
-                });
-                firstVisible.classList.remove('border-transparent');
-                firstVisible.classList.add('border-brand-500');
+                    
+                    // Prioritize variant images over generic product.image on color switch
+                    if (!activeBtn) {
+                        if (!isInitialLoad && !isMain) {
+                            activeBtn = b;
+                        } else if (isInitialLoad && isMain) {
+                            activeBtn = b;
+                        }
+                    }
+                }
+            });
+
+            // Fallback: if no priority button found, pick the first visible one
+            if (!activeBtn) {
+                activeBtn = galleryBtns.find(b => b.style.display !== 'none');
+            }
+
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent');
+                activeBtn.classList.add('border-brand-500');
+                mainImg.src = activeBtn.getAttribute('data-src');
             }
         }
         galleryBtns.forEach(btn => {
@@ -317,7 +326,7 @@
             });
         });
         updateStorageButtons(DEFAULT_COLOR_ID);
-        updateGallery(DEFAULT_COLOR_ID);
+        updateGallery(DEFAULT_COLOR_ID, true);
         // Quantity controls
         (function(){
             const minus = document.getElementById('qty-minus');
@@ -339,5 +348,72 @@
                 input.value = clamp(v + 1);
             });
         })();
+
+        // Socket Implementation
+        const inventorySocket = new WebSocket(
+            (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
+            window.location.host +
+            '/ws/inventory/'
+        );
+
+        inventorySocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'inventory_updated') {
+                const inv = data.inventory;
+                // Update currently viewed variant if ID matches
+                if (inv.id === {{ variant.id }}) {
+                    // Update Price
+                    const priceElement = document.querySelector('.text-3xl.md\\:text-4xl.font-black.text-gray-900');
+                    if (priceElement) priceElement.innerText = '₹' + inv.price;
+
+                    // Update Stock Status
+                    const cartButton = document.querySelector('button[type="submit"]');
+                    const outOfStockSpan = document.querySelector('.flex-1.bg-gray-300.text-white');
+                    
+                    if (inv.stock > 0) {
+                        if (outOfStockSpan) {
+                            const newButton = document.createElement('button');
+                            newButton.type = 'submit';
+                            newButton.className = 'w-full md:flex-1 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-1 py-4 flex items-center justify-center gap-2 whitespace-nowrap';
+                            newButton.innerHTML = '<i class="fas fa-shopping-bag"></i> Add to Cart';
+                            outOfStockSpan.parentNode.replaceChild(newButton, outOfStockSpan);
+                        }
+                    } else {
+                        if (cartButton && cartButton.type === 'submit') {
+                            const newSpan = document.createElement('span');
+                            newSpan.className = 'flex-1 bg-gray-300 text-white font-bold rounded-2xl py-4 flex items-center justify-center gap-2 cursor-not-allowed';
+                            newSpan.innerText = 'Out of Stock';
+                            cartButton.parentNode.replaceChild(newSpan, cartButton);
+                        }
+                    }
+
+                    // Show notification
+                    showToast(`Stock updated: ${inv.product_name} (${inv.stock} left)`, 'info');
+                }
+            }
+        };
+
+        inventorySocket.onclose = function(e) {
+            console.error('Inventory socket closed unexpectedly');
+        };
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-2xl transform transition-all duration-300 translate-y-20 z-[100] flex items-center gap-3 font-bold text-sm ${
+                type === 'success' ? 'bg-emerald-500 text-white' : 
+                type === 'error' ? 'bg-rose-500 text-white' : 
+                'bg-sky-500 text-white'
+            }`;
+            
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+            
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-20'), 100);
+            setTimeout(() => {
+                toast.classList.add('translate-y-20');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
     </script>
 {% endblock buyer_layout %}

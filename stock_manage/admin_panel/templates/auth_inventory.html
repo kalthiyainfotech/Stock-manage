@@ -177,56 +177,6 @@
 
                     
 
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Media
-                        </h3>
-                        <div class="space-y-1.5">
-                            <label class="text-xs font-medium text-slate-700">Product Picture</label>
-                            <div
-                                class="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
-                                <div
-                                    class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-xs">
-                                    <i class="fa-solid fa-image"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <input type="file" name="product_picture" id="product_picture_input"
-                                        class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
-                                    <p class="mt-0.5 text-[11px] text-slate-400">
-                                        Recommended ratio 1:1, JPG or PNG up to 2MB.
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- Preview Container for Single Image -->
-                            <div id="product_picture_preview" class="mt-2 hidden">
-                                <div class="relative inline-block">
-                                    <img src="" alt="Preview" class="h-24 w-24 rounded-lg object-cover border border-slate-200 shadow-sm">
-                                    <button type="button" id="remove_product_picture" class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-sm hover:bg-rose-600 transition">
-                                        <i class="fa-solid fa-xmark text-[10px]"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space-y-1.5">
-                            <label class="text-xs font-medium text-slate-700">Gallery (multiple)</label>
-                            <div
-                                class="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
-                                <div
-                                    class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-xs">
-                                    <i class="fa-solid fa-images"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <input type="file" name="extra_images" id="extra_images_input" multiple
-                                        class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
-                                    <p class="mt-0.5 text-[11px] text-slate-400">
-                                        Add multiple images; first shows as default, others as gallery.
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- Preview Container for Multiple Images -->
-                            <div id="extra_images_preview" class="mt-2 flex flex-wrap gap-2"></div>
-                        </div>
-                    </div>
 
                     <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-2 border-t border-slate-100">
                         <button type="button" id="closeinventoryModalBottom"
@@ -289,8 +239,7 @@
                 <thead
                     class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
                     <tr>
-                        <th class="px-4 py-3 font-medium text-center">No.</th>
-                        <th class="px-4 py-3 font-medium text-center">Product Picture</th>
+                        <th class="px-4 py-3 font-medium text-center">ID</th>
                         <th class="px-4 py-3 font-medium">Category</th>
                         <th class="px-4 py-3 font-medium">Color</th>
                         <th class="px-4 py-3 font-medium">Size</th>
@@ -306,18 +255,6 @@
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
                             {{ forloop.counter }}
-                        </td>
-                        <td class="px-4 py-3 align-middle text-center">
-                            {% if first.product.image %}
-                            <div class="flex justify-center">
-                                <img src="{{ first.product.image.url }}"
-                                     class="h-10 w-10 rounded-full object-cover ring-2 ring-slate-100 shadow-xs">
-                            </div>
-                            {% else %}
-                            <div class="flex justify-center">
-                                <div class="h-10 w-10 rounded-full bg-slate-100 flex items-center justify-center text-xs font-medium text-slate-500 ring-1 ring-slate-200">N/A</div>
-                            </div>
-                            {% endif %}
                         </td>
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-700">
                             {{ first.product.brand.subcetegory.category.name }}
@@ -417,7 +354,7 @@
                                         data-description="{{ first.product.description|default_if_none:''|escapejs }}"
                                         data-image="{% if first.product.image %}{{ first.product.image.url }}{% endif %}"
                                         data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                        data-variants='[{% for v in group.variants %}{"editUrl":"{% url 'edit_inventory' v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                        data-variants='[{% for v in group.variants %}{"editUrl":"{% url "edit_inventory" v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"variantImageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","variantGalleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
                                     >
                                         <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         <span class="sr-only">Edit</span>
@@ -704,54 +641,262 @@ let variantRowCounter = 0;
 
 function addVariantRow(initial = {}) {
     const row = document.createElement('div');
-    row.className = 'grid grid-cols-1 sm:grid-cols-8 gap-2 variant-row items-end mt-4 p-3 border border-slate-100 rounded bg-slate-50/50';
+    row.className = 'variant-row relative p-5 mb-8 border border-slate-200 rounded-2xl bg-white shadow-sm transition-all hover:shadow-md hover:border-slate-300';
+    
     const colorVal = (initial.color || '').replace(/"/g, '&quot;');
     const sizeVal = (initial.size || '').replace(/"/g, '&quot;');
     const priceVal = (initial.price || '');
     const stockVal = (initial.stock || '');
+    const variantImageUrl = (initial.variantImageUrl || '');
+    const variantGalleryUrls = (initial.variantGalleryUrls || '');
     const idx = variantRowCounter++;
+    
+    let galleryHtml = '';
+    if (variantGalleryUrls) {
+        const urls = variantGalleryUrls.split(',');
+        urls.forEach((url, i) => {
+            if (url) {
+                galleryHtml += `
+                    <div class="relative inline-block existing-variant-gallery-img group">
+                        <img src="${url}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md transition-transform group-hover:scale-105">
+                        <button type="button" class="remove-existing-gallery-img absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform scale-0 group-hover:scale-100">
+                            <i class="fa-solid fa-xmark text-[10px]"></i>
+                        </button>
+                    </div>
+                `;
+            }
+        });
+    }
+
     row.innerHTML = `
         <input type="hidden" name="variant_index" value="${idx}">
-        <div class="sm:col-span-2 space-y-1.5">
-            <label class="text-xs font-medium text-slate-700">Color</label>
-            <div class="flex items-center gap-2">
-                <input type="color" class="h-10 w-10 rounded-md border border-slate-200 variant-color-picker" value="${/^#([A-Fa-f0-9]{6})$/.test(colorVal) ? colorVal : '#000000'}">
-                <input type="hidden" name="variant_color" value="${/^#([A-Fa-f0-9]{6})$/.test(colorVal) ? colorVal : '#000000'}" class="variant-color-hidden">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+                    V${idx + 1}
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-slate-900 tracking-tight">Variant Configuration</h4>
+                    <p class="text-[10px] text-slate-400 font-medium">Define specifications and unique media</p>
+                </div>
+            </div>
+            <button type="button" class="removeVariantRowBtn group flex items-center gap-2 px-3 py-1.5 rounded-lg border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all duration-300">
+                <i class="fa-solid fa-trash-can text-[10px]"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider">Remove Variant</span>
+            </button>
+        </div>
+
+        <!-- Inputs Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1">Variant Color</label>
+                <div class="flex items-center gap-3 p-2 rounded-xl border border-slate-200 bg-slate-50/30">
+                    <input type="color" class="h-9 w-9 rounded-lg border-0 cursor-pointer variant-color-picker bg-transparent" value="${/^#([A-Fa-f0-9]{6})$/.test(colorVal) ? colorVal : '#000000'}">
+                    <input type="text" name="variant_color" value="${/^#([A-Fa-f0-9]{6})$/.test(colorVal) ? colorVal : '#000000'}" 
+                        class="variant-color-hidden flex-1 bg-transparent border-0 text-xs font-bold text-slate-700 focus:ring-0 uppercase">
+                </div>
+            </div>
+            
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1">Storage / Size</label>
+                <input type="text" name="variant_size" placeholder="e.g., 128GB" value="${sizeVal}"
+                    class="w-full h-11 rounded-xl border-slate-200 bg-slate-50/30 px-4 text-xs font-bold text-slate-700 focus:border-slate-900 focus:ring-0 transition-all placeholder:font-normal">
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1">Selling Price</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
+                    <input type="number" name="variant_price" placeholder="0.00" step="0.01" value="${priceVal}"
+                        class="w-full h-11 rounded-xl border-slate-200 bg-slate-50/30 pl-8 pr-4 text-xs font-bold text-slate-700 focus:border-slate-900 focus:ring-0 transition-all">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1">Stock Level</label>
+                <input type="number" name="variant_stock" placeholder="0" value="${stockVal}"
+                    class="w-full h-11 rounded-xl border-slate-200 bg-slate-50/30 px-4 text-xs font-bold text-slate-700 focus:border-slate-900 focus:ring-0 transition-all">
             </div>
         </div>
-        <div class="space-y-1.5">
-            <label class="text-xs font-medium text-slate-700">Storage / Size</label>
-            <input type="text" name="variant_size" placeholder="e.g., 128GB" value="${sizeVal}"
-                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-        </div>
-        <div class="space-y-1.5">
-            <label class="text-xs font-medium text-slate-700">Price</label>
-            <input type="number" name="variant_price" placeholder="Price" step="0.01" value="${priceVal}"
-                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-        </div>
-        <div class="space-y-1.5">
-            <label class="text-xs font-medium text-slate-700">Stock</label>
-            <input type="number" name="variant_stock" placeholder="Stock quantity" value="${stockVal}"
-                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-        </div>
-        <div class="space-y-1.5">
-            <label class="text-xs font-medium text-slate-700">Main Image</label>
-            <input type="file" name="variant_image_${idx}" accept="image/*"
-                class="block w-full text-[10px] text-slate-600 file:mr-2 file:rounded file:border-0 file:bg-brand-500 file:px-2 file:py-1 file:font-medium file:text-white hover:file:bg-brand-600">
-        </div>
-        <div class="space-y-1.5">
-            <label class="text-xs font-medium text-slate-700">Gallery</label>
-            <input type="file" name="variant_gallery_${idx}" multiple accept="image/*"
-                class="block w-full text-[10px] text-slate-600 file:mr-2 file:rounded file:border-0 file:bg-slate-700 file:px-2 file:py-1 file:font-medium file:text-white hover:file:bg-slate-800">
-        </div>
-        <div class="space-y-1.5">
-            <label class="text-xs font-medium text-transparent hidden sm:block">.</label>
-            <button type="button" class="removeVariantRowBtn px-2 py-1 flex items-center justify-center rounded border border-rose-300 bg-rose-50 text-rose-600 hover:bg-rose-100 w-full transition h-[34px]">
-                <i class="fa-solid fa-trash text-xs"></i>
-            </button>
+
+        <!-- Media Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Image Column -->
+            <div class="lg:col-span-1 space-y-3">
+                <div class="flex items-center justify-between px-1">
+                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Main Display Image</label>
+                </div>
+                <div class="relative min-h-[140px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-4 flex flex-col items-center justify-center group transition-colors hover:bg-slate-50 hover:border-slate-300">
+                    <div class="variant-main-preview flex flex-wrap gap-2 mb-2">
+                        ${variantImageUrl ? `
+                            <div class="relative group/img">
+                                <img src="${variantImageUrl}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">
+                                <button type="button" class="remove-main-preview absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110">
+                                    <i class="fa-solid fa-xmark text-[10px]"></i>
+                                </button>
+                            </div>
+                        ` : `
+                            <div class="flex flex-col items-center text-slate-400 py-2">
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl mb-2 opacity-50"></i>
+                                <span class="text-[10px] font-bold uppercase tracking-tight">Primary Shot</span>
+                            </div>
+                        `}
+                    </div>
+                    <input type="file" name="variant_image_${idx}" accept="image/*"
+                        class="variant-main-input absolute inset-0 opacity-0 cursor-pointer">
+                    <div class="text-[9px] font-bold text-slate-400 text-center pointer-events-none">Click or drag to upload</div>
+                </div>
+            </div>
+
+            <!-- Gallery Column -->
+            <div class="lg:col-span-2 space-y-3">
+                <div class="flex items-center justify-between px-1">
+                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Additional Gallery Shots</label>
+                    <span class="text-[10px] font-bold text-brand-500 bg-brand-50 px-2 py-0.5 rounded-full">Multi-select enabled</span>
+                </div>
+                <div class="relative min-h-[140px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-4 flex flex-col items-center justify-center group transition-colors hover:bg-slate-50 hover:border-slate-300">
+                    <div class="variant-gallery-preview flex flex-wrap justify-center gap-3 mb-2">
+                        ${galleryHtml || `
+                            <div class="flex flex-col items-center text-slate-400 py-2">
+                                <i class="fa-solid fa-images text-2xl mb-2 opacity-50"></i>
+                                <span class="text-[10px] font-bold uppercase tracking-tight">Detail Angles</span>
+                            </div>
+                        `}
+                    </div>
+                    <input type="file" name="variant_gallery_${idx}" multiple accept="image/*"
+                        class="variant-gallery-input absolute inset-0 opacity-0 cursor-pointer">
+                    <div class="text-[9px] font-bold text-slate-400 text-center pointer-events-none">Click to select multiple detailed images</div>
+                </div>
+            </div>
         </div>
     `;
     variantRows.appendChild(row);
+
+    // Event listeners for image previews within the new row
+    const mainInput = row.querySelector('.variant-main-input');
+    const mainPreview = row.querySelector('.variant-main-preview');
+    const galleryInput = row.querySelector('.variant-gallery-input');
+    const galleryPreview = row.querySelector('.variant-gallery-preview');
+
+    mainInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                mainPreview.innerHTML = `
+                    <div class="relative group/img">
+                        <img src="${e.target.result}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">
+                        <button type="button" class="remove-main-preview absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110">
+                            <i class="fa-solid fa-xmark text-[10px]"></i>
+                        </button>
+                    </div>
+                `;
+            }
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    galleryInput.addEventListener('change', function() {
+        // Clear empty state or previous new previews, keep existing ones
+        const news = galleryPreview.querySelectorAll('.new-preview-item');
+        news.forEach(n => n.remove());
+        
+        // Remove empty state placeholder if it exists
+        const emptyState = galleryPreview.querySelector('.flex-col');
+        if (emptyState) emptyState.remove();
+
+        if (this.files) {
+            Array.from(this.files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'relative inline-block group new-preview-item';
+                    div.dataset.index = index;
+                    div.innerHTML = `
+                        <img src="${e.target.result}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md transition-transform hover:scale-105">
+                        <button type="button" class="remove-new-gallery-preview absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110">
+                            <i class="fa-solid fa-xmark text-[10px]"></i>
+                        </button>
+                    `;
+                    galleryPreview.appendChild(div);
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+    });
+
+    // Color picker sync
+    const picker = row.querySelector('.variant-color-picker');
+    const hexInput = row.querySelector('.variant-color-hidden');
+    picker.addEventListener('input', (e) => {
+        hexInput.value = e.target.value;
+    });
+    hexInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if (/^#([A-Fa-f0-9]{6})$/.test(val)) {
+            picker.value = val;
+        }
+    });
+
+    // Handle internal preview deletions
+    row.addEventListener('click', function(e) {
+        // 1. Remove Main Image Preview
+        if (e.target.closest('.remove-main-preview')) {
+            mainPreview.innerHTML = `
+                <div class="flex flex-col items-center text-slate-400 py-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl mb-2 opacity-50"></i>
+                    <span class="text-[10px] font-bold uppercase tracking-tight">Primary Shot</span>
+                </div>
+            `;
+            mainInput.value = '';
+            return;
+        }
+
+        // 2. Remove Existing Gallery Image
+        if (e.target.closest('.remove-existing-gallery-img')) {
+            const container = e.target.closest('.existing-variant-gallery-img');
+            container.remove();
+            if (galleryPreview.children.length === 0) {
+                galleryPreview.innerHTML = `
+                    <div class="flex flex-col items-center text-slate-400 py-2">
+                        <i class="fa-solid fa-images text-2xl mb-2 opacity-50"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-tight">Detail Angles</span>
+                    </div>
+                `;
+            }
+            return;
+        }
+
+        // 3. Remove New Gallery Image Preview
+        const removeNewBtn = e.target.closest('.remove-new-gallery-preview');
+        if (removeNewBtn) {
+            const item = removeNewBtn.closest('.new-preview-item');
+            const indexToRemove = parseInt(item.dataset.index);
+            item.remove();
+
+            const dt = new DataTransfer();
+            const files = galleryInput.files;
+            for (let i = 0; i < files.length; i++) {
+                if (i !== indexToRemove) {
+                    dt.items.add(files[i]);
+                }
+            }
+            galleryInput.files = dt.files;
+
+            const remaining = galleryPreview.querySelectorAll('.new-preview-item');
+            remaining.forEach((el, i) => el.dataset.index = i);
+            
+            if (galleryPreview.children.length === 0) {
+                galleryPreview.innerHTML = `
+                    <div class="flex flex-col items-center text-slate-400 py-2">
+                        <i class="fa-solid fa-images text-2xl mb-2 opacity-50"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-tight">Detail Angles</span>
+                    </div>
+                `;
+            }
+        }
+    });
 }
 
 if (variantRows) {
@@ -1244,160 +1389,29 @@ inventoryForm.addEventListener('submit', function(e) {
     }
 });
 
-const productPictureInput = document.getElementById('product_picture_input');
-const productPicturePreview = document.getElementById('product_picture_preview');
-const productPictureImg = productPicturePreview.querySelector('img');
-const removeProductPictureBtn = document.getElementById('remove_product_picture');
+const productPictureInput = null;
+const productPicturePreview = null;
+const productPictureImg = null;
+const removeProductPictureBtn = null;
 
-const extraImagesInput = document.getElementById('extra_images_input');
-const extraImagesPreview = document.getElementById('extra_images_preview');
+const extraImagesInput = null;
+const extraImagesPreview = null;
 
-function handleImagePreview(input, previewContainer, previewImg = null, isMultiple = false) {
-     if (isMultiple) {
-         // Only remove newly selected images, not the existing ones from server
-         const existingNewItems = previewContainer.querySelectorAll('.gallery-item:not(.existing-image)');
-         existingNewItems.forEach(item => item.remove());
 
-         if (input.files && input.files.length > 0) {
-             Array.from(input.files).forEach((file, index) => {
-                 const reader = new FileReader();
-                 reader.onload = function(e) {
-                     const div = document.createElement('div');
-                     div.className = 'relative inline-block gallery-item';
-                     div.dataset.index = index;
-                     div.innerHTML = `
-                         <img src="${e.target.result}" class="h-20 w-20 rounded-lg object-cover border border-slate-200 shadow-sm">
-                         <button type="button" class="remove-gallery-img absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-sm hover:bg-rose-600 transition">
-                             <i class="fa-solid fa-xmark text-[10px]"></i>
-                         </button>
-                         <div class="absolute inset-0 bg-black/10 rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
-                             <span class="text-[9px] text-white font-medium bg-black/40 px-1.5 py-0.5 rounded">New</span>
-                         </div>
-                     `;
-                     previewContainer.appendChild(div);
-                 };
-                 reader.readAsDataURL(file);
-             });
-             previewContainer.classList.remove('hidden');
-         } else {
-             // If no files and no existing images, hide the container
-             if (previewContainer.querySelectorAll('.gallery-item').length === 0) {
-                 previewContainer.classList.add('hidden');
-             }
-         }
-     } else {
-         if (input.files && input.files.length > 0) {
-             const reader = new FileReader();
-             reader.onload = function(e) {
-                 previewImg.src = e.target.result;
-                 previewContainer.classList.remove('hidden');
-             };
-             reader.readAsDataURL(input.files[0]);
-         } else {
-             previewContainer.classList.add('hidden');
-         }
-     }
- }
-
-if (productPictureInput) {
-    productPictureInput.addEventListener('change', function() {
-        handleImagePreview(this, productPicturePreview, productPictureImg, false);
-    });
-}
-
-if (removeProductPictureBtn) {
-    removeProductPictureBtn.addEventListener('click', function() {
-        productPictureInput.value = '';
-        productPicturePreview.classList.add('hidden');
-        productPictureImg.src = '';
-    });
-}
-
-if (extraImagesInput) {
-    extraImagesInput.addEventListener('change', function() {
-        handleImagePreview(this, extraImagesPreview, null, true);
-    });
-}
-
-if (extraImagesPreview) {
-    extraImagesPreview.addEventListener('click', function(e) {
-        const btn = e.target.closest('.remove-gallery-img');
-        if (!btn) return;
-        
-        const item = btn.closest('.gallery-item');
-        if (!item) return;
-
-        if (item.classList.contains('existing-image')) {
-            // It's an existing image. For now, we just hide it from view.
-            // If you need to delete it from the server, you would typically 
-            // add its ID/URL to a hidden input field like "deleted_images[]"
-            // and handle that in your Django view.
-            item.remove();
-            if (extraImagesPreview.children.length === 0) {
-                extraImagesPreview.classList.add('hidden');
-            }
-        } else {
-            // It's a newly selected image
-            const indexToRemove = parseInt(item.dataset.index);
-            const dt = new DataTransfer();
-            const files = extraImagesInput.files;
-            
-            for (let i = 0; i < files.length; i++) {
-                if (i !== indexToRemove) {
-                    dt.items.add(files[i]);
-                }
-            }
-            
-            extraImagesInput.files = dt.files;
-            // Re-render previews to update indices
-            handleImagePreview(extraImagesInput, extraImagesPreview, null, true);
-        }
-    });
-}
 
 function resetImagePreviews() {
-    if (productPicturePreview) {
-        productPicturePreview.classList.add('hidden');
-        productPictureImg.src = '';
-    }
-    if (extraImagesPreview) {
-        extraImagesPreview.innerHTML = '';
-    }
-    if (productPictureInput) productPictureInput.value = '';
-    if (extraImagesInput) extraImagesInput.value = '';
+    // Media section removed. Variant image previews are handled per-row.
 }
 
-async function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, specsJson, imageUrl = '', galleryUrls = '') {
+async function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, specsJson, imageUrl = '', galleryUrls = '', variantImageUrl = '', variantGalleryUrls = '') {
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
 
     modalTitle.innerText = "Edit inventory";
     inventoryForm.action = editUrl;
     
-    // Reset and show existing images if available
+    // Global media section removed. Variant images are handled in the variant row.
     resetImagePreviews();
-    if (imageUrl) {
-        productPictureImg.src = imageUrl;
-        productPicturePreview.classList.remove('hidden');
-    }
-    
-    if (galleryUrls) {
-        const urls = galleryUrls.split(',');
-        urls.forEach(url => {
-            if (url) {
-                const div = document.createElement('div');
-                div.className = 'relative inline-block gallery-item existing-image';
-                div.innerHTML = `
-                    <img src="${url}" class="h-20 w-20 rounded-lg object-cover border border-slate-200 shadow-sm">
-                    <button type="button" class="remove-gallery-img absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-sm hover:bg-rose-600 transition">
-                        <i class="fa-solid fa-xmark text-[10px]"></i>
-                    </button>
-                `;
-                extraImagesPreview.appendChild(div);
-            }
-        });
-        extraImagesPreview.classList.remove('hidden');
-    }
 
     categorySelect.value = category;
     if (category) {
@@ -1416,7 +1430,14 @@ async function openEditModal(editUrl, category, subcategory, brand, product, des
     inventoryForm.description.value = description;
     if (variantRows) {
         variantRows.innerHTML = '';
-        addVariantRow({ color: color, size: size, price: price, stock: stock });
+        addVariantRow({ 
+            color: color, 
+            size: size, 
+            price: price, 
+            stock: stock,
+            variantImageUrl: variantImageUrl,
+            variantGalleryUrls: variantGalleryUrls
+        });
         const firstRemoveBtn = variantRows.querySelector('.removeVariantRowBtn');
         if (firstRemoveBtn) firstRemoveBtn.classList.add('hidden');
         if (addVariantRowBtn) addVariantRowBtn.classList.add('hidden'); // Cannot add multiple in edit mode
@@ -1514,7 +1535,9 @@ function renderVariantItems(common, variants) {
                 v.stock || '',
                 JSON.stringify(v.specs || []),
                 common.imageUrl || '',
-                common.galleryUrls || ''
+                common.galleryUrls || '',
+                v.variantImageUrl || '',
+                v.variantGalleryUrls || ''
             );
             hideVariantPicker();
         });
@@ -1729,6 +1752,78 @@ if (inventorySearchInput && inventoryTBody) {
             if (noMatchRowInventory.parentElement === inventoryTBody) inventoryTBody.removeChild(noMatchRowInventory);
         }
     });
+}
+
+// Socket Implementation
+const inventorySocket = new WebSocket(
+    (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
+    window.location.host +
+    '/ws/inventory/'
+);
+
+inventorySocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    if (data.type === 'inventory_updated') {
+        const inv = data.inventory;
+        // Find variant in table and update
+        const variantButtons = document.querySelectorAll(`button[data-edit-url*="/${inv.id}/"]`);
+        variantButtons.forEach(btn => {
+            btn.dataset.price = inv.price;
+            btn.dataset.stock = inv.stock;
+            
+            // If it's a size button, update the text if needed (though usually price/stock is in tooltip)
+            if (btn.classList.contains('edit-variant-size-btn')) {
+                btn.title = `Edit Variant: ${btn.dataset.size} (Stock: ${inv.stock}, Price: ${inv.price})`;
+            }
+        });
+
+        // Update the visible stock in the table if this is the 'first' variant of the group
+        const rows = document.querySelectorAll('#inventoryTableBody tr');
+        rows.forEach(row => {
+            const viewButton = row.querySelector('button[onclick*="openViewModal"]');
+            if (viewButton) {
+                const onclickStr = viewButton.getAttribute('onclick');
+                if (onclickStr.includes(`'${inv.id}'`)) {
+                    // This row belongs to the updated variant's product group
+                    const stockCell = row.querySelector('td:nth-last-child(3)');
+                    if (stockCell) stockCell.innerText = inv.stock;
+                }
+            }
+        });
+
+        showToast(`Inventory updated: ${inv.product_name} (Stock: ${inv.stock})`, 'info');
+    } else if (data.type === 'inventory_added') {
+        showToast(`New inventory added: ${data.inventory.product_name}`, 'success');
+        // Optional: refresh page to see new entry
+        // window.location.reload();
+    } else if (data.type === 'inventory_deleted') {
+        showToast(`Inventory deleted`, 'error');
+        // Optional: remove row or refresh
+        // window.location.reload();
+    }
+};
+
+inventorySocket.onclose = function(e) {
+    console.error('Inventory socket closed unexpectedly');
+};
+
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-2xl transform transition-all duration-300 translate-y-20 z-[100] flex items-center gap-3 font-bold text-sm ${
+        type === 'success' ? 'bg-emerald-500 text-white' : 
+        type === 'error' ? 'bg-rose-500 text-white' : 
+        'bg-sky-500 text-white'
+    }`;
+    
+    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+    toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+    
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.remove('translate-y-20'), 100);
+    setTimeout(() => {
+        toast.classList.add('translate-y-20');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 </script>
 

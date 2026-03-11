@@ -154,32 +154,84 @@ def by_product(request, variant_id):
     gallery_annotated = []
     # Add Product generic gallery mapped to all colors as fallback
     all_cids = list(visible_colors.keys())
+    
+    seen_urls = {} # url -> entry in gallery_annotated
+    url_to_name = {} # url -> file name for matching
+
+    def add_to_annotated(url, color_ids, is_main=False):
+        if not url: return
+        # Try to find if this file name already exists to avoid duplicates with different URL formats
+        file_name = url.split('/')[-1]
+        
+        existing = None
+        if url in seen_urls:
+            existing = seen_urls[url]
+        else:
+            # Fallback check by file name
+            for seen_url, entry in seen_urls.items():
+                if seen_url.split('/')[-1] == file_name:
+                    existing = entry
+                    break
+
+        if existing:
+            # update existing entry color_ids
+            existing_cids = set(existing['color_ids'])
+            existing_cids.update(color_ids)
+            existing['color_ids'] = list(existing_cids)
+            if is_main: existing['is_main'] = True
+        else:
+            entry = {
+                'url': url,
+                'color_ids': list(set(color_ids)),
+                'is_main': is_main
+            }
+            gallery_annotated.append(entry)
+            seen_urls[url] = entry
+
+    # 1. Main Product Image (Default)
+    if product.image:
+        # Check if this main image belongs to a specific variant color
+        matched_color_ids = []
+        p_img_name = product.image.name.split('/')[-1]
+        for v in variants:
+            if v.image:
+                v_img_name = v.image.name.split('/')[-1]
+                if v_img_name == p_img_name:
+                    if v.color.id in all_cids:
+                        matched_color_ids.append(v.color.id)
+        
+        # If it matches specific variants, only show for those colors.
+        # Otherwise, it's a generic product image, show for all.
+        target_cids = list(set(matched_color_ids)) if matched_color_ids else all_cids
+        if target_cids:
+            add_to_annotated(product.image.url, target_cids, is_main=True)
+
+    # 2. Extra Product generic images - shown for all colors
     for img in gallery:
         try:
-            gallery_annotated.append({
-                'url': getattr(img.image, 'url', ''),
-                'color_ids': all_cids
-            })
+            add_to_annotated(img.image.url, all_cids)
         except Exception:
             pass
 
+    # 3. Variant specific images (Color-based)
     for v in variants:
-        cids = [v.color.id]
-        if getattr(v, 'image', None):
+        cid = v.color.id
+        if cid not in all_cids: continue
+        
+        # Variant main image
+        if v.image:
             try:
-                gallery_annotated.append({
-                    'url': getattr(v.image, 'url', ''),
-                    'color_ids': cids
-                })
+                # If this image is already the main product image, don't re-add it 
+                # to all colors if it's already mapped correctly.
+                add_to_annotated(v.image.url, [cid])
             except Exception:
                 pass
+        
+        # Variant gallery images
         for vi in VariantImage.objects.filter(variant=v):
             if vi.image:
                 try:
-                    gallery_annotated.append({
-                        'url': getattr(vi.image, 'url', ''),
-                        'color_ids': cids
-                    })
+                    add_to_annotated(vi.image.url, [cid])
                 except Exception:
                     pass
     
