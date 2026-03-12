@@ -20,7 +20,7 @@
             <div class="w-full lg:w-1/2 flex flex-col gap-4">
                 <div class="bg-gray-100 rounded-3xl overflow-hidden shadow-md relative group h-64 sm:h-80 md:h-[500px]">
                     <img id="main-product-image"
-                        src="{% if product.image %}{{ product.image.url }}{% elif gallery and gallery.0 %}{{ gallery.0.image.url }}{% else %}{% endif %}"
+                        src="{% if variant.image %}{{ variant.image.url }}{% elif product.image %}{{ product.image.url }}{% elif gallery and gallery.0 %}{{ gallery.0.image.url }}{% else %}{% endif %}"
                         alt="{{ product.name }}"
                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-125 cursor-zoom-in">
                     <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -57,13 +57,13 @@
 
                 <div class="border-y border-gray-100 py-6 mb-6">
                     <div class="flex items-end gap-3 mb-2">
-                        <span class="text-3xl md:text-4xl font-black text-gray-900">₹{{ variant.price }}</span>
-                        {% if product.base_price and product.base_price|floatformat:2 > variant.price|floatformat:2 %}
-                        <span class="text-lg md:text-xl text-gray-400 line-through mb-1">₹{{ product.base_price }}</span>
-                        {% if discount_percent %}
-                        <span class="bg-red-100 text-red-600 font-bold px-2 py-1 rounded-lg text-xs md:text-sm mb-1 ml-2">-{{ discount_percent }}% OFF</span>
-                        {% endif %}
-                        {% endif %}
+                        <span id="variant-price" class="text-3xl md:text-4xl font-black text-gray-900">₹{{ variant.price }}</span>
+                        <div id="discount-container" class="flex items-end gap-3 {% if not product.base_price or product.base_price <= variant.price %}hidden{% endif %}">
+                            <span id="base-price" class="text-lg md:text-xl text-gray-400 line-through mb-1">₹{{ product.base_price }}</span>
+                            <span id="discount-badge" class="bg-red-100 text-red-600 font-bold px-2 py-1 rounded-lg text-xs md:text-sm mb-1 ml-2">
+                                -{{ discount_percent }}% OFF
+                            </span>
+                        </div>
                     </div>
                     <p class="text-gray-500 text-sm flex items-center gap-2">
                         <i class="fas fa-tag text-brand-500"></i> Free worldwide shipping on orders over ₹100
@@ -72,21 +72,24 @@
 
                 <!-- Color Selection -->
                 <div class="mb-6">
-                    <h4 class="font-bold text-gray-900 mb-3">Color</h4>
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-bold text-gray-900">Color</h4>
+                        <span id="selected-color-name" class="text-sm font-medium text-brand-600">{{ variant.color.name }}</span>
+                    </div>
                     <div class="mb-3">
                         <div class="flex flex-wrap gap-2">
                             {% for c in colors %}
                             <button
-                                class="color-option w-8 h-8 rounded-full border-2 {% if c.id == variant.color.id %}border-brand-500{% else %}border-gray-200{% endif %}"
+                                class="color-option w-8 h-8 rounded-full border-2 {% if c.id == variant.color.id %}border-brand-500{% else %}border-gray-200{% endif %} transition-all hover:scale-110"
                                 title="{{ c.name }}"
                                 data-color-id="{{ c.id }}"
+                                data-color-name="{{ c.name }}"
                                 data-variants="{{ c.variants|join:',' }}"
                                 style="background-color: {{ c.name }};"
                             ></button>
                             {% endfor %}
                         </div>
                     </div>
-                    
                 </div>
 
                 <!-- Storage Selection -->
@@ -109,7 +112,7 @@
                 <!-- Actions -->
                 <div class="mb-8">
                     <!-- Qty -->
-                    <form action="{% url 'by_add_to_cart' variant.id %}" method="post" class="flex flex-wrap items-center gap-4 w-full">
+                    <form id="add-to-cart-form" action="{% url 'by_add_to_cart' variant.id %}" method="post" class="flex flex-wrap items-center gap-4 w-full">
                         {% csrf_token %}
                         <div class="flex items-center border border-gray-200 rounded-2xl bg-white w-28 md:w-32 justify-between p-1 shrink-0">
                             <button type="button"
@@ -123,20 +126,22 @@
                                 class="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-colors"><i
                                     class="fas fa-plus text-sm"></i></button>
                         </div>
-                    <!-- Add to Cart -->
-                    {% if variant.stock > 0 %}
-                    <button type="submit"
-                        class="w-full md:flex-1 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-1 py-4 flex items-center justify-center gap-2 whitespace-nowrap">
-                        <i class="fas fa-shopping-bag"></i> Add to Cart
-                    </button>
-                    {% else %}
-                    <span
-                        class="flex-1 bg-gray-300 text-white font-bold rounded-2xl py-4 flex items-center justify-center gap-2 cursor-not-allowed">
-                        Out of Stock
-                    </span>
-                    {% endif %}
+                    <!-- Add to Cart Container -->
+                    <div id="cart-btn-container" class="flex-1">
+                        {% if variant.stock > 0 %}
+                        <button type="submit"
+                            class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-1 py-4 flex items-center justify-center gap-2 whitespace-nowrap">
+                            <i class="fas fa-shopping-bag"></i> Add to Cart
+                        </button>
+                        {% else %}
+                        <span
+                            class="w-full bg-gray-300 text-white font-bold rounded-2xl py-4 flex items-center justify-center gap-2 cursor-not-allowed">
+                            Out of Stock
+                        </span>
+                        {% endif %}
+                    </div>
                     <!-- Wishlist -->
-                    <a href="{% url 'by_add_wishlist' variant.id %}"
+                    <a id="wishlist-btn" href="{% url 'by_add_wishlist' variant.id %}"
                         class="w-12 h-12 md:w-14 md:h-14 border border-gray-200 rounded-2xl flex items-center justify-center text-gray-500 hover:text-pink-500 hover:border-pink-500 transition-all hover:-translate-y-1 bg-white shrink-0"
                         title="Add to wishlist">
                         <i class="far fa-heart text-xl"></i>
@@ -210,110 +215,179 @@
         const SIZE_MAP = {{ size_map|safe }};
         const VARIANTS_INFO = {{ variants_info|safe }};
         const DEFAULT_COLOR_ID = {{ variant.color.id }};
+        const DEFAULT_VARIANT_ID = {{ variant.id }};
+        const BASE_PRICE = {{ product.base_price|default:0 }};
+        
         const mainImg = document.getElementById('main-product-image');
         const galleryBtns = Array.from(document.querySelectorAll('.gallery-btn'));
         const colorButtons = document.querySelectorAll('.color-option');
         const sizeButtons = Array.from(document.querySelectorAll('.size-option'));
+        const cartForm = document.getElementById('add-to-cart-form');
+        const wishlistBtn = document.getElementById('wishlist-btn');
+        const colorNameDisplay = document.getElementById('selected-color-name');
+        const priceElement = document.getElementById('variant-price');
+        const discountContainer = document.getElementById('discount-container');
+        const discountBadge = document.getElementById('discount-badge');
+        const qtyInput = document.getElementById('quantity-input');
+        const cartBtnContainer = document.getElementById('cart-btn-container');
+
         let currentColorId = DEFAULT_COLOR_ID;
-        const productUrlTemplate = "{% url 'by_product' 0 %}";
+        let currentVariantId = DEFAULT_VARIANT_ID;
+        let maxStock = {{ variant.stock|default:0 }};
+
+        // Templates for URL construction
+        const productUrlBase = "{% url 'by_product' 0 %}".replace('/0/', '/');
+        const addToCartUrlBase = "{% url 'by_add_to_cart' 0 %}".replace('/0/', '/');
+        const wishlistUrlBase = "{% url 'by_add_wishlist' 0 %}".replace('/0/', '/');
+
+        function clamp(val) {
+            if (!maxStock || maxStock < 1) return 0;
+            if (val < 1) return 1;
+            if (val > maxStock) return maxStock;
+            return val;
+        }
+
+        function updateVariantUI(variantId) {
+            if (!variantId) return;
+            const info = VARIANTS_INFO[variantId];
+            if (!info) return;
+
+            currentVariantId = variantId;
+            currentColorId = info.color_id;
+            maxStock = info.stock;
+
+            // 1. Update Price & Discount
+            if (priceElement) priceElement.innerText = '₹' + info.price;
+            if (discountContainer && discountBadge) {
+                if (BASE_PRICE > info.price) {
+                    const discount = Math.round(((BASE_PRICE - info.price) / BASE_PRICE) * 100);
+                    discountBadge.innerText = '-' + discount + '% OFF';
+                    discountContainer.classList.remove('hidden');
+                } else {
+                    discountContainer.classList.add('hidden');
+                }
+            }
+            
+            // 2. Update Quantity
+            if (qtyInput) qtyInput.value = clamp(parseInt(qtyInput.value || '1'));
+
+            // 3. Update Cart Button
+            if (cartBtnContainer) {
+                if (info.stock > 0) {
+                    cartBtnContainer.innerHTML = `
+                        <button type="submit"
+                            class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-1 py-4 flex items-center justify-center gap-2 whitespace-nowrap">
+                            <i class="fas fa-shopping-bag"></i> Add to Cart
+                        </button>`;
+                } else {
+                    cartBtnContainer.innerHTML = `
+                        <span class="w-full bg-gray-300 text-white font-bold rounded-2xl py-4 flex items-center justify-center gap-2 cursor-not-allowed">
+                            Out of Stock
+                        </span>`;
+                }
+            }
+
+            // 4. Update URLs
+            if (cartForm) {
+                // Construct URL correctly by appending variantId
+                cartForm.action = addToCartUrlBase + variantId + '/';
+            }
+            if (wishlistBtn) {
+                wishlistBtn.href = wishlistUrlBase + variantId + '/';
+            }
+            
+            // 5. Update Gallery & UI
+            updateGallery(info.color_id);
+            if (info.image_url) {
+                mainImg.src = info.image_url;
+                galleryBtns.forEach(b => {
+                    b.classList.toggle('border-brand-500', b.dataset.src === info.image_url);
+                    b.classList.toggle('border-transparent', b.dataset.src !== info.image_url);
+                });
+            }
+
+            // 6. Update Active States
+            colorButtons.forEach(btn => {
+                const active = parseInt(btn.dataset.colorId) === info.color_id;
+                btn.classList.toggle('border-brand-500', active);
+                btn.classList.toggle('border-gray-200', !active);
+                if (active && colorNameDisplay) {
+                    colorNameDisplay.innerText = btn.dataset.colorName || '';
+                }
+            });
+
+            sizeButtons.forEach(btn => {
+                const active = parseInt(btn.dataset.sizeId) === info.size_id;
+                btn.classList.toggle('bg-gray-900', active);
+                btn.classList.toggle('text-white', active);
+                btn.classList.toggle('border-gray-900', active);
+                btn.classList.toggle('border-gray-200', !active);
+            });
+
+            updateStorageButtons(info.color_id);
+            
+            // Update Browser URL without reload
+            const newUrl = productUrlBase + variantId + '/';
+            window.history.pushState({ variantId: variantId }, '', newUrl);
+        }
 
         function updateGallery(colorId, isInitialLoad = false) {
             let activeBtn = null;
-
             galleryBtns.forEach(b => {
                 const ids = (b.dataset.colorIds || '').split(',').map(x => parseInt(x));
                 const visible = ids.includes(colorId);
                 const isMain = b.dataset.isMain === 'true';
-                
                 b.style.display = visible ? '' : 'none';
-                
                 if (visible) {
                     b.classList.remove('border-brand-500');
                     b.classList.add('border-transparent');
-                    
-                    // Prioritize variant images over generic product.image on color switch
                     if (!activeBtn) {
-                        if (!isInitialLoad && !isMain) {
-                            activeBtn = b;
-                        } else if (isInitialLoad && isMain) {
-                            activeBtn = b;
-                        }
+                        if ((!isInitialLoad && !isMain) || (isInitialLoad && isMain)) activeBtn = b;
                     }
                 }
             });
-
-            // Fallback: if no priority button found, pick the first visible one
-            if (!activeBtn) {
-                activeBtn = galleryBtns.find(b => b.style.display !== 'none');
-            }
-
+            if (!activeBtn) activeBtn = galleryBtns.find(b => b.style.display !== 'none');
             if (activeBtn) {
                 activeBtn.classList.remove('border-transparent');
                 activeBtn.classList.add('border-brand-500');
                 mainImg.src = activeBtn.getAttribute('data-src');
             }
         }
+
         galleryBtns.forEach(btn => {
             btn.addEventListener('click', function () {
                 if (this.style.display === 'none') return;
                 mainImg.src = this.getAttribute('data-src');
                 galleryBtns.forEach(b => {
-                    b.classList.remove('border-brand-500');
-                    b.classList.add('border-transparent');
+                    b.classList.toggle('border-brand-500', b === this);
+                    b.classList.toggle('border-transparent', b !== this);
                 });
-                this.classList.remove('border-transparent');
-                this.classList.add('border-brand-500');
             });
         });
-
-        function goToVariant(id) {
-            if (!id) return;
-            window.location.href = productUrlTemplate.replace('0', id);
-        }
 
         function updateStorageButtons(colorId) {
             currentColorId = colorId;
             sizeButtons.forEach(btn => {
                 const sizeId = parseInt(btn.dataset.sizeId);
                 const entry = (SIZE_MAP[colorId] || {})[sizeId];
-                if (!entry) {
+                if (!entry || !entry.stock || entry.stock < 1) {
                     btn.setAttribute('disabled', 'true');
                     btn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-100', 'text-gray-400');
                     btn.classList.remove('hover:border-brand-500', 'hover:text-brand-600', 'bg-gray-900', 'text-white');
-                    btn.dataset.variants = '';
                 } else {
-                    const vid = entry.id;
-                    const stock = entry.stock;
-                    btn.dataset.variants = String(vid);
-                    if (!stock || stock < 1) {
-                        btn.setAttribute('disabled', 'true');
-                        btn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-gray-100', 'text-gray-400');
-                        btn.classList.remove('hover:border-brand-500', 'hover:text-brand-600', 'bg-gray-900', 'text-white');
-                    } else {
-                        btn.removeAttribute('disabled');
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-100', 'text-gray-400');
-                        btn.classList.add('hover:border-brand-500', 'hover:text-brand-600');
-                    }
+                    btn.removeAttribute('disabled');
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-gray-100', 'text-gray-400');
+                    btn.classList.add('hover:border-brand-500', 'hover:text-brand-600');
                 }
             });
         }
 
         colorButtons.forEach(btn => {
             btn.addEventListener('click', function () {
-                colorButtons.forEach(b => {
-                    b.classList.remove('border-brand-500');
-                    b.classList.add('border-gray-200');
-                });
-                this.classList.remove('border-gray-200');
-                this.classList.add('border-brand-500');
-                const sw = document.getElementById('current-color-swatch');
-                if (sw) {
-                    const bg = this.getAttribute('title') || this.style.backgroundColor || '';
-                    sw.style.backgroundColor = bg;
-                }
                 const colorId = parseInt(this.dataset.colorId);
-                updateStorageButtons(colorId);
-                updateGallery(colorId);
+                const sizesForColor = SIZE_MAP[colorId] || {};
+                const firstSizeId = Object.keys(sizesForColor)[0];
+                if (firstSizeId) updateVariantUI(sizesForColor[firstSizeId].id);
             });
         });
 
@@ -321,99 +395,42 @@
             btn.addEventListener('click', function () {
                 const sizeId = parseInt(this.dataset.sizeId);
                 const entry = (SIZE_MAP[currentColorId] || {})[sizeId];
-                const id = entry ? entry.id : null;
-                goToVariant(id);
+                if (entry) updateVariantUI(entry.id);
             });
         });
+
         updateStorageButtons(DEFAULT_COLOR_ID);
         updateGallery(DEFAULT_COLOR_ID, true);
-        // Quantity controls
+
         (function(){
             const minus = document.getElementById('qty-minus');
             const plus = document.getElementById('qty-plus');
             const input = document.getElementById('quantity-input');
-            const maxStock = {{ variant.stock|default:0 }};
-            function clamp(val) {
-                if (!maxStock || maxStock < 1) return 0;
-                if (val < 1) return 1;
-                if (val > maxStock) return maxStock;
-                return val;
-            }
-            if (minus) minus.addEventListener('click', () => {
-                let v = parseInt(input.value || '1');
-                input.value = clamp(v - 1);
-            });
-            if (plus) plus.addEventListener('click', () => {
-                let v = parseInt(input.value || '1');
-                input.value = clamp(v + 1);
-            });
+            if (minus) minus.addEventListener('click', () => { input.value = clamp(parseInt(input.value || '1') - 1); });
+            if (plus) plus.addEventListener('click', () => { input.value = clamp(parseInt(input.value || '1') + 1); });
         })();
 
         // Socket Implementation
-        const inventorySocket = new WebSocket(
-            (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
-            window.location.host +
-            '/ws/inventory/'
-        );
-
+        const inventorySocket = new WebSocket((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws/inventory/');
         inventorySocket.onmessage = function(e) {
             const data = JSON.parse(e.data);
-            if (data.type === 'inventory_updated') {
+            if (data.type === 'inventory_updated' && data.inventory.id === currentVariantId) {
                 const inv = data.inventory;
-                // Update currently viewed variant if ID matches
-                if (inv.id === {{ variant.id }}) {
-                    // Update Price
-                    const priceElement = document.querySelector('.text-3xl.md\\:text-4xl.font-black.text-gray-900');
-                    if (priceElement) priceElement.innerText = '₹' + inv.price;
-
-                    // Update Stock Status
-                    const cartButton = document.querySelector('button[type="submit"]');
-                    const outOfStockSpan = document.querySelector('.flex-1.bg-gray-300.text-white');
-                    
-                    if (inv.stock > 0) {
-                        if (outOfStockSpan) {
-                            const newButton = document.createElement('button');
-                            newButton.type = 'submit';
-                            newButton.className = 'w-full md:flex-1 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-1 py-4 flex items-center justify-center gap-2 whitespace-nowrap';
-                            newButton.innerHTML = '<i class="fas fa-shopping-bag"></i> Add to Cart';
-                            outOfStockSpan.parentNode.replaceChild(newButton, outOfStockSpan);
-                        }
-                    } else {
-                        if (cartButton && cartButton.type === 'submit') {
-                            const newSpan = document.createElement('span');
-                            newSpan.className = 'flex-1 bg-gray-300 text-white font-bold rounded-2xl py-4 flex items-center justify-center gap-2 cursor-not-allowed';
-                            newSpan.innerText = 'Out of Stock';
-                            cartButton.parentNode.replaceChild(newSpan, cartButton);
-                        }
-                    }
-
-                    // Show notification
-                    showToast(`Stock updated: ${inv.product_name} (${inv.stock} left)`, 'info');
-                }
+                if (priceElement) priceElement.innerText = '₹' + inv.price;
+                updateVariantUI(currentVariantId); // Refresh everything
+                showToast(`Stock updated: ${inv.product_name} (${inv.stock} left)`, 'info');
             }
         };
-
-        inventorySocket.onclose = function(e) {
-            console.error('Inventory socket closed unexpectedly');
-        };
+        inventorySocket.onclose = function(e) { console.error('Inventory socket closed unexpectedly'); };
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-2xl transform transition-all duration-300 translate-y-20 z-[100] flex items-center gap-3 font-bold text-sm ${
-                type === 'success' ? 'bg-emerald-500 text-white' : 
-                type === 'error' ? 'bg-rose-500 text-white' : 
-                'bg-sky-500 text-white'
-            }`;
-            
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-2xl transform transition-all duration-300 translate-y-20 z-[100] flex items-center gap-3 font-bold text-sm ${type === 'success' ? 'bg-emerald-500 text-white' : type === 'error' ? 'bg-rose-500 text-white' : 'bg-sky-500 text-white'}`;
             const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
             toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
-            
             document.body.appendChild(toast);
             setTimeout(() => toast.classList.remove('translate-y-20'), 100);
-            setTimeout(() => {
-                toast.classList.add('translate-y-20');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            setTimeout(() => { toast.classList.add('translate-y-20'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
     </script>
 {% endblock buyer_layout %}
