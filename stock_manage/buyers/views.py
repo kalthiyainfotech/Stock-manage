@@ -240,7 +240,7 @@ def by_product(request, variant_id):
     for item in gallery_annotated:
         for cid in item.get('color_ids', []):
             if cid in images_by_color:
-                images_by_color[cid].append(item['`url`'])
+                images_by_color[cid].append(item['url'])
     specs = []
     try:
         from admin_panel.models import VariantSpec

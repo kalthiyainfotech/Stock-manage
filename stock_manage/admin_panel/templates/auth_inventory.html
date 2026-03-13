@@ -729,11 +729,11 @@ function addVariantRow(initial = {}) {
                     <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Main Display Image</label>
                 </div>
                 <div class="relative min-h-[140px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-4 flex flex-col items-center justify-center group transition-colors hover:bg-slate-50 hover:border-slate-300">
-                    <div class="variant-main-preview flex flex-wrap gap-2 mb-2">
+                    <div class="variant-main-preview flex flex-wrap gap-2 mb-2 relative z-20">
                         ${variantImageUrl ? `
                             <div class="relative group/img">
                                 <img src="${variantImageUrl}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">
-                                <button type="button" class="remove-main-preview absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110">
+                                <button type="button" class="remove-main-preview absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110 z-30">
                                     <i class="fa-solid fa-xmark text-[10px]"></i>
                                 </button>
                             </div>
@@ -745,8 +745,8 @@ function addVariantRow(initial = {}) {
                         `}
                     </div>
                     <input type="file" name="variant_image_${idx}" accept="image/*"
-                        class="variant-main-input absolute inset-0 opacity-0 cursor-pointer">
-                    <div class="text-[9px] font-bold text-slate-400 text-center pointer-events-none">Click or drag to upload</div>
+                        class="variant-main-input absolute inset-0 opacity-0 cursor-pointer z-10">
+                    <div class="text-[9px] font-bold text-slate-400 text-center pointer-events-none relative z-20">Click or drag to upload</div>
                 </div>
             </div>
 
@@ -757,7 +757,7 @@ function addVariantRow(initial = {}) {
                     <span class="text-[10px] font-bold text-brand-500 bg-brand-50 px-2 py-0.5 rounded-full">Multi-select enabled</span>
                 </div>
                 <div class="relative min-h-[140px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-4 flex flex-col items-center justify-center group transition-colors hover:bg-slate-50 hover:border-slate-300">
-                    <div class="variant-gallery-preview flex flex-wrap justify-center gap-3 mb-2">
+                    <div class="variant-gallery-preview flex flex-wrap justify-center gap-3 mb-2 relative z-20">
                         ${galleryHtml || `
                             <div class="flex flex-col items-center text-slate-400 py-2">
                                 <i class="fa-solid fa-images text-2xl mb-2 opacity-50"></i>
@@ -766,8 +766,8 @@ function addVariantRow(initial = {}) {
                         `}
                     </div>
                     <input type="file" name="variant_gallery_${idx}" multiple accept="image/*"
-                        class="variant-gallery-input absolute inset-0 opacity-0 cursor-pointer">
-                    <div class="text-[9px] font-bold text-slate-400 text-center pointer-events-none">Click to select multiple detailed images</div>
+                        class="variant-gallery-input absolute inset-0 opacity-0 cursor-pointer z-10">
+                    <div class="text-[9px] font-bold text-slate-400 text-center pointer-events-none relative z-20">Click to select multiple detailed images</div>
                 </div>
             </div>
         </div>
@@ -780,6 +780,9 @@ function addVariantRow(initial = {}) {
     const galleryInput = row.querySelector('.variant-gallery-input');
     const galleryPreview = row.querySelector('.variant-gallery-preview');
 
+    // Persistent DataTransfer for this variant's gallery
+    const galleryDT = new DataTransfer();
+
     mainInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
             const reader = new FileReader();
@@ -787,7 +790,7 @@ function addVariantRow(initial = {}) {
                 mainPreview.innerHTML = `
                     <div class="relative group/img">
                         <img src="${e.target.result}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">
-                        <button type="button" class="remove-main-preview absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110">
+                        <button type="button" class="remove-main-preview absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110 z-30">
                             <i class="fa-solid fa-xmark text-[10px]"></i>
                         </button>
                     </div>
@@ -798,33 +801,62 @@ function addVariantRow(initial = {}) {
     });
 
     galleryInput.addEventListener('change', function() {
-        // Clear empty state or previous new previews, keep existing ones
+        if (this.files) {
+            // Append new files to the existing DataTransfer object
+            Array.from(this.files).forEach(file => {
+                galleryDT.items.add(file);
+            });
+            
+            // Sync the input with our persistent DataTransfer
+            galleryInput.files = galleryDT.files;
+            
+            renderGalleryPreviews();
+        }
+    });
+
+    function renderGalleryPreviews() {
+        // 1. Remove all new previews and the plus box, but keep existing ones
         const news = galleryPreview.querySelectorAll('.new-preview-item');
         news.forEach(n => n.remove());
         
-        // Remove empty state placeholder if it exists
-        const emptyState = galleryPreview.querySelector('.flex-col');
+        const plusBoxes = galleryPreview.querySelectorAll('.add-more-gallery-box');
+        plusBoxes.forEach(p => p.remove());
+        
+        // 2. Remove empty state placeholder if it exists
+        const emptyState = galleryPreview.querySelector('.empty-gallery-state');
         if (emptyState) emptyState.remove();
 
-        if (this.files) {
-            Array.from(this.files).forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = 'relative inline-block group new-preview-item';
-                    div.dataset.index = index;
-                    div.innerHTML = `
-                        <img src="${e.target.result}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md transition-transform hover:scale-105">
-                        <button type="button" class="remove-new-gallery-preview absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110">
-                            <i class="fa-solid fa-xmark text-[10px]"></i>
-                        </button>
-                    `;
-                    galleryPreview.appendChild(div);
-                }
-                reader.readAsDataURL(file);
-            });
-        }
-    });
+        // 3. Render new file previews
+        Array.from(galleryDT.files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'relative inline-block group new-preview-item';
+                div.dataset.index = index;
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md transition-transform hover:scale-105">
+                    <button type="button" class="remove-new-gallery-preview absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110 z-30">
+                        <i class="fa-solid fa-xmark text-[10px]"></i>
+                    </button>
+                `;
+                galleryPreview.appendChild(div);
+            }
+            reader.readAsDataURL(file);
+        });
+
+        // 4. Always add the "Plus" box at the end
+        const addMoreBox = document.createElement('div');
+        addMoreBox.className = 'add-more-gallery-box flex h-16 w-16 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-slate-400 hover:text-slate-500 transition-colors cursor-pointer';
+        addMoreBox.innerHTML = '<i class="fa-solid fa-plus text-lg pointer-events-none"></i>';
+        addMoreBox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            galleryInput.click();
+        });
+        galleryPreview.appendChild(addMoreBox);
+    }
+
+    // Initialize the gallery view
+    renderGalleryPreviews();
 
     // Color picker sync
     const picker = row.querySelector('.variant-color-picker');
@@ -859,7 +891,7 @@ function addVariantRow(initial = {}) {
             container.remove();
             if (galleryPreview.children.length === 0) {
                 galleryPreview.innerHTML = `
-                    <div class="flex flex-col items-center text-slate-400 py-2">
+                    <div class="empty-gallery-state flex flex-col items-center text-slate-400 py-2">
                         <i class="fa-solid fa-images text-2xl mb-2 opacity-50"></i>
                         <span class="text-[10px] font-bold uppercase tracking-tight">Detail Angles</span>
                     </div>
@@ -873,28 +905,30 @@ function addVariantRow(initial = {}) {
         if (removeNewBtn) {
             const item = removeNewBtn.closest('.new-preview-item');
             const indexToRemove = parseInt(item.dataset.index);
-            item.remove();
-
-            const dt = new DataTransfer();
-            const files = galleryInput.files;
-            for (let i = 0; i < files.length; i++) {
-                if (i !== indexToRemove) {
-                    dt.items.add(files[i]);
-                }
-            }
-            galleryInput.files = dt.files;
-
-            const remaining = galleryPreview.querySelectorAll('.new-preview-item');
-            remaining.forEach((el, i) => el.dataset.index = i);
             
-            if (galleryPreview.children.length === 0) {
-                galleryPreview.innerHTML = `
-                    <div class="flex flex-col items-center text-slate-400 py-2">
-                        <i class="fa-solid fa-images text-2xl mb-2 opacity-50"></i>
-                        <span class="text-[10px] font-bold uppercase tracking-tight">Detail Angles</span>
-                    </div>
-                `;
-            }
+            // Reconstruct DataTransfer without the removed file
+            const newDT = new DataTransfer();
+            Array.from(galleryDT.files).forEach((file, i) => {
+                if (i !== indexToRemove) {
+                    newDT.items.add(file);
+                }
+            });
+            
+            // Update our persistent DataTransfer
+            // Note: We can't clear items easily, so we just replace the whole reference if possible, 
+            // but DataTransfer objects are usually managed via clear/add.
+            // A better way is to just keep the new one.
+            
+            // Clear current DT and re-add
+            galleryDT.items.clear();
+            Array.from(newDT.files).forEach(f => galleryDT.items.add(f));
+            
+            // Sync input
+            galleryInput.files = galleryDT.files;
+            
+            // Re-render
+            renderGalleryPreviews();
+            return;
         }
     });
 }
