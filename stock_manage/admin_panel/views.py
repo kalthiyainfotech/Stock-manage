@@ -461,10 +461,13 @@ def delete_leave_admin(request, id):
             })
     return redirect('auth_leaves')
 
+
+
 @never_cache
 @login_required(login_url='auth_login')
 def add_inventory(request):
     if request.method == "POST":
+        
 
         category_name = request.POST.get('new_category') or request.POST.get('category')
         if not category_name:
@@ -953,7 +956,7 @@ def add_blogs(request):
             image=request.FILES.get('image'),
             des=request.POST.get('des'),
             by=request.POST.get('by'),
-            date=request.POST.get('date'),
+            date=request.POST.get('date'), 
         )
         layer = get_channel_layer()
         if layer:

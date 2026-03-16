@@ -132,10 +132,16 @@
                                     <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                         Variants (Color, Size, Price, Stock)
                                     </h3>
-                                    <button type="button" id="addVariantRowBtn"
-                                        class="text-xs px-3 py-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 font-medium text-slate-700 flex items-center gap-1 transition">
-                                        <i class="fa-solid fa-plus"></i> Add Variant
-                                    </button>
+                                    <div class="flex gap-2">
+                                        <button type="button" id="addSameColorMultipleSizesBtn"
+                                            class="text-xs px-3 py-1.5 rounded-md border border-sky-300 bg-sky-50 hover:bg-sky-100 font-medium text-sky-700 flex items-center gap-1 transition">
+                                            <i class="fa-solid fa-layer-group"></i> Add Same Color, Multiple Sizes
+                                        </button>
+                                        <button type="button" id="addVariantRowBtn"
+                                            class="text-xs px-3 py-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 font-medium text-slate-700 flex items-center gap-1 transition">
+                                            <i class="fa-solid fa-plus"></i> Add Variant
+                                        </button>
+                                    </div>
                                 </div>
                                 <div id="variantRows" class="space-y-3">
                                     <!-- Variant rows will be appended here via JS -->
@@ -959,6 +965,28 @@ if (variantRows) {
 if (addVariantRowBtn && variantRows) {
     addVariantRowBtn.addEventListener('click', function () {
         addVariantRow();
+    });
+}
+
+// Add Same Color, Multiple Sizes functionality
+const addSameColorMultipleSizesBtn = document.getElementById('addSameColorMultipleSizesBtn');
+if (addSameColorMultipleSizesBtn && variantRows) {
+    addSameColorMultipleSizesBtn.addEventListener('click', function() {
+        // Add 5 variants with same color but different sizes (S, M, L, XL, XXL)
+        const commonColor = '#000000';
+        const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
+        
+        sizes.forEach((size, index) => {
+            addVariantRow({
+                color: commonColor,
+                size: size,
+                price: '',
+                stock: ''
+            });
+        });
+        
+        // Hide the "Add Variant" button since we've added multiple sizes
+        if (addVariantRowBtn) addVariantRowBtn.classList.add('hidden');
     });
 }
 

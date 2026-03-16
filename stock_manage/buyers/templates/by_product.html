@@ -20,9 +20,10 @@
             <div class="w-full lg:w-1/2 flex flex-col gap-4">
                 <div class="bg-gray-100 rounded-3xl overflow-hidden shadow-md relative group h-64 sm:h-80 md:h-[500px]">
                     <img id="main-product-image"
-                        src="{% if variant.image %}{{ variant.image.url }}{% elif product.image %}{{ product.image.url }}{% elif gallery and gallery.0 %}{{ gallery.0.image.url }}{% else %}{% endif %}"
+                        src="{{ initial_main_image_url|default:'' }}"
                         alt="{{ product.name }}"
-                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-125 cursor-zoom-in">
+                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-125 cursor-zoom-in"
+                        onerror="this.src='https://placehold.co/600x800?text=Image+Not+Found';">
                     <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </div>
                 <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
@@ -332,25 +333,32 @@
         }
 
         function updateGallery(colorId, isInitialLoad = false) {
-            let activeBtn = null;
-            galleryBtns.forEach(b => {
+            const visibleBtns = galleryBtns.filter(b => {
                 const ids = (b.dataset.colorIds || '').split(',').map(x => parseInt(x));
                 const visible = ids.includes(colorId);
-                const isMain = b.dataset.isMain === 'true';
                 b.style.display = visible ? '' : 'none';
-                if (visible) {
-                    b.classList.remove('border-brand-500');
-                    b.classList.add('border-transparent');
-                    if (!activeBtn) {
-                        if ((!isInitialLoad && !isMain) || (isInitialLoad && isMain)) activeBtn = b;
-                    }
-                }
+                return visible;
             });
-            if (!activeBtn) activeBtn = galleryBtns.find(b => b.style.display !== 'none');
+
+            galleryBtns.forEach(b => b.classList.remove('border-brand-500', 'border-transparent'));
+
+            if (visibleBtns.length === 0) {
+                mainImg.src = 'https://placehold.co/600x800?text=No+Images+for+this+color';
+                return;
+            }
+
+            let activeBtn = visibleBtns.find(b => b.getAttribute('data-src') === mainImg.getAttribute('src'));
+
+            if (!activeBtn) {
+                activeBtn = visibleBtns.find(b => b.dataset.isMain === 'true') || visibleBtns[0];
+            }
+
             if (activeBtn) {
-                activeBtn.classList.remove('border-transparent');
-                activeBtn.classList.add('border-brand-500');
                 mainImg.src = activeBtn.getAttribute('data-src');
+                activeBtn.classList.add('border-brand-500');
+                visibleBtns.forEach(b => {
+                    if (b !== activeBtn) b.classList.add('border-transparent');
+                });
             }
         }
 

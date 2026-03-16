@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from django.views.decorators.cache import never_cache
 from functools import wraps
 from .models import Buyer, CartItem, Order, OrderItem, WishlistItem
-from admin_panel.models import ProductVariant, Blogs, Contact
+from admin_panel.models import ProductVariant, ProductImage, Blogs, Contact
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import F, OuterRef, Subquery, Sum, Q, Max
@@ -24,6 +24,47 @@ def buyer_login_required(view_func):
             return redirect("by_login")
         return view_func(request, *args, **kwargs)
     return wrapper
+
+def _safe_image_url(image_field):
+    try:
+        if not image_field:
+            return None
+        name = getattr(image_field, "name", None)
+        storage = getattr(image_field, "storage", None)
+        if not name or not storage:
+            return None
+        if not storage.exists(name):
+            return None
+        return image_field.url
+    except Exception:
+        return None
+
+def _resolve_shop_image_url(product, variant=None):
+    image_url = _safe_image_url(getattr(product, "image", None))
+    if image_url:
+        return image_url
+    if variant is not None:
+        image_url = _safe_image_url(getattr(variant, "image", None))
+        if image_url:
+            return image_url
+    try:
+        other_v = ProductVariant.objects.filter(
+            product=product,
+            image__isnull=False
+        ).exclude(image='').order_by('-id').first()
+        image_url = _safe_image_url(getattr(other_v, "image", None)) if other_v else None
+        if image_url:
+            return image_url
+    except Exception:
+        pass
+    try:
+        product_img = ProductImage.objects.filter(product=product).order_by("id").first()
+        image_url = _safe_image_url(getattr(product_img, "image", None)) if product_img else None
+        if image_url:
+            return image_url
+    except Exception:
+        pass
+    return None
 
 def by_register(request):
     if request.method == "POST":
@@ -139,7 +180,7 @@ def by_product(request, variant_id):
             'size_id': v.size.id,
             'stock': v.stock,
             'price': float(v.price),
-            'image_url': getattr(v.image, 'url', '') if getattr(v, 'image', None) else '',
+            'image_url': _safe_image_url(getattr(v, 'image', None)) or '',
         }
         size_map.setdefault(v.color.id, {}).setdefault(v.size.id, {'id': v.id, 'stock': v.stock})
 
@@ -156,7 +197,6 @@ def by_product(request, variant_id):
     all_cids = list(visible_colors.keys())
     
     seen_urls = {} # url -> entry in gallery_annotated
-    url_to_name = {} # url -> file name for matching
 
     def add_to_annotated(url, color_ids, is_main=False):
         if not url: return
@@ -178,6 +218,7 @@ def by_product(request, variant_id):
             existing_cids = set(existing['color_ids'])
             existing_cids.update(color_ids)
             existing['color_ids'] = list(existing_cids)
+            # If the new addition is marked as main, or if it was already main, it stays main.
             if is_main: existing['is_main'] = True
         else:
             entry = {
@@ -188,8 +229,31 @@ def by_product(request, variant_id):
             gallery_annotated.append(entry)
             seen_urls[url] = entry
 
-    # 1. Main Product Image (Default)
-    if product.image:
+    # 1. Variant specific images (Color-based) - Added FIRST to prioritize over generic ones
+    for v in variants:
+        cid = v.color.id
+        if cid not in all_cids: continue
+        
+        # Variant main image - marked as IS_MAIN for this specific color
+        try:
+            variant_main_url = _safe_image_url(getattr(v, 'image', None))
+            if variant_main_url:
+                add_to_annotated(variant_main_url, [cid], is_main=True)
+        except Exception:
+            pass
+        
+        # Variant gallery images
+        for vi in VariantImage.objects.filter(variant=v):
+            try:
+                variant_gallery_url = _safe_image_url(getattr(vi, 'image', None))
+                if variant_gallery_url:
+                    add_to_annotated(variant_gallery_url, [cid])
+            except Exception:
+                pass
+
+    # 2. Main Product Image (Default)
+    product_main_url = _safe_image_url(getattr(product, 'image', None))
+    if product_main_url:
         # Check if this main image belongs to a specific variant color
         matched_color_ids = []
         p_img_name = product.image.name.split('/')[-1]
@@ -204,36 +268,18 @@ def by_product(request, variant_id):
         # Otherwise, it's a generic product image, show for all.
         target_cids = list(set(matched_color_ids)) if matched_color_ids else all_cids
         if target_cids:
-            add_to_annotated(product.image.url, target_cids, is_main=True)
+            # Only mark as main if no variant-specific image was already added as main for these colors
+            # Actually, add_to_annotated handles the is_main flag.
+            add_to_annotated(product_main_url, target_cids, is_main=True)
 
-    # 2. Extra Product generic images - shown for all colors
+    # 3. Extra Product generic images - shown for all colors
     for img in gallery:
         try:
-            add_to_annotated(img.image.url, all_cids)
+            product_gallery_url = _safe_image_url(getattr(img, 'image', None))
+            if product_gallery_url:
+                add_to_annotated(product_gallery_url, all_cids)
         except Exception:
             pass
-
-    # 3. Variant specific images (Color-based)
-    for v in variants:
-        cid = v.color.id
-        if cid not in all_cids: continue
-        
-        # Variant main image
-        if v.image:
-            try:
-                # If this image is already the main product image, don't re-add it 
-                # to all colors if it's already mapped correctly.
-                add_to_annotated(v.image.url, [cid])
-            except Exception:
-                pass
-        
-        # Variant gallery images
-        for vi in VariantImage.objects.filter(variant=v):
-            if vi.image:
-                try:
-                    add_to_annotated(vi.image.url, [cid])
-                except Exception:
-                    pass
     
     # Optional backward-compatible dictionary depending on template structure
     images_by_color = {cid: [] for cid in visible_colors.keys()}
@@ -253,6 +299,10 @@ def by_product(request, variant_id):
             discount_percent = int(round((float(product.base_price) - float(variant.price)) / float(product.base_price) * 100))
     except Exception:
         discount_percent = None
+    initial_main_image_url = product_main_url or _safe_image_url(getattr(variant, 'image', None))
+    if not initial_main_image_url and gallery_annotated:
+        color_matched = next((g for g in gallery_annotated if variant.color.id in g.get('color_ids', [])), None)
+        initial_main_image_url = (color_matched or gallery_annotated[0]).get('url')
     context = {
         'variant': variant,
         'product': product,
@@ -265,6 +315,7 @@ def by_product(request, variant_id):
         'size_map': size_map,
         'images_by_color': images_by_color,
         'gallery_annotated': gallery_annotated,
+        'initial_main_image_url': initial_main_image_url,
     }
     return render(request, 'by_product.html', context)
 
@@ -390,6 +441,9 @@ def by_shop(request):
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
+    for item in page_obj:
+        item.calculated_image_url = _resolve_shop_image_url(item.product, item)
+
     return render(request, 'by_shop.html', {
         'page_obj': page_obj,
         'paginator': paginator,
@@ -458,11 +512,16 @@ def by_shop_api(request):
     items = []
     for v in page_obj:
         p = v.product
-        img = None
-        try:
-            img = p.image.url if getattr(p, 'image', None) else None
-        except Exception:
-            img = None
+        img = _resolve_shop_image_url(p, v)
+        
+        # Get all available sizes for this product
+        available_sizes = list(
+            ProductVariant.objects.filter(
+                product=p, 
+                stock__gt=0
+            ).values_list('size__name', flat=True).distinct().order_by('size__name')
+        )
+        
         items.append({
             "id": v.id,
             "price": float(v.price),
@@ -471,6 +530,7 @@ def by_shop_api(request):
             "image_url": img,
             "is_best": v.id in best_ids,
             "in_wishlist": v.id in wishlist_ids,
+            "available_sizes": available_sizes,
         })
     return JsonResponse({
         "items": items,
