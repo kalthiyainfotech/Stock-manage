@@ -132,16 +132,10 @@
                                     <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                                         Variants (Color, Size, Price, Stock)
                                     </h3>
-                                    <div class="flex gap-2">
-                                        <button type="button" id="addSameColorMultipleSizesBtn"
-                                            class="text-xs px-3 py-1.5 rounded-md border border-sky-300 bg-sky-50 hover:bg-sky-100 font-medium text-sky-700 flex items-center gap-1 transition">
-                                            <i class="fa-solid fa-layer-group"></i> Add Same Color, Multiple Sizes
-                                        </button>
-                                        <button type="button" id="addVariantRowBtn"
-                                            class="text-xs px-3 py-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 font-medium text-slate-700 flex items-center gap-1 transition">
-                                            <i class="fa-solid fa-plus"></i> Add Variant
-                                        </button>
-                                    </div>
+                                    <button type="button" id="addMainVariantBtn"
+                                        class="text-xs px-3 py-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 font-medium text-slate-700 flex items-center gap-1 transition">
+                                        <i class="fa-solid fa-plus"></i> Add Main Variant
+                                    </button>
                                 </div>
                                 <div id="variantRows" class="space-y-3">
                                     <!-- Variant rows will be appended here via JS -->
@@ -604,7 +598,7 @@ const specsContainer = document.getElementById('specsContainer');
 const addSpecRowBtn = document.getElementById('addSpecRowBtn');
 const colorPicker = document.getElementById('colorPicker');
 const variantRows = document.getElementById('variantRows');
-const addVariantRowBtn = document.getElementById('addVariantRowBtn');
+const addMainVariantBtn = document.getElementById('addMainVariantBtn');
 
 function addSpecRow(name = '', value = '') {
     const row = document.createElement('div');
@@ -643,350 +637,174 @@ addSpecRowBtn.addEventListener('click', function() {
     addSpecRow();
 });
 
-let variantRowCounter = 0;
+let mainVariantCounter = 0;
+let subVariantCounter = 0;
 
-function addVariantRow(initial = {}) {
-    const row = document.createElement('div');
-    row.className = 'variant-row relative p-5 mb-8 border border-slate-200 rounded-2xl bg-white shadow-sm transition-all hover:shadow-md hover:border-slate-300';
-    
-    const colorVal = (initial.color || '').replace(/"/g, '&quot;');
-    const sizeVal = (initial.size || '').replace(/"/g, '&quot;');
-    const priceVal = (initial.price || '');
-    const stockVal = (initial.stock || '');
-    const variantImageUrl = (initial.variantImageUrl || '');
-    const variantGalleryUrls = (initial.variantGalleryUrls || '');
-    const idx = variantRowCounter++;
-    
-    let galleryHtml = '';
-    if (variantGalleryUrls) {
-        const urls = variantGalleryUrls.split(',');
-        urls.forEach((url, i) => {
-            if (url) {
-                galleryHtml += `
-                    <div class="relative inline-block existing-variant-gallery-img group">
-                        <img src="${url}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md transition-transform group-hover:scale-105">
-                        <button type="button" class="remove-existing-gallery-img absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform scale-0 group-hover:scale-100">
-                            <i class="fa-solid fa-xmark text-[10px]"></i>
-                        </button>
-                    </div>
-                `;
-            }
-        });
-    }
-
-    row.innerHTML = `
-        <input type="hidden" name="variant_index" value="${idx}">
-        
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-            <div class="flex items-center gap-3">
-                <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
-                    V${idx + 1}
-                </div>
-                <div>
-                    <h4 class="text-sm font-bold text-slate-900 tracking-tight">Variant Configuration</h4>
-                    <p class="text-[10px] text-slate-400 font-medium">Define specifications and unique media</p>
-                </div>
-            </div>
-            <button type="button" class="removeVariantRowBtn group flex items-center gap-2 px-3 py-1.5 rounded-lg border border-rose-100 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all duration-300">
-                <i class="fa-solid fa-trash-can text-[10px]"></i>
-                <span class="text-[10px] font-bold uppercase tracking-wider">Remove Variant</span>
-            </button>
-        </div>
-
-        <!-- Inputs Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="space-y-2">
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1">Variant Color</label>
-                <div class="flex items-center gap-3 p-2 rounded-xl border border-slate-200 bg-slate-50/30">
-                    <input type="color" class="h-9 w-9 rounded-lg border-0 cursor-pointer variant-color-picker bg-transparent" value="${/^#([A-Fa-f0-9]{6})$/.test(colorVal) ? colorVal : '#000000'}">
-                    <input type="text" name="variant_color" value="${/^#([A-Fa-f0-9]{6})$/.test(colorVal) ? colorVal : '#000000'}" 
-                        class="variant-color-hidden flex-1 bg-transparent border-0 text-xs font-bold text-slate-700 focus:ring-0 uppercase">
-                </div>
-            </div>
-            
-            <div class="space-y-2">
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1">Storage / Size</label>
-                <input type="text" name="variant_size" placeholder="e.g., 128GB" value="${sizeVal}"
-                    class="w-full h-11 rounded-xl border-slate-200 bg-slate-50/30 px-4 text-xs font-bold text-slate-700 focus:border-slate-900 focus:ring-0 transition-all placeholder:font-normal">
-            </div>
-
-            <div class="space-y-2">
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1">Selling Price</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
-                    <input type="number" name="variant_price" placeholder="0.00" step="0.01" value="${priceVal}"
-                        class="w-full h-11 rounded-xl border-slate-200 bg-slate-50/30 pl-8 pr-4 text-xs font-bold text-slate-700 focus:border-slate-900 focus:ring-0 transition-all">
-                </div>
-            </div>
-
-            <div class="space-y-2">
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1">Stock Level</label>
-                <input type="number" name="variant_stock" placeholder="0" value="${stockVal}"
-                    class="w-full h-11 rounded-xl border-slate-200 bg-slate-50/30 px-4 text-xs font-bold text-slate-700 focus:border-slate-900 focus:ring-0 transition-all">
-            </div>
-        </div>
-
-        <!-- Media Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Main Image Column -->
-            <div class="lg:col-span-1 space-y-3">
-                <div class="flex items-center justify-between px-1">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Main Display Image</label>
-                </div>
-                <div class="relative min-h-[140px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-4 flex flex-col items-center justify-center group transition-colors hover:bg-slate-50 hover:border-slate-300">
-                    <div class="variant-main-preview flex flex-wrap gap-2 mb-2 relative z-20">
-                        ${variantImageUrl ? `
-                            <div class="relative group/img">
-                                <img src="${variantImageUrl}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">
-                                <button type="button" class="remove-main-preview absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110 z-30">
-                                    <i class="fa-solid fa-xmark text-[10px]"></i>
-                                </button>
-                            </div>
-                        ` : `
-                            <div class="flex flex-col items-center text-slate-400 py-2">
-                                <i class="fa-solid fa-cloud-arrow-up text-2xl mb-2 opacity-50"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-tight">Primary Shot</span>
-                            </div>
-                        `}
-                    </div>
-                    <input type="file" name="variant_image_${idx}" accept="image/*"
-                        class="variant-main-input absolute inset-0 opacity-0 cursor-pointer z-10">
-                    <div class="text-[9px] font-bold text-slate-400 text-center pointer-events-none relative z-20">Click or drag to upload</div>
-                </div>
-            </div>
-
-            <!-- Gallery Column -->
-            <div class="lg:col-span-2 space-y-3">
-                <div class="flex items-center justify-between px-1">
-                    <label class="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Additional Gallery Shots</label>
-                    <span class="text-[10px] font-bold text-brand-500 bg-brand-50 px-2 py-0.5 rounded-full">Multi-select enabled</span>
-                </div>
-                <div class="relative min-h-[140px] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-4 flex flex-col items-center justify-center group transition-colors hover:bg-slate-50 hover:border-slate-300">
-                    <div class="variant-gallery-preview flex flex-wrap justify-center gap-3 mb-2 relative z-20">
-                        ${galleryHtml || `
-                            <div class="flex flex-col items-center text-slate-400 py-2">
-                                <i class="fa-solid fa-images text-2xl mb-2 opacity-50"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-tight">Detail Angles</span>
-                            </div>
-                        `}
-                    </div>
-                    <input type="file" name="variant_gallery_${idx}" multiple accept="image/*"
-                        class="variant-gallery-input absolute inset-0 opacity-0 cursor-pointer z-10">
-                    <div class="text-[9px] font-bold text-slate-400 text-center pointer-events-none relative z-20">Click to select multiple detailed images</div>
-                </div>
-            </div>
-        </div>
-    `;
-    variantRows.appendChild(row);
-
-    // Event listeners for image previews within the new row
-    const mainInput = row.querySelector('.variant-main-input');
-    const mainPreview = row.querySelector('.variant-main-preview');
-    const galleryInput = row.querySelector('.variant-gallery-input');
-    const galleryPreview = row.querySelector('.variant-gallery-preview');
-
-    // Persistent DataTransfer for this variant's gallery
+function bindMediaPreview(block) {
+    const mainInput = block.querySelector('.main-variant-image-input');
+    const mainPreview = block.querySelector('.main-variant-image-preview');
+    const galleryInput = block.querySelector('.main-variant-gallery-input');
+    const galleryPreview = block.querySelector('.main-variant-gallery-preview');
     const galleryDT = new DataTransfer();
 
-    mainInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                mainPreview.innerHTML = `
-                    <div class="relative group/img">
-                        <img src="${e.target.result}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">
-                        <button type="button" class="remove-main-preview absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110 z-30">
-                            <i class="fa-solid fa-xmark text-[10px]"></i>
-                        </button>
-                    </div>
-                `;
-            }
-            reader.readAsDataURL(this.files[0]);
-        }
+    mainInput.addEventListener('change', function () {
+        if (!this.files || !this.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            mainPreview.innerHTML = `<img src="${e.target.result}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">`;
+        };
+        reader.readAsDataURL(this.files[0]);
     });
 
-    galleryInput.addEventListener('change', function() {
-        if (this.files) {
-            // Append new files to the existing DataTransfer object
-            Array.from(this.files).forEach(file => {
-                galleryDT.items.add(file);
-            });
-            
-            // Sync the input with our persistent DataTransfer
-            galleryInput.files = galleryDT.files;
-            
-            renderGalleryPreviews();
-        }
-    });
-
-    function renderGalleryPreviews() {
-        // 1. Remove all new previews and the plus box, but keep existing ones
-        const news = galleryPreview.querySelectorAll('.new-preview-item');
-        news.forEach(n => n.remove());
-        
-        const plusBoxes = galleryPreview.querySelectorAll('.add-more-gallery-box');
-        plusBoxes.forEach(p => p.remove());
-        
-        // 2. Remove empty state placeholder if it exists
-        const emptyState = galleryPreview.querySelector('.empty-gallery-state');
-        if (emptyState) emptyState.remove();
-
-        // 3. Render new file previews
+    function renderGallery() {
+        galleryPreview.innerHTML = '';
         Array.from(galleryDT.files).forEach((file, index) => {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 const div = document.createElement('div');
-                div.className = 'relative inline-block group new-preview-item';
-                div.dataset.index = index;
+                div.className = 'relative inline-block';
                 div.innerHTML = `
-                    <img src="${e.target.result}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md transition-transform hover:scale-105">
-                    <button type="button" class="remove-new-gallery-preview absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition transform hover:scale-110 z-30">
+                    <img src="${e.target.result}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md">
+                    <button type="button" data-remove-idx="${index}" class="remove-gallery-item absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600">
                         <i class="fa-solid fa-xmark text-[10px]"></i>
                     </button>
                 `;
                 galleryPreview.appendChild(div);
-            }
+            };
             reader.readAsDataURL(file);
         });
-
-        // 4. Always add the "Plus" box at the end
-        const addMoreBox = document.createElement('div');
-        addMoreBox.className = 'add-more-gallery-box flex h-16 w-16 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-slate-400 hover:text-slate-500 transition-colors cursor-pointer';
-        addMoreBox.innerHTML = '<i class="fa-solid fa-plus text-lg pointer-events-none"></i>';
-        addMoreBox.addEventListener('click', (e) => {
-            e.stopPropagation();
-            galleryInput.click();
-        });
-        galleryPreview.appendChild(addMoreBox);
     }
 
-    // Initialize the gallery view
-    renderGalleryPreviews();
-
-    // Color picker sync
-    const picker = row.querySelector('.variant-color-picker');
-    const hexInput = row.querySelector('.variant-color-hidden');
-    picker.addEventListener('input', (e) => {
-        hexInput.value = e.target.value;
-    });
-    hexInput.addEventListener('input', (e) => {
-        const val = e.target.value;
-        if (/^#([A-Fa-f0-9]{6})$/.test(val)) {
-            picker.value = val;
-        }
+    galleryInput.addEventListener('change', function () {
+        if (!this.files) return;
+        Array.from(this.files).forEach(f => galleryDT.items.add(f));
+        galleryInput.files = galleryDT.files;
+        renderGallery();
     });
 
-    // Handle internal preview deletions
-    row.addEventListener('click', function(e) {
-        // 1. Remove Main Image Preview
-        if (e.target.closest('.remove-main-preview')) {
-            mainPreview.innerHTML = `
-                <div class="flex flex-col items-center text-slate-400 py-2">
-                    <i class="fa-solid fa-cloud-arrow-up text-2xl mb-2 opacity-50"></i>
-                    <span class="text-[10px] font-bold uppercase tracking-tight">Primary Shot</span>
+    block.addEventListener('click', function (e) {
+        const removeBtn = e.target.closest('.remove-gallery-item');
+        if (!removeBtn) return;
+        const removeIdx = parseInt(removeBtn.dataset.removeIdx);
+        const next = new DataTransfer();
+        Array.from(galleryDT.files).forEach((file, i) => {
+            if (i !== removeIdx) next.items.add(file);
+        });
+        galleryDT.items.clear();
+        Array.from(next.files).forEach(f => galleryDT.items.add(f));
+        galleryInput.files = galleryDT.files;
+        renderGallery();
+    });
+}
+
+function addSubVariantRow(block, initial = {}) {
+    const colorInput = block.querySelector('.main-variant-color-input');
+    const mediaIndex = block.dataset.mediaIndex;
+    const row = document.createElement('div');
+    row.className = 'sub-variant-row grid grid-cols-1 sm:grid-cols-5 gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/40';
+    row.innerHTML = `
+        <input type="hidden" name="variant_index" value="${subVariantCounter++}">
+        <input type="hidden" name="variant_media_index" value="${mediaIndex}">
+        <input type="hidden" name="variant_color" value="${colorInput.value}" class="sub-variant-color-hidden">
+        <input type="text" name="variant_size" placeholder="Size (M/L/XL...)" value="${(initial.size || '').replace(/"/g, '&quot;')}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+        <input type="number" step="0.01" name="variant_price" placeholder="Price" value="${initial.price || ''}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+        <input type="number" name="variant_stock" placeholder="Stock" value="${initial.stock || ''}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+        <input type="text" name="variant_sku" placeholder="SKU (optional)" value="${(initial.sku || '').replace(/"/g, '&quot;')}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
+        <button type="button" class="removeSubVariantBtn rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-600 hover:text-white">Remove</button>
+    `;
+    block.querySelector('.sub-variant-rows').appendChild(row);
+}
+
+function syncSubColors(block) {
+    const colorVal = block.querySelector('.main-variant-color-input').value || '#000000';
+    block.querySelectorAll('.sub-variant-color-hidden').forEach(input => {
+        input.value = colorVal;
+    });
+}
+
+function addMainVariantBlock(initial = {}) {
+    const mediaIndex = mainVariantCounter++;
+    const colorValue = /^#([A-Fa-f0-9]{6})$/.test(initial.color || '') ? initial.color : '#000000';
+    const block = document.createElement('div');
+    block.className = 'main-variant-block p-4 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4';
+    block.dataset.mediaIndex = mediaIndex;
+    block.innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+                <h4 class="text-sm font-bold text-slate-900">Main Variant (Color)</h4>
+                <p class="text-xs text-slate-500">Add sub variants like size, price, stock and SKU</p>
+            </div>
+            <button type="button" class="removeMainVariantBtn rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-600 hover:text-white">Remove Color</button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-600">Main Variant Type</label>
+                <input type="text" value="Color" readonly class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700">
+            </div>
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-600">Color Value</label>
+                <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1">
+                    <input type="color" class="main-variant-color-picker h-8 w-10 rounded border-0 bg-transparent" value="${colorValue}">
+                    <input type="text" class="main-variant-color-input w-full bg-transparent px-2 py-1 text-sm font-semibold text-slate-700 focus:outline-none" value="${colorValue}">
                 </div>
-            `;
-            mainInput.value = '';
-            return;
-        }
+            </div>
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-600">Main Image</label>
+                <input type="file" name="variant_image_${mediaIndex}" accept="image/*" class="main-variant-image-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs">
+                <div class="main-variant-image-preview">${initial.variantImageUrl ? `<img src="${initial.variantImageUrl}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">` : ''}</div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <label class="text-xs font-semibold text-slate-600">Gallery Images</label>
+            <input type="file" name="variant_gallery_${mediaIndex}" multiple accept="image/*" class="main-variant-gallery-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs">
+            <div class="main-variant-gallery-preview flex flex-wrap gap-2"></div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
+            <div class="flex items-center justify-between mb-3">
+                <h5 class="text-xs font-semibold text-slate-700 uppercase tracking-wide">Sub Variants (Size)</h5>
+                <button type="button" class="addSubVariantBtn rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-700 hover:text-white">Add Sub Variant</button>
+            </div>
+            <div class="sub-variant-rows space-y-2"></div>
+        </div>
+    `;
+    variantRows.appendChild(block);
 
-        // 2. Remove Existing Gallery Image
-        if (e.target.closest('.remove-existing-gallery-img')) {
-            const container = e.target.closest('.existing-variant-gallery-img');
-            container.remove();
-            if (galleryPreview.children.length === 0) {
-                galleryPreview.innerHTML = `
-                    <div class="empty-gallery-state flex flex-col items-center text-slate-400 py-2">
-                        <i class="fa-solid fa-images text-2xl mb-2 opacity-50"></i>
-                        <span class="text-[10px] font-bold uppercase tracking-tight">Detail Angles</span>
-                    </div>
-                `;
-            }
-            return;
-        }
+    const picker = block.querySelector('.main-variant-color-picker');
+    const input = block.querySelector('.main-variant-color-input');
+    picker.addEventListener('input', () => {
+        input.value = picker.value;
+        syncSubColors(block);
+    });
+    input.addEventListener('input', () => {
+        if (/^#([A-Fa-f0-9]{6})$/.test(input.value)) picker.value = input.value;
+        syncSubColors(block);
+    });
 
-        // 3. Remove New Gallery Image Preview
-        const removeNewBtn = e.target.closest('.remove-new-gallery-preview');
-        if (removeNewBtn) {
-            const item = removeNewBtn.closest('.new-preview-item');
-            const indexToRemove = parseInt(item.dataset.index);
-            
-            // Reconstruct DataTransfer without the removed file
-            const newDT = new DataTransfer();
-            Array.from(galleryDT.files).forEach((file, i) => {
-                if (i !== indexToRemove) {
-                    newDT.items.add(file);
-                }
-            });
-            
-            // Update our persistent DataTransfer
-            // Note: We can't clear items easily, so we just replace the whole reference if possible, 
-            // but DataTransfer objects are usually managed via clear/add.
-            // A better way is to just keep the new one.
-            
-            // Clear current DT and re-add
-            galleryDT.items.clear();
-            Array.from(newDT.files).forEach(f => galleryDT.items.add(f));
-            
-            // Sync input
-            galleryInput.files = galleryDT.files;
-            
-            // Re-render
-            renderGalleryPreviews();
-            return;
-        }
+    block.querySelector('.addSubVariantBtn').addEventListener('click', () => addSubVariantRow(block));
+    block.querySelector('.removeMainVariantBtn').addEventListener('click', () => block.remove());
+    bindMediaPreview(block);
+
+    addSubVariantRow(block, initial);
+    syncSubColors(block);
+}
+
+if (addMainVariantBtn && variantRows) {
+    addMainVariantBtn.addEventListener('click', function () {
+        addMainVariantBlock();
     });
 }
 
 if (variantRows) {
     variantRows.addEventListener('click', function (e) {
-        const btn = e.target.closest('.removeVariantRowBtn');
-        if (btn) {
-            const row = btn.closest('.variant-row');
-            if (row) row.remove();
-            return;
+        const subRemoveBtn = e.target.closest('.removeSubVariantBtn');
+        if (!subRemoveBtn) return;
+        const subRow = subRemoveBtn.closest('.sub-variant-row');
+        const block = subRemoveBtn.closest('.main-variant-block');
+        if (subRow) subRow.remove();
+        if (block && block.querySelectorAll('.sub-variant-row').length === 0) {
+            addSubVariantRow(block);
+            syncSubColors(block);
         }
-    });
-}
-
-if (variantRows) {
-    variantRows.addEventListener('input', function (e) {
-        const picker = e.target.closest('.variant-color-picker');
-        const hidden = e.target.closest('.variant-color-hidden');
-        if (picker) {
-            const row = picker.closest('.variant-row');
-            const hid = row.querySelector('.variant-color-hidden');
-            if (hid) hid.value = picker.value;
-        }
-    });
-}
-
-if (addVariantRowBtn && variantRows) {
-    addVariantRowBtn.addEventListener('click', function () {
-        addVariantRow();
-    });
-}
-
-// Add Same Color, Multiple Sizes functionality
-const addSameColorMultipleSizesBtn = document.getElementById('addSameColorMultipleSizesBtn');
-if (addSameColorMultipleSizesBtn && variantRows) {
-    addSameColorMultipleSizesBtn.addEventListener('click', function() {
-        // Add 5 variants with same color but different sizes (S, M, L, XL, XXL)
-        const commonColor = '#000000';
-        const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-        
-        sizes.forEach((size, index) => {
-            addVariantRow({
-                color: commonColor,
-                size: size,
-                price: '',
-                stock: ''
-            });
-        });
-        
-        // Hide the "Add Variant" button since we've added multiple sizes
-        if (addVariantRowBtn) addVariantRowBtn.classList.add('hidden');
     });
 }
 
@@ -1027,9 +845,9 @@ document.getElementById('openinventoryModal').onclick = () => {
     resetDropdowns();
     resetSpecs();
     if (variantRows) {
+        mainVariantCounter = 0;
+        subVariantCounter = 0;
         variantRows.innerHTML = '';
-        addVariantRow();
-        if (addVariantRowBtn) addVariantRowBtn.classList.remove('hidden');
     }
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
@@ -1491,8 +1309,10 @@ async function openEditModal(editUrl, category, subcategory, brand, product, des
     
     inventoryForm.description.value = description;
     if (variantRows) {
+        mainVariantCounter = 0;
+        subVariantCounter = 0;
         variantRows.innerHTML = '';
-        addVariantRow({ 
+        addMainVariantBlock({ 
             color: color, 
             size: size, 
             price: price, 
@@ -1500,9 +1320,7 @@ async function openEditModal(editUrl, category, subcategory, brand, product, des
             variantImageUrl: variantImageUrl,
             variantGalleryUrls: variantGalleryUrls
         });
-        const firstRemoveBtn = variantRows.querySelector('.removeVariantRowBtn');
-        if (firstRemoveBtn) firstRemoveBtn.classList.add('hidden');
-        if (addVariantRowBtn) addVariantRowBtn.classList.add('hidden'); // Cannot add multiple in edit mode
+        if (addMainVariantBtn) addMainVariantBtn.classList.remove('hidden');
     }
 
     resetSpecs();

@@ -528,6 +528,8 @@ def add_inventory(request):
         sizes = request.POST.getlist('variant_size')
         prices = request.POST.getlist('variant_price')
         stocks = request.POST.getlist('variant_stock')
+        skus = request.POST.getlist('variant_sku')
+        media_indexes = request.POST.getlist('variant_media_index')
 
         spec_names = request.POST.getlist('spec_name')
         spec_values = request.POST.getlist('spec_value')
@@ -535,17 +537,22 @@ def add_inventory(request):
         layer = get_channel_layer()
 
         if colors:
+            color_variants = {}
+            color_gallery_source = {}
             for i in range(len(colors)):
                 idx = indexes[i] if i < len(indexes) else i
+                media_idx = media_indexes[i] if i < len(media_indexes) and media_indexes[i] else idx
                 color_name = colors[i].strip() or 'Default'
+                color_key = color_name.strip().lower()
                 size_name = sizes[i].strip() if i < len(sizes) else 'Default'
                 size_name = size_name or 'Default'
                 price_val = prices[i] if i < len(prices) and prices[i] else 0
                 stock_val = stocks[i] if i < len(stocks) and stocks[i] else 0
+                input_sku = skus[i].strip() if i < len(skus) and skus[i] else ''
 
                 color, _ = Color.objects.get_or_create(name=color_name)
                 size, _ = Size.objects.get_or_create(name=size_name)
-                sku = f"{product.id}-{color.id}-{size.id}"
+                sku = input_sku or f"{product.id}-{color.id}-{size.id}"
 
                 variant, created = ProductVariant.objects.get_or_create(
                     product=product,
@@ -560,9 +567,10 @@ def add_inventory(request):
                 if not created:
                     variant.price = price_val
                     variant.stock = stock_val
+                    variant.sku = sku
                     variant.save()
                     
-                v_image = request.FILES.get(f'variant_image_{idx}')
+                v_image = request.FILES.get(f'variant_image_{media_idx}')
                 if v_image:
                     variant.image = v_image
                     variant.save()
@@ -571,10 +579,15 @@ def add_inventory(request):
                         product.image = v_image
                         product.save()
                     
-                v_galleries = request.FILES.getlist(f'variant_gallery_{idx}')
+                v_galleries = request.FILES.getlist(f'variant_gallery_{media_idx}')
                 for gi in v_galleries:
                     if gi:
                         VariantImage.objects.create(variant=variant, image=gi)
+                        color_gallery_source[color_key] = variant.id
+
+                if color_key not in color_variants:
+                    color_variants[color_key] = []
+                color_variants[color_key].append(variant)
 
                 VariantSpec.objects.filter(variant=variant).delete()
                 for name, value in zip(spec_names, spec_values):
@@ -596,6 +609,22 @@ def add_inventory(request):
                         "type": "inventory_added",
                         "inventory": payload,
                     })
+            for color_key, variants_in_color in color_variants.items():
+                source_variant_with_image = next((v for v in variants_in_color if v.image), None)
+                if source_variant_with_image:
+                    for target_variant in variants_in_color:
+                        if not target_variant.image:
+                            target_variant.image = source_variant_with_image.image.name
+                            target_variant.save(update_fields=['image'])
+                source_variant_id = color_gallery_source.get(color_key)
+                if source_variant_id:
+                    source_gallery = list(VariantImage.objects.filter(variant_id=source_variant_id))
+                    if source_gallery:
+                        for target_variant in variants_in_color:
+                            if VariantImage.objects.filter(variant=target_variant).exists():
+                                continue
+                            for source_img in source_gallery:
+                                VariantImage.objects.create(variant=target_variant, image=source_img.image.name)
         else:
             # Fallback for single variant
             color_name = request.POST.get('color', '').strip() or 'Default'
