@@ -200,16 +200,16 @@ def by_product(request, variant_id):
 
     def add_to_annotated(url, color_ids, is_main=False):
         if not url: return
-        # Try to find if this file name already exists to avoid duplicates with different URL formats
-        file_name = url.split('/')[-1]
         
-        existing = None
-        if url in seen_urls:
-            existing = seen_urls[url]
-        else:
-            # Fallback check by file name
-            for seen_url, entry in seen_urls.items():
-                if seen_url.split('/')[-1] == file_name:
+        # Consistent URL for keying
+        url_key = url.strip()
+        file_name = url_key.split('/')[-1].split('?')[0] # Remove query params if any
+        
+        existing = seen_urls.get(url_key)
+        if not existing:
+            # Fallback: check if another entry has the same filename (different URL format/relative vs absolute)
+            for key, entry in seen_urls.items():
+                if key.split('/')[-1].split('?')[0] == file_name:
                     existing = entry
                     break
 
@@ -218,8 +218,8 @@ def by_product(request, variant_id):
             existing_cids = set(existing['color_ids'])
             existing_cids.update(color_ids)
             existing['color_ids'] = list(existing_cids)
-            # If the new addition is marked as main, or if it was already main, it stays main.
-            if is_main: existing['is_main'] = True
+            if is_main: 
+                existing['is_main'] = True
         else:
             entry = {
                 'url': url,
@@ -227,29 +227,24 @@ def by_product(request, variant_id):
                 'is_main': is_main
             }
             gallery_annotated.append(entry)
-            seen_urls[url] = entry
+            seen_urls[url_key] = entry
 
-    # 1. Variant specific images (Color-based) - Added FIRST to prioritize over generic ones
+    # 1. Variant specific images (Color-based)
+    variant_processed = set()
     for v in variants:
         cid = v.color.id
         if cid not in all_cids: continue
         
-        # Variant main image - marked as IS_MAIN for this specific color
-        try:
-            variant_main_url = _safe_image_url(getattr(v, 'image', None))
-            if variant_main_url:
-                add_to_annotated(variant_main_url, [cid], is_main=True)
-        except Exception:
-            pass
+        # Group by (color, image_path) to avoid duplicate calls for same physical file
+        v_main_url = _safe_image_url(getattr(v, 'image', None))
+        if v_main_url:
+            add_to_annotated(v_main_url, [cid], is_main=True)
         
-        # Variant gallery images
-        for vi in VariantImage.objects.filter(variant=v):
-            try:
-                variant_gallery_url = _safe_image_url(getattr(vi, 'image', None))
-                if variant_gallery_url:
-                    add_to_annotated(variant_gallery_url, [cid])
-            except Exception:
-                pass
+        # For gallery images, we also group by variant set or just rely on add_to_annotated merging
+        for vi in v.gallery_images.all():  # Use related_name 'gallery_images'
+            v_gallery_url = _safe_image_url(getattr(vi, 'image', None))
+            if v_gallery_url:
+                add_to_annotated(v_gallery_url, [cid])
 
     # 2. Main Product Image (Default)
     product_main_url = _safe_image_url(getattr(product, 'image', None))

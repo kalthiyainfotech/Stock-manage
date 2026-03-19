@@ -441,4 +441,70 @@
             setTimeout(() => { toast.classList.add('translate-y-20'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
     </script>
+    <!-- Footer Spacer -->
+    <div class="h-20"></div>
+
+    <script>
+        // WebSocket for Live Updates
+        const variantId = "{{ variant.id }}";
+        const productId = "{{ product.id }}";
+        
+        const socketProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const socketUrl = `${socketProtocol}//${window.location.host}/ws/inventory/`;
+        
+        let inventorySocket = null;
+
+        function connectSocket() {
+            inventorySocket = new WebSocket(socketUrl);
+
+            inventorySocket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                if (data.type === 'inventory_updated' || data.type === 'inventory_deleted') {
+                    // If the updated item is this specific variant, or part of this product, refresh
+                    // Note: We refresh to ensure all complex gallery/price/stock logic from server is re-applied correctly.
+                    if (String(data.id) === String(variantId) || (data.inventory && String(data.inventory.product_id) === String(productId))) {
+                    const inv = data.inventory;
+                    const affected = (inv && String(inv.product_id) === String(productId)) || (data.type === 'inventory_deleted' && String(data.id) === String(variantId));
+                    if (!affected) return;
+                    if (data.type === 'inventory_deleted' || (inv && (inv.image_url || inv.gallery_urls))) {
+                        window.location.reload();
+                        return;
+                    }
+                    if (inv) {
+                        try {
+                            if (VARIANTS_INFO[inv.id]) { VARIANTS_INFO[inv.id].price = inv.price; VARIANTS_INFO[inv.id].stock = inv.stock; }
+                            if (SIZE_MAP[inv.color_id] && SIZE_MAP[inv.color_id][inv.size_id]) { SIZE_MAP[inv.color_id][inv.size_id].stock = inv.stock; }
+                            if (String(inv.id) === String(currentVariantId)) {
+                                if (priceElement) priceElement.innerText = `₹${parseFloat(inv.price).toFixed(2)}`;
+                                maxStock = inv.stock;
+                                if (qtyInput) qtyInput.value = clamp(parseInt(qtyInput.value) || 1);
+                                if (cartBtnContainer) {
+                                    if (inv.stock > 0) {
+                                        cartBtnContainer.innerHTML = `<button type="submit" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-2xl shadow-lg shadow-brand-500/30 transition-all hover:-translate-y-1 py-4 flex items-center justify-center gap-2 whitespace-nowrap"><i class="fas fa-shopping-bag"></i> Add to Cart</button>`;
+                                    } else {
+                                        cartBtnContainer.innerHTML = `<span class="w-full bg-gray-300 text-white font-bold rounded-2xl py-4 flex items-center justify-center gap-2 cursor-not-allowed">Out of Stock</span>`;
+                                    }
+                                }
+                                showToast(`Stock/Price Updated`, 'info');
+                            }
+                        } catch (err) { console.error("UI Update error:", err); }
+                    }
+                    }
+                }
+            };
+
+            inventorySocket.onclose = function(e) {
+                console.log('Inventory socket closed. Reconnecting...');
+                setTimeout(connectSocket, 2000);
+            };
+
+            inventorySocket.onerror = function(err) {
+                console.error('Inventory socket error:', err);
+                inventorySocket.close();
+            };
+        }
+
+        connectSocket();
+    </script>
+
 {% endblock buyer_layout %}

@@ -50,6 +50,50 @@
                 </button>
             </div>
 
+            <div id="oldDataSection" class="hidden mx-4 mt-4 sm:mx-6 p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="h-6 w-1 bg-amber-500 rounded-full"></div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Original Item Details</h3>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-y-3 gap-x-4 text-[11px]">
+                    <div class="space-y-0.5">
+                        <p class="text-slate-400 font-medium">Category</p>
+                        <p id="oldCategory" class="text-slate-900 font-semibold"></p>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="text-slate-400 font-medium">Subcategory</p>
+                        <p id="oldSubcategory" class="text-slate-900 font-semibold"></p>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="text-slate-400 font-medium">Brand</p>
+                        <p id="oldBrand" class="text-slate-900 font-semibold"></p>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="text-slate-400 font-medium">Product</p>
+                        <p id="oldProduct" class="text-slate-900 font-semibold"></p>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="text-slate-400 font-medium">Color</p>
+                        <div class="flex items-center gap-1.5">
+                            <span id="oldColorCircle" class="h-3 w-3 rounded-full border border-slate-300"></span>
+                            <span id="oldColorValue" class="text-slate-900 font-semibold uppercase"></span>
+                        </div>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="text-slate-400 font-medium">Size</p>
+                        <p id="oldSize" class="text-slate-900 font-semibold"></p>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="text-slate-400 font-medium">Price</p>
+                        <p id="oldPrice" class="text-slate-900 font-semibold"></p>
+                    </div>
+                    <div class="space-y-0.5">
+                        <p class="text-slate-400 font-medium">Stock</p>
+                        <p id="oldStock" class="text-slate-900 font-semibold"></p>
+                    </div>
+                </div>
+            </div>
+
             <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
                 <form id="inventoryForm" method="POST"
                     action="{% url 'add_inventory' %}"
@@ -277,8 +321,11 @@
                                     data-size="{{ v.size.name|escapejs }}"
                                     data-price="{{ v.price }}"
                                     data-stock="{{ v.stock }}"
+                                    data-sku="{{ v.sku|escapejs }}"
                                     data-image="{% if first.product.image %}{{ first.product.image.url }}{% endif %}"
                                     data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                    data-variant-image="{% if v.image %}{{ v.image.url }}{% endif %}"
+                                    data-variant-gallery="{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
                                     data-specs='[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
                                 ></button>
                                 {% endfor %}
@@ -301,8 +348,11 @@
                                     data-size="{{ v.size.name|escapejs }}"
                                     data-price="{{ v.price }}"
                                     data-stock="{{ v.stock }}"
+                                    data-sku="{{ v.sku|escapejs }}"
                                     data-image="{% if first.product.image %}{{ first.product.image.url }}{% endif %}"
                                     data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                    data-variant-image="{% if v.image %}{{ v.image.url }}{% endif %}"
+                                    data-variant-gallery="{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
                                     data-specs='[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
                                 >
                                     {{ v.size.name }}
@@ -322,23 +372,17 @@
                         <td class="px-4 py-3 align-middle text-center">
                             <div class="inline-flex items-center justify-center gap-2">
                                 <button
-                                    onclick="openViewModal(
-                                        '{{ first.id }}',
-                                        '{{ first.product.name }}',
-                                        '{{ first.product.brand.name }}',
-                                        '{{ first.product.brand.subcetegory.category.name }}',
-                                        '{{ first.product.brand.subcetegory.name }}',
-                                        '{{ first.color.name }}',
-                                        '{{ first.size.name }}',
-                                        '{{ first.stock }}',
-                                        '{{ first.price }}',
-                                        `{{ first.product.description|default_if_none:'' }}`,
-                                        'Active',
-                                        '{% if first.product.image %}{{ first.product.image.url }}{% endif %}',
-                                        `{% for s in first.specs.all %}{{ s.name|escapejs }}: {{ s.value|escapejs }}{% if not forloop.last %}\n{% endif %}{% endfor %}`
-                                    )"
+                                    type="button"
+                                    onclick="openViewModal(this)"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
-                                    title="View">
+                                    title="View"
+                                    data-product-name="{{ first.product.name|escapejs }}"
+                                    data-brand="{{ first.product.brand.name|escapejs }}"
+                                    data-category="{{ first.product.brand.subcetegory.category.name|escapejs }}"
+                                    data-subcategory="{{ first.product.brand.subcetegory.name|escapejs }}"
+                                    data-description="{{ first.product.description|default_if_none:''|escapejs }}"
+                                    data-variants='[{% for v in group.variants %}{"id":"{{ v.id }}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","sku":"{{ v.sku|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"imageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","galleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                >
                                     <i class="fa-solid fa-eye text-xs"></i>
                                     <span class="sr-only">View</span>
                                 </button>
@@ -354,7 +398,7 @@
                                         data-description="{{ first.product.description|default_if_none:''|escapejs }}"
                                         data-image="{% if first.product.image %}{{ first.product.image.url }}{% endif %}"
                                         data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                        data-variants='[{% for v in group.variants %}{"editUrl":"{% url "edit_inventory" v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"variantImageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","variantGalleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                        data-variants='[{% for v in group.variants %}{"editUrl":"{% url "edit_inventory" v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","sku":"{{ v.sku|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"variantImageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","variantGalleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
                                     >
                                         <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         <span class="sr-only">Edit</span>
@@ -412,56 +456,81 @@
         </div>
     </div>
 </div>
-<div id="viewModal"
-     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
-
-    <div class="bg-white w-full max-w-4xl rounded-xl p-5 sm:p-6 relative">
-
-        <button onclick="closeViewModal()"
-                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
-            ✖
-        </button>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-
-            <div class="w-full flex justify-center">
-                <img id="viewProfile"
-                     class="w-full max-w-sm h-72 md:h-96 object-cover rounded-lg shadow bg-gray-200">
+<!-- Hierarchical View Modal: Colors & Sizes -->
+<div id="viewModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[60] px-4 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl relative">
+        <div class="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
+            <div>
+                <h2 id="viewProductName" class="text-xl font-bold text-slate-900 leading-tight"></h2>
+                <p id="viewProductMeta" class="text-xs text-slate-500 font-medium"></p>
             </div>
+            <button onclick="closeViewModal()" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="p-6 max-h-[70vh] overflow-y-auto">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-l-4 border-emerald-500 pl-3">Variants by Color</h3>
+            <div id="viewVariantsList" class="space-y-6">
+                <!-- Color groups injected here -->
+            </div>
+        </div>
+    </div>
+</div>
 
-            <div class="space-y-4">
-
-                <div>
-                    <h2 id="viewName"
-                        class="text-2xl font-bold text-gray-800"></h2>
-                    <p id="viewEmail"
-                       class="text-sm text-gray-500"></p>
+<!-- Level 3: Individual Variant Detail Modal -->
+<div id="variantDetailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[70] px-4 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-300">
+        <button onclick="closeVariantDetailModal()" class="absolute top-4 right-4 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-white/80 text-slate-600 shadow-lg hover:bg-white transition">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+            <!-- Left: Image Section -->
+            <div class="bg-slate-50 p-6 lg:p-8 flex flex-col gap-4">
+                <div class="aspect-square rounded-2xl overflow-hidden bg-white shadow-inner">
+                    <img id="detailMainImage" src="" class="w-full h-full object-cover">
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-
-                    <p><strong>ID:</strong> <span id="viewId"></span></p>
-                    <p><strong>Status:</strong>
-                        <span id="viewStatus"
-                              class="font-medium"></span>
-                    </p>
-
-                    <p><strong>Category:</strong> <span id="viewCategory"></span></p>
-                    <p><strong>Subcategory:</strong> <span id="viewSubcategory"></span></p>
-
-                    <p><strong>Color:</strong> <span id="viewColor"></span></p>
-                    
-                    <p><strong>Size:</strong> <span id="viewSize"></span></p>
-
-                    <p><strong>Stock:</strong> <span id="viewStock"></span></p>
-                    <p><strong>Price:</strong> <span id="viewPrice"></span></p>
-
-                    <p class="sm:col-span-2">
-                        <strong>Description:</strong>
-                        <span id="viewDescription"></span>
-                    </p>
+                <div id="detailGallery" class="flex flex-wrap gap-2">
+                    <!-- Gallery thumbnails -->
                 </div>
-
+            </div>
+            <!-- Right: Info Section -->
+            <div class="p-8 lg:p-10 space-y-6">
+                <div class="space-y-1">
+                    <div id="detailBadge" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">Active</div>
+                    <h2 id="detailTitle" class="text-2xl font-black text-slate-900"></h2>
+                    <p id="detailSKU" class="text-xs font-mono text-slate-400 uppercase tracking-widest"></p>
+                </div>
+                <div class="flex items-center gap-6 py-4 border-y border-slate-100">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Price</p>
+                        <p id="detailPrice" class="text-2xl font-black text-emerald-600"></p>
+                    </div>
+                    <div class="h-10 w-px bg-slate-100"></div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Stock</p>
+                        <p id="detailStock" class="text-2xl font-black text-slate-900"></p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category</p>
+                            <p id="detailCategory" class="text-sm font-semibold text-slate-700"></p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Brand</p>
+                            <p id="detailBrand" class="text-sm font-semibold text-slate-700"></p>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</p>
+                        <p id="detailDesc" class="text-sm text-slate-600 leading-relaxed"></p>
+                    </div>
+                    <div id="detailSpecsContainer" class="space-y-2 pt-4 hidden">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Specifications</p>
+                        <div id="detailSpecs" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -743,15 +812,31 @@ function addMainVariantBlock(initial = {}) {
             </div>
             <div class="space-y-2">
                 <label class="text-xs font-semibold text-slate-600">Color Value</label>
-                <div class="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1">
-                    <input type="color" class="main-variant-color-picker h-8 w-10 rounded border-0 bg-transparent" value="${colorValue}">
-                    <input type="text" class="main-variant-color-input w-full bg-transparent px-2 py-1 text-sm font-semibold text-slate-700 focus:outline-none" value="${colorValue}">
+                <div class="flex items-center gap-2">
+                    <div class="relative group">
+                        <input type="color" class="main-variant-color-picker h-10 w-20 rounded cursor-pointer border-2 border-slate-200 hover:border-slate-400 transition-all" value="${colorValue}">
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 leading-none mb-1 tracking-wider">Hex Code</span>
+                        <span class="text-sm font-mono font-bold text-slate-700 color-code-display">${colorValue}</span>
+                    </div>
+                    <input type="hidden" class="main-variant-color-input" value="${colorValue}">
                 </div>
             </div>
             <div class="space-y-2">
                 <label class="text-xs font-semibold text-slate-600">Main Image</label>
                 <input type="file" name="variant_image_${mediaIndex}" accept="image/*" class="main-variant-image-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs">
-                <div class="main-variant-image-preview">${initial.variantImageUrl ? `<img src="${initial.variantImageUrl}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">` : ''}</div>
+                <div class="main-variant-image-preview">
+                    ${initial.variantImageUrl ? `
+                        <div class="relative inline-block mt-2 existing-main-image-container">
+                            <img src="${initial.variantImageUrl}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">
+                            <button type="button" class="remove-existing-main absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition" title="Delete Main Image">
+                                <i class="fa-solid fa-xmark text-xs"></i>
+                            </button>
+                            <input type="hidden" name="delete_variant_main_${mediaIndex}" value="false" class="delete-main-input">
+                        </div>
+                    ` : ''}
+                </div>
             </div>
         </div>
         <div class="space-y-2">
@@ -769,23 +854,64 @@ function addMainVariantBlock(initial = {}) {
     `;
     variantRows.appendChild(block);
 
+    // Populate existing gallery images
+    if (initial.variantGalleryUrls) {
+        const galleryPreview = block.querySelector('.main-variant-gallery-preview');
+        const urls = initial.variantGalleryUrls.split(',');
+        urls.forEach(url => {
+            if (!url.trim()) return;
+            const div = document.createElement('div');
+            div.className = 'relative inline-block existing-gallery-item';
+            div.innerHTML = `
+                <img src="${url.trim()}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md">
+                <button type="button" class="remove-existing-gallery absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition" data-url="${url.trim()}">
+                    <i class="fa-solid fa-xmark text-[10px]"></i>
+                </button>
+                <input type="hidden" name="delete_variant_gallery_${mediaIndex}" value="" class="delete-gallery-input">
+            `;
+            galleryPreview.appendChild(div);
+        });
+    }
+
+    // Attach event listeners for existing image removal
+    block.querySelectorAll('.remove-existing-main').forEach(btn => {
+        btn.onclick = function() {
+            const container = this.closest('.existing-main-image-container');
+            container.querySelector('.delete-main-input').value = "true";
+            container.style.opacity = "0.3";
+            container.style.pointerEvents = "none";
+            this.remove();
+        };
+    });
+
+    block.querySelectorAll('.remove-existing-gallery').forEach(btn => {
+        btn.onclick = function() {
+            const item = this.closest('.existing-gallery-item');
+            item.querySelector('.delete-gallery-input').value = this.dataset.url;
+            item.style.opacity = "0.3";
+            item.style.pointerEvents = "none";
+            this.remove();
+        };
+    });
+
+    // If editing, add the first sub-variant row automatically
+    // (Only if no rows exist yet to prevent duplication)
+    if (initial.size && block.querySelectorAll('.sub-variant-row').length === 0) {
+        addSubVariantRow(block, initial);
+    }
+
     const picker = block.querySelector('.main-variant-color-picker');
     const input = block.querySelector('.main-variant-color-input');
+    const display = block.querySelector('.color-code-display');
     picker.addEventListener('input', () => {
         input.value = picker.value;
-        syncSubColors(block);
-    });
-    input.addEventListener('input', () => {
-        if (/^#([A-Fa-f0-9]{6})$/.test(input.value)) picker.value = input.value;
+        if (display) display.innerText = picker.value;
         syncSubColors(block);
     });
 
     block.querySelector('.addSubVariantBtn').addEventListener('click', () => addSubVariantRow(block));
     block.querySelector('.removeMainVariantBtn').addEventListener('click', () => block.remove());
     bindMediaPreview(block);
-
-    addSubVariantRow(block, initial);
-    syncSubColors(block);
 }
 
 if (addMainVariantBtn && variantRows) {
@@ -849,6 +975,8 @@ document.getElementById('openinventoryModal').onclick = () => {
         subVariantCounter = 0;
         variantRows.innerHTML = '';
     }
+    const oldSection = document.getElementById('oldDataSection');
+    if (oldSection) oldSection.classList.add('hidden');
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
 };
@@ -1283,31 +1411,88 @@ function resetImagePreviews() {
     // Media section removed. Variant image previews are handled per-row.
 }
 
-async function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, specsJson, imageUrl = '', galleryUrls = '', variantImageUrl = '', variantGalleryUrls = '') {
+function unescapeJS(str) {
+    if (!str) return '';
+    return str.replace(/\\u0027/g, "'")
+              .replace(/\\u0022/g, '"')
+              .replace(/\\u0026/g, '&')
+              .replace(/\\u003C/g, '<')
+              .replace(/\\u003E/g, '>')
+              .replace(/\\u005C/g, '\\')
+              .replace(/\\u002D/g, '-');
+}
+
+async function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, sku, specsJson, imageUrl = '', galleryUrls = '', variantImageUrl = '', variantGalleryUrls = '') {
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
 
     modalTitle.innerText = "Edit inventory";
     inventoryForm.action = editUrl;
     
-    // Global media section removed. Variant images are handled in the variant row.
     resetImagePreviews();
 
-    categorySelect.value = category;
-    if (category) {
-        await loadSubcategories(category);
-        subcategorySelect.value = subcategory || '';
-        if (subcategory) {
-            await loadBrands(subcategory);
-            brandSelect.value = brand || '';
-            if (brand) {
-                await loadProducts(brand);
-                productSelect.value = product || '';
+    // Unescape all incoming strings
+    const cat = unescapeJS(category);
+    const sub = unescapeJS(subcategory);
+    const brd = unescapeJS(brand);
+    const prd = unescapeJS(product);
+    const desc = unescapeJS(description);
+
+    // 1. Category
+    categorySelect.value = cat;
+    
+    if (cat) {
+        try {
+            // 2. Subcategory
+            await loadSubcategories(cat);
+            if (sub) {
+                const subOpt = Array.from(subcategorySelect.options).find(o => o.value === sub || o.textContent.trim() === sub);
+                if (subOpt) {
+                    subcategorySelect.value = subOpt.value;
+                    
+                    // 3. Brand
+                    await loadBrands(subcategorySelect.value);
+                    if (brd) {
+                        const brandOpt = Array.from(brandSelect.options).find(o => o.value === brd || o.textContent.trim() === brd);
+                        if (brandOpt) {
+                            brandSelect.value = brandOpt.value;
+                            
+                            // 4. Product
+                            await loadProducts(brandSelect.value);
+                            if (prd) {
+                                const prodOpt = Array.from(productSelect.options).find(o => o.value === prd || o.textContent.trim() === prd);
+                                if (prodOpt) {
+                                    productSelect.value = prodOpt.value;
+                                }
+                            }
+                        }
+                    }
+                }
             }
+        } catch (err) {
+            console.error("Error pre-populating cascading selects:", err);
         }
     }
     
-    inventoryForm.description.value = description;
+    inventoryForm.description.value = desc;
+    
+    // Show and populate Old Data Section for comparison
+    const oldSection = document.getElementById('oldDataSection');
+    if (oldSection) {
+        oldSection.classList.remove('hidden');
+        document.getElementById('oldCategory').innerText = cat || '-';
+        document.getElementById('oldSubcategory').innerText = sub || '-';
+        document.getElementById('oldBrand').innerText = brd || '-';
+        document.getElementById('oldProduct').innerText = prd || '-';
+        document.getElementById('oldColorCircle').style.backgroundColor = color || 'transparent';
+        document.getElementById('oldColorValue').innerText = color || '-';
+        document.getElementById('oldSize').innerText = size || '-';
+        const oldSkuEl = document.getElementById('oldSku');
+        if (oldSkuEl) oldSkuEl.innerText = sku || '-';
+        document.getElementById('oldPrice').innerText = price || '-';
+        document.getElementById('oldStock').innerText = stock || '-';
+    }
+
     if (variantRows) {
         mainVariantCounter = 0;
         subVariantCounter = 0;
@@ -1317,6 +1502,7 @@ async function openEditModal(editUrl, category, subcategory, brand, product, des
             size: size, 
             price: price, 
             stock: stock,
+            sku: sku,
             variantImageUrl: variantImageUrl,
             variantGalleryUrls: variantGalleryUrls
         });
@@ -1328,10 +1514,14 @@ async function openEditModal(editUrl, category, subcategory, brand, product, des
         const specs = JSON.parse(specsJson || '[]');
         if (Array.isArray(specs) && specs.length) {
             specsContainer.innerHTML = '';
-            specs.forEach(s => addSpecRow(s.name || '', s.value || ''));
+            specs.forEach(s => addSpecRow(s.name, s.value));
+        } else {
+            addSpecRow();
         }
     } catch (e) {
+        addSpecRow();
     }
+    
     newCategoryInput.classList.add('hidden');
     newSubcategoryInput.classList.add('hidden');
     newBrandInput.classList.add('hidden');
@@ -1413,6 +1603,7 @@ function renderVariantItems(common, variants) {
                 v.size || '',
                 v.price || '',
                 v.stock || '',
+                v.sku || '',
                 JSON.stringify(v.specs || []),
                 common.imageUrl || '',
                 common.galleryUrls || '',
@@ -1532,9 +1723,12 @@ document.querySelectorAll('.edit-variant-color-btn').forEach(btn => {
             d.size || '',
             d.price || '',
             d.stock || '',
+            d.sku || '',
             d.specs || '[]',
             d.image || '',
-            d.gallery || ''
+            d.gallery || '',
+            d.variantImage || '',
+            d.variantGallery || ''
         );
     });
 });
@@ -1554,9 +1748,12 @@ document.querySelectorAll('.edit-variant-size-btn').forEach(btn => {
             d.size || '',
             d.price || '',
             d.stock || '',
+            d.sku || '',
             d.specs || '[]',
             d.image || '',
-            d.gallery || ''
+            d.gallery || '',
+            d.variantImage || '',
+            d.variantGallery || ''
         );
     });
 });
@@ -1573,26 +1770,61 @@ function closeDeleteModal() {
 
 
 const viewModal = document.getElementById('viewModal');
+const variantDetailModal = document.getElementById('variantDetailModal');
 
-function openViewModal(
-    id, product, brand, category, subcategory, color, size, stock, price, description, status, profile, specsText
-) {
-    document.getElementById('viewId').innerText = id;
-    document.getElementById('viewName').innerText = product;
-    document.getElementById('viewEmail').innerText = brand;
-    document.getElementById('viewCategory').innerText = category;
-    document.getElementById('viewSubcategory').innerText = subcategory;
-    document.getElementById('viewColor').innerText = color;
-    document.getElementById('viewSize').innerText = size;
-    document.getElementById('viewStock').innerText = stock;
-    document.getElementById('viewPrice').innerText = price;
-    const specs = (specsText || '').trim();
-    document.getElementById('viewDescription').innerText = specs ? `${description}\n\nSpecs:\n${specs}` : description;
-    document.getElementById('viewStatus').innerText = status;
+function openViewModal(btn) {
+    const d = btn.dataset;
+    let variants = [];
+    try {
+        variants = JSON.parse(d.variants || '[]');
+    } catch (e) { console.error("Error parsing variants:", e); }
 
-    const img = document.getElementById('viewProfile');
-    img.src = profile ? profile : '';
-    img.alt = product;
+    document.getElementById('viewProductName').innerText = d.productName;
+    document.getElementById('viewProductMeta').innerText = `${d.brand} • ${d.category} > ${d.subcategory}`;
+
+    // Group variants by color
+    const groups = {};
+    variants.forEach(v => {
+        if (!groups[v.color]) groups[v.color] = [];
+        groups[v.color].push(v);
+    });
+
+    const list = document.getElementById('viewVariantsList');
+    list.innerHTML = '';
+
+    Object.keys(groups).forEach(color => {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'p-5 rounded-2xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-sm transition-all duration-300';
+        
+        const colorName = color || 'No Color';
+        
+        let sizesHtml = '';
+        groups[color].forEach((v, idx) => {
+            // We'll store the variant data in a global map for the detail modal to pick up
+            const vKey = `v_${v.id}`;
+            window[vKey] = v;
+            window[`common_${v.id}`] = d;
+
+            sizesHtml += `
+                <button onclick="showVariantDetail('${v.id}')" 
+                        class="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[13px] font-bold text-slate-700 hover:border-emerald-500 hover:text-emerald-600 hover:shadow-md transition-all active:scale-95 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    ${v.size}
+                </button>
+            `;
+        });
+
+        groupDiv.innerHTML = `
+            <div class="flex items-center gap-3 mb-4">
+                <span class="h-6 w-6 rounded-full border-2 border-white shadow-sm" style="background-color: ${color}"></span>
+                <span class="text-[11px] font-black text-slate-400 uppercase tracking-[2px]">${colorName}</span>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                ${sizesHtml}
+            </div>
+        `;
+        list.appendChild(groupDiv);
+    });
 
     viewModal.classList.remove('hidden');
     viewModal.classList.add('flex');
@@ -1601,6 +1833,76 @@ function openViewModal(
 function closeViewModal() {
     viewModal.classList.add('hidden');
 }
+
+function showVariantDetail(vId) {
+    const v = window[`v_${vId}`];
+    const common = window[`common_${vId}`];
+    if (!v || !common) return;
+
+    document.getElementById('detailTitle').innerText = `${common.productName} (${v.color} - ${v.size})`;
+    document.getElementById('detailSKU').innerText = v.sku ? `SKU: ${v.sku}` : 'NO SKU ASSIGNED';
+    document.getElementById('detailPrice').innerText = `₹${parseFloat(v.price).toFixed(2)}`;
+    document.getElementById('detailStock').innerText = v.stock;
+    document.getElementById('detailCategory').innerText = common.category;
+    document.getElementById('detailBrand').innerText = common.brand;
+    document.getElementById('detailDesc').innerText = common.description || 'No description available for this product.';
+
+    const mainImg = document.getElementById('detailMainImage');
+    mainImg.src = v.imageUrl || 'https://placehold.co/600x800?text=No+Image';
+
+    const gallery = document.getElementById('detailGallery');
+    gallery.innerHTML = '';
+    
+    // Collect all images (main + gallery)
+    const galleryUrls = (v.galleryUrls || '').split(',').filter(u => u.trim() !== '');
+    const allImages = v.imageUrl ? [v.imageUrl, ...galleryUrls] : galleryUrls;
+    
+    allImages.forEach(url => {
+        const img = document.createElement('img');
+        img.src = url.trim();
+        img.className = 'h-16 w-16 rounded-xl object-cover cursor-pointer border-2 border-white shadow-sm hover:border-emerald-500 transition-all';
+        img.onclick = () => {
+            mainImg.src = url.trim();
+            // Highlight active thumb
+            gallery.querySelectorAll('img').forEach(i => i.classList.remove('border-emerald-500'));
+            img.classList.add('border-emerald-500');
+        };
+        gallery.appendChild(img);
+    });
+
+    // Specifications
+    const specsCont = document.getElementById('detailSpecsContainer');
+    const specsList = document.getElementById('detailSpecs');
+    specsList.innerHTML = '';
+    
+    if (v.specs && v.specs.length > 0) {
+        specsCont.classList.remove('hidden');
+        v.specs.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100 group hover:border-emerald-200 transition-colors';
+            div.innerHTML = `
+                <span class="text-[10px] uppercase font-bold text-slate-400 group-hover:text-emerald-500 transition-colors">${s.name}</span>
+                <span class="text-xs font-bold text-slate-700">${s.value}</span>
+            `;
+            specsList.appendChild(div);
+        });
+    } else {
+        specsCont.classList.add('hidden');
+    }
+
+    variantDetailModal.classList.remove('hidden');
+    variantDetailModal.classList.add('flex');
+}
+
+function closeVariantDetailModal() {
+    variantDetailModal.classList.add('hidden');
+}
+
+// Click outside to close modals
+window.addEventListener('click', (e) => {
+    if (e.target === viewModal) closeViewModal();
+    if (e.target === variantDetailModal) closeVariantDetailModal();
+});
 const inventorySearchInput = document.getElementById('inventorySearch');
 const inventoryTBody = document.getElementById('inventoryTableBody');
 let noMatchRowInventory = null;
@@ -1645,41 +1947,74 @@ inventorySocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     if (data.type === 'inventory_updated') {
         const inv = data.inventory;
-        // Find variant in table and update
-        const variantButtons = document.querySelectorAll(`button[data-edit-url*="/${inv.id}/"]`);
-        variantButtons.forEach(btn => {
-            btn.dataset.price = inv.price;
-            btn.dataset.stock = inv.stock;
+        
+        // 1. Update individual size pills (the ones that open individual modals)
+        const targetPills = document.querySelectorAll(`button[data-edit-url*="/${inv.id}/"]`);
+        targetPills.forEach(pill => {
+            pill.dataset.price = inv.price;
+            pill.dataset.stock = inv.stock;
+            if (inv.image_url) pill.dataset.variantImage = inv.image_url;
+            if (inv.gallery_urls) pill.dataset.variantGallery = inv.gallery_urls.join(',');
             
-            // If it's a size button, update the text if needed (though usually price/stock is in tooltip)
-            if (btn.classList.contains('edit-variant-size-btn')) {
-                btn.title = `Edit Variant: ${btn.dataset.size} (Stock: ${inv.stock}, Price: ${inv.price})`;
+            if (pill.classList.contains('edit-variant-size-btn')) {
+                pill.title = `Edit Variant: ${pill.dataset.size} (Stock: ${inv.stock}, Price: ${inv.price})`;
             }
         });
 
-        // Update the visible stock in the table if this is the 'first' variant of the group
+        // 2. Update the parent row's VIEW and EDIT group buttons (crucial for hierarchical modals)
         const rows = document.querySelectorAll('#inventoryTableBody tr');
         rows.forEach(row => {
-            const viewButton = row.querySelector('button[onclick*="openViewModal"]');
-            if (viewButton) {
-                const onclickStr = viewButton.getAttribute('onclick');
-                if (onclickStr.includes(`'${inv.id}'`)) {
-                    // This row belongs to the updated variant's product group
-                    const stockCell = row.querySelector('td:nth-last-child(3)');
-                    if (stockCell) stockCell.innerText = inv.stock;
+            const viewBtn = row.querySelector('button[onclick*="openViewModal"]');
+            const editBtn = row.querySelector('button[title="Edit"]');
+            
+            [viewBtn, editBtn].forEach(btn => {
+                if (!btn || !btn.dataset.variants) return;
+                try {
+                    let vts = JSON.parse(btn.dataset.variants);
+                    let rowUpdated = false;
+                    vts.forEach(vt => {
+                        // For View button, we have vt.id. For Edit button, it's often vt.editUrl containing ID
+                        const vtId = vt.id || (vt.editUrl ? vt.editUrl.split('/').filter(Boolean).pop() : null);
+                        
+                        if (String(vtId) === String(inv.id)) {
+                            vt.price = inv.price;
+                            vt.stock = inv.stock;
+                            // Update all possible image keys used by different modals
+                            if (inv.image_url) {
+                                vt.imageUrl = inv.image_url;
+                                vt.variantImageUrl = inv.image_url;
+                            }
+                            if (inv.gallery_urls) {
+                                const gStr = inv.gallery_urls.join(',');
+                                vt.galleryUrls = gStr;
+                                vt.variantGalleryUrls = gStr;
+                            }
+                            rowUpdated = true;
+                        }
+                    });
+                    
+                    if (rowUpdated) {
+                        btn.dataset.variants = JSON.stringify(vts);
+                        // Recalculate and update the overall stock count shown in the table
+                        const stockCell = row.querySelector('td:nth-last-child(3)');
+                        if (stockCell) {
+                            const totalStock = vts.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
+                            stockCell.innerText = totalStock;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error parsing variants for live update:", e);
                 }
-            }
+            });
         });
 
-        showToast(`Inventory updated: ${inv.product_name} (Stock: ${inv.stock})`, 'info');
+        showToast(`Inventory updated: ${inv.product_name} (${inv.color_name} - ${inv.stock} left)`, 'info');
     } else if (data.type === 'inventory_added') {
         showToast(`New inventory added: ${data.inventory.product_name}`, 'success');
-        // Optional: refresh page to see new entry
-        // window.location.reload();
+        // Page refresh is recommended for entirely new items to maintain table indexing
     } else if (data.type === 'inventory_deleted') {
         showToast(`Inventory deleted`, 'error');
-        // Optional: remove row or refresh
-        // window.location.reload();
+        // Refresh or remove row...
     }
 };
 
