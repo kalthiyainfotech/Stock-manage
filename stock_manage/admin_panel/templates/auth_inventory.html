@@ -408,6 +408,7 @@
                                     type="button"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
                                     title="Delete"
+                                    data-product-id="{{ first.product.id }}"
                                     data-delete-variants='[{% for v in group.variants %}{"deleteUrl":"{% url 'delete_inventory' v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }}}{% if not forloop.last %},{% endif %}{% endfor %}]'>
                                     <i class="fa-solid fa-trash text-xs"></i>
                                     <span class="sr-only">Delete</span>
@@ -627,7 +628,14 @@
      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">
     <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl shadow-slate-300/40">
         <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
-            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Delete Variant</h2>
+            <div class="flex items-center gap-3">
+                <h2 class="text-base sm:text-lg font-semibold text-slate-900">Delete Variant</h2>
+                <button id="deleteAllVariantsBtn"
+                        title="Delete All Variants"
+                        class="inline-flex h-7 w-7 items-center justify-center rounded-full text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition border border-rose-100">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+            </div>
             <button id="closeVariantDeletePicker"
                     class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">✕</button>
         </div>
@@ -1645,9 +1653,17 @@ const variantDeletePickerList = document.getElementById('variantDeletePickerList
 const variantDeleteSearch = document.getElementById('variantDeleteSearch');
 const closeVariantDeletePicker = document.getElementById('closeVariantDeletePicker');
 
-function showVariantDeletePicker() {
+function showVariantDeletePicker(productId) {
     variantDeletePickerModal.classList.remove('hidden');
     variantDeletePickerModal.classList.add('flex');
+    const deleteAllBtn = document.getElementById('deleteAllVariantsBtn');
+    if (deleteAllBtn) {
+        deleteAllBtn.onclick = () => {
+            const bulkUrl = `/delete/inventory/product/${productId}/`;
+            openDeleteModal(bulkUrl);
+            hideVariantDeletePicker();
+        };
+    }
 }
 function hideVariantDeletePicker() {
     variantDeletePickerModal.classList.add('hidden');
@@ -1699,7 +1715,8 @@ document.querySelectorAll('button[title="Delete"]').forEach(btn => {
     btn.addEventListener('click', function () {
         let variants = [];
         try { variants = JSON.parse(this.dataset.deleteVariants || '[]'); } catch (e) {}
-        showVariantDeletePicker();
+        const productId = this.dataset.productId;
+        showVariantDeletePicker(productId);
         renderDeleteVariantItems(variants);
         if (variantDeleteSearch) {
             variantDeleteSearch.oninput = function() {

@@ -157,7 +157,7 @@ def by_product(request, variant_id):
             'product__brand__subcetegory',
             'product__brand__subcetegory__category',
             'color',
-            'size'
+            'size'  
         ).get(id=variant_id, product__status=True)
     except ProductVariant.DoesNotExist:
         return redirect('by_shop')

@@ -975,6 +975,25 @@ def delete_inventory(request, id):
 
 @never_cache
 @login_required(login_url='auth_login')
+def delete_product_inventory(request, product_id):
+    """Deletes all variants of a product."""
+    variants = ProductVariant.objects.filter(product_id=product_id)
+    ids = list(variants.values_list('id', flat=True))
+    variants.delete()
+    
+    layer = get_channel_layer()
+    if layer:
+        for vid in ids:
+            async_to_sync(layer.group_send)("inventory", {
+                "type": "inventory_deleted",
+                "id": vid,
+            })
+            
+    messages.success(request, f"Deleted all variants for product ID {product_id}")
+    return redirect('auth_inventory')
+
+@never_cache
+@login_required(login_url='auth_login')
 def get_subcategories(request):
     category_name = request.GET.get('category_name')
     if category_name:
