@@ -102,20 +102,72 @@
         </div>
     </footer>
 
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[1000] space-y-3"></div>
+
     <script>
-        const menuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        if (menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', () => {
-                if (mobileMenu.classList.contains('hidden')) {
-                    mobileMenu.classList.remove('hidden');
-                    setTimeout(() => { mobileMenu.classList.remove('opacity-0', 'scale-y-0'); mobileMenu.classList.add('opacity-100', 'scale-y-100'); }, 10);
-                } else {
-                    mobileMenu.classList.remove('opacity-100', 'scale-y-100'); mobileMenu.classList.add('opacity-0', 'scale-y-0');
-                    setTimeout(() => { mobileMenu.classList.add('hidden'); }, 300);
-                }
-            });
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-rose-500' : 'bg-brand-600';
+            
+            toast.className = `${bgClass} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-fade-in transition-all duration-500 transform translate-y-0 opacity-100`;
+            toast.innerHTML = `
+                <div class="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-bell'} text-lg"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-sm">${title}</p>
+                    <p class="text-xs text-white/80 mt-0.5">${message}</p>
+                </div>
+                <button class="ml-4 text-white/50 hover:text-white transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            const closeBtn = toast.querySelector('button');
+            const removeToast = () => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            };
+            
+            closeBtn.onclick = removeToast;
+            setTimeout(removeToast, 5000);
         }
+
+        (function() {
+            try {
+                const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+                const socket = new WebSocket(`${proto}://${location.host}/ws/orders/`);
+                const buyerId = {{ request.session.buyer_id|default:0 }};
+                
+                socket.onmessage = (e) => {
+                    const data = JSON.parse(e.data);
+                    if (data.type === 'order_updated' && data.order && Number(data.order.buyer_id) === Number(buyerId)) {
+                        showToast('Order Update', `Your order ${data.order.order_number} is now ${data.order.status}.`, 'success');
+                    }
+                };
+            } catch (err) {
+                console.error("Order socket error:", err);
+            }
+        })();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (menuBtn && mobileMenu) {
+                menuBtn.addEventListener('click', () => {
+                    if (mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.remove('hidden');
+                        setTimeout(() => { mobileMenu.classList.remove('opacity-0', 'scale-y-0'); mobileMenu.classList.add('opacity-100', 'scale-y-100'); }, 10);
+                    } else {
+                        mobileMenu.classList.remove('opacity-100', 'scale-y-100'); mobileMenu.classList.add('opacity-0', 'scale-y-0');
+                        setTimeout(() => { mobileMenu.classList.add('hidden'); }, 300);
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

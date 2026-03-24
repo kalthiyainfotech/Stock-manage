@@ -30,12 +30,8 @@
                     <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-center py-6 border-b border-gray-100 group">
                         <div class="col-span-1 sm:col-span-6 flex gap-4">
                             <a href="{% url 'by_product' item.variant.id %}" class="w-24 h-24 rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
-                                {% if item.variant.image %}
-                                <img src="{{ item.variant.image.url }}"
-                                     alt="{{ item.variant.product.name }}"
-                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                                {% elif item.variant.product.image %}
-                                <img src="{{ item.variant.product.image.url }}"
+                                {% if item.image_url %}
+                                <img src="{{ item.image_url }}"
                                      alt="{{ item.variant.product.name }}"
                                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                 {% else %}

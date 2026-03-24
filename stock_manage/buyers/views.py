@@ -1,3 +1,5 @@
+import razorpay
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
@@ -718,6 +720,7 @@ def by_cart(request):
             item.save()
         item.total_price = item.variant.price * item.quantity
         subtotal += item.total_price
+        item.image_url = _resolve_shop_image_url(item.variant.product, item.variant)
 
     context = {
         "cart_items": cart_items,
@@ -756,6 +759,8 @@ def by_checkout(request):
             item.save()
         item.total_price = float(item.variant.price) * item.quantity
         subtotal += item.total_price
+        # Resolve image URL for each item
+        item.image_url = _resolve_shop_image_url(item.variant.product, item.variant)
     
     context = {
         "cart_items": cart_items,
@@ -860,6 +865,36 @@ def place_order(request):
                 if not updated:
                     raise ValueError("Insufficient stock")
             cart_items.delete()
+            
+            # If payment method is UPI, create Razorpay order
+            if payment_method == "upi":
+                try:
+                    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+                    data = {
+                        "amount": int(total * 100),  # amount in paise
+                        "currency": "INR",
+                        "receipt": order.order_number,
+                    }
+                    razorpay_order = client.order.create(data=data)
+                    order.razorpay_order_id = razorpay_order['id']
+                    order.save()
+                    
+                    return JsonResponse({
+                        "success": True,
+                        "payment_method": "upi",
+                        "razorpay_order_id": razorpay_order['id'],
+                        "razorpay_key": settings.RAZORPAY_KEY_ID,
+                        "amount": float(total),
+                        "order_id": order.id,
+                        "currency": "INR",
+                        "name": f"{first_name} {last_name}",
+                        "email": email,
+                        "phone": phone
+                    })
+                except Exception as e:
+                    # This will trigger the rollback for the whole atomic transaction
+                    raise ValueError(f"Razorpay order creation failed: {str(e)}")
+
             layer = get_channel_layer()
             if layer:
                 payload = {
@@ -877,9 +912,96 @@ def place_order(request):
                     "type": "order_added",
                     "order": payload,
                 })
-    except Exception:
+    except Exception as e:
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"success": False, "error": str(e)})
         return redirect("by_checkout")
+    
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"success": True, "payment_method": "cash_on_delivery"})
+    
     return redirect("by_thankyou")
+
+@never_cache
+@buyer_login_required
+def verify_payment(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
+    
+    import json
+    try:
+        data = json.loads(request.body)
+        razorpay_payment_id = data.get('razorpay_payment_id')
+        razorpay_order_id = data.get('razorpay_order_id')
+        razorpay_signature = data.get('razorpay_signature')
+        order_id = data.get('orderId')
+        
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': razorpay_payment_id,
+            'razorpay_signature': razorpay_signature
+        }
+        
+        # Verify the signature
+        client.utility.verify_payment_signature(params_dict)
+        
+        # If verification is successful, update the order
+        order = Order.objects.get(id=order_id)
+        order.razorpay_payment_id = razorpay_payment_id
+        order.razorpay_signature = razorpay_signature
+        order.payment_status = 'paid'
+        order.save()
+        
+        # Notify admin via channels
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": order.id,
+                "order_number": order.order_number,
+                "buyer_id": order.buyer_id,
+                "buyer_name": order.buyer.name,
+                "email": order.email,
+                "total": float(order.total),
+                "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
+                "status": order.status,
+                "total_items": sum(i.quantity for i in order.items.all()),
+            }
+            async_to_sync(layer.group_send)("orders", {
+                "type": "order_added",
+                "order": payload,
+            })
+            
+        return JsonResponse({"success": True})
+        
+    except razorpay.errors.SignatureVerificationError:
+        return JsonResponse({"success": False, "error": "Invalid signature"}, status=400)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+@never_cache
+@buyer_login_required
+def cancel_unpaid_order(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Method not allowed"}, status=405)
+    
+    import json
+    try:
+        data = json.loads(request.body)
+        order_id = data.get('orderId')
+        order = Order.objects.get(id=order_id, payment_status='pending')
+        
+        # Return items to stock
+        for item in order.items.all():
+            ProductVariant.objects.filter(id=item.variant_id).update(stock=F('stock') + item.quantity)
+        
+        order.status = 'cancelled'
+        order.save()
+        
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 @never_cache
 @buyer_login_required
@@ -892,6 +1014,14 @@ def by_history(request):
         "items__variant",
         "items__variant__product"
     ).order_by("-created_at")
+    
+    for order in orders:
+        for it in order.items.all():
+            if it.variant:
+                it.image_url = _resolve_shop_image_url(it.variant.product, it.variant)
+            else:
+                it.image_url = None
+
     status_counts = {
         "all": orders.count(),
         "pending": orders.filter(status="pending").count(),

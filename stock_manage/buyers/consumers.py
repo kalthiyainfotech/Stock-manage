@@ -10,22 +10,13 @@ class BlogConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard("blogs", self.channel_name)
 
     async def blog_added(self, event):
-        await self.send_json({
-            "type": "blog_added",
-            "blog": event["blog"],
-        })
+        await self.send_json(event)
 
     async def blog_updated(self, event):
-        await self.send_json({
-            "type": "blog_updated",
-            "blog": event["blog"],
-        })
+        await self.send_json(event)
 
     async def blog_deleted(self, event):
-        await self.send_json({
-            "type": "blog_deleted",
-            "id": event["id"],
-        })
+        await self.send_json(event)
 
 
 class CategoryConsumer(AsyncJsonWebsocketConsumer):
@@ -37,22 +28,13 @@ class CategoryConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard("categories", self.channel_name)
 
     async def category_added(self, event):
-        await self.send_json({
-            "type": "category_added",
-            "category": event["category"],
-        })
+        await self.send_json(event)
 
     async def category_updated(self, event):
-        await self.send_json({
-            "type": "category_updated",
-            "category": event["category"],
-        })
+        await self.send_json(event)
 
     async def category_deleted(self, event):
-        await self.send_json({
-            "type": "category_deleted",
-            "id": event["id"],
-        })
+        await self.send_json(event)
 
 
 class InventoryConsumer(AsyncJsonWebsocketConsumer):
@@ -64,22 +46,13 @@ class InventoryConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard("inventory", self.channel_name)
 
     async def inventory_added(self, event):
-        await self.send_json({
-            "type": "inventory_added",
-            "inventory": event.get("inventory"),
-        })
+        await self.send_json(event)
 
     async def inventory_updated(self, event):
-        await self.send_json({
-            "type": "inventory_updated",
-            "inventory": event.get("inventory"),
-        })
+        await self.send_json(event)
 
     async def inventory_deleted(self, event):
-        await self.send_json({
-            "type": "inventory_deleted",
-            "id": event.get("id"),
-        })
+        await self.send_json(event)
 
 
 class OrderConsumer(AsyncJsonWebsocketConsumer):
@@ -91,19 +64,10 @@ class OrderConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard("orders", self.channel_name)
 
     async def order_added(self, event):
-        await self.send_json({
-            "type": "order_added",
-            "order": event.get("order"),
-        })
+        await self.send_json(event)
 
     async def order_updated(self, event):
-        await self.send_json({
-            "type": "order_updated",
-            "order": event.get("order"),
-        })
+        await self.send_json(event)
 
     async def order_deleted(self, event):
-        await self.send_json({
-            "type": "order_deleted",
-            "id": event.get("id"),
-        })
+        await self.send_json(event)

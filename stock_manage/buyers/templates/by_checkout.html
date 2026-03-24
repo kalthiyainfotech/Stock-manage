@@ -2,13 +2,13 @@
 {% block buyer_layout %}
 {% load static %}
 
-    
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row gap-8 lg:gap-16">
 
         <!-- Main Form -->
         <main class="w-full lg:w-3/5">
-            <form action="{% url 'by_place_order' %}" method="post">
+            <form id="checkout-form" action="{% url 'by_place_order' %}" method="post">
                 {% csrf_token %}
                 
 
@@ -132,8 +132,8 @@
                     {% for item in cart_items %}
                     <div class="flex items-center gap-4">
                         <div class="relative">
-                            {% if item.variant.product.image %}
-                            <img src="{{ item.variant.product.image.url }}" alt="{{ item.variant.product.name }}" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
+                            {% if item.image_url %}
+                            <img src="{{ item.image_url }}" alt="{{ item.variant.product.name }}" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
                             {% else %}
                             <div class="w-16 h-16 rounded-xl bg-gray-200 shadow-sm"></div>
                             {% endif %}
@@ -178,5 +178,105 @@
         </aside>
 
     </div>
+
+<script>
+document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+    
+    // Only intercept for UPI (Razorpay)
+    if (paymentMethod === 'upi') {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.payment_method === 'upi') {
+                const options = {
+                    key: data.razorpay_key,
+                    amount: Math.round(data.amount * 100), // convert to paise correctly
+                    currency: data.currency,
+                    name: "Ecom Practice",
+                    description: "Order Payment",
+                    order_id: data.razorpay_order_id,
+                    handler: async function (response) {
+                        try {
+                            const verifyResponse = await fetch("{% url 'by_verify_payment' %}", {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                                },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    orderId: data.order_id
+                                })
+                            });
+                            
+                            const verifyData = await verifyResponse.json();
+                            if (verifyData.success) {
+                                window.location.href = "{% url 'by_thankyou' %}";
+                            } else {
+                                alert("Payment verification failed: " + verifyData.error);
+                            }
+                        } catch (error) {
+                            console.error("Verification Error:", error);
+                            alert("Payment verification error. Please contact support.");
+                        }
+                    },
+                    modal: {
+                        ondismiss: async function () {
+                            try {
+                                await fetch("{% url 'by_cancel_unpaid_order' %}", {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                                    },
+                                    body: JSON.stringify({
+                                        orderId: data.order_id
+                                    })
+                                });
+                                // toast.error('Payment cancelled');
+                            } catch (error) {
+                                console.error("Cancel Error:", error);
+                            }
+                        }
+                    },
+                    prefill: {
+                        name: data.name,
+                        email: data.email,
+                        contact: data.phone
+                    },
+                    theme: {
+                        color: "#000"
+                    }
+                };
+                
+                const rzp = new window.Razorpay(options);
+                rzp.open();
+            } else if (!data.success) {
+                alert("Order creation failed: " + data.error);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again.");
+        }
+    }
+    // For COD, the form will submit normally
+});
+</script>
 
 {% endblock buyer_layout %}

@@ -61,8 +61,8 @@
               {% for it in order.items.all %}
               <div class="flex items-center gap-4">
                 <div class="relative">
-                  {% if it.variant.product.image %}
-                  <img src="{{ it.variant.product.image.url }}" alt="{{ it.product_name }}" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
+                  {% if it.image_url %}
+                  <img src="{{ it.image_url }}" alt="{{ it.product_name }}" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
                   {% else %}
                   <div class="w-16 h-16 rounded-xl bg-gray-200 shadow-sm"></div>
                   {% endif %}

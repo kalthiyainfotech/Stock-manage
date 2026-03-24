@@ -117,7 +117,58 @@
     
     {% endblock sup_base %}
 
+    <div id="toast-container" class="fixed bottom-5 right-5 z-[1000] space-y-3"></div>
+
     <script>
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-500' : type === 'error' ? 'bg-rose-500' : 'bg-slate-800';
+            
+            toast.className = `${bgClass} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-fade-in transition-all duration-500 transform translate-y-0 opacity-100`;
+            toast.innerHTML = `
+                <div class="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-bell'} text-lg"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-sm">${title}</p>
+                    <p class="text-xs text-white/80 mt-0.5">${message}</p>
+                </div>
+                <button class="ml-4 text-white/50 hover:text-white transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            const closeBtn = toast.querySelector('button');
+            const removeToast = () => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            };
+            
+            closeBtn.onclick = removeToast;
+            setTimeout(removeToast, 5000);
+        }
+
+        (function() {
+            try {
+                const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+                const socket = new WebSocket(`${proto}://${location.host}/ws/orders/`);
+                
+                socket.onmessage = (e) => {
+                    const data = JSON.parse(e.data);
+                    if (data.type === 'order_added') {
+                        showToast('New Order!', `Order ${data.order.order_number} has been placed.`, 'success');
+                    } else if (data.type === 'order_updated') {
+                        showToast('Order Updated', `Order ${data.order.order_number} is now ${data.order.status}.`);
+                    }
+                };
+            } catch (err) {
+                console.error("Order socket error:", err);
+            }
+        })();
+
         const __loaderEl = document.getElementById('globalLoader');
         function showLoader(){ if(__loaderEl) __loaderEl.classList.remove('hidden'); }
         function hideLoader(){ if(__loaderEl) __loaderEl.classList.add('hidden'); }
