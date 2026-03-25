@@ -300,6 +300,40 @@ def by_product(request, variant_id):
     if not initial_main_image_url and gallery_annotated:
         color_matched = next((g for g in gallery_annotated if variant.color.id in g.get('color_ids', [])), None)
         initial_main_image_url = (color_matched or gallery_annotated[0]).get('url')
+
+    # Fetch Related Products (same category)
+    related_products_qs = ProductVariant.objects.select_related(
+        'product', 'product__brand'
+    ).filter(
+        product__brand__subcetegory__category=product.brand.subcetegory.category,
+        product__status=True,
+        stock__gt=0
+    ).exclude(product=product).values('product_id').annotate(first_id=Max('id')).values('first_id')
+
+    related_variants = ProductVariant.objects.select_related(
+        'product', 'product__brand'
+    ).filter(id__in=related_products_qs)[:10]
+
+    for rv in related_variants:
+        rv.calculated_image_url = _resolve_shop_image_url(rv.product, rv)
+
+    # Fetch Reviews
+    from .models import ProductReview
+    reviews = ProductReview.objects.filter(variant__product=product).select_related('buyer')
+    
+    # Check if current user can review (must have purchased the product and not reviewed yet)
+    can_review = False
+    buyer_id = request.session.get("buyer_id")
+    if buyer_id:
+        has_purchased = OrderItem.objects.filter(
+            order__buyer_id=buyer_id, 
+            variant__product=product,
+            order__status='delivered'
+        ).exists()
+        has_reviewed = ProductReview.objects.filter(buyer_id=buyer_id, variant__product=product).exists()
+        if has_purchased and not has_reviewed:
+            can_review = True
+
     context = {
         'variant': variant,
         'product': product,
@@ -313,8 +347,38 @@ def by_product(request, variant_id):
         'images_by_color': images_by_color,
         'gallery_annotated': gallery_annotated,
         'initial_main_image_url': initial_main_image_url,
+        'related_products': related_variants,
+        'reviews': reviews,
+        'can_review': can_review,
     }
     return render(request, 'by_product.html', context)
+
+@never_cache
+@buyer_login_required
+def add_review(request, variant_id):
+    from .models import ProductReview
+    if request.method == "POST":
+        buyer_id = request.session.get("buyer_id")
+        rating = request.POST.get("rating")
+        comment = request.POST.get("comment")
+        
+        try:
+            variant = ProductVariant.objects.get(id=variant_id)
+            # Check if already reviewed for this product
+            if ProductReview.objects.filter(buyer_id=buyer_id, variant__product=variant.product).exists():
+                messages.error(request, "You have already reviewed this product.")
+            else:
+                ProductReview.objects.create(
+                    buyer_id=buyer_id,
+                    variant=variant,
+                    rating=rating,
+                    comment=comment
+                )
+                messages.success(request, "Thank you for your review!")
+        except Exception as e:
+            messages.error(request, f"Error adding review: {str(e)}")
+            
+    return redirect(request.META.get('HTTP_REFERER', 'by_index'))
 
 @never_cache
 def by_contact(request):

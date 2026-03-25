@@ -31,7 +31,7 @@
     <link href="{% static 'css/by_style.css' %}" rel="stylesheet">
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans selection:bg-brand-500 selection:text-white">
-    <nav class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300">
+    <nav id="navbar" class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <a href="{% url 'by_index' %}" class="text-2xl font-black text-brand-900 tracking-tighter">LUXE<span class="text-brand-500">.</span></a>
@@ -97,14 +97,30 @@
         {% block buyer_layout %}{% endblock buyer_layout %}
     </div>
 
+    {% block footer %}
     <footer class="bg-gray-900 pt-16 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white text-center">
             <h4 class="text-2xl font-black tracking-tighter mb-4 text-white">LUXE<span class="text-brand-500">.</span></h4>
             <p class="text-gray-500 text-sm">&copy; 2026 LUXE E-Commerce. All rights reserved.</p>
         </div>
     </footer>
+    {% endblock footer %}
 
     <div id="toast-container" class="fixed bottom-5 right-5 z-[1000] space-y-3"></div>
+
+    <!-- Review Modal -->
+    <div id="review-modal" class="fixed inset-0 bg-black bg-opacity-50 z-[1001] hidden items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-black text-gray-900">Leave a Review</h3>
+                <button id="close-review-modal" class="text-gray-500 hover:text-gray-800"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="review-modal-body" class="p-6">
+                <!-- Order items will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
 
     <script>
         function showToast(title, message, type = 'info') {
@@ -143,13 +159,68 @@
                 const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
                 const socket = new WebSocket(`${proto}://${location.host}/ws/orders/`);
                 const buyerId = {{ request.session.buyer_id|default:0 }};
-                
+
                 socket.onmessage = (e) => {
                     const data = JSON.parse(e.data);
-                    if (data.type === 'order_updated' && data.order && Number(data.order.buyer_id) === Number(buyerId)) {
+                    if (data.type === 'order_status_updated' && data.order && Number(data.order.buyer_id) === Number(buyerId)) {
                         showToast('Order Update', `Your order ${data.order.order_number} is now ${data.order.status}.`, 'success');
+                        if (data.order.status === 'delivered') {
+                            fetch(`/api/order/${data.order.order_id}/items/`)
+                                .then(response => response.json())
+                                .then(items => {
+                                    const modalBody = document.getElementById('review-modal-body');
+                                    modalBody.innerHTML = ''; // Clear previous content
+                                    items.forEach(item => {
+                                        const formHtml = `
+                                            <form action="/reviews/add/${item.variant_id}/" method="post" class="review-form mb-6 p-4 border rounded-lg">
+                                                {% csrf_token %}
+                                                <h4 class="font-bold">${item.product_name}</h4>
+                                                <input type="hidden" name="order_id" value="${data.order.order_id}">
+                                                <div class="my-2">
+                                                    <label class="block text-sm font-bold text-gray-700 mb-1">Rating</label>
+                                                    <div class="flex star-rating">
+                                                        <input type="hidden" name="rating" class="rating-value" value="5">
+                                                        <i class="fas fa-star text-yellow-400" data-value="1"></i>
+                                                        <i class="fas fa-star text-yellow-400" data-value="2"></i>
+                                                        <i class="fas fa-star text-yellow-400" data-value="3"></i>
+                                                        <i class="fas fa-star text-yellow-400" data-value="4"></i>
+                                                        <i class="fas fa-star text-yellow-400" data-value="5"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="my-2">
+                                                    <label class="block text-sm font-bold text-gray-700 mb-1">Comment</label>
+                                                    <textarea name="comment" rows="3" required class="w-full p-2 border rounded-md"></textarea>
+                                                </div>
+                                                <button type="submit" class="px-4 py-2 bg-brand-600 text-white rounded-lg">Submit Review</button>
+                                            </form>
+                                        `;
+                                        modalBody.insertAdjacentHTML('beforeend', formHtml);
+                                    });
+                                    document.getElementById('review-modal').classList.remove('hidden');
+                                    document.getElementById('review-modal').classList.add('flex');
+                                });
+                        }
                     }
                 };
+
+                document.getElementById('close-review-modal').addEventListener('click', () => {
+                    document.getElementById('review-modal').classList.add('hidden');
+                    document.getElementById('review-modal').classList.remove('flex');
+                });
+
+                document.getElementById('review-modal-body').addEventListener('click', e => {
+                    if (e.target.classList.contains('fa-star')) {
+                        const ratingContainer = e.target.closest('.star-rating');
+                        const ratingValue = ratingContainer.querySelector('.rating-value');
+                        const stars = ratingContainer.querySelectorAll('i');
+                        const val = e.target.dataset.value;
+                        ratingValue.value = val;
+                        stars.forEach((star, index) => {
+                            star.classList.toggle('text-yellow-400', index < val);
+                            star.classList.toggle('text-gray-300', index >= val);
+                        });
+                    }
+                });
             } catch (err) {
                 console.error("Order socket error:", err);
             }
@@ -169,7 +240,20 @@
                     }
                 });
             }
+
+            // Navbar blur on scroll
+            const navbar = document.getElementById('navbar');
+            if (navbar) {
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 20) {
+                        navbar.classList.add('shadow-md');
+                    } else {
+                        navbar.classList.remove('shadow-md');
+                    }
+                });
+            }
         });
     </script>
+    {% block scripts %}{% endblock scripts %}
 </body>
 </html>

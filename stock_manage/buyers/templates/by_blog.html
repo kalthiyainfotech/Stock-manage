@@ -26,7 +26,7 @@
                 </div>
             </article>
             {% empty %}
-            <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">No blogs yet.</div>
+            <div id="no-blogs-msg" class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">No blogs yet.</div>
             {% endfor %}
         </div>
         
@@ -65,8 +65,11 @@
         function onAdded(blog) {
             const existing = grid.querySelector(`article[data-id="${blog.id}"]`);
             if (existing) existing.outerHTML = cardHtml(blog);
-            else grid.insertAdjacentHTML('afterbegin', cardHtml(blog));
-            
+            else {
+                grid.insertAdjacentHTML('afterbegin', cardHtml(blog));
+                const noMsg = document.getElementById('no-blogs-msg');
+                if (noMsg) noMsg.remove();
+            }
         }
         function onUpdated(blog) {
             const card = grid.querySelector(`article[data-id="${blog.id}"]`);
@@ -76,7 +79,12 @@
         }
         function onDeleted(id) {
             const card = grid.querySelector(`article[data-id="${id}"]`);
-            if (card) card.remove();
+            if (card) {
+                card.remove();
+                if (grid.children.length === 0) {
+                    grid.innerHTML = '<div id="no-blogs-msg" class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">No blogs yet.</div>';
+                }
+            }
         }
         try {
             const proto = (location.protocol === 'https:') ? 'wss' : 'ws';

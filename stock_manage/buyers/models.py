@@ -140,3 +140,18 @@ class WishlistItem(models.Model):
 
     def __str__(self):
         return f"{self.buyer.email} - wishlist - {self.variant}"
+
+
+class ProductReview(models.Model):
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, related_name="reviews")
+    variant = models.ForeignKey(ProductVariant, on_delete=models.CASCADE, related_name="reviews")
+    rating = models.PositiveIntegerField(default=5)  # 1 to 5
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("buyer", "variant")
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.buyer.name} review for {self.variant.product.name} - {self.rating} stars"

@@ -837,8 +837,6 @@ def edit_inventory(request, id):
         processed_media = {}
 
         if color_names:
-            from .models import ProductVariant, VariantImage, VariantSpec, ProductImage
-            
             # Using basic dicts with list values for safest type inference
             c_groups = {} 
             c_m_indices = {}
@@ -1182,6 +1180,31 @@ def delete_contact(request, id):
 @never_cache
 @login_required(login_url='auth_login')
 def auth_order(request):
+    if request.method == "POST":
+        order_id = request.POST.get('order_id')
+        new_status = request.POST.get('status')
+        order = get_object_or_404(Order, id=order_id)
+        order.status = new_status
+        order.save()
+
+        layer = get_channel_layer()
+        if layer:
+            order_data = {
+                "order_id": order.id,
+                "order_number": order.order_number,
+                "status": order.status,
+                "buyer_id": order.buyer.id,
+            }
+            async_to_sync(layer.group_send)(
+                f"user_{order.buyer.id}",
+                {
+                    "type": "order_status_updated",
+                    "order": order_data
+                }
+            )
+
+        return JsonResponse({"status": "success", "new_status": new_status})
+
     orders_list = Order.objects.select_related('buyer').prefetch_related('items').all().order_by('-created_at')
     
     paginator = Paginator(orders_list, 10)

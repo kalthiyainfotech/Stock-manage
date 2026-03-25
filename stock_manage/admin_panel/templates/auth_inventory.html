@@ -279,17 +279,17 @@
         </div>
 
         <div class="overflow-x-auto border-t border-slate-100">
-            <table class="min-w-full text-left text-sm text-slate-700">
+            <table class="w-full min-w-[1000px] text-left text-sm text-slate-700">
                 <thead
                     class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
                     <tr>
-                        <th class="px-4 py-3 font-medium text-center">ID</th>
-                        <th class="px-4 py-3 font-medium">Category</th>
-                        <th class="px-4 py-3 font-medium">Color</th>
-                        <th class="px-4 py-3 font-medium">Size</th>
-                        <th class="px-4 py-3 font-medium text-center">Stock</th>
-                        <th class="px-4 py-3 font-medium text-center">Status</th>
-                        <th class="px-4 py-3 font-medium text-center">Action</th>
+                        <th class="px-2 sm:px-4 py-3 font-medium text-center">ID</th>
+                        <th class="px-2 sm:px-4 py-3 font-medium">Category</th>
+                        <th class="px-2 sm:px-4 py-3 font-medium">Color</th>
+                        <th class="px-2 sm:px-4 py-3 font-medium">Size</th>
+                        <th class="px-2 sm:px-4 py-3 font-medium text-center">Stock</th>
+                        <th class="px-2 sm:px-4 py-3 font-medium text-center">Status</th>
+                        <th class="px-2 sm:px-4 py-3 font-medium text-center">Action</th>
                     </tr>
                 </thead>
 
@@ -297,18 +297,18 @@
                     {% for group in inventory_groups %}
                     {% with first=group.variants.0 %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
+                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
                             {{ forloop.counter }}
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-700">
+                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-700">
                             {{ first.product.brand.subcetegory.category.name }}
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
-                            <div class="flex flex-wrap gap-2">
+                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
+                            <div class="flex flex-wrap gap-1.5 max-w-[180px]">
                                 {% for v in group.variants %}
                                 <button
                                     type="button"
-                                    class="inline-block w-4 h-4 rounded-full border border-slate-300 hover:ring-2 hover:ring-slate-300 edit-variant-color-btn"
+                                    class="inline-block w-4 h-4 rounded-full border border-slate-300 hover:ring-2 hover:ring-slate-300 edit-variant-color-btn shrink-0"
                                     title="Edit Variant: {{ v.color.name }}"
                                     style="background-color: {{ v.color.name }}"
                                     data-edit-url="{% url 'edit_inventory' v.id %}"
@@ -331,12 +331,12 @@
                                 {% endfor %}
                             </div>
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
-                            <div class="flex flex-wrap gap-2">
+                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
+                            <div class="flex flex-wrap gap-1.5 max-w-[200px]">
                                 {% for v in group.variants %}
                                 <button
                                     type="button"
-                                    class="px-2 py-0.5 rounded border text-[11px] hover:bg-slate-100 edit-variant-size-btn"
+                                    class="px-2 py-0.5 rounded border text-[11px] hover:bg-slate-100 edit-variant-size-btn shrink-0"
                                     title="Edit Variant: {{ v.size.name }}"
                                     data-edit-url="{% url 'edit_inventory' v.id %}"
                                     data-category="{{ v.product.brand.subcetegory.category.name|escapejs }}"
@@ -360,21 +360,21 @@
                                 {% endfor %}
                             </div>
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-700 text-center">
+                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-700 text-center">
                             {{ first.stock }}
                         </td>
-                        <td class="px-4 py-3 align-middle text-center">
+                        <td class="px-2 sm:px-4 py-3 align-middle text-center">
                             <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
                                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                                 Active
                             </span>
                         </td>
-                        <td class="px-4 py-3 align-middle text-center">
+                        <td class="px-2 sm:px-4 py-3 align-middle text-center">
                             <div class="inline-flex items-center justify-center gap-2">
                                 <button
                                     type="button"
                                     onclick="openViewModal(this)"
-                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition shrink-0"
                                     title="View"
                                     data-product-name="{{ first.product.name|escapejs }}"
                                     data-brand="{{ first.product.brand.name|escapejs }}"
@@ -386,7 +386,7 @@
                                     <i class="fa-solid fa-eye text-xs"></i>
                                     <span class="sr-only">View</span>
                                 </button>
-                                <div class="relative inline-block">
+                                <div class="relative inline-block shrink-0">
                                     <button
                                         type="button"
                                         class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition"
@@ -406,7 +406,7 @@
                                 </div>
                                 <button
                                     type="button"
-                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition shrink-0"
                                     title="Delete"
                                     data-product-id="{{ first.product.id }}"
                                     data-delete-variants='[{% for v in group.variants %}{"deleteUrl":"{% url 'delete_inventory' v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }}}{% if not forloop.last %},{% endif %}{% endfor %}]'>

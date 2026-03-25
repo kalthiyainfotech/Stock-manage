@@ -33,7 +33,9 @@
           {% for wi in wishlist_items %}
           <div class="rounded-2xl border border-gray-200 bg-gray-50 overflow-hidden">
             <a href="{% url 'by_product' wi.variant.id %}" class="block h-48 bg-gray-100">
-              {% if wi.variant.product.image %}
+              {% if wi.variant.image %}
+              <img src="{{ wi.variant.image.url }}" alt="{{ wi.variant.product.name }}" class="w-full h-full object-cover">
+              {% elif wi.variant.product.image %}
               <img src="{{ wi.variant.product.image.url }}" alt="{{ wi.variant.product.name }}" class="w-full h-full object-cover">
               {% else %}
               <div class="w-full h-full bg-gray-200"></div>

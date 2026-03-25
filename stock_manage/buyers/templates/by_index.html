@@ -217,7 +217,10 @@
         </div>
     </section>
 
-    <!-- Footer -->
+{% endblock buyer_layout %}
+
+{% block footer %}
+    <!-- Detailed Footer for Index Page -->
     <footer class="bg-gray-50 pt-16 pb-8 border-t border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
@@ -262,25 +265,7 @@
                     </ul>
                 </div>
 
-                <!-- Categories -->
-                <div>
-                    <h4 class="font-bold text-gray-900 text-lg mb-6">Categories</h4>
-                    <ul class="space-y-4">
-                        <li><a href="{% url 'by_shop' %}"
-                                class="text-gray-500 hover:text-brand-600 transition-colors flex items-center"><i
-                                    class="fas fa-chevron-right text-xs mr-2 text-brand-500"></i> Men's Wear</a></li>
-                        <li><a href="{% url 'by_shop' %}"
-                                class="text-gray-500 hover:text-brand-600 transition-colors flex items-center"><i
-                                    class="fas fa-chevron-right text-xs mr-2 text-brand-500"></i> Women's Wear</a></li>
-                        <li><a href="{% url 'by_shop' %}"
-                                class="text-gray-500 hover:text-brand-600 transition-colors flex items-center"><i
-                                    class="fas fa-chevron-right text-xs mr-2 text-brand-500"></i> Shoes & Bags</a></li>
-                        <li><a href="{% url 'by_shop' %}"
-                                class="text-gray-500 hover:text-brand-600 transition-colors flex items-center"><i
-                                    class="fas fa-chevron-right text-xs mr-2 text-brand-500"></i> Accessories</a></li>
-                    </ul>
-                </div>
-
+                
                 <!-- Contact Info -->
                 <div>
                     <h4 class="font-bold text-gray-900 text-lg mb-6">Contact Us</h4>
@@ -316,38 +301,7 @@
             </div>
         </div>
     </footer>
+{% endblock footer %}
 
-    <!-- Scripts -->
-    <script>
-        // Mobile Menu Toggle
-        const menuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        menuBtn.addEventListener('click', () => {
-            if (mobileMenu.classList.contains('hidden')) {
-                mobileMenu.classList.remove('hidden');
-                setTimeout(() => {
-                    mobileMenu.classList.remove('opacity-0', 'scale-y-0');
-                    mobileMenu.classList.add('opacity-100', 'scale-y-100');
-                }, 10);
-
-            } else {
-                mobileMenu.classList.remove('opacity-100', 'scale-y-100');
-                mobileMenu.classList.add('opacity-0', 'scale-y-0');
-                setTimeout(() => {
-                    mobileMenu.classList.add('hidden');
-                }, 300);
-            }
-        });
-
-        // Navbar blur on scroll
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 20) {
-                navbar.classList.add('shadow-md');
-            } else {
-                navbar.classList.remove('shadow-md');
-            }
-        });
-    </script>
-{% endblock buyer_layout %}
+{% block scripts %}
+{% endblock scripts %}

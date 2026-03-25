@@ -41,20 +41,10 @@
 
             <!-- Right: Details -->
             <div class="w-full lg:w-1/2 flex flex-col pt-2 md:pt-4">
-                <div class="mb-2">
-                    <span
-                        class="bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Best
-                        Seller</span>
-                </div>
+                
                 <h1 class="text-3xl md:text-4xl lg:text-5xl font-black text-gray-900 mb-4 mt-2 leading-tight break-words">{{ product.name }}</h1>
 
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="flex text-yellow-400 text-sm">
-                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
-                            class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-                    </div>
-                    <span class="text-gray-500 text-sm">{{ product.brand.name }}</span>
-                </div>
+                
 
                 <div class="border-y border-gray-100 py-6 mb-6">
                     <div class="flex items-end gap-3 mb-2">
@@ -75,7 +65,6 @@
                 <div class="mb-6">
                     <div class="flex justify-between items-center mb-3">
                         <h4 class="font-bold text-gray-900">Color</h4>
-                        <span id="selected-color-name" class="text-sm font-medium text-brand-600">{{ variant.color.name }}</span>
                     </div>
                     <div class="mb-3">
                         <div class="flex flex-wrap gap-2">
@@ -96,8 +85,7 @@
                 <!-- Storage Selection -->
                 <div class="mb-8">
                     <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-bold text-gray-900">Select Storage</h4>
-                        <button class="text-brand-600 text-sm font-medium hover:underline">Storage Guide</button>
+                        <h4 class="font-bold text-gray-900">Select Variant</h4>
                     </div>
                     <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
                         {% for s in sizes %}
@@ -176,17 +164,15 @@
     </main>
 
     <!-- Description & Details Tabs -->
-    <section class="border-t border-gray-100 py-16 bg-white">
+    <section class="border-t border-gray-100 py-16 bg-white" id="product-tabs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-center border-b border-gray-200 mb-8 max-w-2xl mx-auto">
-                <button class="px-8 py-4 font-bold text-brand-600 border-b-2 border-brand-500">Description</button>
-                <button
-                    class="px-8 py-4 font-bold text-gray-500 hover:text-brand-600 transition-colors border-b-2 border-transparent">Additional
-                    Information</button>
-                <button
-                    class="px-8 py-4 font-bold text-gray-500 hover:text-brand-600 transition-colors border-b-2 border-transparent">Reviews</button>
+                <button class="tab-btn px-8 py-4 font-bold transition-all border-b-2 border-brand-500 text-brand-600" data-tab="description">Description</button>
+                <button class="tab-btn px-8 py-4 font-bold transition-all border-b-2 border-transparent text-gray-500 hover:text-brand-600" data-tab="reviews">Reviews ({{ reviews.count }})</button>
             </div>
-            <div class="max-w-3xl mx-auto text-gray-600 leading-relaxed text-lg">
+
+            <!-- Description Tab Content -->
+            <div id="description-tab" class="tab-content max-w-3xl mx-auto text-gray-600 leading-relaxed text-lg">
                 {% if product.description %}
                 <p class="mb-6">{{ product.description }}</p>
                 {% endif %}
@@ -198,19 +184,120 @@
                 </ul>
                 {% endif %}
             </div>
+
+            <!-- Reviews Tab Content -->
+            <div id="reviews-tab" class="tab-content hidden max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    <!-- Left: Review Stats -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-gray-50 rounded-3xl p-8 sticky top-24">
+                            <h3 class="text-2xl font-black text-gray-900 mb-2">Customer Reviews</h3>
+                            <div class="flex items-center gap-2 mb-6">
+                                <div class="flex text-yellow-400">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <span class="font-bold text-gray-900">4.8 out of 5</span>
+                            </div>
+
+                            {% if can_review %}
+                            <button onclick="toggleReviewForm()" class="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl hover:bg-brand-500 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-pen"></i> Write a Review
+                            </button>
+                            {% elif not request.session.buyer_id %}
+                            <a href="{% url 'by_login' %}" class="w-full bg-gray-100 text-gray-600 font-bold py-4 rounded-2xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2">
+                                <i class="fas fa-lock"></i> Login to Review
+                            </a>
+                            {% else %}
+                            <p class="text-xs text-gray-400 text-center italic">Only verified buyers can leave a review after their order is delivered.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Right: Review List -->
+                    <div class="lg:col-span-2 space-y-8">
+                        <!-- Review Form (Hidden by default) -->
+                        <div id="review-form-container" class="hidden bg-white border-2 border-brand-100 rounded-3xl p-8 mb-12 shadow-xl shadow-brand-500/5">
+                            <h4 class="text-xl font-black text-gray-900 mb-6">Share your experience</h4>
+                            <form action="{% url 'add_review' variant.id %}" method="post" id="review-form">
+                                {% csrf_token %}
+                                <div class="mb-6">
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Rating</label>
+                                    <div class="flex gap-2 text-2xl cursor-pointer" id="star-rating">
+                                        <input type="hidden" name="rating" id="rating-value" value="5">
+                                        <i class="fas fa-star text-yellow-400" data-value="1"></i>
+                                        <i class="fas fa-star text-yellow-400" data-value="2"></i>
+                                        <i class="fas fa-star text-yellow-400" data-value="3"></i>
+                                        <i class="fas fa-star text-yellow-400" data-value="4"></i>
+                                        <i class="fas fa-star text-yellow-400" data-value="5"></i>
+                                    </div>
+                                </div>
+                                <div class="mb-6">
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Your Review</label>
+                                    <textarea name="comment" rows="4" required class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:border-brand-500 transition-all" placeholder="What did you like or dislike about this product?"></textarea>
+                                </div>
+                                <div class="flex justify-end gap-3">
+                                    <button type="button" onclick="toggleReviewForm()" class="px-6 py-3 font-bold text-gray-500 hover:text-gray-700">Cancel</button>
+                                    <button type="submit" class="bg-brand-500 text-white font-bold px-8 py-3 rounded-xl hover:bg-brand-600 transition-all">Post Review</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {% if reviews %}
+                            <div class="space-y-6">
+                                {% for r in reviews %}
+                                <div class="bg-white border border-gray-100 rounded-3xl p-8 hover:shadow-lg transition-all">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-black">
+                                                {% if r.buyer.profile_image %}
+                                                    <img src="{{ r.buyer.profile_image.url }}" class="w-full h-full rounded-full object-cover">
+                                                {% else %}
+                                                    {{ r.buyer.name|slice:":1"|upper }}
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-gray-900">{{ r.buyer.name }}</div>
+                                                <div class="text-xs text-gray-400">{{ r.created_at|date:"F d, Y" }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex text-yellow-400 text-xs">
+                                            {% for i in "12345"|make_list %}
+                                                {% if forloop.counter <= r.rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-600 leading-relaxed">{{ r.comment }}</p>
+                                    <div class="mt-4 flex items-center gap-4 text-xs font-bold text-gray-400">
+                                        <button class="hover:text-brand-500 flex items-center gap-1"><i class="far fa-thumbs-up"></i> Helpful</button>
+                                        <button class="hover:text-rose-500 flex items-center gap-1"><i class="far fa-flag"></i> Report</button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                                    <i class="far fa-comment-alt text-2xl text-gray-300"></i>
+                                </div>
+                                <h4 class="text-lg font-bold text-gray-900">No reviews yet</h4>
+                                <p class="text-gray-500 text-sm">Be the first to share your experience with this product.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 pt-16 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
-            <div class="text-center">
-                <h4 class="text-2xl font-black tracking-tighter mb-4 text-white">LUXE<span
-                        class="text-brand-500">.</span></h4>
-                <p class="text-gray-500 text-sm">&copy; 2026 LUXE. All Rights Reserved.</p>
-            </div>
-        </div>
-    </footer>
+
 
     <script>
         const SIZE_MAP = {{ size_map|safe }};
@@ -440,9 +527,77 @@
             setTimeout(() => toast.classList.remove('translate-y-20'), 100);
             setTimeout(() => { toast.classList.add('translate-y-20'); setTimeout(() => toast.remove(), 300); }, 3000);
         }
+
+        // Tab Switching Logic
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.dataset.tab;
+                
+                // Update buttons
+                tabBtns.forEach(b => {
+                    b.classList.remove('border-brand-500', 'text-brand-600');
+                    b.classList.add('border-transparent', 'text-gray-500');
+                });
+                btn.classList.add('border-brand-500', 'text-brand-600');
+                btn.classList.remove('border-transparent', 'text-gray-500');
+
+                // Update content
+                tabContents.forEach(content => {
+                    content.classList.add('hidden');
+                    if (content.id === `${target}-tab`) {
+                        content.classList.remove('hidden');
+                    }
+                });
+            });
+        });
+
+        // Review Form Logic
+        function toggleReviewForm() {
+            const container = document.getElementById('review-form-container');
+            container.classList.toggle('hidden');
+            if (!container.classList.contains('hidden')) {
+                container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Star Rating Logic
+        const stars = document.querySelectorAll('#star-rating i');
+        const ratingInput = document.getElementById('rating-value');
+
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() {
+                const val = parseInt(this.dataset.value);
+                highlightStars(val);
+            });
+
+            star.addEventListener('mouseout', function() {
+                highlightStars(parseInt(ratingInput.value));
+            });
+
+            star.addEventListener('click', function() {
+                const val = parseInt(this.dataset.value);
+                ratingInput.value = val;
+                highlightStars(val);
+            });
+        });
+
+        function highlightStars(count) {
+            stars.forEach(s => {
+                const sVal = parseInt(s.dataset.value);
+                if (sVal <= count) {
+                    s.classList.remove('far', 'text-gray-300');
+                    s.classList.add('fas', 'text-yellow-400');
+                } else {
+                    s.classList.remove('fas', 'text-yellow-400');
+                    s.classList.add('far', 'text-gray-300');
+                }
+            });
+        }
     </script>
-    <!-- Footer Spacer -->
-    <div class="h-20"></div>
+
 
     <script>
         // WebSocket for Live Updates
