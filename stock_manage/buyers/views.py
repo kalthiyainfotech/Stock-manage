@@ -907,7 +907,7 @@ def place_order(request):
                     "created_at": order.created_at.strftime("%Y-%m-%d %H:%M"),
                     "status": order.status,
                     "total_items": sum(i.quantity for i in order.items.all()),
-                }
+                }   
                 async_to_sync(layer.group_send)("orders", {
                     "type": "order_added",
                     "order": payload,
@@ -1191,4 +1191,21 @@ def by_update_profile(request):
     messages.success(request, "Profile updated successfully.", extra_tags="buyer")
     referer = request.META.get("HTTP_REFERER") or "/buyers/"
     return redirect(referer)
+
+@never_cache
+@buyer_login_required
+def by_order_receipt(request, order_id):
+    buyer_id = request.session.get("buyer_id")
+    try:
+        order = Order.objects.select_related("buyer").prefetch_related(
+            "items",
+            "items__variant",
+            "items__variant__product",
+            "items__variant__color",
+            "items__variant__size",
+        ).get(id=order_id, buyer_id=buyer_id)
+    except Order.DoesNotExist:
+        return redirect("by_history")
+    
+    return render(request, "by_receipt.html", {"order": order})
 

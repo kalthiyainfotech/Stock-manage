@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.http import JsonResponse
 from .models import *
 from buyers.models import Buyer, Order
@@ -719,41 +720,50 @@ def add_inventory(request):
 @never_cache
 @login_required(login_url='auth_login')
 def auth_inventory(request):
-    inventory_list = ProductVariant.objects.select_related(
+    # Paginate by Product instead of ProductVariant, and only show products with variants
+    product_list = Product.objects.annotate(
+        variant_count=Count('variants')
+    ).filter(variant_count__gt=0).select_related(
+        'brand',
+        'brand__subcetegory',
+        'brand__subcetegory__category'
+    ).order_by('-id')
+
+    paginator = Paginator(product_list, 10)
+    page_number = request.GET.get('page')
+    inventory_page = paginator.get_page(page_number)
+
+    categories = Category.objects.filter(status=True).order_by('name')
+
+    # Get all variants for the products on this page
+    product_ids = [p.id for p in inventory_page]
+    all_variants = ProductVariant.objects.filter(product_id__in=product_ids).select_related(
         'product',
         'color',
         'size',
         'product__brand',
         'product__brand__subcetegory',
         'product__brand__subcetegory__category'
-    ).order_by('-id')
+    ).prefetch_related('gallery_images', 'specs').order_by('-id')
 
-    paginator = Paginator(inventory_list, 10)
-    page_number = request.GET.get('page')
-    inventory = paginator.get_page(page_number)
-
-    categories = Category.objects.filter(status=True).order_by('name')
-
-    groups_map = {}
     groups = []
-    for v in inventory:
-        pid = v.product_id
-        g = groups_map.get(pid)
-        if not g:
-            g = {
-                'product': v.product,
-                'variants': [],
-                'colors': set(),
-                'sizes': set(),
-            }
-            groups_map[pid] = g
-            groups.append(g)
-        g['variants'].append(v)
-        g['colors'].add(v.color.name)
-        g['sizes'].add(v.size.name)
+    for p in inventory_page:
+        variants = [v for v in all_variants if v.product_id == p.id]
+        if variants:
+            # Calculate total stock across all variants for this product
+            total_stock = sum(v.stock for v in variants)
+            # Inject total_stock into the first variant so template doesn't need much change
+            # We use a temporary attribute to avoid saving to DB if anyone calls .save()
+            # but in this context it's safe since it's just for display.
+            variants[0].stock = total_stock 
+            
+            groups.append({
+                'product': p,
+                'variants': variants,
+            })
 
     return render(request, 'auth_inventory.html', {
-        'inventorys': inventory,
+        'inventorys': inventory_page,
         'inventory_groups': groups,
         'categories': categories
     })

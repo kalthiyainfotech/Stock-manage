@@ -29,4 +29,5 @@ urlpatterns = [
     path("order/<int:order_id>/return/", by_return_order, name="by_return_order"),
     path("order/<int:order_id>/cancel/", by_cancel_order, name="by_cancel_order"),
     path("order/<int:order_id>/items/", by_order_items_api, name="by_order_items_api"),
+    path("order/<int:order_id>/receipt/", by_order_receipt, name="by_order_receipt"),
 ]
