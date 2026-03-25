@@ -1,0 +1,193 @@
+{% extends "by_base.html" %}
+{% block buyer_layout %}
+{% load static %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Sidebar -->
+    <aside class="w-full lg:w-1/4">
+      <div class="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="relative group">
+            <div class="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl font-black overflow-hidden border-2 border-brand-100">
+              {% if buyer.profile_image %}
+                <img src="{{ buyer.profile_image.url }}" alt="{{ buyer.name }}" class="w-full h-full object-cover">
+              {% else %}
+                {{ buyer.name|slice:":1"|upper }}
+              {% endif %}
+            </div>
+            <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-brand-500 rounded-lg flex items-center justify-center text-white text-[10px] shadow-lg border-2 border-white">
+                <i class="fas fa-check"></i>
+            </div>
+          </div>
+          <div>
+            <div class="font-black text-gray-900 leading-tight">{{ buyer.name }}</div>
+            <div class="text-xs text-brand-600 font-bold mt-1 uppercase tracking-wider">Premium Member</div>
+          </div>
+        </div>
+        <nav class="space-y-2">
+          <a href="{% url 'by_profile' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-50 text-brand-700 font-bold transition-all">
+            <i class="fas fa-user-circle w-5"></i>
+            <span>Personal Details</span>
+          </a>
+          <a href="{% url 'by_history' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">
+            <i class="fas fa-shopping-bag w-5"></i>
+            <span>Order History</span>
+          </a>
+          <a href="{% url 'by_wishlist' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">
+            <i class="fas fa-heart w-5"></i>
+            <span>My Wishlist</span>
+          </a>
+          <a href="{% url 'by_cart' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl border border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">
+            <i class="fas fa-shopping-cart w-5"></i>
+            <span>Shopping Cart</span>
+          </a>
+          <div class="pt-4 mt-4 border-t border-gray-100">
+            <a href="{% url 'by_logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-rose-500 hover:bg-rose-50 font-bold transition-all">
+              <i class="fas fa-sign-out-alt w-5"></i>
+              <span>Logout</span>
+            </a>
+          </div>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="w-full lg:w-3/4">
+      <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="p-8 sm:p-12 border-b border-gray-50">
+          <h1 class="text-3xl font-black text-gray-900 tracking-tight">Personal Details</h1>
+          <p class="text-gray-500 mt-2">Manage your account information and preferences.</p>
+        </div>
+        
+        <form action="{% url 'by_update_profile' %}" method="post" enctype="multipart/form-data" class="p-8 sm:p-12">
+          {% csrf_token %}
+          
+          <!-- Avatar Upload -->
+          <div class="mb-12 flex flex-col sm:flex-row items-center gap-8">
+            <div class="w-32 h-32 rounded-3xl bg-gray-100 overflow-hidden border-4 border-white shadow-xl relative group">
+                {% if buyer.profile_image %}
+                    <img src="{{ buyer.profile_image.url }}" id="profile-preview" class="w-full h-full object-cover">
+                {% else %}
+                    <div id="profile-placeholder" class="w-full h-full flex items-center justify-center text-4xl font-black text-gray-300">
+                        {{ buyer.name|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+                <label class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <i class="fas fa-camera text-white text-2xl"></i>
+                    <input type="file" name="profile_image" class="hidden" accept="image/*" onchange="previewImage(this)">
+                </label>
+            </div>
+            <div class="text-center sm:text-left">
+                <h4 class="font-bold text-gray-900 text-lg">Profile Photo</h4>
+                <p class="text-gray-500 text-sm mt-1">Recommended: Square image, max 2MB</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Name (Read-only) -->
+            <div class="space-y-2">
+              <label class="block text-sm font-bold text-gray-700 ml-1">Full Name</label>
+              <div class="relative">
+                <input type="text" value="{{ buyer.name }}" readonly 
+                    class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-gray-500 font-medium cursor-not-allowed focus:outline-none">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-5">
+                    <i class="fas fa-lock text-gray-300 text-xs"></i>
+                </div>
+              </div>
+              <p class="text-[10px] text-gray-400 ml-1">Contact support to change your registered name.</p>
+            </div>
+
+            <!-- Email (Read-only) -->
+            <div class="space-y-2">
+              <label class="block text-sm font-bold text-gray-700 ml-1">Email Address</label>
+              <div class="relative">
+                <input type="email" value="{{ buyer.email }}" readonly 
+                    class="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-gray-500 font-medium cursor-not-allowed focus:outline-none">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-5">
+                    <i class="fas fa-lock text-gray-300 text-xs"></i>
+                </div>
+              </div>
+              <p class="text-[10px] text-gray-400 ml-1">Email address is linked to your account login.</p>
+            </div>
+
+            <!-- Phone -->
+            <div class="space-y-2">
+              <label class="block text-sm font-bold text-gray-700 ml-1">Phone Number</label>
+              <input type="tel" name="phone" value="{{ buyer.phone|default:'' }}" placeholder="+91 00000 00000"
+                  class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-50 transition-all font-medium">
+            </div>
+
+            <!-- Gender -->
+            <div class="space-y-2">
+              <label class="block text-sm font-bold text-gray-700 ml-1">Gender</label>
+              <select name="gender" class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-50 transition-all font-medium appearance-none">
+                <option value="" {% if not buyer.gender %}selected{% endif %}>Select Gender</option>
+                <option value="Male" {% if buyer.gender == 'Male' %}selected{% endif %}>Male</option>
+                <option value="Female" {% if buyer.gender == 'Female' %}selected{% endif %}>Female</option>
+                <option value="Other" {% if buyer.gender == 'Other' %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+
+            <!-- Address -->
+            <div class="md:col-span-2 space-y-2">
+              <label class="block text-sm font-bold text-gray-700 ml-1">Shipping Address</label>
+              <textarea name="address" rows="3" placeholder="Enter your full address"
+                  class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-50 transition-all font-medium resize-none">{{ buyer.address|default:'' }}</textarea>
+            </div>
+
+            <!-- City -->
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700 ml-1">City</label>
+                <input type="text" name="city" value="{{ buyer.city|default:'' }}" placeholder="City"
+                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-50 transition-all font-medium">
+            </div>
+
+            <!-- State -->
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700 ml-1">State</label>
+                <input type="text" name="state" value="{{ buyer.state|default:'' }}" placeholder="State"
+                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-50 transition-all font-medium">
+            </div>
+
+            <!-- Pincode -->
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700 ml-1">Pincode</label>
+                <input type="text" name="pincode" value="{{ buyer.pincode|default:'' }}" placeholder="Pincode"
+                    class="w-full px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-50 transition-all font-medium">
+            </div>
+          </div>
+
+          <div class="mt-12 flex justify-end">
+            <button type="submit" class="bg-gray-900 text-white px-10 py-4 rounded-2xl font-black hover:bg-brand-600 transition-all shadow-xl shadow-gray-200 flex items-center gap-3 group">
+                <span>Save Changes</span>
+                <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('profile-preview');
+                const placeholder = document.getElementById('profile-placeholder');
+                if (preview) {
+                    preview.src = e.target.result;
+                } else if (placeholder) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.id = 'profile-preview';
+                    img.className = 'w-full h-full object-cover';
+                    placeholder.parentNode.replaceChild(img, placeholder);
+                }
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock buyer_layout %}

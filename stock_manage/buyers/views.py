@@ -1155,42 +1155,52 @@ def by_logout(request):
 
 @never_cache
 @buyer_login_required
-def by_update_profile(request):
-    if request.method != "POST":
-        return redirect("by_index")
+def by_profile(request):
     buyer_id = request.session.get("buyer_id")
     try:
         buyer = Buyer.objects.get(id=buyer_id)
     except Buyer.DoesNotExist:
         return redirect("by_login")
-    name = request.POST.get("name", "").strip()
-    email = request.POST.get("email", "").strip()
+    return render(request, "by_profile.html", {"buyer": buyer})
+
+@never_cache
+@buyer_login_required
+def by_update_profile(request):
+    if request.method != "POST":
+        return redirect("by_profile")
+    buyer_id = request.session.get("buyer_id")
+    try:
+        buyer = Buyer.objects.get(id=buyer_id)
+    except Buyer.DoesNotExist:
+        return redirect("by_login")
+    
+    # name and email are not changable
     gender = request.POST.get("gender", "").strip()
     phone = request.POST.get("phone", "").strip()
     address = request.POST.get("address", "").strip()
+    city = request.POST.get("city", "").strip()
+    state = request.POST.get("state", "").strip()
+    pincode = request.POST.get("pincode", "").strip()
     profile_image = request.FILES.get("profile_image")
-    if name:
-        buyer.name = name
-    if email and email != buyer.email:
-        if Buyer.objects.filter(email=email).exclude(id=buyer.id).exists():
-            messages.error(request, "Email already in use.", extra_tags="buyer")
-            referer = request.META.get("HTTP_REFERER") or "/buyers/"
-            return redirect(referer)
-        buyer.email = email
+    
     if gender:
         buyer.gender = gender
     if phone:
         buyer.phone = phone
     if address:
         buyer.address = address
+    if city:
+        buyer.city = city
+    if state:
+        buyer.state = state
+    if pincode:
+        buyer.pincode = pincode
     if profile_image:
         buyer.profile_image = profile_image
+        
     buyer.save()
-    request.session["buyer_name"] = buyer.name
-    request.session["buyer_email"] = buyer.email
     messages.success(request, "Profile updated successfully.", extra_tags="buyer")
-    referer = request.META.get("HTTP_REFERER") or "/buyers/"
-    return redirect(referer)
+    return redirect("by_profile")
 
 @never_cache
 @buyer_login_required

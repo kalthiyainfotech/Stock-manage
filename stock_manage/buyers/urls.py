@@ -6,6 +6,7 @@ urlpatterns = [
     path("home/", by_home, name="by_home"),
     path("login/", by_login, name="by_login"),
     path("register/", by_register, name="by_register"),
+    path("profile/", by_profile, name="by_profile"),
     path("profile/update/", by_update_profile, name="by_update_profile"),
     path("blog/", by_blog, name="by_blog"),
     path("cart/", by_cart, name="by_cart"),
