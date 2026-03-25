@@ -103,7 +103,7 @@
                                         <div class="flex justify-between items-center">
                                             <span class="text-lg font-black text-gray-900">₹${item.price}</span>
                                             {% if request.session.buyer_id %}
-                                            <a href="/cart/add/${item.id}/" class="w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-brand-600 transition-colors flex items-center justify-center shadow-lg group-hover:rotate-12">
+                                            <a href="/cart/add/${item.id}/" class="ajax-action w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-brand-600 transition-colors flex items-center justify-center shadow-lg group-hover:rotate-12">
                                                 <i class="fas fa-plus"></i>
                                             </a>
                                             {% else %}
@@ -299,7 +299,7 @@
                     <div class="flex justify-between items-center">
                         <span class="text-lg font-black text-gray-900">₹{{ item.price }}</span>
                         {% if request.session.buyer_id %}
-                        <a href="{% url 'by_add_to_cart' item.id %}" class="w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-brand-600 transition-colors flex items-center justify-center shadow-lg group-hover:rotate-12">
+                        <a href="{% url 'by_add_to_cart' item.id %}" class="ajax-action w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-brand-600 transition-colors flex items-center justify-center shadow-lg group-hover:rotate-12">
                             <i class="fas fa-plus"></i>
                         </a>
                         {% else %}
@@ -359,8 +359,11 @@
         socket.onmessage = function (event) {
             try {
                 const data = JSON.parse(event.data);
-                if (data && (data.type === 'inventory_added' || data.type === 'inventory_updated' || data.type === 'inventory_deleted')) {
+                if (data && (data.type === 'inventory_added' || data.type === 'inventory_deleted')) {
                     window.location.reload();
+                } else if (data && data.type === 'inventory_updated') {
+                    // Update stock UI without reload if possible
+                    updateFilters(); // This is already implemented in by_shop.html to refresh via API
                 }
             } catch (e) {
             }

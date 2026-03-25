@@ -195,6 +195,13 @@
                                         </p>
                                     </div>
                                 </div>
+                                <div id="workerImagePreviewContainer" class="hidden mt-2 relative inline-block">
+                                    <img id="workerImagePreview" src="" class="h-16 w-16 rounded-lg object-cover border border-slate-200 shadow-sm">
+                                    <button type="button" id="removeWorkerImagePreview" 
+                                        class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] hover:bg-rose-600 shadow-md">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="space-y-1.5">
@@ -376,7 +383,8 @@
                                             '{{ worker.city }}',
                                             '{{ worker.address }}',
                                             '{{ worker.gender }}',
-                                            '{{ worker.status }}'
+                                            '{{ worker.status }}',
+                                            '{% if worker.profile_picture %}{{ worker.profile_picture.url }}{% endif %}'
                                         )"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition"
                                     title="Edit">
@@ -580,6 +588,10 @@ document.getElementById('openworkerModal').onclick = () => {
     workerForm.reset();
     workerForm.action = "{% url 'add_worker' %}";
     modalTitle.innerText = "Add Worker";
+    if (workerImagePreviewContainer) {
+        workerImagePreviewContainer.classList.add('hidden');
+        workerImagePreview.src = '';
+    }
     workerModal.classList.remove('hidden');
     workerModal.classList.add('flex');
 };
@@ -608,7 +620,7 @@ if (toggleWorkerPasswordBtn && workerPasswordInput && workerPasswordEyeIcon) {
     });
 }
 
-function openEditModal(editUrl, name, email, first_name, last_name, mbno, salary, state, city, address, gender, status) {
+function openEditModal(editUrl, name, email, first_name, last_name, mbno, salary, state, city, address, gender, status, profilePictureUrl) {
     workerModal.classList.remove('hidden');
     workerModal.classList.add('flex');
 
@@ -626,6 +638,14 @@ function openEditModal(editUrl, name, email, first_name, last_name, mbno, salary
     workerForm.address.value = address;
     workerForm.gender.value = gender;
     workerForm.status.value = status;
+
+    if (profilePictureUrl) {
+        workerImagePreview.src = profilePictureUrl;
+        workerImagePreviewContainer.classList.remove('hidden');
+    } else {
+        workerImagePreviewContainer.classList.add('hidden');
+        workerImagePreview.src = '';
+    }
 }
 
 function openDeleteModal(deleteUrl) {
@@ -671,6 +691,33 @@ function openViewModal(
 
 function closeViewModal() {
     viewModal.classList.add('hidden');
+}
+
+const workerImagePreviewContainer = document.getElementById('workerImagePreviewContainer');
+const workerImagePreview = document.getElementById('workerImagePreview');
+const removeWorkerImagePreviewBtn = document.getElementById('removeWorkerImagePreview');
+const workerProfilePictureInput = workerForm.profile_picture;
+
+if (workerProfilePictureInput) {
+    workerProfilePictureInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                workerImagePreview.src = e.target.result;
+                workerImagePreviewContainer.classList.remove('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+if (removeWorkerImagePreviewBtn) {
+    removeWorkerImagePreviewBtn.addEventListener('click', function() {
+        workerProfilePictureInput.value = '';
+        workerImagePreview.src = '';
+        workerImagePreviewContainer.classList.add('hidden');
+    });
 }
 
 const workerSearchInput = document.getElementById('workerSearch');

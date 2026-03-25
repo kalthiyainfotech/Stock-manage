@@ -29,6 +29,12 @@
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/tiny-slider.css' %}" rel="stylesheet">
     <link href="{% static 'css/by_style.css' %}" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        .htmx-indicator { display: none; }
+        .htmx-request .htmx-indicator { display: block; }
+        .htmx-request.htmx-indicator { display: block; }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans selection:bg-brand-500 selection:text-white">
     <nav id="navbar" class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300">
@@ -252,7 +258,56 @@
                     }
                 });
             }
+
+            // Global AJAX Actions
+            document.addEventListener('click', e => {
+                const btn = e.target.closest('.ajax-action');
+                if (btn) {
+                    e.preventDefault();
+                    const url = btn.getAttribute('href') || btn.getAttribute('data-url');
+                    const method = btn.getAttribute('data-method') || 'GET';
+                    
+                    fetch(url, {
+                        method: method,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken')
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            showToast('Success', data.message || 'Action completed', 'success');
+                            if (data.cart_count !== undefined) {
+                                // Optional: update cart count UI if it exists
+                            }
+                        } else if (data.status === 'error' ) {
+                            showToast('Error', data.message || 'Something went wrong', 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('AJAX Action error:', err);
+                        // Fallback to normal navigation if AJAX fails for some reason
+                        // window.location.href = url;
+                    });
+                }
+            });
         });
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
     </script>
     {% block scripts %}{% endblock scripts %}
 </body>

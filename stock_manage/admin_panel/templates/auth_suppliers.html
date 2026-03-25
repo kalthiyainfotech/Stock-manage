@@ -188,6 +188,13 @@
                                         </p>
                                     </div>
                                 </div>
+                                <div id="imagePreviewContainer" class="hidden mt-2 relative inline-block">
+                                    <img id="imagePreview" src="" class="h-16 w-16 rounded-lg object-cover border border-slate-200 shadow-sm">
+                                    <button type="button" id="removeImagePreview" 
+                                        class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] hover:bg-rose-600 shadow-md">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="space-y-1.5">
@@ -367,7 +374,8 @@
                                             '{{ supplier.city }}',
                                             '{{ supplier.address }}',
                                             '{{ supplier.gender }}',
-                                            '{{ supplier.status }}'
+                                            '{{ supplier.status }}',
+                                            '{% if supplier.profile_picture %}{{ supplier.profile_picture.url }}{% endif %}'
                                         )"
 
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition"
@@ -566,6 +574,8 @@ document.getElementById('openSupplierModal').onclick = () => {
     supplierForm.reset();
     supplierForm.action = "{% url 'add_supplier' %}";
     modalTitle.innerText = "Add Supplier";
+    imagePreviewContainer.classList.add('hidden');
+    imagePreview.src = '';
     supplierModal.classList.remove('hidden');
     supplierModal.classList.add('flex');
 };
@@ -593,7 +603,7 @@ if (togglePasswordBtn && passwordInput && passwordEyeIcon) {
     });
 }
 
-function openEditModal(editUrl, name, email, first_name, last_name, mbno, state, city, address, gender, status) {
+function openEditModal(editUrl, name, email, first_name, last_name, mbno, state, city, address, gender, status, profilePictureUrl) {
     supplierModal.classList.remove('hidden');
     supplierModal.classList.add('flex');
 
@@ -610,6 +620,14 @@ function openEditModal(editUrl, name, email, first_name, last_name, mbno, state,
     supplierForm.address.value = address;
     supplierForm.gender.value = gender;
     supplierForm.status.value = status;
+
+    if (profilePictureUrl) {
+        imagePreview.src = profilePictureUrl;
+        imagePreviewContainer.classList.remove('hidden');
+    } else {
+        imagePreviewContainer.classList.add('hidden');
+        imagePreview.src = '';
+    }
 }
 
 function openDeleteModal(deleteUrl) {
@@ -652,6 +670,33 @@ function openViewModal(
 
 function closeViewModal() {
     viewModal.classList.add('hidden');
+}
+
+const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+const imagePreview = document.getElementById('imagePreview');
+const removeImagePreviewBtn = document.getElementById('removeImagePreview');
+const profilePictureInput = supplierForm.profile_picture;
+
+if (profilePictureInput) {
+    profilePictureInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreviewContainer.classList.remove('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+if (removeImagePreviewBtn) {
+    removeImagePreviewBtn.addEventListener('click', function() {
+        profilePictureInput.value = '';
+        imagePreview.src = '';
+        imagePreviewContainer.classList.add('hidden');
+    });
 }
 
 const supplierSearchInput = document.getElementById('supplierSearch');

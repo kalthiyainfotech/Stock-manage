@@ -670,11 +670,9 @@ def add_to_cart(request, variant_id):
         if cart_item.quantity < variant.stock:
             cart_item.quantity = min(cart_item.quantity + quantity_to_add, variant.stock)
             cart_item.save()
-        else:
-            
-            return redirect("by_shop")
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"status": "success", "message": "Added to cart", "cart_count": CartItem.objects.filter(buyer=buyer).count()})
 
-    
     return redirect("by_cart")
 
 @never_cache
@@ -692,6 +690,8 @@ def add_to_wishlist(request, variant_id):
         return redirect("by_shop")
     from .models import WishlistItem
     WishlistItem.objects.get_or_create(buyer=buyer, variant=variant)
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"status": "success", "message": "Added to wishlist"})
     return redirect("by_wishlist")
 
 @never_cache

@@ -4,27 +4,12 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
   <div class="flex flex-col lg:flex-row gap-8">
     <aside class="w-full lg:w-1/4">
-      <div class="bg-white rounded-2xl border border-gray-100 p-6">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
-            {{ request.session.buyer_name|default:"" |slice:":1" }}
-          </div>
-          <div>
-            <div class="font-bold text-gray-900">{{ request.session.buyer_name|default:"Your Account" }}</div>
-            <div class="text-xs text-gray-500">{{ request.session.buyer_email|default:"" }}</div>
-          </div>
-        </div>
-        <nav class="space-y-2">
-          <a href="{% url 'by_profile' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Profile</a>
-          <a href="{% url 'by_history' %}" class="block px-4 py-3 rounded-xl bg-brand-50 text-brand-700 font-bold">Order History</a>
-          <a href="{% url 'by_cart' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Cart</a>
-          <a href="{% url 'by_shop' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Shop</a>
-          <a href="{% url 'by_logout' %}" class="block px-4 py-3 rounded-xl border border-gray-200 text-gray-700">Logout</a>
-        </nav>
-      </div>
+      {% with active_page='history' %}
+        {% include "by_sidebar.html" %}
+      {% endwith %}
     </aside>
 
-    <main class="w-full lg:w-3/4">
+    <main id="buyer-main-content" class="w-full lg:w-3/4">
       <div class="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
         <div class="flex items-center justify-between mb-6">
           <h1 class="text-2xl font-black text-gray-900">Order History</h1>
