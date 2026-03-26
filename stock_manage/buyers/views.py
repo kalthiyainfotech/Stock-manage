@@ -773,18 +773,25 @@ def by_cart(request):
 
     cart_items = CartItem.objects.select_related(
         "variant",
-        "variant__product"
+        "variant__product",
+        "variant__color",
+        "variant__size"
     ).filter(buyer=buyer)
 
     subtotal = 0
     for item in cart_items:
-       
         if item.quantity < 1:
             item.quantity = 1
             item.save()
         item.total_price = item.variant.price * item.quantity
         subtotal += item.total_price
-        item.image_url = _resolve_shop_image_url(item.variant.product, item.variant)
+        # Prioritize variant-specific image, then product image
+        if item.variant.image and hasattr(item.variant.image, 'url'):
+            item.image_url = item.variant.image.url
+        elif item.variant.product.image and hasattr(item.variant.product.image, 'url'):
+            item.image_url = item.variant.product.image.url
+        else:
+            item.image_url = None
 
     context = {
         "cart_items": cart_items,
