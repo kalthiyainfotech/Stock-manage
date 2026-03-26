@@ -87,7 +87,7 @@ def auth_suppliers(request):
 @login_required(login_url='auth_login')
 def add_supplier(request):
     if request.method == "POST":
-        Suppliers.objects.create(
+        s = Suppliers.objects.create(
             name=request.POST['name'],
             email=request.POST['email'],
             password=request.POST['password'],
@@ -102,6 +102,21 @@ def add_supplier(request):
             profile_picture=request.FILES.get('profile_picture'),
             document=request.FILES.get('document'),
         )
+        layer = get_channel_layer()
+        if layer:
+            async_to_sync(layer.group_send)("suppliers", {
+                "type": "supplier_added",
+                "supplier": {
+                    "id": s.id,
+                    "name": s.name,
+                    "email": s.email,
+                    "first_name": s.first_name,
+                    "last_name": s.last_name,
+                    "mbno": s.mbno,
+                    "status": s.status,
+                    "profile_picture": s.profile_picture.url if s.profile_picture else None,
+                }
+            })
         return redirect('auth_suppliers')
 
     return redirect('auth_suppliers')
@@ -130,6 +145,21 @@ def edit_supplier(request, id):
             supplier.document = request.FILES['document']
 
         supplier.save()
+        layer = get_channel_layer()
+        if layer:
+            async_to_sync(layer.group_send)("suppliers", {
+                "type": "supplier_updated",
+                "supplier": {
+                    "id": supplier.id,
+                    "name": supplier.name,
+                    "email": supplier.email,
+                    "first_name": supplier.first_name,
+                    "last_name": supplier.last_name,
+                    "mbno": supplier.mbno,
+                    "status": supplier.status,
+                    "profile_picture": supplier.profile_picture.url if supplier.profile_picture else None,
+                }
+            })
 
     return redirect('auth_suppliers')
 
@@ -137,6 +167,12 @@ def edit_supplier(request, id):
 @login_required(login_url='auth_login')
 def delete_supplier(request, id):
     Suppliers.objects.filter(id=id).delete()
+    layer = get_channel_layer()
+    if layer:
+        async_to_sync(layer.group_send)("suppliers", {
+            "type": "supplier_deleted",
+            "id": id,
+        })
     return redirect('auth_suppliers')
 
 @never_cache
@@ -700,10 +736,11 @@ def add_inventory(request):
 
             if layer:
                 payload = {
-                    "id": variant.id,
+                    "product_id": product.id,
                     "product_name": product.name,
                     "brand_name": brand.name,
                     "category_name": category.name,
+                    "variant_id": variant.id,
                     "price": float(variant.price),
                     "stock": variant.stock,
                 }

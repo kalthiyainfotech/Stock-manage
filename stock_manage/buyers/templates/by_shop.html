@@ -245,6 +245,38 @@
             window.addEventListener('popstate', function() {
                 window.location.reload();
             });
+
+            // WebSocket Implementation for Real-time Inventory Updates
+            (function () {
+                const loc = window.location;
+                const scheme = loc.protocol === 'https:' ? 'wss' : 'ws';
+                const socketUrl = scheme + '://' + loc.host + '/ws/inventory/';
+                let socketUpdateTimer = null;
+                
+                try {
+                    const socket = new WebSocket(socketUrl);
+                    socket.onmessage = function (event) {
+                        try {
+                            const data = JSON.parse(event.data);
+                            if (data && (data.type === 'inventory_added' || data.type === 'inventory_updated' || data.type === 'inventory_deleted')) {
+                                // Debounce updates to avoid multiple rapid refreshes
+                                if (socketUpdateTimer) clearTimeout(socketUpdateTimer);
+                                socketUpdateTimer = setTimeout(() => {
+                                    updateFilters();
+                                }, 300);
+                            }
+                        } catch (e) {
+                            console.error('Socket message error:', e);
+                        }
+                    };
+                    socket.onclose = function() {
+                        console.log('Inventory socket closed. Reconnecting in 5s...');
+                        setTimeout(arguments.callee, 5000);
+                    };
+                } catch (e) {
+                    console.error('Socket connection error:', e);
+                }
+            })();
         })();
         </script>
 
@@ -348,29 +380,5 @@
         </div>
     </main>
 </div>
-
-<script>
-(function () {
-    const loc = window.location;
-    const scheme = loc.protocol === 'https:' ? 'wss' : 'ws';
-    const socketUrl = scheme + '://' + loc.host + '/ws/inventory/';
-    try {
-        const socket = new WebSocket(socketUrl);
-        socket.onmessage = function (event) {
-            try {
-                const data = JSON.parse(event.data);
-                if (data && (data.type === 'inventory_added' || data.type === 'inventory_deleted')) {
-                    window.location.reload();
-                } else if (data && data.type === 'inventory_updated') {
-                    // Update stock UI without reload if possible
-                    updateFilters(); // This is already implemented in by_shop.html to refresh via API
-                }
-            } catch (e) {
-            }
-        };
-    } catch (e) {
-    }
-})();
-</script>
 
 {% endblock buyer_layout %}

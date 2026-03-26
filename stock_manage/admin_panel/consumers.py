@@ -14,3 +14,20 @@ class DashboardConsumer(AsyncJsonWebsocketConsumer):
             "type": "dashboard_update",
             "data": event["data"],
         })
+
+class SupplierConsumer(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        await self.channel_layer.group_add("suppliers", self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard("suppliers", self.channel_name)
+
+    async def supplier_added(self, event):
+        await self.send_json(event)
+
+    async def supplier_updated(self, event):
+        await self.send_json(event)
+
+    async def supplier_deleted(self, event):
+        await self.send_json(event)
