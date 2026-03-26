@@ -9,6 +9,8 @@ urlpatterns = [
     path('add-supplier/', add_supplier, name='add_supplier'),
     path('supplier/edit/<int:id>/', edit_supplier, name='edit_supplier'),
     path('supplier/delete/<int:id>/', delete_supplier, name='delete_supplier'),
+    path('category/delete/<int:id>/', delete_category, name='delete_category'),
+    path('subcategory/delete/<int:id>/', delete_subcategory, name='delete_subcategory'),
 
 
     path('auth_workers/',auth_workers,name='auth_workers'),

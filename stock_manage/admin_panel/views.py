@@ -4,13 +4,14 @@ from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count
 from django.http import JsonResponse
 from .models import *
-from buyers.models import Buyer, Order
+from buyers.models import Buyer, Order, OrderItem
 from decimal import Decimal
 import calendar
 from datetime import date
+from django.db.models import Sum, Count, F
+from django.db.models.functions import TruncMonth
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -56,12 +57,62 @@ def auth_dashboard(request):
 
     recent_orders = Order.objects.select_related('buyer').order_by('-created_at')[:5]
     recent_contacts = Contact.objects.order_by('-created_at')[:5]
+    categories = Category.objects.all().order_by('name')
+    subcategories = Subcetegory.objects.select_related('category').order_by('category__name', 'name')
 
-    return render(request, 'auth_dashboard.html', {
+    # Data for Charts
+    # 1. Sales by Category
+    category_sales_data = OrderItem.objects.filter(order__status='delivered').values(
+        name=F('variant__product__brand__subcetegory__category__name')
+    ).annotate(
+        value=Sum('total')
+    ).order_by('-value')
+
+    # 2. Monthly Sales (Last 6 months)
+    monthly_sales_data = Order.objects.filter(status='delivered').annotate(
+        month=TruncMonth('created_at')
+    ).values('month').annotate(
+        total_sales=Sum('total')
+    ).order_by('month')
+
+    # 3. Top Selling Products
+    top_selling_products = OrderItem.objects.filter(order__status='delivered').values(
+        'product_name'
+    ).annotate(
+        total_qty=Sum('quantity'),
+        total_revenue=Sum('total')
+    ).order_by('-total_qty')[:5]
+
+    import json
+    from django.core.serializers.json import DjangoJSONEncoder
+
+    context = {
         **stats,
         'recent_orders': recent_orders,
         'recent_contacts': recent_contacts,
-    })
+        'categories': categories,
+        'subcategories': subcategories,
+        'category_sales_json': json.dumps(list(category_sales_data), cls=DjangoJSONEncoder),
+        'monthly_sales_json': json.dumps([
+            {'month': s['month'].strftime('%b %Y'), 'total_sales': float(s['total_sales'])} 
+            for s in monthly_sales_data
+        ], cls=DjangoJSONEncoder),
+        'top_products_json': json.dumps(list(top_selling_products), cls=DjangoJSONEncoder),
+    }
+
+    return render(request, 'auth_dashboard.html', context)
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_category(request, id):
+    Category.objects.filter(id=id).delete()
+    return redirect('auth_dashboard')
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_subcategory(request, id):
+    Subcetegory.objects.filter(id=id).delete()
+    return redirect('auth_dashboard')
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -87,7 +138,7 @@ def auth_suppliers(request):
 @login_required(login_url='auth_login')
 def add_supplier(request):
     if request.method == "POST":
-        s = Suppliers.objects.create(
+        Suppliers.objects.create(
             name=request.POST['name'],
             email=request.POST['email'],
             password=request.POST['password'],
@@ -102,21 +153,6 @@ def add_supplier(request):
             profile_picture=request.FILES.get('profile_picture'),
             document=request.FILES.get('document'),
         )
-        layer = get_channel_layer()
-        if layer:
-            async_to_sync(layer.group_send)("suppliers", {
-                "type": "supplier_added",
-                "supplier": {
-                    "id": s.id,
-                    "name": s.name,
-                    "email": s.email,
-                    "first_name": s.first_name,
-                    "last_name": s.last_name,
-                    "mbno": s.mbno,
-                    "status": s.status,
-                    "profile_picture": s.profile_picture.url if s.profile_picture else None,
-                }
-            })
         return redirect('auth_suppliers')
 
     return redirect('auth_suppliers')
@@ -145,21 +181,6 @@ def edit_supplier(request, id):
             supplier.document = request.FILES['document']
 
         supplier.save()
-        layer = get_channel_layer()
-        if layer:
-            async_to_sync(layer.group_send)("suppliers", {
-                "type": "supplier_updated",
-                "supplier": {
-                    "id": supplier.id,
-                    "name": supplier.name,
-                    "email": supplier.email,
-                    "first_name": supplier.first_name,
-                    "last_name": supplier.last_name,
-                    "mbno": supplier.mbno,
-                    "status": supplier.status,
-                    "profile_picture": supplier.profile_picture.url if supplier.profile_picture else None,
-                }
-            })
 
     return redirect('auth_suppliers')
 
@@ -167,12 +188,6 @@ def edit_supplier(request, id):
 @login_required(login_url='auth_login')
 def delete_supplier(request, id):
     Suppliers.objects.filter(id=id).delete()
-    layer = get_channel_layer()
-    if layer:
-        async_to_sync(layer.group_send)("suppliers", {
-            "type": "supplier_deleted",
-            "id": id,
-        })
     return redirect('auth_suppliers')
 
 @never_cache
@@ -575,15 +590,12 @@ def add_inventory(request):
 
         if colors:
             color_variants = {}
-            processed_media = {} # media_idx -> { 'main': image_file/None, 'gallery': [file_list] }
-            
-            # Map of media_idx to the first variant that "owns" the files
-            # to avoid re-saving the same request.FILES object which creates duplicate files
-            
+            color_gallery_source = {}
             for i in range(len(colors)):
                 idx = indexes[i] if i < len(indexes) else i
-                media_idx = str(media_indexes[i] if i < len(media_indexes) and media_indexes[i] else idx)
-                color_name = colors[i].strip().lower() or 'default'
+                media_idx = media_indexes[i] if i < len(media_indexes) and media_indexes[i] else idx
+                color_name = colors[i].strip() or 'Default'
+                color_key = color_name.strip().lower()
                 size_name = sizes[i].strip() if i < len(sizes) else 'Default'
                 size_name = size_name or 'Default'
                 price_val = prices[i] if i < len(prices) and prices[i] else 0
@@ -609,48 +621,25 @@ def add_inventory(request):
                     variant.stock = stock_val
                     variant.sku = sku
                     variant.save()
+                    
+                v_image = request.FILES.get(f'variant_image_{media_idx}')
+                if v_image:
+                    variant.image = v_image
+                    variant.save()
+                    # If product has no image, use the first variant's image as default
+                    if not product.image:
+                        product.image = v_image
+                        product.save()
+                    
+                v_galleries = request.FILES.getlist(f'variant_gallery_{media_idx}')
+                for gi in v_galleries:
+                    if gi:
+                        VariantImage.objects.create(variant=variant, image=gi)
+                        color_gallery_source[color_key] = variant.id
 
-                # Process Media only once per media_idx
-                if media_idx not in processed_media:
-                    v_image = request.FILES.get(f'variant_image_{media_idx}')
-                    v_galleries = request.FILES.getlist(f'variant_gallery_{media_idx}')
-                    
-                    # Store what we found for this group
-                    processed_media[media_idx] = {
-                        'main': v_image,
-                        'gallery_files': v_galleries,
-                        'primary_variant': variant 
-                    }
-                    
-                    if v_image:
-                        variant.image = v_image
-                        variant.save()
-                        if not product.image:
-                            product.image = v_image
-                            product.save()
-                    
-                    # Add gallery images only for the primary variant in this group
-                    for gi in v_galleries:
-                        if gi:
-                            VariantImage.objects.create(variant=variant, image=gi)
-                else:
-                    # For subsequent variants in the same media group, point to the primary variant's files
-                    primary_entry = processed_media[media_idx]
-                    primary_variant = primary_entry['primary_variant']
-                    
-                    if primary_variant.image and not variant.image:
-                        variant.image = primary_variant.image.name
-                        variant.save()
-                    
-                    # We don't create new VariantImage records here because we want 
-                    # the display logic to find them via the primary variant or 
-                    # we will ensure they are linked. 
-                    # Actually, for the "one per color" expected behavior, 
-                    # it's better if they share the same physical file on disk.
-                
-                if color_name not in color_variants:
-                    color_variants[color_name] = []
-                color_variants[color_name].append(variant)
+                if color_key not in color_variants:
+                    color_variants[color_key] = []
+                color_variants[color_key].append(variant)
 
                 VariantSpec.objects.filter(variant=variant).delete()
                 for name, value in zip(spec_names, spec_values):
@@ -672,25 +661,22 @@ def add_inventory(request):
                         "type": "inventory_added",
                         "inventory": payload,
                     })
-
-            # Cleanup / Final Pass for syncing colors if needed
-            for c_key, variants_in_color in color_variants.items():
-                source_v = next((v for v in variants_in_color if v.image), None)
-                if source_v:
-                    for target_v in variants_in_color:
-                        if not target_v.image:
-                            target_v.image = source_v.image.name
-                            target_v.save()
-                
-                # Cross-link gallery images for consistency if some variants missed them
-                # (though the media_idx logic usually handles this now)
-                source_v_with_gallery = next((v for v in variants_in_color if v.gallery_images.exists()), None)
-                if source_v_with_gallery:
-                    source_gallery = list(source_v_with_gallery.gallery_images.all())
-                    for target_v in variants_in_color:
-                        if target_v != source_v_with_gallery and not target_v.gallery_images.exists():
-                            for sg in source_gallery:
-                                VariantImage.objects.create(variant=target_v, image=sg.image.name)
+            for color_key, variants_in_color in color_variants.items():
+                source_variant_with_image = next((v for v in variants_in_color if v.image), None)
+                if source_variant_with_image:
+                    for target_variant in variants_in_color:
+                        if not target_variant.image:
+                            target_variant.image = source_variant_with_image.image.name
+                            target_variant.save(update_fields=['image'])
+                source_variant_id = color_gallery_source.get(color_key)
+                if source_variant_id:
+                    source_gallery = list(VariantImage.objects.filter(variant_id=source_variant_id))
+                    if source_gallery:
+                        for target_variant in variants_in_color:
+                            if VariantImage.objects.filter(variant=target_variant).exists():
+                                continue
+                            for source_img in source_gallery:
+                                VariantImage.objects.create(variant=target_variant, image=source_img.image.name)
         else:
             # Fallback for single variant
             color_name = request.POST.get('color', '').strip() or 'Default'
@@ -736,11 +722,10 @@ def add_inventory(request):
 
             if layer:
                 payload = {
-                    "product_id": product.id,
+                    "id": variant.id,
                     "product_name": product.name,
                     "brand_name": brand.name,
                     "category_name": category.name,
-                    "variant_id": variant.id,
                     "price": float(variant.price),
                     "stock": variant.stock,
                 }
@@ -757,50 +742,41 @@ def add_inventory(request):
 @never_cache
 @login_required(login_url='auth_login')
 def auth_inventory(request):
-    # Paginate by Product instead of ProductVariant, and only show products with variants
-    product_list = Product.objects.annotate(
-        variant_count=Count('variants')
-    ).filter(variant_count__gt=0).select_related(
-        'brand',
-        'brand__subcetegory',
-        'brand__subcetegory__category'
-    ).order_by('-id')
-
-    paginator = Paginator(product_list, 10)
-    page_number = request.GET.get('page')
-    inventory_page = paginator.get_page(page_number)
-
-    categories = Category.objects.filter(status=True).order_by('name')
-
-    # Get all variants for the products on this page
-    product_ids = [p.id for p in inventory_page]
-    all_variants = ProductVariant.objects.filter(product_id__in=product_ids).select_related(
+    inventory_list = ProductVariant.objects.select_related(
         'product',
         'color',
         'size',
         'product__brand',
         'product__brand__subcetegory',
         'product__brand__subcetegory__category'
-    ).prefetch_related('gallery_images', 'specs').order_by('-id')
+    ).order_by('-id')
 
+    paginator = Paginator(inventory_list, 10)
+    page_number = request.GET.get('page')
+    inventory = paginator.get_page(page_number)
+
+    categories = Category.objects.filter(status=True).order_by('name')
+
+    groups_map = {}
     groups = []
-    for p in inventory_page:
-        variants = [v for v in all_variants if v.product_id == p.id]
-        if variants:
-            # Calculate total stock across all variants for this product
-            total_stock = sum(v.stock for v in variants)
-            # Inject total_stock into the first variant so template doesn't need much change
-            # We use a temporary attribute to avoid saving to DB if anyone calls .save()
-            # but in this context it's safe since it's just for display.
-            variants[0].stock = total_stock 
-            
-            groups.append({
-                'product': p,
-                'variants': variants,
-            })
+    for v in inventory:
+        pid = v.product_id
+        g = groups_map.get(pid)
+        if not g:
+            g = {
+                'product': v.product,
+                'variants': [],
+                'colors': set(),
+                'sizes': set(),
+            }
+            groups_map[pid] = g
+            groups.append(g)
+        g['variants'].append(v)
+        g['colors'].add(v.color.name)
+        g['sizes'].add(v.size.name)
 
     return render(request, 'auth_inventory.html', {
-        'inventorys': inventory_page,
+        'inventorys': inventory,
         'inventory_groups': groups,
         'categories': categories
     })
@@ -867,135 +843,72 @@ def edit_inventory(request, id):
         size_names = request.POST.getlist('variant_size')
         price_vals = request.POST.getlist('variant_price')
         stock_vals = request.POST.getlist('variant_stock')
-        sku_vals = request.POST.getlist('variant_sku')
-        media_indexes = request.POST.getlist('variant_media_index')
 
-        # Map to prevent duplicate image processing for variants sharing the same media index
-        processed_media = {}
+        # Fallback to single fields if variant_color list is empty
+        color_name = (color_names[0] if color_names else request.POST.get('color', '')).strip()
+        size_name = (size_names[0] if size_names else request.POST.get('size', '')).strip()
+        price_val = (price_vals[0] if price_vals else request.POST.get('price')) or 0
+        stock_val = (stock_vals[0] if stock_vals else request.POST.get('stock')) or 0
 
-        if color_names:
-            # Using basic dicts with list values for safest type inference
-            c_groups = {} 
-            c_m_indices = {}
+        if not color_name:
+            color_name = 'Default'
+        color, _ = Color.objects.get_or_create(
+            name=color_name
+        )
+
+        if not size_name:
+            size_name = 'Default'
+        size, _ = Size.objects.get_or_create(
+            name=size_name
+        )
+
+        inventory.product = product
+        inventory.color = color
+        inventory.size = size
+        inventory.price = price_val
+        inventory.stock = stock_val
+        inventory.sku = f"{product.id}-{color.id}-{size.id}"
+        inventory.save()
+        
+        indexes = request.POST.getlist('variant_index')
+        idx = indexes[0] if indexes else 0
+        v_image = request.FILES.get(f'variant_image_{idx}')
+        if v_image:
+            inventory.image = v_image
+            inventory.save()
+            # If product has no image, use the edited variant's image as default
+            if not product.image:
+                product.image = v_image
+                product.save()
             
-            for i in range(len(color_names)):
-                m_idx_val = str(media_indexes[i] if i < len(media_indexes) else i)
-                color_name = (color_names[i] or '').strip().lower() or 'default'
-                size_name = (size_names[i] or '').strip() if i < len(size_names) else 'Default'
-                price_val = price_vals[i] if (i < len(price_vals) and price_vals[i]) else 0
-                stock_val = stock_vals[i] if (i < len(stock_vals) and stock_vals[i]) else 0
-                sku_val = sku_vals[i].strip() if (i < len(sku_vals) and sku_vals[i]) else f"{product.id}-{i}"
-                
-                clr_obj, _ = Color.objects.get_or_create(name=color_name)
-                sz_obj, _ = Size.objects.get_or_create(name=size_name)
-                
-                if i == 0:
-                    v = inventory
-                    v.color = clr_obj
-                    v.size = sz_obj
-                else:
-                    v, _ = ProductVariant.objects.get_or_create(
-                        product=product,
-                        color=clr_obj,
-                        size=sz_obj,
-                        defaults={'price': price_val, 'stock': stock_val, 'sku': sku_val}
-                    )
-                
-                v.price = price_val
-                v.stock = stock_val
-                v.sku = sku_val
-                v.save()
-                
-                if color_name not in c_groups:
-                    c_groups[color_name] = []
-                if color_name not in c_m_indices:
-                    c_m_indices[color_name] = []
-                
-                c_groups[color_name].append(v)
-                if m_idx_val not in c_m_indices[color_name]:
-                    c_m_indices[color_name].append(m_idx_val)
-                
-                # Update Specs
-                VariantSpec.objects.filter(variant=v).delete()
-                spec_names = request.POST.getlist('spec_name')
-                spec_values = request.POST.getlist('spec_value')
-                for sn, sv in zip(spec_names, spec_values):
-                    sn_str = (sn or '').strip()
-                    sv_str = (sv or '').strip()
-                    if sn_str and sv_str:
-                        VariantSpec.objects.create(variant=v, name=sn_str, value=sv_str)
-            
-            # Phase 2: Synchronize Images by Color Group
-            for c_key in c_groups:
-                members = c_groups[c_key]
-                primary_v = members[0]
-                idx_list = c_m_indices.get(c_key, [])
-                
-                for m_idx in idx_list:
-                    # Combined Main Deletions
-                    if request.POST.get(f'delete_variant_main_{m_idx}') == 'true' and primary_v.image:
-                        primary_v.image = None
-                        primary_v.save()
-                    
-                    # Combined Gallery Deletions
-                    gal_delete_urls = request.POST.getlist(f'delete_variant_gallery_{m_idx}')
-                    for gd_url in gal_delete_urls:
-                        if gd_url:
-                            filename = gd_url.split('/')[-1]
-                            VariantImage.objects.filter(variant=primary_v, image__icontains=filename).delete()
-                            ProductImage.objects.filter(product=product, image__icontains=filename).delete()
+        v_galleries = request.FILES.getlist(f'variant_gallery_{idx}')
+        for gi in v_galleries:
+            if gi:
+                VariantImage.objects.create(variant=inventory, image=gi)
 
-                # 2. Combined Uploads for the group
-                for m_idx in idx_list:
-                    new_main_file = request.FILES.get(f'variant_image_{m_idx}')
-                    if new_main_file:
-                        primary_v.image = new_main_file
-                        primary_v.save()
-                        if not product.image:
-                            product.image = new_main_file
-                            product.save()
-                    
-                    new_gallery_files = request.FILES.getlist(f'variant_gallery_{m_idx}')
-                    for ngf in new_gallery_files:
-                        if ngf:
-                            VariantImage.objects.create(variant=primary_v, image=ngf)
+        spec_names = request.POST.getlist('spec_name')
+        spec_values = request.POST.getlist('spec_value')
+        VariantSpec.objects.filter(variant=inventory).delete()
+        for name, value in zip(spec_names, spec_values):
+            name = (name or '').strip()
+            value = (value or '').strip()
+            if name and value:
+                VariantSpec.objects.create(variant=inventory, name=name, value=value)
 
-                # 3. Propagate images to EVERY variant of this color in the database
-                all_color_variants = ProductVariant.objects.filter(product=product, color=primary_v.color)
-                for mirror_v in all_color_variants:
-                    if mirror_v.id == primary_v.id:
-                        continue
-                    
-                    # Update main image
-                    mirror_v.image = primary_v.image
-                    mirror_v.save()
-                    
-                    # Synchronize gallery by mirroring VariantImage records
-                    VariantImage.objects.filter(variant=mirror_v).delete()
-                    for v_img_obj in VariantImage.objects.filter(variant=primary_v):
-                        VariantImage.objects.create(variant=mirror_v, image=v_img_obj.image)
-
-            # Phase 3: Real-time Updates (Notify about all variants of this product)
-            layer = get_channel_layer()
-            if layer:
-                for v in ProductVariant.objects.filter(product=product):
-                    gv_urls = [vi.image.url for vi in v.gallery_images.all() if vi.image]
-                    v_payload = {
-                        "id": v.id,
-                        "product_id": product.id,
-                        "product_name": product.name,
-                        "color_id": v.color.id,
-                        "color_name": v.color.name,
-                        "size_id": v.size.id,
-                        "price": float(v.price),
-                        "stock": v.stock,
-                        "image_url": v.image.url if v.image else None,
-                        "gallery_urls": gv_urls,
-                    }
-                    async_to_sync(layer.group_send)("inventory", {
-                        "type": "inventory_updated",
-                        "inventory": v_payload,
-                    })
+        layer = get_channel_layer()
+        if layer:
+            payload = {
+                "id": inventory.id,
+                "product_name": product.name,
+                "brand_name": product.brand.name,
+                "category_name": product.brand.subcetegory.category.name,
+                "price": float(inventory.price),
+                "stock": inventory.stock,
+            }
+            async_to_sync(layer.group_send)("inventory", {
+                "type": "inventory_updated",
+                "inventory": payload,
+            })
 
         messages.success(request, "Inventory updated successfully")
         return redirect('auth_inventory')
@@ -1016,25 +929,6 @@ def delete_inventory(request, id):
             "id": inv_id,
         })
 
-    return redirect('auth_inventory')
-
-@never_cache
-@login_required(login_url='auth_login')
-def delete_product_inventory(request, product_id):
-    """Deletes all variants of a product."""
-    variants = ProductVariant.objects.filter(product_id=product_id)
-    ids = list(variants.values_list('id', flat=True))
-    variants.delete()
-    
-    layer = get_channel_layer()
-    if layer:
-        for vid in ids:
-            async_to_sync(layer.group_send)("inventory", {
-                "type": "inventory_deleted",
-                "id": vid,
-            })
-            
-    messages.success(request, f"Deleted all variants for product ID {product_id}")
     return redirect('auth_inventory')
 
 @never_cache
@@ -1217,31 +1111,6 @@ def delete_contact(request, id):
 @never_cache
 @login_required(login_url='auth_login')
 def auth_order(request):
-    if request.method == "POST":
-        order_id = request.POST.get('order_id')
-        new_status = request.POST.get('status')
-        order = get_object_or_404(Order, id=order_id)
-        order.status = new_status
-        order.save()
-
-        layer = get_channel_layer()
-        if layer:
-            order_data = {
-                "order_id": order.id,
-                "order_number": order.order_number,
-                "status": order.status,
-                "buyer_id": order.buyer.id,
-            }
-            async_to_sync(layer.group_send)(
-                f"user_{order.buyer.id}",
-                {
-                    "type": "order_status_updated",
-                    "order": order_data
-                }
-            )
-
-        return JsonResponse({"status": "success", "new_status": new_status})
-
     orders_list = Order.objects.select_related('buyer').prefetch_related('items').all().order_by('-created_at')
     
     paginator = Paginator(orders_list, 10)
@@ -1291,3 +1160,20 @@ def admin_order_items_api(request, order_id):
             "size": getattr(getattr(it.variant, "size", None), "name", ""),
         })
     return JsonResponse({"items": items})
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_product_inventory(request, product_id):
+    # This deletes the entire product and all its variants
+    Product.objects.filter(id=product_id).delete()
+    
+    layer = get_channel_layer()
+    if layer:
+        # We notify about deletion. Since multiple variants might be gone, 
+        # a simple refresh on the buyer side is often easiest.
+        async_to_sync(layer.group_send)("inventory", {
+            "type": "inventory_deleted",
+            "product_id": product_id,
+        })
+
+    return redirect('auth_inventory')
