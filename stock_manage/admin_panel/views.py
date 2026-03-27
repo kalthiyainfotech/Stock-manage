@@ -742,41 +742,57 @@ def add_inventory(request):
 @never_cache
 @login_required(login_url='auth_login')
 def auth_inventory(request):
-    inventory_list = ProductVariant.objects.select_related(
+    product_list = Product.objects.select_related(
+        'brand',
+        'brand__subcetegory',
+        'brand__subcetegory__category'
+    ).order_by('-id')
+
+    paginator = Paginator(product_list, 10)
+    page_number = request.GET.get('page')
+    products_page = paginator.get_page(page_number)
+
+    variants = ProductVariant.objects.filter(product__in=products_page).select_related(
         'product',
         'color',
         'size',
         'product__brand',
         'product__brand__subcetegory',
         'product__brand__subcetegory__category'
-    ).order_by('-id')
-
-    paginator = Paginator(inventory_list, 10)
-    page_number = request.GET.get('page')
-    inventory = paginator.get_page(page_number)
+    )
 
     categories = Category.objects.filter(status=True).order_by('name')
 
     groups_map = {}
     groups = []
-    for v in inventory:
-        pid = v.product_id
-        g = groups_map.get(pid)
-        if not g:
-            g = {
-                'product': v.product,
-                'variants': [],
-                'colors': set(),
-                'sizes': set(),
-            }
-            groups_map[pid] = g
-            groups.append(g)
-        g['variants'].append(v)
-        g['colors'].add(v.color.name)
-        g['sizes'].add(v.size.name)
+    
+    for p in products_page:
+        g = {
+            'product': p,
+            'variants': [],
+            'colors_seen': set(),
+            'sizes_seen': set(),
+            'unique_color_variants': [],
+            'unique_size_variants': [],
+        }
+        groups_map[p.id] = g
+        groups.append(g)
+
+    for v in variants:
+        g = groups_map.get(v.product_id)
+        if g is not None:
+            g['variants'].append(v)
+            if v.color.name not in g['colors_seen']:
+                g['colors_seen'].add(v.color.name)
+                g['unique_color_variants'].append(v)
+            if v.size.name not in g['sizes_seen']:
+                g['sizes_seen'].add(v.size.name)
+                g['unique_size_variants'].append(v)
+
+    groups = [g for g in groups if g['variants']]
 
     return render(request, 'auth_inventory.html', {
-        'inventorys': inventory,
+        'inventorys': products_page,
         'inventory_groups': groups,
         'categories': categories
     })

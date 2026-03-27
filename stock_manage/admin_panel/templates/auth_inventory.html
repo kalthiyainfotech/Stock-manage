@@ -303,7 +303,7 @@
                         </td>
                         <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
                             <div class="flex flex-wrap gap-1.5 max-w-[180px]">
-                                {% for v in group.variants %}
+                                {% for v in group.unique_color_variants %}
                                 <button
                                     type="button"
                                     class="inline-block w-4 h-4 rounded-full border border-slate-300 hover:ring-2 hover:ring-slate-300 edit-variant-color-btn shrink-0"
@@ -331,7 +331,7 @@
                         </td>
                         <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
                             <div class="flex flex-wrap gap-1.5 max-w-[200px]">
-                                {% for v in group.variants %}
+                                {% for v in group.unique_size_variants|slice:":2" %}
                                 <button
                                     type="button"
                                     class="px-2 py-0.5 rounded border text-[11px] hover:bg-slate-100 edit-variant-size-btn shrink-0"
@@ -356,6 +356,11 @@
                                     {{ v.size.name }}
                                 </button>
                                 {% endfor %}
+                                {% if group.unique_size_variants|length > 2 %}
+                                <span class="px-2 py-0.5 rounded border text-[11px] bg-slate-50 text-slate-500 shrink-0">
+                                    +{{ group.unique_size_variants|length|add:"-2" }} more
+                                </span>
+                                {% endif %}
                             </div>
                         </td>
                         <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-700 text-center">
@@ -477,58 +482,69 @@
 </div>
 
 <!-- Level 3: Individual Variant Detail Modal -->
-<div id="variantDetailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[70] px-4 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-300">
-        <button onclick="closeVariantDetailModal()" class="absolute top-4 right-4 z-10 h-10 w-10 flex items-center justify-center rounded-full bg-white/80 text-slate-600 shadow-lg hover:bg-white transition">
+<div id="variantDetailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[70] px-3 sm:px-6 backdrop-blur-sm lg:p-8 py-6">
+    <div class="bg-white w-full max-w-5xl rounded-[2rem] shadow-2xl relative animate-in fade-in zoom-in duration-300 flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh] md:h-[85vh] overflow-y-auto md:overflow-hidden">
+        
+        <!-- Premium sticky close button -->
+        <button onclick="closeVariantDetailModal()" class="absolute top-4 right-4 md:top-6 md:right-6 z-[100] h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200 hover:text-slate-900 transition">
             <i class="fa-solid fa-xmark"></i>
         </button>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
-            <!-- Left: Image Section -->
-            <div class="bg-slate-50 p-6 lg:p-8 flex flex-col gap-4">
-                <div class="aspect-square rounded-2xl overflow-hidden bg-white shadow-inner">
-                    <img id="detailMainImage" src="" class="w-full h-full object-cover">
+
+        <!-- Left: Image Section -->
+        <div class="bg-slate-50/70 p-6 md:p-8 lg:p-12 flex flex-col gap-6 w-full md:w-[45%] lg:w-[45%] shrink-0 h-auto md:h-full overflow-visible md:overflow-y-auto border-b md:border-b-0 md:border-r border-slate-100/60 custom-scrollbar lg:justify-center relative">
+            <div class="aspect-square rounded-[1.5rem] overflow-hidden bg-white shadow-sm ring-1 ring-slate-200 relative">
+                <img id="detailMainImage" src="" class="absolute inset-0 w-full h-full object-contain p-6 mix-blend-multiply">
+            </div>
+            <div id="detailGallery" class="flex flex-wrap gap-3 pb-2">
+                <!-- Gallery thumbnails -->
+            </div>
+        </div>
+
+        <!-- Right: Info Section -->
+        <div class="p-6 md:p-8 lg:p-12 space-y-8 w-full md:w-[55%] lg:w-[55%] h-auto md:h-full overflow-visible md:overflow-y-auto custom-scrollbar relative">
+            <div class="space-y-2 pr-12">
+                <div id="detailBadge" class="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest bg-emerald-100/80 text-emerald-700 ring-1 ring-emerald-200/50">Active</div>
+                <h2 id="detailTitle" class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight pt-2"></h2>
+                <p id="detailSKU" class="text-xs font-mono text-slate-400 uppercase tracking-widest pt-1"></p>
+            </div>
+            
+            <div class="flex flex-wrap sm:flex-nowrap gap-x-10 gap-y-6 py-5 border-y border-slate-100">
+                <div class="space-y-1.5 w-full sm:w-auto sm:flex-1 min-w-[120px]">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Price</p>
+                    <p id="detailPrice" class="text-3xl font-black text-emerald-600 break-all sm:break-normal"></p>
                 </div>
-                <div id="detailGallery" class="flex flex-wrap gap-2">
-                    <!-- Gallery thumbnails -->
+                <div class="hidden sm:block w-px bg-slate-100"></div>
+                <div class="space-y-1.5 w-full sm:w-auto sm:flex-1 min-w-[120px]">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stock Level</p>
+                    <p id="detailStock" class="text-3xl font-black text-slate-900 break-all sm:break-normal"></p>
                 </div>
             </div>
-            <!-- Right: Info Section -->
-            <div class="p-8 lg:p-10 space-y-6">
-                <div class="space-y-1">
-                    <div id="detailBadge" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700">Active</div>
-                    <h2 id="detailTitle" class="text-2xl font-black text-slate-900"></h2>
-                    <p id="detailSKU" class="text-xs font-mono text-slate-400 uppercase tracking-widest"></p>
-                </div>
-                <div class="flex items-center gap-6 py-4 border-y border-slate-100">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Price</p>
-                        <p id="detailPrice" class="text-2xl font-black text-emerald-600"></p>
+
+            <div class="space-y-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category</p>
+                        <p id="detailCategory" class="text-base font-semibold text-slate-800 break-words"></p>
                     </div>
-                    <div class="h-10 w-px bg-slate-100"></div>
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Stock</p>
-                        <p id="detailStock" class="text-2xl font-black text-slate-900"></p>
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Brand</p>
+                        <p id="detailBrand" class="text-base font-semibold text-slate-800 break-words"></p>
                     </div>
                 </div>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category</p>
-                            <p id="detailCategory" class="text-sm font-semibold text-slate-700"></p>
-                        </div>
-                        <div class="space-y-1">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Brand</p>
-                            <p id="detailBrand" class="text-sm font-semibold text-slate-700"></p>
-                        </div>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</p>
-                        <p id="detailDesc" class="text-sm text-slate-600 leading-relaxed"></p>
-                    </div>
-                    <div id="detailSpecsContainer" class="space-y-2 pt-4 hidden">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Specifications</p>
-                        <div id="detailSpecs" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
-                    </div>
+
+                <div class="space-y-3">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest relative">
+                        <span>Description</span>
+                    </p>
+                    <p id="detailDesc" class="text-sm text-slate-600 leading-relaxed max-w-prose"></p>
+                </div>
+
+                <div id="detailSpecsContainer" class="space-y-4 pt-6 mt-6 border-t border-slate-100 hidden">
+                    <p class="text-[10px] items-center flex gap-2 font-bold text-slate-400 uppercase tracking-[0.2em]">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> 
+                        Specifications
+                    </p>
+                    <div id="detailSpecs" class="flex flex-col gap-3"></div>
                 </div>
             </div>
         </div>
@@ -1894,10 +1910,10 @@ function showVariantDetail(vId) {
         specsCont.classList.remove('hidden');
         v.specs.forEach(s => {
             const div = document.createElement('div');
-            div.className = 'flex justify-between items-center p-3 rounded-xl bg-slate-50 border border-slate-100 group hover:border-emerald-200 transition-colors';
+            div.className = 'flex flex-col sm:flex-row sm:items-start p-4 rounded-2xl bg-slate-50/50 border border-slate-100/60 group hover:border-emerald-200 hover:bg-white hover:shadow-sm transition-all duration-300 gap-2 sm:gap-6';
             div.innerHTML = `
-                <span class="text-[10px] uppercase font-bold text-slate-400 group-hover:text-emerald-500 transition-colors">${s.name}</span>
-                <span class="text-xs font-bold text-slate-700">${s.value}</span>
+                <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider shrink-0 sm:w-1/3 sm:pt-0.5 group-hover:text-emerald-500 transition-colors">${s.name}</span>
+                <span class="text-sm font-semibold text-slate-800 break-words leading-relaxed">${s.value}</span>
             `;
             specsList.appendChild(div);
         });
