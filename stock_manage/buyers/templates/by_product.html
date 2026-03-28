@@ -420,6 +420,7 @@
         }
 
         function updateGallery(colorId, isInitialLoad = false) {
+            // Show only images that belong to this color
             const visibleBtns = galleryBtns.filter(b => {
                 const ids = (b.dataset.colorIds || '').split(',').map(x => parseInt(x));
                 const visible = ids.includes(colorId);
@@ -427,6 +428,7 @@
                 return visible;
             });
 
+            // Reset all border classes first
             galleryBtns.forEach(b => b.classList.remove('border-brand-500', 'border-transparent'));
 
             if (visibleBtns.length === 0) {
@@ -434,14 +436,27 @@
                 return;
             }
 
-            let activeBtn = visibleBtns.find(b => b.getAttribute('data-src') === mainImg.getAttribute('src'));
+            // Find the active button - prioritize by current main image source
+            let activeBtn = visibleBtns.find(b => {
+                const btnSrc = b.getAttribute('data-src');
+                const mainSrc = mainImg.getAttribute('src');
+                // Compare filenames instead of full URLs to handle CDN/cache differences
+                const btnFile = btnSrc ? btnSrc.split('/').pop().split('?')[0] : '';
+                const mainFile = mainSrc ? mainSrc.split('/').pop().split('?')[0] : '';
+                return btnFile === mainFile;
+            });
 
+            // If no match found, use the marked main image or first available
             if (!activeBtn) {
                 activeBtn = visibleBtns.find(b => b.dataset.isMain === 'true') || visibleBtns[0];
             }
 
             if (activeBtn) {
-                mainImg.src = activeBtn.getAttribute('data-src');
+                const newSrc = activeBtn.getAttribute('data-src');
+                // Only change image if it's different to avoid flickering
+                if (mainImg.src !== newSrc) {
+                    mainImg.src = newSrc;
+                }
                 activeBtn.classList.add('border-brand-500');
                 visibleBtns.forEach(b => {
                     if (b !== activeBtn) b.classList.add('border-transparent');
@@ -482,7 +497,13 @@
                 const colorId = parseInt(this.dataset.colorId);
                 const sizesForColor = SIZE_MAP[colorId] || {};
                 const firstSizeId = Object.keys(sizesForColor)[0];
-                if (firstSizeId) updateVariantUI(sizesForColor[firstSizeId].id);
+                
+                // Update gallery FIRST before changing variant
+                updateGallery(colorId);
+                
+                if (firstSizeId) {
+                    updateVariantUI(sizesForColor[firstSizeId].id);
+                }
             });
         });
 
