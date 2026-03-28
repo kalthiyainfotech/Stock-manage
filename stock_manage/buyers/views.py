@@ -231,30 +231,31 @@ def by_product(request, variant_id):
             gallery_annotated.append(entry)
             seen_urls[url_key] = entry
 
-    # 1. Variant specific images (Color-based) - Process each variant separately
-    variant_processed = set()
+    # 1. Variant specific images (Color-based) - Process each color separately
+    color_processed_for_images = set()
     for v in variants:
         cid = v.color.id
         if cid not in all_cids: continue
         
-        # Track this variant to avoid processing same color+size combo multiple times
-        variant_key = (cid, v.size.id)
-        if variant_key in variant_processed:
+        # Track this color to avoid processing images from multiple sizes of the same color
+        if cid in color_processed_for_images:
             continue
-        variant_processed.add(variant_key)
         
-        # Main variant image - strictly for THIS color only
         v_main_url = _safe_image_url(getattr(v, 'image', None))
-        if v_main_url:
-            # Add with ONLY this color ID, not shared
-            add_to_annotated(v_main_url, [cid], is_main=True)
+        v_gallery = list(v.gallery_images.all())
         
-        # Gallery images for this variant - also strictly for THIS color
-        for vi in v.gallery_images.all():
-            v_gallery_url = _safe_image_url(getattr(vi, 'image', None))
-            if v_gallery_url:
-                # Each gallery image belongs ONLY to this variant's color
-                add_to_annotated(v_gallery_url, [cid])
+        if v_main_url or v_gallery:
+            color_processed_for_images.add(cid)
+            
+            # Main variant image - strictly for THIS color only
+            if v_main_url:
+                add_to_annotated(v_main_url, [cid], is_main=True)
+            
+            # Gallery images for this variant - also strictly for THIS color
+            for vi in v_gallery:
+                v_gallery_url = _safe_image_url(getattr(vi, 'image', None))
+                if v_gallery_url:
+                    add_to_annotated(v_gallery_url, [cid])
 
     # 2. Main Product Image (Default) - Only use if no variant-specific images exist
     product_main_url = _safe_image_url(getattr(product, 'image', None))
