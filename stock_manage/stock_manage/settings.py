@@ -69,6 +69,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'buyers.context_processors.current_buyer',
                 'admin_panel.context_processors.admin_profile',
+                'suppliers.context_processors.current_supplier',
+                'workers.context_processors.current_worker',
             ],
         },
     },
