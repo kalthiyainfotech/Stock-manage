@@ -1193,3 +1193,27 @@ def delete_product_inventory(request, product_id):
         })
 
     return redirect('auth_inventory')
+
+@never_cache
+@login_required(login_url='auth_login')
+def auth_profile(request):
+    user = request.user
+    profile, _ = AdminProfile.objects.get_or_create(user=user)
+
+    if request.method == "POST":
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.email = request.POST.get('email', user.email)
+        user.save()
+
+        profile.phone = request.POST.get('phone', profile.phone)
+        profile.address = request.POST.get('address', profile.address)
+        
+        if request.FILES.get('profile_image'):
+            profile.profile_image = request.FILES['profile_image']
+            
+        profile.save()
+        messages.success(request, "Admin Profile updated successfully")
+        return redirect(request.META.get('HTTP_REFERER', 'auth_dashboard'))
+        
+    return redirect(request.META.get('HTTP_REFERER', 'auth_dashboard'))

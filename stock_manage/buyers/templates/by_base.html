@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{% static 'img/1.ico' %}">
     <title>Luxe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -30,84 +31,160 @@
     <link href="{% static 'css/tiny-slider.css' %}" rel="stylesheet">
     <link href="{% static 'css/by_style.css' %}" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         .htmx-indicator { display: none; }
         .htmx-request .htmx-indicator { display: block; }
         .htmx-request.htmx-indicator { display: block; }
     </style>
+    {% block extra_head %}{% endblock extra_head %}
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans selection:bg-brand-500 selection:text-white">
-    <nav id="navbar" class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm transition-all duration-300">
+    {% block navbar %}
+    <nav x-data="{ mobileMenuOpen: false, forceWhite: {% block force_white_nav %}true{% endblock %}, scrolled: false }"
+         x-init="scrolled = forceWhite ? true : (window.pageYOffset > 20)"
+         @scroll.window="scrolled = forceWhite ? true : (window.pageYOffset > 20)"
+         :class="{ 'bg-white/90 shadow-md backdrop-blur-md border-b border-gray-100': scrolled, 'bg-transparent text-white': !scrolled }"
+         class="fixed w-full z-50 transition-all duration-300 left-0 top-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <a href="{% url 'by_index' %}" class="text-2xl font-black text-brand-900 tracking-tighter">LUXE<span class="text-brand-500">.</span></a>
-                <div class="hidden md:flex space-x-8 items-center font-medium">
-                    <a href="{% url 'by_index' %}" class="text-gray-700 hover:text-brand-600 transition-all">Home</a>
-                    <a href="{% url 'by_shop' %}" class="text-gray-700 hover:text-brand-600 transition-all">Shop</a>
-                    <a href="{% url 'by_blog' %}" class="text-gray-700 hover:text-brand-600 transition-all">Blog</a>
-                    <a href="{% url 'by_contact' %}" class="text-gray-700 hover:text-brand-600 transition-all">Contact</a>
-                    <a href="{% url 'by_profile' %}" class="text-gray-700 hover:text-brand-600 transition-all">Profile</a>
-                    <a href="{% url 'by_wishlist' %}" class="text-gray-700 hover:text-brand-600 transition-all">Wishlist</a>
-                    <a href="{% url 'by_history' %}" class="text-gray-700 hover:text-brand-600 transition-all">History</a>
-                    <a href="{% url 'by_cart' %}" class="inline-flex items-center gap-2 bg-brand-600 text-white px-5 py-2 rounded-full hover:bg-brand-500 transition-all">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>Cart</span>
-                    </a>
-                    {% if request.session.buyer_id %}
-                        <a href="{% url 'by_logout' %}" class="inline-flex items-center gap-2 text-white bg-gray-900 px-4 py-2 rounded-full hover:bg-gray-800 transition-all">
-                            <i class="fas fa-user"></i>
-                            <span>Logout</span>
+                <a href="{% url 'by_index' %}" class="text-3xl font-black tracking-tighter" :class="scrolled ? 'text-brand-900' : 'text-white'">
+                    LUXE<span class="text-brand-500">.</span>
+                </a>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 items-center font-medium" :class="scrolled ? 'text-gray-700' : 'text-white'">
+                    <a href="{% url 'by_index' %}" class="hover:text-brand-500 transition-all">Home</a>
+                    <a href="{% url 'by_shop' %}" class="hover:text-brand-500 transition-all">Shop</a>
+                    <a href="{% url 'by_blog' %}" class="hover:text-brand-500 transition-all">Blog</a>
+                    <a href="{% url 'by_contact' %}" class="hover:text-brand-500 transition-all">Contact</a>
+                    
+                    <div class="flex items-center gap-4 ml-4">
+                        <a href="{% url 'by_cart' %}" class="hover:text-brand-500 relative">
+                            <i class="fas fa-shopping-cart text-xl"></i>
+                            <span class="absolute -top-2 -right-2 bg-brand-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
                         </a>
-                    {% else %}
-                        <a href="{% url 'by_login' %}" class="inline-flex items-center gap-2 text-white bg-gray-900 px-4 py-2 rounded-full hover:bg-gray-800 transition-all">
-                            <i class="fas fa-user"></i>
-                            <span>Login</span>
-                        </a>
-                    {% endif %}
+                        <a href="{% url 'by_wishlist' %}" class="hover:text-brand-500"><i class="fas fa-heart text-xl"></i></a>
+                        <!-- Auth/Profile -->
+                        {% if request.session.buyer_id %}
+                            <a href="{% url 'by_profile' %}" class="hover:text-brand-500 ml-2"><i class="fas fa-user text-xl"></i></a>
+                            <a href="{% url 'by_logout' %}" class="hover:text-brand-500 ml-2" title="Logout"><i class="fas fa-sign-out-alt text-xl"></i></a>
+                        {% else %}
+                            <a href="{% url 'by_login' %}" class="hover:text-brand-500 ml-2"><i class="fas fa-user text-xl"></i></a>
+                        {% endif %}
+                    </div>
                 </div>
-                <button id="mobile-menu-btn" class="md:hidden p-3 rounded-lg hover:bg-brand-50 transition-all">
-                    <i class="fas fa-bars text-xl text-gray-700"></i>
+
+                <!-- Mobile menu button -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 rounded-lg" :class="scrolled ? 'text-gray-900' : 'text-white'">
+                    <i class="fas fa-bars text-2xl"></i>
                 </button>
             </div>
         </div>
-        <div id="mobile-menu" class="md:hidden hidden origin-top bg-white shadow-lg">
-            <div class="px-4 py-3 space-y-2">
-                <a href="{% url 'by_index' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">Home</a>
-                <a href="{% url 'by_shop' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">Shop</a>
-                <a href="{% url 'by_blog' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">Blog</a>
-                <a href="{% url 'by_contact' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">Contact</a>
-                <a href="{% url 'by_profile' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">Profile</a>
-                <a href="{% url 'by_history' %}" class="block px-4 py-2 rounded-lg hover:bg-brand-50">History</a>
-                <div class="flex items-center gap-2 px-4 py-2">
-                    <a href="{% url 'by_cart' %}" class="inline-flex items-center gap-2 bg-brand-600 text-white px-4 py-2 rounded-full hover:bg-brand-500 transition-all">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span>Cart</span>
-                    </a>
-                    {% if request.session.buyer_id %}
-                        <a href="{% url 'by_logout' %}" class="inline-flex items-center gap-2 text-white bg-gray-900 px-4 py-2 rounded-full hover:bg-gray-800 transition-all">
-                            <i class="fas fa-user"></i>
-                            <span>Logout</span>
-                        </a>
-                    {% else %}
-                        <a href="{% url 'by_login' %}" class="inline-flex items-center gap-2 text-white bg-gray-900 px-4 py-2 rounded-full hover:bg-gray-800 transition-all">
-                            <i class="fas fa-user"></i>
-                            <span>Login</span>
-                        </a>
-                    {% endif %}
+
+        <!-- Mobile Menu -->
+        <div x-show="mobileMenuOpen" x-transition class="md:hidden bg-white shadow-xl text-gray-900 absolute top-20 left-0 w-full">
+            <div class="px-4 py-6 space-y-4">
+                <a href="{% url 'by_index' %}" class="block font-bold hover:text-brand-500">Home</a>
+                <a href="{% url 'by_shop' %}" class="block font-bold hover:text-brand-500">Shop</a>
+                <a href="{% url 'by_blog' %}" class="block font-bold hover:text-brand-500">Blog</a>
+                <a href="{% url 'by_contact' %}" class="block font-bold hover:text-brand-500">Contact</a>
+                <div class="flex gap-4 pt-4 border-t border-gray-100">
+                     <a href="{% url 'by_cart' %}" class="flex-1 bg-brand-500 text-white py-2 rounded-lg text-center"><i class="fas fa-shopping-cart"></i> Cart</a>
+                     {% if request.session.buyer_id %}
+                         <a href="{% url 'by_profile' %}" class="flex-1 bg-gray-900 text-white py-2 rounded-lg text-center"><i class="fas fa-user"></i> Profile</a>
+                         <a href="{% url 'by_logout' %}" class="bg-rose-500 text-white px-4 py-2 rounded-lg text-center"><i class="fas fa-sign-out-alt"></i></a>
+                     {% else %}
+                         <a href="{% url 'by_login' %}" class="flex-1 bg-gray-900 text-white py-2 rounded-lg text-center"><i class="fas fa-user"></i> Login</a>
+                     {% endif %}
                 </div>
             </div>
         </div>
     </nav>
+    {% endblock navbar %}
 
+    {% block main_container %}
     <div class="pt-24">
         {% block buyer_layout %}{% endblock buyer_layout %}
     </div>
+    {% endblock main_container %}
 
     {% block footer %}
-    <footer class="bg-gray-900 pt-16 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-white text-center">
-            <h4 class="text-2xl font-black tracking-tighter mb-4 text-white">LUXE<span class="text-brand-500">.</span></h4>
-            <p class="text-gray-500 text-sm">&copy; 2026 LUXE E-Commerce. All rights reserved.</p>
+    <!-- 10. FOOTER -->
+    <footer class="bg-gray-950 pt-20 pb-10 border-t border-gray-800 text-gray-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <!-- Branding -->
+                <div>
+                    <a href="{% url 'by_index' %}" class="text-3xl font-black text-white tracking-tighter block mb-6">
+                        LUXE<span class="text-brand-500">.</span>
+                    </a>
+                    <p class="text-gray-400 mb-8 leading-relaxed font-light">
+                        Pioneering premium fashion and everyday essentials for the modern lifestyle. Quality without compromise since 2026.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-brand-500 transition-all hover:-translate-y-1"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-blue-400 transition-all hover:-translate-y-1"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-pink-600 transition-all hover:-translate-y-1"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-red-600 transition-all hover:-translate-y-1"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="font-bold text-white text-lg mb-6 uppercase tracking-wider">Quick Links</h4>
+                    <ul class="space-y-4">
+                        <li><a href="{% url 'by_index' %}" class="text-gray-400 hover:text-brand-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-3 text-brand-500 opacity-50"></i> Home</a></li>
+                        <li><a href="{% url 'by_shop' %}" class="text-gray-400 hover:text-brand-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-3 text-brand-500 opacity-50"></i> Shop Collection</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-brand-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-3 text-brand-500 opacity-50"></i> About Us</a></li>
+                        <li><a href="{% url 'by_contact' %}" class="text-gray-400 hover:text-brand-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-3 text-brand-500 opacity-50"></i> Contact Us</a></li>
+                        <li><a href="{% url 'by_blog' %}" class="text-gray-400 hover:text-brand-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-3 text-brand-500 opacity-50"></i> Fashion Blog</a></li>
+                    </ul>
+                </div>
+
+                <!-- Customer Service -->
+                <div>
+                    <h4 class="font-bold text-white text-lg mb-6 uppercase tracking-wider">Customer Care</h4>
+                    <ul class="space-y-4">
+                        <li><a href="#" class="text-gray-400 hover:text-brand-400 transition-colors">FAQ & Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-brand-400 transition-colors">Shipping & Delivery</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-brand-400 transition-colors">Returns & Exchanges</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-brand-400 transition-colors">Track Your Order</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-brand-400 transition-colors">Size Guide</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div>
+                    <h4 class="font-bold text-white text-lg mb-6 uppercase tracking-wider">Contact Us</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1.5 mr-4 text-brand-500 text-lg"></i>
+                            <span class="text-gray-400 font-light">123 Fashion Ave, Suite 400<br>New York, NY 10001</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone mr-4 text-brand-500 text-lg"></i>
+                            <span class="text-gray-400 font-light">+1 (800) 123-4567</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-4 text-brand-500 text-lg"></i>
+                            <span class="text-gray-400 font-light">support@luxe.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-gray-500 text-sm font-light text-center md:text-left">
+                    &copy; 2026 LUXE E-Commerce. All rights reserved. Designed with <i class="fas fa-heart text-brand-500 mx-1"></i> by LUXE Studio.
+                </p>
+                <div class="flex gap-4">
+                    <i class="fab fa-cc-visa text-gray-500 text-3xl hover:text-white transition-colors cursor-pointer"></i>
+                    <i class="fab fa-cc-mastercard text-gray-500 text-3xl hover:text-white transition-colors cursor-pointer"></i>
+                    <i class="fab fa-cc-paypal text-gray-500 text-3xl hover:text-white transition-colors cursor-pointer"></i>
+                    <i class="fab fa-cc-apple-pay text-gray-500 text-3xl hover:text-white transition-colors cursor-pointer"></i>
+                </div>
+            </div>
         </div>
     </footer>
     {% endblock footer %}
