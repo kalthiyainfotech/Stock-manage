@@ -26,210 +26,278 @@
     </div>
 
     <div id="workerModal"
-        class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
+        class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm items-center justify-center px-3 sm:px-6 transition-all duration-300">
 
         <div
-            class="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl shadow-slate-300/40 max-h-[90vh] overflow-y-auto">
+            class="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl shadow-slate-900/20 max-h-[92vh] overflow-y-auto no-scrollbar animate-modal-enter">
 
-            <div
-                class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
-                <div>
-                    <h2 id="modalTitle" class="text-base sm:text-lg font-semibold text-slate-900">
-                        Add Worker
-                    </h2>
-                    <p class="mt-0.5 text-xs sm:text-sm text-slate-500">
-                        Fill in the details to create or update a worker profile.
-                    </p>
+            <!-- Modal Header -->
+            <div class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-8 bg-gradient-to-r from-[#161F32] to-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-sm border border-white/20">
+                        <i class="fa-solid fa-user-plus text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 id="modalTitle" class="text-base sm:text-lg font-bold text-white tracking-tight">Add Worker</h2>
+                        <p class="text-[10px] sm:text-xs text-slate-300 uppercase tracking-widest font-medium">Create New Profile</p>
+                    </div>
                 </div>
                 <button id="closeworkerModal"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
-                    <span class="sr-only">Close</span>
-                    ✕
+                    class="h-8 w-8 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
+            <div class="p-5 sm:p-8">
                 <form id="workerForm" method="POST"
                     action="{% url 'add_worker' %}"
                     enctype="multipart/form-data"
-                    class="space-y-6">
+                    class="space-y-8">
 
                     {% csrf_token %}
 
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Personal Information
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Name</label>
-                                <input type="text" name="name" required
-                                    placeholder="e.g. Darshan Patel"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                    <!-- Personal Information -->
+                    <div class="space-y-5">
+                        <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <i class="fa-solid fa-id-card text-indigo-500 text-xs"></i>
+                            <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Personal Details</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <!-- Full Name -->
+                            <div class="space-y-1.5 sm:col-span-2">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Full Name</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                        <i class="fa-solid fa-user text-xs"></i>
+                                    </span>
+                                    <input type="text" name="name" id="worker_name"
+                                        placeholder="e.g. Darshan Patel"
+                                        class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                </div>
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
 
+                            <!-- First Name -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Email</label>
-                                <input type="email" name="email" required
-                                    placeholder="worker@email.com"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">First Name</label>
+                                <input type="text" name="first_name" id="worker_first_name"
+                                    placeholder="Enter first name"
+                                    class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
 
+                            <!-- Last Name -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">First Name</label>
-                                <input type="text" name="first_name" required
-                                    placeholder="First name"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Last Name</label>
+                                <input type="text" name="last_name" id="worker_last_name"
+                                    placeholder="Enter last name"
+                                    class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
 
+                            <!-- Email -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Last Name</label>
-                                <input type="text" name="last_name" required
-                                    placeholder="Last name"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Email Address</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                        <i class="fa-solid fa-envelope text-xs"></i>
+                                    </span>
+                                    <input type="email" name="email" id="worker_email"
+                                        placeholder="worker@example.com"
+                                        class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                </div>
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
 
+                            <!-- Mobile -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Password</label>
-                                <div class="relative">
-                                    <input
-                                        id="workerPassword"
-                                        type="password"
-                                        name="password"
-                                        placeholder="Leave blank to keep same"
-                                        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                                    <button
-                                        type="button"
-                                        id="toggleWorkerPasswordVisibility"
-                                        class="absolute inset-y-0 right-2 flex items-center text-slate-400 hover:text-slate-600">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Mobile Number</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                        <i class="fa-solid fa-phone text-xs"></i>
+                                    </span>
+                                    <input type="number" name="mbno" id="worker_mbno"
+                                        placeholder="10 digit number"
+                                        class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                </div>
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
+                            </div>
+
+                            <!-- Salary -->
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Monthly Salary</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-emerald-500 transition-colors">
+                                        <i class="fa-solid fa-indian-rupee-sign text-xs"></i>
+                                    </span>
+                                    <input type="number" name="salary" step="0.01" min="0" id="worker_salary"
+                                        placeholder="e.g. 25000"
+                                        class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 outline-none">
+                                </div>
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Password</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                        <i class="fa-solid fa-lock text-xs"></i>
+                                    </span>
+                                    <input type="password" name="password" id="workerPassword"
+                                        placeholder="Create password"
+                                        class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-10 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                    <button type="button" id="toggleWorkerPasswordVisibility"
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-indigo-500">
                                         <i class="fa-solid fa-eye text-xs" id="workerPasswordEyeIcon"></i>
                                     </button>
                                 </div>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Mobile Number</label>
-                                <input type="number" name="mbno" required
-                                    placeholder="e.g. 9876543210"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                            </div>
-                            
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Salary</label>
-                                <input type="number" name="salary" step="0.01" min="0" required
-                                    placeholder="e.g. 25000.00"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Location & Status
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- Location & Status -->
+                    <div class="space-y-5">
+                        <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <i class="fa-solid fa-location-dot text-emerald-500 text-xs"></i>
+                            <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Position & Location</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">State</label>
-                                <input type="text" name="state"
-                                    placeholder="State"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">State</label>
+                                <input type="text" name="state" id="worker_state"
+                                    placeholder="Enter state"
+                                    class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">City</label>
-                                <input type="text" name="city"
-                                    placeholder="City"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">City</label>
+                                <input type="text" name="city" id="worker_city"
+                                    placeholder="Enter city"
+                                    class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
 
                             <div class="space-y-1.5 sm:col-span-2">
-                                <label class="text-xs font-medium text-slate-700">Address</label>
-                                <textarea name="address" rows="2"
-                                    placeholder="Street, area, landmark"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 resize-none"></textarea>
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Full Address</label>
+                                <textarea name="address" rows="2" id="worker_address"
+                                    placeholder="Enter complete residential address"
+                                    class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none resize-none"></textarea>
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Gender</label>
-                                <select name="gender" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                                    <option value="">Select Gender</option>
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                    <option>Other</option>
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Gender</label>
+                                <select name="gender" id="worker_gender"
+                                    class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                    <option value="">Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
                                 </select>
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Status</label>
-                                <select name="status" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                                    <option value="">Select Status</option>
-                                    <option>Active</option>
-                                    <option>Inactive</option>
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Work Status</label>
+                                <select name="status" id="worker_status"
+                                    class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                    <option value="">Select status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Attachments
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Profile Picture</label>
-                                <div
-                                    class="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
-                                    <div
-                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-xs">
-                                        <i class="fa-solid fa-user"></i>
+                    <!-- Attachments -->
+                    <div class="space-y-5">
+                        <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <i class="fa-solid fa-paperclip text-amber-500 text-xs"></i>
+                            <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Worker Attachments</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <!-- Profile Picture Upload -->
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Profile Photo</label>
+                                <div id="workerProfileUploadBox" class="group relative rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-b from-slate-50/80 to-white hover:border-indigo-300 hover:bg-indigo-50/30 transition-all duration-300 text-center cursor-pointer overflow-hidden"
+                                     style="min-height: 120px;"
+                                     onclick="document.querySelector('input[name=profile_picture]').click()">
+                                    <!-- Default state -->
+                                    <div id="workerProfilePlaceholder" class="flex flex-col items-center gap-2 p-4">
+                                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                                            <i class="fa-solid fa-camera text-indigo-500 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-medium text-slate-600">Click to upload</p>
+                                            <p class="text-[10px] text-slate-400 mt-0.5">JPG or PNG, up to 2MB</p>
+                                        </div>
                                     </div>
-                                    <div class="flex-1">
-                                        <input type="file" name="profile_picture"
-                                            class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
-                                        <p class="mt-0.5 text-[11px] text-slate-400">
-                                            JPG or PNG, up to 2MB.
-                                        </p>
+                                    <!-- Full-bleed Preview -->
+                                    <div id="workerImagePreviewContainer" class="hidden absolute inset-0">
+                                        <img id="workerImagePreview" src="" class="w-full h-full object-cover">
                                     </div>
-                                </div>
-                                <div id="workerImagePreviewContainer" class="hidden mt-2 relative inline-block">
-                                    <img id="workerImagePreview" src="" class="h-16 w-16 rounded-lg object-cover border border-slate-200 shadow-sm">
-                                    <button type="button" id="removeWorkerImagePreview" 
-                                        class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] hover:bg-rose-600 shadow-md">
-                                        <i class="fa-solid fa-xmark"></i>
+                                    <!-- Close icon -->
+                                    <button type="button" id="removeWorkerImagePreview"
+                                        class="hidden absolute top-2 right-2 z-10 h-7 w-7 rounded-full bg-black/50 text-white hover:bg-black/70 items-center justify-center backdrop-blur-sm shadow-lg"
+                                        onclick="event.stopPropagation()">
+                                        <i class="fa-solid fa-xmark text-xs"></i>
                                     </button>
+                                    <input type="file" name="profile_picture" class="hidden" accept="image/*">
                                 </div>
                             </div>
 
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Document</label>
-                                <div
-                                    class="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
-                                    <div
-                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 text-xs">
-                                        <i class="fa-solid fa-file-lines"></i>
+                            <!-- Document Upload -->
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">ID / Document</label>
+                                <div id="workerDocUploadBox" class="group relative rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-b from-slate-50/80 to-white hover:border-emerald-300 hover:bg-emerald-50/30 transition-all duration-300 text-center cursor-pointer overflow-hidden"
+                                     style="min-height: 120px;"
+                                     onclick="document.querySelector('input[name=document]').click()">
+                                    <!-- Default state -->
+                                    <div id="workerDocPlaceholder" class="flex flex-col items-center gap-2 p-4">
+                                        <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                                            <i class="fa-solid fa-file-arrow-up text-emerald-500 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-medium text-slate-600">Click to upload</p>
+                                            <p class="text-[10px] text-slate-400 mt-0.5">PDF or ID document</p>
+                                        </div>
                                     </div>
-                                    <div class="flex-1">
-                                        <input type="file" name="document"
-                                            class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
-                                        <p class="mt-0.5 text-[11px] text-slate-400">
-                                            Any supporting ID or agreement file.
-                                        </p>
+                                    <!-- Preview state -->
+                                    <div id="workerDocPreviewContainer" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-white p-4">
+                                        <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center mb-1">
+                                            <i class="fa-solid fa-file-check text-emerald-500"></i>
+                                        </div>
+                                        <p id="workerDocFileName" class="text-[10px] text-slate-600 font-bold truncate max-w-full px-2"></p>
+                                        <p class="text-[9px] text-emerald-500 font-medium mt-0.5">Document Attached ✓</p>
                                     </div>
+                                    <!-- Close icon -->
+                                    <button type="button" id="removeWorkerDocPreview"
+                                        class="hidden absolute top-2 right-2 z-10 h-7 w-7 rounded-full bg-black/50 text-white hover:bg-black/70 items-center justify-center backdrop-blur-sm shadow-lg"
+                                        onclick="event.stopPropagation()">
+                                        <i class="fa-solid fa-xmark text-xs"></i>
+                                    </button>
+                                    <input type="file" name="document" class="hidden">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-2 border-t border-slate-100">
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-5 border-t border-slate-100 sticky bottom-0 bg-white z-10 -mx-5 sm:-mx-8 px-5 sm:px-8 pb-1">
                         <button type="button" id="closeworkerModalBottom"
-                            class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                            class="inline-flex items-center justify-center rounded-xl bg-slate-100 px-6 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
                             Cancel
                         </button>
 
-                        <button type="submit"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                        <button type="submit" id="workerSubmitBtn"
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-900 px-8 py-2.5 text-sm font-bold text-white shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 active:scale-95 transition-all">
                             <i class="fa-solid fa-floppy-disk text-xs"></i>
                             <span>Save Worker</span>
                         </button>
@@ -283,8 +351,6 @@
                 <thead
                     class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
                     <tr>
-                        <th class="px-4 py-3 font-medium text-center">No.</th>
-                        <th class="px-4 py-3 font-medium text-center">Worker ID</th>
                         <th class="px-4 py-3 font-medium text-center">Profile</th>
                         <th class="px-4 py-3 font-medium">Name</th>
                         <th class="px-4 py-3 font-medium">Email</th>
@@ -296,13 +362,6 @@
                 <tbody id="workersTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for worker in workers %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
-                            {{ forloop.counter }}
-                        </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm font-medium text-slate-700 text-center">
-                            #{{ worker.id }}
-                        </td>
-
                         <td class="px-4 py-3 align-middle text-center">
                             {% if worker.profile_picture %}
                             <div class="flex justify-center">
@@ -443,55 +502,120 @@
 </div>
 
 <div id="viewModal"
-     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm px-3 sm:px-6 transition-all duration-300">
 
-    <div class="bg-white w-full max-w-4xl rounded-xl p-5 sm:p-6 relative">
+    <div class="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl shadow-slate-900/20 max-h-[92vh] overflow-y-auto no-scrollbar animate-modal-enter">
 
-        <button onclick="closeViewModal()"
-                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
-            ✖
-        </button>
+        <!-- ── Premium Banner Header ── -->
+        <div class="relative h-32 sm:h-40 bg-[#161F32] overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;40&quot; height=&quot;40&quot; viewBox=&quot;0 0 40 40&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot; fill-rule=&quot;evenodd&quot;%3E%3Cpath d=&quot;M0 40L40 0H20L0 20M40 40V20L20 40&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+            
+            <!-- Close Button -->
+            <button onclick="closeViewModal()"
+                class="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-black/20 text-white hover:bg-black/40 flex items-center justify-center backdrop-blur-md transition-all">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <!-- ── Profile Snapshot ── -->
+        <div class="px-6 sm:px-10 -mt-16 sm:-mt-20 relative z-10">
+            <div class="flex flex-col sm:flex-row items-center sm:items-end gap-5">
+                <!-- Avatar -->
+                <div class="h-32 w-32 sm:h-40 sm:w-40 rounded-2xl border-4 border-white bg-slate-100 shadow-xl overflow-hidden flex-shrink-0">
+                    <img id="viewProfile" src="" alt="Profile" class="w-full h-full object-cover">
+                </div>
+                <!-- Identity -->
+                <div class="flex-grow text-center sm:text-left pb-2">
+                    <h2 id="viewName" class="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight"></h2>
+                    <div class="flex flex-wrap justify-center sm:justify-start items-center gap-3 mt-2">
+                        <span class="flex items-center gap-1.5 text-slate-500 text-sm">
+                            <i class="fa-solid fa-envelope text-xs"></i>
+                            <span id="viewEmail"></span>
+                        </span>
+                        <span class="h-1 w-1 rounded-full bg-slate-300 hidden sm:block"></span>
+                        <span class="flex items-center gap-1.5 text-slate-500 text-sm">
+                            <i class="fa-solid fa-id-badge text-xs"></i>
+                            ID: <span id="viewId" class="font-semibold text-slate-700"></span>
+                        </span>
+                    </div>
+                </div>
+                <!-- Status Badge -->
+                <div class="pb-2">
+                    <span id="viewStatusWrapper" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm ring-1 ring-inset">
+                        <span id="viewStatusDot" class="h-2 w-2 rounded-full"></span>
+                        <span id="viewStatus"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
 
-            <div class="w-full flex justify-center">
-                <img id="viewProfile"
-                     class="w-full max-w-sm h-72 md:h-96 object-cover rounded-lg shadow bg-gray-200">
+        <!-- ── Detail Grid ── -->
+        <div class="p-6 sm:p-10 space-y-8">
+            
+            <!-- Section 1: General Info -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                    <i class="fa-solid fa-user-gear text-indigo-500"></i>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest">Personal Overview</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">First Name</p>
+                        <p id="viewFirstName" class="text-sm font-bold text-slate-700"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Last Name</p>
+                        <p id="viewLastName" class="text-sm font-bold text-slate-700"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mobile Number</p>
+                        <div id="viewMobile" class="text-sm font-bold text-slate-700 flex items-center gap-2 line-height-1">
+                            <i class="fa-solid fa-phone text-[10px] text-slate-300"></i>
+                            <span></span>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Monthly Salary</p>
+                        <p id="viewSalary" class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                            <i class="fa-solid fa-indian-rupee-sign text-[10px] text-slate-300"></i>
+                            <span></span>
+                        </p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Gender</p>
+                        <p id="viewGender" class="text-sm font-bold text-slate-700 capitalize"></p>
+                    </div>
+                </div>
             </div>
 
+            <!-- Section 2: Location Details -->
             <div class="space-y-4">
-
-                <div>
-                    <h2 id="viewName"
-                        class="text-2xl font-bold text-gray-800"></h2>
-                    <p id="viewEmail"
-                       class="text-sm text-gray-500"></p>
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                    <i class="fa-solid fa-location-dot text-emerald-500"></i>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest">Address & Location</h3>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-
-                    <p><strong>ID:</strong> <span id="viewId"></span></p>
-                    <p><strong>Status:</strong>
-                        <span id="viewStatus"
-                              class="font-medium"></span>
-                    </p>
-
-                    <p><strong>First Name:</strong> <span id="viewFirstName"></span></p>
-                    <p><strong>Last Name:</strong> <span id="viewLastName"></span></p>
-
-                    <p><strong>Mobile:</strong> <span id="viewMobile"></span></p>
-                    <p><strong>Salary:</strong> <span id="viewSalary"></span></p>
-                    <p><strong>Gender:</strong> <span id="viewGender"></span></p>
-
-                    <p><strong>State:</strong> <span id="viewState"></span></p>
-                    <p><strong>City:</strong> <span id="viewCity"></span></p>
-
-                    <p class="sm:col-span-2">
-                        <strong>Address:</strong>
-                        <span id="viewAddress"></span>
-                    </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">State</p>
+                        <p id="viewState" class="text-sm font-bold text-slate-700"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">City</p>
+                        <p id="viewCity" class="text-sm font-bold text-slate-700"></p>
+                    </div>
+                    <div class="space-y-1 sm:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Full Address</p>
+                        <p id="viewAddress" class="text-sm font-medium text-slate-600 mt-1 leading-relaxed"></p>
+                    </div>
                 </div>
+            </div>
 
+            <!-- Footer Action -->
+            <div class="pt-6 border-t border-slate-100 flex justify-end">
+                <button onclick="closeViewModal()"
+                    class="px-8 py-3 rounded-xl bg-slate-900 text-white text-sm font-bold shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 active:scale-95 transition-all">
+                    Close Profile
+                </button>
             </div>
         </div>
     </div>
@@ -567,29 +691,101 @@
 
 <!-- JS -->
 <script>
-/* ===============================
-   EXISTING CODE (UNCHANGED)
-================================ */
-
+// ─── Elements ───
 const workerModal = document.getElementById('workerModal');
 const deleteModal = document.getElementById('deleteModal');
 const workerForm = document.getElementById('workerForm');
 const modalTitle = document.getElementById('modalTitle');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-const closeWorkerModalTop = document.getElementById('closeworkerModal');
-const closeWorkerModalBottom = document.getElementById('closeworkerModalBottom');
+const workerSubmitBtn = document.getElementById('workerSubmitBtn');
+
 const workerPasswordInput = document.getElementById('workerPassword');
 const toggleWorkerPasswordBtn = document.getElementById('toggleWorkerPasswordVisibility');
 const workerPasswordEyeIcon = document.getElementById('workerPasswordEyeIcon');
 
+const viewModal = document.getElementById('viewModal');
+
+// Upload Elements (Profile)
+const workerProfileUploadBox = document.getElementById('workerProfileUploadBox');
+const workerProfilePlaceholder = document.getElementById('workerProfilePlaceholder');
+const workerImagePreviewContainer = document.getElementById('workerImagePreviewContainer');
+const workerImagePreview = document.getElementById('workerImagePreview');
+const removeWorkerImagePreviewBtn = document.getElementById('removeWorkerImagePreview');
+const profilePictureInput = workerForm.querySelector('input[name="profile_picture"]');
+
+// Upload Elements (Document)
+const workerDocUploadBox = document.getElementById('workerDocUploadBox');
+const workerDocPlaceholder = document.getElementById('workerDocPlaceholder');
+const workerDocPreviewContainer = document.getElementById('workerDocPreviewContainer');
+const workerDocFileName = document.getElementById('workerDocFileName');
+const removeWorkerDocPreviewBtn = document.getElementById('removeWorkerDocPreview');
+const documentInput = workerForm.querySelector('input[name="document"]');
+
+let isEditMode = false;
+
+// ─── Reset / Clear ───
+function clearFieldError(fieldName) {
+    const field = workerForm.querySelector(`[name="${fieldName}"]`);
+    if (field) {
+        field.classList.remove('border-rose-500', 'bg-rose-50/50', 'ring-rose-500/10');
+        const err = field.closest('.space-y-1.5')?.querySelector('.field-error');
+        if (err) {
+            err.classList.add('hidden');
+            err.innerText = '';
+        }
+    }
+}
+
+function showFieldError(fieldName, message) {
+    const field = workerForm.querySelector(`[name="${fieldName}"]`);
+    if (field) {
+        field.classList.add('border-rose-500', 'bg-rose-50/50', 'ring-4', 'ring-rose-500/10');
+        const err = field.closest('.space-y-1.5')?.querySelector('.field-error');
+        if (err) {
+            err.classList.remove('hidden');
+            err.innerText = message;
+        }
+    }
+}
+
+function clearAllErrors() {
+    workerForm.querySelectorAll('.worker-field').forEach(f => {
+        f.classList.remove('border-rose-500', 'bg-rose-50/50', 'ring-rose-500/10');
+    });
+    workerForm.querySelectorAll('.field-error').forEach(e => {
+        e.classList.add('hidden');
+        e.innerText = '';
+    });
+}
+
+function resetUploadBoxes() {
+    // Reset Profile
+    profilePictureInput.value = '';
+    workerImagePreview.src = '';
+    workerImagePreviewContainer.classList.add('hidden');
+    workerProfilePlaceholder.classList.remove('hidden');
+    removeWorkerImagePreviewBtn.classList.add('hidden');
+    workerProfileUploadBox.classList.add('border-dashed');
+    workerProfileUploadBox.classList.remove('border-solid', 'border-indigo-300');
+
+    // Reset Document
+    documentInput.value = '';
+    workerDocFileName.innerText = '';
+    workerDocPreviewContainer.classList.add('hidden');
+    workerDocPlaceholder.classList.remove('hidden');
+    removeWorkerDocPreviewBtn.classList.add('hidden');
+    workerDocUploadBox.classList.add('border-dashed');
+    workerDocUploadBox.classList.remove('border-solid', 'border-emerald-300');
+}
+
+// ─── Modal Controls ───
 document.getElementById('openworkerModal').onclick = () => {
     workerForm.reset();
+    clearAllErrors();
+    resetUploadBoxes();
+    isEditMode = false;
     workerForm.action = "{% url 'add_worker' %}";
     modalTitle.innerText = "Add Worker";
-    if (workerImagePreviewContainer) {
-        workerImagePreviewContainer.classList.add('hidden');
-        workerImagePreview.src = '';
-    }
     workerModal.classList.remove('hidden');
     workerModal.classList.add('flex');
 };
@@ -597,33 +793,36 @@ document.getElementById('openworkerModal').onclick = () => {
 function hideWorkerModal() {
     workerModal.classList.add('hidden');
     workerModal.classList.remove('flex');
+    if (typeof hideLoader === 'function') hideLoader();
 }
 
-if (closeWorkerModalTop) {
-    closeWorkerModalTop.onclick = hideWorkerModal;
-}
+const closeBtnTop = document.getElementById('closeworkerModal');
+if (closeBtnTop) closeBtnTop.onclick = hideWorkerModal;
 
-if (closeWorkerModalBottom) {
-    closeWorkerModalBottom.onclick = hideWorkerModal;
-}
+const closeBtnBottom = document.getElementById('closeworkerModalBottom');
+if (closeBtnBottom) closeBtnBottom.onclick = hideWorkerModal;
 
-// Toggle password visibility (add / edit)
+// ─── Password Toggle ───
 if (toggleWorkerPasswordBtn && workerPasswordInput && workerPasswordEyeIcon) {
     toggleWorkerPasswordBtn.addEventListener('click', () => {
         const isHidden = workerPasswordInput.type === 'password';
         workerPasswordInput.type = isHidden ? 'text' : 'password';
-
         workerPasswordEyeIcon.classList.toggle('fa-eye', !isHidden);
         workerPasswordEyeIcon.classList.toggle('fa-eye-slash', isHidden);
     });
 }
 
+// ─── Edit Modal ───
 function openEditModal(editUrl, name, email, first_name, last_name, mbno, salary, state, city, address, gender, status, profilePictureUrl) {
+    workerForm.reset();
+    clearAllErrors();
+    resetUploadBoxes();
+    
     workerModal.classList.remove('hidden');
     workerModal.classList.add('flex');
-
     modalTitle.innerText = "Edit Worker";
     workerForm.action = editUrl;
+    isEditMode = true;
 
     workerForm.name.value = name;
     workerForm.email.value = email;
@@ -640,12 +839,14 @@ function openEditModal(editUrl, name, email, first_name, last_name, mbno, salary
     if (profilePictureUrl) {
         workerImagePreview.src = profilePictureUrl;
         workerImagePreviewContainer.classList.remove('hidden');
-    } else {
-        workerImagePreviewContainer.classList.add('hidden');
-        workerImagePreview.src = '';
+        workerProfilePlaceholder.classList.add('hidden');
+        removeWorkerImagePreviewBtn.classList.remove('hidden');
+        workerProfileUploadBox.classList.remove('border-dashed');
+        workerProfileUploadBox.classList.add('border-solid', 'border-indigo-300');
     }
 }
 
+// ─── Delete Modal ───
 function openDeleteModal(deleteUrl) {
     deleteModal.classList.remove('hidden');
     deleteModal.classList.add('flex');
@@ -654,33 +855,46 @@ function openDeleteModal(deleteUrl) {
 
 function closeDeleteModal() {
     deleteModal.classList.add('hidden');
+    deleteModal.classList.remove('flex');
 }
 
-/* ===============================
-   VIEW MODAL (ADDED CODE)
-================================ */
-
-const viewModal = document.getElementById('viewModal');
-
-function openViewModal(
-    id, name, email, first_name, last_name, mbno, salary,
-    state, city, address, gender, status, profile
-) {
+// ─── View Modal ───
+function openViewModal(id, name, email, first_name, last_name, mbno, salary, state, city, address, gender, status, profile) {
     document.getElementById('viewId').innerText = id;
     document.getElementById('viewName').innerText = name;
     document.getElementById('viewEmail').innerText = email;
     document.getElementById('viewFirstName').innerText = first_name;
     document.getElementById('viewLastName').innerText = last_name;
-    document.getElementById('viewMobile').innerText = mbno;
-    document.getElementById('viewSalary').innerText = salary;
+    
+    const mobileEl = document.getElementById('viewMobile');
+    mobileEl.querySelector('span').innerText = mbno;
+    
+    const salaryEl = document.getElementById('viewSalary');
+    salaryEl.querySelector('span').innerText = salary;
+
     document.getElementById('viewState').innerText = state;
     document.getElementById('viewCity').innerText = city;
     document.getElementById('viewAddress').innerText = address;
     document.getElementById('viewGender').innerText = gender;
     document.getElementById('viewStatus').innerText = status;
 
+    const statusWrapper = document.getElementById('viewStatusWrapper');
+    const statusDot = document.getElementById('viewStatusDot');
+    
+    if (status === 'Active') {
+        statusWrapper.className = "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm ring-1 ring-inset bg-emerald-50 text-emerald-700 ring-emerald-600/20";
+        statusDot.className = "h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse";
+    } else {
+        statusWrapper.className = "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm ring-1 ring-inset bg-rose-50 text-rose-700 ring-rose-600/20";
+        statusDot.className = "h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]";
+    }
+
     const img = document.getElementById('viewProfile');
-    img.src = profile ? profile : '';
+    if (profile) {
+        img.src = profile;
+    } else {
+        img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=F1F5F9&color=475569&bold=true&size=256`;
+    }
     img.alt = name;
 
     viewModal.classList.remove('hidden');
@@ -689,65 +903,150 @@ function openViewModal(
 
 function closeViewModal() {
     viewModal.classList.add('hidden');
+    viewModal.classList.remove('flex');
 }
 
-const workerImagePreviewContainer = document.getElementById('workerImagePreviewContainer');
-const workerImagePreview = document.getElementById('workerImagePreview');
-const removeWorkerImagePreviewBtn = document.getElementById('removeWorkerImagePreview');
-const workerProfilePictureInput = workerForm.profile_picture;
-
-if (workerProfilePictureInput) {
-    workerProfilePictureInput.addEventListener('change', function() {
+// ─── File Upload Handlers ───
+if (profilePictureInput) {
+    profilePictureInput.addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = (e) => {
                 workerImagePreview.src = e.target.result;
+                workerProfilePlaceholder.classList.add('hidden');
                 workerImagePreviewContainer.classList.remove('hidden');
-            }
+                removeWorkerImagePreviewBtn.classList.remove('hidden');
+                workerProfileUploadBox.classList.remove('border-dashed');
+                workerProfileUploadBox.classList.add('border-solid', 'border-indigo-300');
+            };
             reader.readAsDataURL(file);
         }
     });
 }
 
 if (removeWorkerImagePreviewBtn) {
-    removeWorkerImagePreviewBtn.addEventListener('click', function() {
-        workerProfilePictureInput.value = '';
-        workerImagePreview.src = '';
-        workerImagePreviewContainer.classList.add('hidden');
+    removeWorkerImagePreviewBtn.onclick = (e) => {
+        e.stopPropagation();
+        resetUploadBoxes(); // Simplest way
+    };
+}
+
+if (documentInput) {
+    documentInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            workerDocFileName.innerText = file.name;
+            workerDocPlaceholder.classList.add('hidden');
+            workerDocPreviewContainer.classList.remove('hidden');
+            removeWorkerDocPreviewBtn.classList.remove('hidden');
+            workerDocUploadBox.classList.remove('border-dashed');
+            workerDocUploadBox.classList.add('border-solid', 'border-emerald-300');
+        }
     });
 }
 
+if (removeWorkerDocPreviewBtn) {
+    removeWorkerDocPreviewBtn.onclick = (e) => {
+        e.stopPropagation();
+        documentInput.value = '';
+        workerDocFileName.innerText = '';
+        workerDocPreviewContainer.classList.add('hidden');
+        workerDocPlaceholder.classList.remove('hidden');
+        removeWorkerDocPreviewBtn.classList.add('hidden');
+        workerDocUploadBox.classList.add('border-dashed');
+        workerDocUploadBox.classList.remove('border-solid', 'border-emerald-300');
+    };
+}
+
+// ─── Validation ───
+function validateAllFields() {
+    clearAllErrors();
+    let isValid = true;
+    const data = new FormData(workerForm);
+
+    const required = ['name', 'email', 'first_name', 'last_name', 'mbno', 'salary', 'state', 'city', 'address', 'gender', 'status'];
+    required.forEach(field => {
+        const val = data.get(field);
+        if (!val || val.trim() === '') {
+            showFieldError(field, 'This field is required');
+            isValid = false;
+        }
+    });
+
+    const email = data.get('email');
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError('email', 'Please enter a valid email');
+        isValid = false;
+    }
+
+    const mobile = data.get('mbno');
+    if (mobile && mobile.length !== 10) {
+        showFieldError('mbno', 'Mobile number must be 10 digits');
+        isValid = false;
+    }
+
+    if (!isEditMode && (!data.get('password') || data.get('password').trim() === '')) {
+        showFieldError('password', 'Password is required for new workers');
+        isValid = false;
+    }
+
+    if (!isValid) {
+        const firstErr = workerForm.querySelector('.field-error:not(.hidden)');
+        if (firstErr) firstErr.closest('.space-y-1.5').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return isValid;
+}
+
+// ─── Form Submission ───
+if (workerForm) {
+    workerForm.onsubmit = function(e) {
+        e.preventDefault();
+        if (!validateAllFields()) return;
+
+        workerSubmitBtn.disabled = true;
+        workerSubmitBtn.querySelector('span').innerText = 'Saving...';
+        if (typeof showLoader === 'function') showLoader();
+
+        const formData = new FormData(this);
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json().then(data => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
+            if (ok && data.status === 'success') {
+                hideWorkerModal();
+                window.location.reload();
+            } else {
+                if (data.error === 'email_exists') {
+                    showFieldError('email', data.message || 'Email already exists');
+                }
+                workerSubmitBtn.disabled = false;
+                workerSubmitBtn.querySelector('span').innerText = 'Save Worker';
+                if (typeof hideLoader === 'function') hideLoader();
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            workerSubmitBtn.disabled = false;
+            workerSubmitBtn.querySelector('span').innerText = 'Save Worker';
+            if (typeof hideLoader === 'function') hideLoader();
+        });
+    };
+}
+
+// ─── Search ───
 const workerSearchInput = document.getElementById('workerSearch');
 const workersTBody = document.getElementById('workersTableBody');
-let noMatchRowWorkers = null;
-function ensureNoMatchRowWorkers() {
-    if (!noMatchRowWorkers) {
-        noMatchRowWorkers = document.createElement('tr');
-        const td = document.createElement('td');
-        td.colSpan = 7;
-        td.className = 'px-4 py-6 text-center text-slate-500';
-        td.innerText = 'No matching workers.';
-        noMatchRowWorkers.appendChild(td);
-    }
-}
 if (workerSearchInput && workersTBody) {
-    workerSearchInput.addEventListener('input', function () {
-        const q = this.value.trim().toLowerCase();
+    workerSearchInput.addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
         const rows = Array.from(workersTBody.querySelectorAll('tr'));
-        let visibleCount = 0;
         rows.forEach(row => {
-            const txt = row.textContent.toLowerCase();
-            const show = q === '' || txt.includes(q);
-            row.style.display = show ? '' : 'none';
-            if (show) visibleCount += 1;
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
         });
-        ensureNoMatchRowWorkers();
-        if (visibleCount === 0) {
-            if (noMatchRowWorkers.parentElement !== workersTBody) workersTBody.appendChild(noMatchRowWorkers);
-        } else {
-            if (noMatchRowWorkers.parentElement === workersTBody) workersTBody.removeChild(noMatchRowWorkers);
-        }
     });
 }
 </script>

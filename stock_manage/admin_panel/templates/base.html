@@ -44,6 +44,39 @@
         @keyframes l26 {
             100% { transform: rotate(1turn); }
         }
+
+        /* ── Modern Premium Scrollbar ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #192335;
+            border-radius: 20px;
+            border: 1px solid transparent;
+            background-clip: content-box;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #192335;
+            width: 8px; /* Visual "growth" on hover */
+        }
+
+        /* Firefox Support */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #192335 transparent;
+        }
+
+        /* Keep the hidden scrollbar utility for specific areas if needed */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">

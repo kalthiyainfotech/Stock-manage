@@ -26,214 +26,335 @@
     </div>
 
     <div id="supplierModal"
-        class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm px-3 sm:px-6 transition-all">
 
         <div
-            class="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl shadow-slate-300/40 max-h-[90vh] overflow-y-auto">
+            class="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl shadow-slate-900/20 max-h-[92vh] overflow-y-auto no-scrollbar animate-modal-enter">
 
-            <div
-                class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
-                <div>
-                    <h2 id="modalTitle" class="text-base sm:text-lg font-semibold text-slate-900">
-                        Add Supplier
-                    </h2>
-                    <p class="mt-0.5 text-xs sm:text-sm text-slate-500">
-                        Fill in the basic details to create or update a supplier profile.
-                    </p>
+            <!-- ─── Premium Gradient Header ─── -->
+            <div class="sticky top-0 z-10 flex items-center justify-between px-5 py-4 sm:px-7 sm:py-5 bg-[#151E31] to-violet-500 rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm border border-white/20 shadow-sm">
+                        <i class="fa-solid fa-truck-field text-white text-base"></i>
+                    </div>
+                    <div>
+                        <h2 id="modalTitle" class="text-base sm:text-lg font-bold text-white tracking-tight">
+                            Add Supplier
+                        </h2>
+                        <p class="text-[11px] sm:text-xs text-indigo-100/80">
+                            Fill in details to create or update a supplier.
+                        </p>
+                    </div>
                 </div>
                 <button id="closeSupplierModal"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
-                    <span class="sr-only">Close</span>
-                    ✕
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white/90 hover:bg-white/25 hover:text-white transition-all duration-200 backdrop-blur-sm border border-white/10">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
 
-            <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
+            <!-- ─── Form Body ─── -->
+            <div class="px-5 pb-5 pt-5 sm:px-7 sm:pb-7">
                 <form id="supplierForm" method="POST"
                     action="{% url 'add_supplier' %}"
                     enctype="multipart/form-data"
-                    class="space-y-6" novalidate data-ajax-form>
+                    class="space-y-7" novalidate data-ajax-form>
 
                     {% csrf_token %}
 
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Personal Information
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- ── Section 1: Personal Information ── -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <div class="h-6 w-6 rounded-md bg-indigo-50 flex items-center justify-center">
+                                <i class="fa-solid fa-user text-[10px] text-indigo-500"></i>
+                            </div>
+                            <h3 class="text-xs font-bold uppercase tracking-[0.15em] text-slate-600">
+                                Personal Information
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Name -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Name <span class="text-rose-500">*</span></label>
-                                <input type="text" name="name"
-                                    placeholder="e.g. Darpan Traders"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Name <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-building text-slate-400 text-xs"></i>
+                                    </span>
+                                    <input type="text" name="name"
+                                        placeholder="e.g. Darpan Traders"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200">
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="name"></p>
                             </div>
 
+                            <!-- Email -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Email <span class="text-rose-500">*</span></label>
-                                <input type="email" name="email"
-                                    placeholder="name@supplier.com"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Email <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-envelope text-slate-400 text-xs"></i>
+                                    </span>
+                                    <input type="email" name="email"
+                                        placeholder="name@supplier.com"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200">
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="email"></p>
                             </div>
 
+                            <!-- First Name -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">First Name <span class="text-rose-500">*</span></label>
-                                <input type="text" name="first_name"
-                                    placeholder="First name"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">First Name <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-user text-slate-400 text-xs"></i>
+                                    </span>
+                                    <input type="text" name="first_name"
+                                        placeholder="First name"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200">
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="first_name"></p>
                             </div>
 
+                            <!-- Last Name -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Last Name <span class="text-rose-500">*</span></label>
-                                <input type="text" name="last_name"
-                                    placeholder="Last name"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Last Name <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-user text-slate-400 text-xs"></i>
+                                    </span>
+                                    <input type="text" name="last_name"
+                                        placeholder="Last name"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200">
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="last_name"></p>
                             </div>
 
+                            <!-- Password -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Password <span class="text-rose-500">*</span></label>
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Password <span class="text-rose-500">*</span></label>
                                 <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-lock text-slate-400 text-xs"></i>
+                                    </span>
                                     <input
                                         id="supplierPassword"
                                         type="password"
                                         name="password"
                                         placeholder="Enter password"
-                                        class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-10 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200">
                                     <button
                                         type="button"
                                         id="togglePasswordVisibility"
-                                        class="absolute inset-y-0 right-2 flex items-center text-slate-400 hover:text-slate-600">
+                                        class="absolute inset-y-0 right-2.5 flex items-center text-slate-400 hover:text-indigo-500 transition-colors">
                                         <i class="fa-solid fa-eye text-xs" id="passwordEyeIcon"></i>
                                     </button>
                                 </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="password"></p>
                             </div>
 
+                            <!-- Mobile Number -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Mobile Number <span class="text-rose-500">*</span></label>
-                                <input type="text" name="mbno"
-                                    placeholder="e.g. 9876543210" maxlength="10"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Mobile Number <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-phone text-slate-400 text-xs"></i>
+                                    </span>
+                                    <input type="text" name="mbno"
+                                        placeholder="e.g. 9876543210" maxlength="10"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200">
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="mbno"></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Location & Status
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <!-- ── Divider ── -->
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- ── Section 2: Location & Status ── -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <div class="h-6 w-6 rounded-md bg-emerald-50 flex items-center justify-center">
+                                <i class="fa-solid fa-location-dot text-[10px] text-emerald-500"></i>
+                            </div>
+                            <h3 class="text-xs font-bold uppercase tracking-[0.15em] text-slate-600">
+                                Location & Status
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- State -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">State <span class="text-rose-500">*</span></label>
-                                <input type="text" name="state"
-                                    placeholder="State"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">State <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-map text-slate-400 text-xs"></i>
+                                    </span>
+                                    <input type="text" name="state"
+                                        placeholder="State"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200">
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="state"></p>
                             </div>
 
+                            <!-- City -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">City <span class="text-rose-500">*</span></label>
-                                <input type="text" name="city"
-                                    placeholder="City"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">City <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-city text-slate-400 text-xs"></i>
+                                    </span>
+                                    <input type="text" name="city"
+                                        placeholder="City"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200">
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="city"></p>
                             </div>
 
+                            <!-- Address -->
                             <div class="space-y-1.5 sm:col-span-2">
-                                <label class="text-xs font-medium text-slate-700">Address <span class="text-rose-500">*</span></label>
-                                <textarea name="address" rows="2"
-                                    placeholder="Street, area, landmark"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 resize-none"></textarea>
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Address <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute top-3 left-0 flex items-start pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-location-dot text-slate-400 text-xs"></i>
+                                    </span>
+                                    <textarea name="address" rows="2"
+                                        placeholder="Street, area, landmark"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200 resize-none"></textarea>
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="address"></p>
                             </div>
 
+                            <!-- Gender -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Gender <span class="text-rose-500">*</span></label>
-                                <select name="gender"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                                    <option value="">Select Gender</option>
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                    <option>Other</option>
-                                </select>
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Gender <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-venus-mars text-slate-400 text-xs"></i>
+                                    </span>
+                                    <select name="gender"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200 appearance-none">
+                                        <option value="">Select Gender</option>
+                                        <option>Male</option>
+                                        <option>Female</option>
+                                        <option>Other</option>
+                                    </select>
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+                                    </span>
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="gender"></p>
                             </div>
 
+                            <!-- Status -->
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Status <span class="text-rose-500">*</span></label>
-                                <select name="status"
-                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                                    <option value="">Select Status</option>
-                                    <option>Active</option>
-                                    <option>Inactive</option>
-                                </select>
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Status <span class="text-rose-500">*</span></label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <i class="fa-solid fa-toggle-on text-slate-400 text-xs"></i>
+                                    </span>
+                                    <select name="status"
+                                        class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200 appearance-none">
+                                        <option value="">Select Status</option>
+                                        <option>Active</option>
+                                        <option>Inactive</option>
+                                    </select>
+                                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+                                    </span>
+                                </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="status"></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Attachments
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Profile Picture</label>
-                                <div
-                                    class="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
-                                    <div
-                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white text-xs">
-                                        <i class="fa-solid fa-user"></i>
+                    <!-- ── Divider ── -->
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- ── Section 3: File Uploads ── -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2">
+                            <div class="h-6 w-6 rounded-md bg-amber-50 flex items-center justify-center">
+                                <i class="fa-solid fa-paperclip text-[10px] text-amber-500"></i>
+                            </div>
+                            <h3 class="text-xs font-bold uppercase tracking-[0.15em] text-slate-600">
+                                Attachments <span class="text-slate-400 font-normal normal-case tracking-normal">(Optional)</span>
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Profile Picture -->
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Profile Picture</label>
+                                <div id="profileUploadBox" class="group relative rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-b from-slate-50/80 to-white hover:border-indigo-300 hover:bg-indigo-50/30 transition-all duration-300 text-center cursor-pointer overflow-hidden"
+                                     style="min-height:120px"
+                                     onclick="document.querySelector('input[name=profile_picture]').click()">
+                                    <!-- Default upload state -->
+                                    <div id="profileUploadPlaceholder" class="flex flex-col items-center gap-2 p-4">
+                                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                                            <i class="fa-solid fa-camera text-indigo-500 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-medium text-slate-600">Click to upload</p>
+                                            <p class="text-[10px] text-slate-400 mt-0.5">JPG or PNG, up to 2MB</p>
+                                        </div>
                                     </div>
-                                    <div class="flex-1">
-                                        <input type="file" name="profile_picture"
-                                            class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
-                                        <p class="mt-0.5 text-[11px] text-slate-400">
-                                            JPG or PNG, up to 2MB.
-                                        </p>
+                                    <!-- Full-bleed image preview (hidden by default) -->
+                                    <div id="imagePreviewContainer" class="hidden absolute inset-0">
+                                        <img id="imagePreview" src="" class="w-full h-full object-cover">
                                     </div>
-                                </div>
-                                <div id="imagePreviewContainer" class="hidden mt-2 relative inline-block">
-                                    <img id="imagePreview" src="" class="h-16 w-16 rounded-lg object-cover border border-slate-200 shadow-sm">
-                                    <button type="button" id="removeImagePreview" 
-                                        class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] hover:bg-rose-600 shadow-md">
-                                        <i class="fa-solid fa-xmark"></i>
+                                    <!-- Close icon top-right (hidden by default) -->
+                                    <button type="button" id="removeImagePreview"
+                                        class="hidden absolute top-2 right-2 z-10 h-7 w-7 rounded-full bg-black/50 text-white hover:bg-black/70 items-center justify-center backdrop-blur-sm shadow-lg"
+                                        onclick="event.stopPropagation()">
+                                        <i class="fa-solid fa-xmark text-xs"></i>
                                     </button>
+                                    <input type="file" name="profile_picture" class="hidden" accept="image/*">
                                 </div>
                             </div>
 
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Document</label>
-                                <div
-                                    class="flex items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2">
-                                    <div
-                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 text-xs">
-                                        <i class="fa-solid fa-file-lines"></i>
+                            <!-- Document -->
+                            <div class="space-y-2">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">Document</label>
+                                <div id="docUploadBox" class="group relative rounded-xl border-2 border-dashed border-slate-200 bg-gradient-to-b from-slate-50/80 to-white p-4 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all duration-300 text-center cursor-pointer overflow-hidden"
+                                     onclick="document.querySelector('input[name=document]').click()">
+                                    <!-- Default upload state -->
+                                    <div id="docUploadPlaceholder" class="flex flex-col items-center gap-2">
+                                        <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                                            <i class="fa-solid fa-file-arrow-up text-emerald-500 text-sm"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-medium text-slate-600">Click to upload</p>
+                                            <p class="text-[10px] text-slate-400 mt-0.5">PDF, JPG, PNG or DOC</p>
+                                        </div>
                                     </div>
-                                    <div class="flex-1">
-                                        <input type="file" name="document"
-                                            class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:bg-slate-800">
-                                        <p class="mt-0.5 text-[11px] text-slate-400">
-                                            Any supporting ID or agreement file.
-                                        </p>
+                                    <!-- Preview state (hidden by default) -->
+                                    <div id="docPreviewContainer" class="hidden flex flex-col items-center gap-2">
+                                        <div class="h-10 w-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                                            <i class="fa-solid fa-file-check text-emerald-500 text-sm"></i>
+                                        </div>
+                                        <p id="docFileName" class="text-[10px] text-slate-600 font-medium truncate max-w-full"></p>
+                                        <p class="text-[9px] text-emerald-500 font-medium">File selected ✓</p>
                                     </div>
+                                    <input type="file" name="document" class="hidden">
                                 </div>
+                                <!-- Remove button -->
+                                <button type="button" id="removeDocPreview" 
+                                    class="hidden items-center gap-1.5 text-[11px] text-rose-500 hover:text-rose-600 font-medium transition-colors mt-1">
+                                    <i class="fa-solid fa-trash-can text-[9px]"></i>
+                                    Remove file
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-2 border-t border-slate-100">
+                    <!-- ── Footer Buttons ── -->
+                    <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end pt-5 border-t border-slate-100">
                         <button type="button" id="closeSupplierModalBottom"
-                            class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                            class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm">
+                            <i class="fa-solid fa-xmark text-[10px]"></i>
                             Cancel
                         </button>
 
                         <button type="submit" id="supplierSubmitBtn"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 hover:from-indigo-700 hover:to-violet-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-[0.98]">
                             <i class="fa-solid fa-floppy-disk text-xs"></i>
                             <span>Save Supplier</span>
                         </button>
@@ -243,6 +364,7 @@
             </div>
         </div>
     </div>
+
 
     <section
         class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
@@ -287,8 +409,6 @@
                 <thead
                     class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
                     <tr>
-                        <th class="px-4 py-3 font-medium text-center">No.</th>
-                        <th class="px-4 py-3 font-medium whitespace-nowrap text-center">Supplier ID</th>
                         <th class="px-4 py-3 font-medium text-center">Profile</th>
                         <th class="px-4 py-3 font-medium">Name</th>
                         <th class="px-4 py-3 font-medium">Email</th>
@@ -300,13 +420,7 @@
                 <tbody id="suppliersTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for supplier in suppliers %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
-                            {{ forloop.counter }}
-                        </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm font-medium text-slate-700 text-center">
-                            #{{ supplier.id }}
-                        </td>
-
+                        
                         <td class="px-4 py-3 align-middle text-center">
                             {% if supplier.profile_picture %}
                             <div class="flex justify-center">
@@ -464,54 +578,113 @@
     </div>
 </div>
 <div id="viewModal"
-     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm px-3 sm:px-6 transition-all duration-300">
 
-    <div class="bg-white w-full max-w-4xl rounded-xl p-5 sm:p-6 relative">
+    <div class="relative w-full max-w-3xl rounded-2xl bg-white shadow-2xl shadow-slate-900/20 max-h-[92vh] overflow-y-auto no-scrollbar animate-modal-enter">
 
-        <button onclick="closeViewModal()"
-                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
-            ✖
-        </button>
+        <!-- ── Premium Banner Header ── -->
+        <div class="relative h-32 sm:h-40 bg-gradient-to-r bg-[#161F32] overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;40&quot; height=&quot;40&quot; viewBox=&quot;0 0 40 40&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot; fill-rule=&quot;evenodd&quot;%3E%3Cpath d=&quot;M0 40L40 0H20L0 20M40 40V20L20 40&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+            
+            <!-- Close Button -->
+            <button onclick="closeViewModal()"
+                class="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-black/20 text-white hover:bg-black/40 flex items-center justify-center backdrop-blur-md transition-all">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <!-- ── Profile Snapshot ── -->
+        <div class="px-6 sm:px-10 -mt-16 sm:-mt-20 relative z-10">
+            <div class="flex flex-col sm:flex-row items-center sm:items-end gap-5">
+                <!-- Avatar -->
+                <div class="h-32 w-32 sm:h-40 sm:w-40 rounded-2xl border-4 border-white bg-slate-100 shadow-xl overflow-hidden flex-shrink-0">
+                    <img id="viewProfile" src="" alt="Profile" class="w-full h-full object-cover">
+                </div>
+                <!-- Identity -->
+                <div class="flex-grow text-center sm:text-left pb-2">
+                    <h2 id="viewName" class="text-2xl sm:text-3xl font-bold text-slate-800 tracking-tight"></h2>
+                    <div class="flex flex-wrap justify-center sm:justify-start items-center gap-3 mt-2">
+                        <span class="flex items-center gap-1.5 text-slate-500 text-sm">
+                            <i class="fa-solid fa-envelope text-xs"></i>
+                            <span id="viewEmail"></span>
+                        </span>
+                        <span class="h-1 w-1 rounded-full bg-slate-300 hidden sm:block"></span>
+                        <span class="flex items-center gap-1.5 text-slate-500 text-sm">
+                            <i class="fa-solid fa-id-badge text-xs"></i>
+                            ID: <span id="viewId" class="font-semibold text-slate-700"></span>
+                        </span>
+                    </div>
+                </div>
+                <!-- Status Badge -->
+                <div class="pb-2">
+                    <span id="viewStatusWrapper" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm ring-1 ring-inset">
+                        <span id="viewStatusDot" class="h-2 w-2 rounded-full"></span>
+                        <span id="viewStatus"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
 
-            <div class="w-full flex justify-center">
-                <img id="viewProfile"
-                     class="w-full max-w-sm h-72 md:h-96 object-cover rounded-lg shadow bg-gray-200">
+        <!-- ── Detail Grid ── -->
+        <div class="p-6 sm:p-10 space-y-8">
+            
+            <!-- Section 1: General Info -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                    <i class="fa-solid fa-user-gear text-indigo-500"></i>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest">Personal Overview</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">First Name</p>
+                        <p id="viewFirstName" class="text-sm font-bold text-slate-700"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Last Name</p>
+                        <p id="viewLastName" class="text-sm font-bold text-slate-700"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Mobile Number</p>
+                        <p id="viewMobile" class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-phone text-[10px] text-slate-300"></i>
+                            <span></span>
+                        </p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Gender</p>
+                        <p id="viewGender" class="text-sm font-bold text-slate-700 capitalize"></p>
+                    </div>
+                </div>
             </div>
 
+            <!-- Section 2: Location Details -->
             <div class="space-y-4">
-
-                <div>
-                    <h2 id="viewName"
-                        class="text-2xl font-bold text-gray-800"></h2>
-                    <p id="viewEmail"
-                       class="text-sm text-gray-500"></p>
+                <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
+                    <i class="fa-solid fa-location-dot text-emerald-500"></i>
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest">Address & Location</h3>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-
-                    <p><strong>ID:</strong> <span id="viewId"></span></p>
-                    <p><strong>Status:</strong>
-                        <span id="viewStatus"
-                              class="font-medium"></span>
-                    </p>
-
-                    <p><strong>First Name:</strong> <span id="viewFirstName"></span></p>
-                    <p><strong>Last Name:</strong> <span id="viewLastName"></span></p>
-
-                    <p><strong>Mobile:</strong> <span id="viewMobile"></span></p>
-                    <p><strong>Gender:</strong> <span id="viewGender"></span></p>
-
-                    <p><strong>State:</strong> <span id="viewState"></span></p>
-                    <p><strong>City:</strong> <span id="viewCity"></span></p>
-
-                    <p class="sm:col-span-2">
-                        <strong>Address:</strong>
-                        <span id="viewAddress"></span>
-                    </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">State</p>
+                        <p id="viewState" class="text-sm font-bold text-slate-700"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">City</p>
+                        <p id="viewCity" class="text-sm font-bold text-slate-700"></p>
+                    </div>
+                    <div class="space-y-1 sm:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Full Address</p>
+                        <p id="viewAddress" class="text-sm font-medium text-slate-600 mt-1 leading-relaxed"></p>
+                    </div>
                 </div>
+            </div>
 
+            <!-- Footer Action -->
+            <div class="pt-6 border-t border-slate-100 flex justify-end">
+                <button onclick="closeViewModal()"
+                    class="px-8 py-3 rounded-xl bg-slate-900 text-white text-sm font-bold shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 active:scale-95 transition-all">
+                    Close Profile
+                </button>
             </div>
         </div>
     </div>
@@ -740,14 +913,28 @@ for (const fieldName in validationRules) {
 }
 
 // ─── Modal open/close ───
+function resetUploadBoxes() {
+    // Reset profile picture box
+    imagePreviewContainer.classList.add('hidden');
+    imagePreview.src = '';
+    if (profileUploadPlaceholder) profileUploadPlaceholder.classList.remove('hidden');
+    if (removeImagePreviewBtn) { removeImagePreviewBtn.classList.add('hidden'); removeImagePreviewBtn.classList.remove('flex'); }
+    if (profileUploadBox) { profileUploadBox.classList.add('border-dashed'); profileUploadBox.classList.remove('border-solid', 'border-indigo-300'); }
+    // Reset document box
+    if (docPreviewContainer) { docPreviewContainer.classList.add('hidden'); docPreviewContainer.classList.remove('flex'); }
+    if (docUploadPlaceholder) docUploadPlaceholder.classList.remove('hidden');
+    if (removeDocPreviewBtn) { removeDocPreviewBtn.classList.add('hidden'); removeDocPreviewBtn.classList.remove('inline-flex'); }
+    if (docUploadBox) { docUploadBox.classList.add('border-dashed'); docUploadBox.classList.remove('border-solid', 'border-emerald-200', 'bg-emerald-50/40'); }
+    if (docFileNameEl) docFileNameEl.textContent = '';
+}
+
 document.getElementById('openSupplierModal').onclick = () => {
     supplierForm.reset();
     clearAllErrors();
+    resetUploadBoxes();
     supplierForm.action = "{% url 'add_supplier' %}";
     modalTitle.innerText = "Add Supplier";
     isEditMode = false;
-    imagePreviewContainer.classList.add('hidden');
-    imagePreview.src = '';
     supplierModal.classList.remove('hidden');
     supplierModal.classList.add('flex');
 };
@@ -834,15 +1021,37 @@ function openViewModal(id, name, email, first_name, last_name, mbno, state, city
     document.getElementById('viewEmail').innerText = email;
     document.getElementById('viewFirstName').innerText = first_name;
     document.getElementById('viewLastName').innerText = last_name;
-    document.getElementById('viewMobile').innerText = mbno;
+    
+    // Mobile with icon handling
+    const mobileEl = document.getElementById('viewMobile');
+    mobileEl.querySelector('span').innerText = mbno;
+    
     document.getElementById('viewState').innerText = state;
     document.getElementById('viewCity').innerText = city;
     document.getElementById('viewAddress').innerText = address;
     document.getElementById('viewGender').innerText = gender;
     document.getElementById('viewStatus').innerText = status;
 
+    // Status Badge Styling
+    const statusWrapper = document.getElementById('viewStatusWrapper');
+    const statusDot = document.getElementById('viewStatusDot');
+    
+    if (status === 'Active') {
+        statusWrapper.className = "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm ring-1 ring-inset bg-emerald-50 text-emerald-700 ring-emerald-600/20";
+        statusDot.className = "h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse";
+    } else {
+        statusWrapper.className = "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-sm ring-1 ring-inset bg-rose-50 text-rose-700 ring-rose-600/20";
+        statusDot.className = "h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]";
+    }
+
+    // Profile Image Handling
     const img = document.getElementById('viewProfile');
-    img.src = profile ? profile : '';
+    if (profile) {
+        img.src = profile;
+    } else {
+        // High quality UI placeholder
+        img.src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(name) + "&background=F1F5F9&color=475569&bold=true&size=256";
+    }
     img.alt = name;
 
     viewModal.classList.remove('hidden');
@@ -854,26 +1063,83 @@ function closeViewModal() {
     viewModal.classList.remove('flex');
 }
 
-// ─── Image preview ───
+// ─── File upload previews (inside box) ───
+const profileUploadPlaceholder = document.getElementById('profileUploadPlaceholder');
+const docUploadPlaceholder = document.getElementById('docUploadPlaceholder');
+const docPreviewContainer = document.getElementById('docPreviewContainer');
+const docFileNameEl = document.getElementById('docFileName');
+const documentInput = supplierForm.querySelector('input[name="document"]');
+const removeDocPreviewBtn = document.getElementById('removeDocPreview');
+const profileUploadBox = document.getElementById('profileUploadBox');
+const docUploadBox = document.getElementById('docUploadBox');
+
+// Profile Picture change — show full-bleed preview inside box
 if (profilePictureInput) {
-    profilePictureInput.addEventListener('change', function() {
+    profilePictureInput.addEventListener('change', function(e) {
+        e.stopPropagation();
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
+            reader.onload = function(ev) {
+                imagePreview.src = ev.target.result;
+                profileUploadPlaceholder.classList.add('hidden');
                 imagePreviewContainer.classList.remove('hidden');
+                removeImagePreviewBtn.classList.remove('hidden');
+                removeImagePreviewBtn.classList.add('flex');
+                profileUploadBox.classList.remove('border-dashed');
+                profileUploadBox.classList.add('border-solid', 'border-indigo-300');
             }
             reader.readAsDataURL(file);
         }
     });
 }
 
+// Remove profile picture — revert to upload state
 if (removeImagePreviewBtn) {
-    removeImagePreviewBtn.addEventListener('click', function() {
+    removeImagePreviewBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
         profilePictureInput.value = '';
         imagePreview.src = '';
         imagePreviewContainer.classList.add('hidden');
+        profileUploadPlaceholder.classList.remove('hidden');
+        removeImagePreviewBtn.classList.add('hidden');
+        removeImagePreviewBtn.classList.remove('flex');
+        profileUploadBox.classList.add('border-dashed');
+        profileUploadBox.classList.remove('border-solid', 'border-indigo-300');
+    });
+}
+
+// Document change
+if (documentInput) {
+    documentInput.addEventListener('change', function(e) {
+        e.stopPropagation();
+        const file = this.files[0];
+        if (file) {
+            docFileNameEl.textContent = file.name;
+            docUploadPlaceholder.classList.add('hidden');
+            docPreviewContainer.classList.remove('hidden');
+            docPreviewContainer.classList.add('flex');
+            removeDocPreviewBtn.classList.remove('hidden');
+            removeDocPreviewBtn.classList.add('inline-flex');
+            docUploadBox.classList.remove('border-dashed');
+            docUploadBox.classList.add('border-solid', 'border-emerald-200', 'bg-emerald-50/40');
+        }
+    });
+}
+
+// Remove document
+if (removeDocPreviewBtn) {
+    removeDocPreviewBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        documentInput.value = '';
+        docFileNameEl.textContent = '';
+        docPreviewContainer.classList.add('hidden');
+        docPreviewContainer.classList.remove('flex');
+        docUploadPlaceholder.classList.remove('hidden');
+        removeDocPreviewBtn.classList.add('hidden');
+        removeDocPreviewBtn.classList.remove('inline-flex');
+        docUploadBox.classList.add('border-dashed');
+        docUploadBox.classList.remove('border-solid', 'border-emerald-200', 'bg-emerald-50/40');
     });
 }
 
