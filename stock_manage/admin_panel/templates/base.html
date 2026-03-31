@@ -16,12 +16,40 @@
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
         .animate-modal-enter { animation: modal-enter 0.3s ease-out forwards; }
+
+        /* Custom Loader */
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            display: grid;
+            -webkit-mask: conic-gradient(from 15deg, #0000, #000);
+            animation: l26 1s infinite steps(12);
+        }
+        .loader,
+        .loader:before,
+        .loader:after {
+            background:
+                radial-gradient(closest-side at 50% 12.5%, #1e3a8a 96%, #0000) 50% 0/20% 80% repeat-y,
+                radial-gradient(closest-side at 12.5% 50%, #1e3a8a 96%, #0000) 0 50%/80% 20% repeat-x;
+        }
+        .loader:before,
+        .loader:after {
+            content: "";
+            grid-area: 1/1;
+            transform: rotate(30deg);
+        }
+        .loader:after {
+            transform: rotate(60deg);
+        }
+        @keyframes l26 {
+            100% { transform: rotate(1turn); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div id="globalLoader" class="fixed inset-0 z-[1000] bg-white/70 backdrop-blur-sm hidden">
         <div class="h-full w-full flex items-center justify-center">
-            <div class="h-12 w-12 rounded-full border-4 border-slate-300 border-t-slate-900 animate-spin"></div>
+            <div class="loader"></div>
         </div>
     </div>
     <aside id="sidebar" class="fixed top-0 left-0 z-40 h-screen w-64 bg-gradient-to-b from-slate-900 to-slate-800 shadow-xl transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
@@ -357,9 +385,19 @@
         function showLoader(){ if(__loaderEl) __loaderEl.classList.remove('hidden'); }
         function hideLoader(){ if(__loaderEl) __loaderEl.classList.add('hidden'); }
         const __origFetch = window.fetch;
-        window.fetch = async function(...args){ showLoader(); try { const r = await __origFetch.apply(this, args); return r; } finally { hideLoader(); } };
+        window.fetch = async function(...args){
+            // Don't show loader for AJAX form submissions — they manage validation first
+            const isAjaxForm = (args[1] && args[1].headers && args[1].headers['X-Requested-With'] === 'XMLHttpRequest');
+            if (!isAjaxForm) showLoader();
+            try { const r = await __origFetch.apply(this, args); return r; }
+            finally { if (!isAjaxForm) hideLoader(); }
+        };
         window.addEventListener('beforeunload', () => { showLoader(); });
-        document.addEventListener('submit', () => { showLoader(); }, true);
+        document.addEventListener('submit', (e) => {
+            // Skip AJAX-managed forms — they control the loader themselves
+            if (e.target && e.target.hasAttribute('data-ajax-form')) return;
+            showLoader();
+        }, true);
         document.addEventListener('DOMContentLoaded', () => { hideLoader(); });
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');

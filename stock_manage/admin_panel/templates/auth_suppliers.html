@@ -52,7 +52,7 @@
                 <form id="supplierForm" method="POST"
                     action="{% url 'add_supplier' %}"
                     enctype="multipart/form-data"
-                    class="space-y-6">
+                    class="space-y-6" novalidate data-ajax-form>
 
                     {% csrf_token %}
 
@@ -62,42 +62,46 @@
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Name</label>
-                                <input type="text" name="name" required
+                                <label class="text-xs font-medium text-slate-700">Name <span class="text-rose-500">*</span></label>
+                                <input type="text" name="name"
                                     placeholder="e.g. Darpan Traders"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="name"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Email</label>
-                                <input type="email" name="email" required
+                                <label class="text-xs font-medium text-slate-700">Email <span class="text-rose-500">*</span></label>
+                                <input type="email" name="email"
                                     placeholder="name@supplier.com"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="email"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">First Name</label>
-                                <input type="text" name="first_name" required
+                                <label class="text-xs font-medium text-slate-700">First Name <span class="text-rose-500">*</span></label>
+                                <input type="text" name="first_name"
                                     placeholder="First name"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="first_name"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Last Name</label>
-                                <input type="text" name="last_name" required
+                                <label class="text-xs font-medium text-slate-700">Last Name <span class="text-rose-500">*</span></label>
+                                <input type="text" name="last_name"
                                     placeholder="Last name"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="last_name"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Password</label>
+                                <label class="text-xs font-medium text-slate-700">Password <span class="text-rose-500">*</span></label>
                                 <div class="relative">
                                     <input
                                         id="supplierPassword"
                                         type="password"
                                         name="password"
-                                        placeholder="Leave blank to keep same"
-                                        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                        placeholder="Enter password"
+                                        class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 pr-10 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                                     <button
                                         type="button"
                                         id="togglePasswordVisibility"
@@ -105,13 +109,15 @@
                                         <i class="fa-solid fa-eye text-xs" id="passwordEyeIcon"></i>
                                     </button>
                                 </div>
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="password"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Mobile Number</label>
-                                <input type="number" name="mbno" required
-                                    placeholder="e.g. 9876543210"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-xs font-medium text-slate-700">Mobile Number <span class="text-rose-500">*</span></label>
+                                <input type="text" name="mbno"
+                                    placeholder="e.g. 9876543210" maxlength="10"
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="mbno"></p>
                             </div>
                         </div>
                     </div>
@@ -122,45 +128,50 @@
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">State</label>
+                                <label class="text-xs font-medium text-slate-700">State <span class="text-rose-500">*</span></label>
                                 <input type="text" name="state"
                                     placeholder="State"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="state"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">City</label>
+                                <label class="text-xs font-medium text-slate-700">City <span class="text-rose-500">*</span></label>
                                 <input type="text" name="city"
                                     placeholder="City"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="city"></p>
                             </div>
 
                             <div class="space-y-1.5 sm:col-span-2">
-                                <label class="text-xs font-medium text-slate-700">Address</label>
+                                <label class="text-xs font-medium text-slate-700">Address <span class="text-rose-500">*</span></label>
                                 <textarea name="address" rows="2"
                                     placeholder="Street, area, landmark"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 resize-none"></textarea>
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 resize-none"></textarea>
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="address"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Gender</label>
-                                <select name="gender" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-xs font-medium text-slate-700">Gender <span class="text-rose-500">*</span></label>
+                                <select name="gender"
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                                     <option value="">Select Gender</option>
                                     <option>Male</option>
                                     <option>Female</option>
                                     <option>Other</option>
                                 </select>
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="gender"></p>
                             </div>
 
                             <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Status</label>
-                                <select name="status" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                <label class="text-xs font-medium text-slate-700">Status <span class="text-rose-500">*</span></label>
+                                <select name="status"
+                                    class="supplier-field w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                                     <option value="">Select Status</option>
                                     <option>Active</option>
                                     <option>Inactive</option>
                                 </select>
+                                <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="status"></p>
                             </div>
                         </div>
                     </div>
@@ -221,8 +232,8 @@
                             Cancel
                         </button>
 
-                        <button type="submit"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                        <button type="submit" id="supplierSubmitBtn"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed">
                             <i class="fa-solid fa-floppy-disk text-xs"></i>
                             <span>Save Supplier</span>
                         </button>
@@ -432,6 +443,26 @@
         </div>
     </div>
 </div>
+
+<!-- Email Already Exists Modal -->
+<div id="emailExistsModal"
+     class="fixed inset-0 z-[60] hidden bg-black/50">
+    <div class="flex h-full w-full items-center justify-center px-4">
+        <div class="w-full max-w-sm bg-white rounded-xl shadow-2xl p-6 text-center">
+            <div class="mx-auto mb-4 h-14 w-14 rounded-full bg-amber-50 flex items-center justify-center">
+                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-2xl"></i>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Email Already Exists</h2>
+            <p class="text-sm text-gray-500 mb-6">
+                A supplier with this email address is already registered. Please use a different email.
+            </p>
+            <button onclick="closeEmailExistsModal()"
+                class="w-full px-4 py-2.5 text-sm font-semibold bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors">
+                OK, Got it
+            </button>
+        </div>
+    </div>
+</div>
 <div id="viewModal"
      class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
 
@@ -556,9 +587,9 @@
 
 <script>
 
-
 const supplierModal = document.getElementById('supplierModal');
 const deleteModal = document.getElementById('deleteModal');
+const emailExistsModal = document.getElementById('emailExistsModal');
 const supplierForm = document.getElementById('supplierForm');
 const modalTitle = document.getElementById('modalTitle');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
@@ -567,11 +598,154 @@ const closeSupplierModalBottom = document.getElementById('closeSupplierModalBott
 const passwordInput = document.getElementById('supplierPassword');
 const togglePasswordBtn = document.getElementById('togglePasswordVisibility');
 const passwordEyeIcon = document.getElementById('passwordEyeIcon');
+const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+const imagePreview = document.getElementById('imagePreview');
+const removeImagePreviewBtn = document.getElementById('removeImagePreview');
+const profilePictureInput = supplierForm.profile_picture;
 
+// ─── Field labels for error messages ───
+const fieldLabels = {
+    name: 'name', email: 'email', first_name: 'first name', last_name: 'last name',
+    password: 'password', mbno: 'mobile number', state: 'state', city: 'city',
+    address: 'address', gender: 'gender', status: 'status'
+};
+
+// ─── Validation Schema (Formik/Yup style) ───
+const validationRules = {
+    name:       { required: true },
+    email:      { required: true, email: true },
+    first_name: { required: true },
+    last_name:  { required: true },
+    password:   { required: true },
+    mbno:       { required: true, digits: 10 },
+    state:      { required: true },
+    city:       { required: true },
+    address:    { required: true },
+    gender:     { required: true },
+    status:     { required: true }
+};
+
+let isEditMode = false;
+
+// ─── Validate a single field ───
+function validateField(fieldName, value) {
+    const rules = validationRules[fieldName];
+    if (!rules) return '';
+    const label = fieldLabels[fieldName] || fieldName;
+
+    // In edit mode, password is optional
+    if (fieldName === 'password' && isEditMode) return '';
+
+    if (rules.required && !value.trim()) {
+        return `The ${label} field is required.`;
+    }
+    if (rules.email && value.trim()) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(value.trim())) {
+            return `The ${label} field must be a valid email address.`;
+        }
+    }
+    if (rules.digits && value.trim()) {
+        const digitsOnly = /^\d+$/;
+        if (!digitsOnly.test(value.trim()) || value.trim().length !== rules.digits) {
+            return `The ${label} must be exactly ${rules.digits} digits.`;
+        }
+    }
+    return '';
+}
+
+// ─── Show / Clear error for a field ───
+function showFieldError(fieldName, message) {
+    const errorEl = document.querySelector(`.field-error[data-field="${fieldName}"]`);
+    const input = supplierForm.elements[fieldName];
+    if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
+    }
+    if (input) {
+        input.classList.remove('border-slate-200');
+        input.classList.add('border-rose-400', 'ring-rose-200');
+    }
+}
+
+function clearFieldError(fieldName) {
+    const errorEl = document.querySelector(`.field-error[data-field="${fieldName}"]`);
+    const input = supplierForm.elements[fieldName];
+    if (errorEl) {
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+    }
+    if (input) {
+        input.classList.remove('border-rose-400', 'ring-rose-200');
+        input.classList.add('border-slate-200');
+    }
+}
+
+function clearAllErrors() {
+    document.querySelectorAll('.field-error').forEach(el => {
+        el.textContent = '';
+        el.classList.add('hidden');
+    });
+    supplierForm.querySelectorAll('.supplier-field').forEach(el => {
+        el.classList.remove('border-rose-400', 'ring-rose-200');
+        el.classList.add('border-slate-200');
+    });
+}
+
+// ─── Validate all fields, return true if valid ───
+function validateAllFields() {
+    let isValid = true;
+    let firstInvalidField = null;
+
+    for (const fieldName in validationRules) {
+        const input = supplierForm.elements[fieldName];
+        const value = input ? (input.value || '') : '';
+        const error = validateField(fieldName, value);
+
+        if (error) {
+            showFieldError(fieldName, error);
+            isValid = false;
+            if (!firstInvalidField) firstInvalidField = input;
+        } else {
+            clearFieldError(fieldName);
+        }
+    }
+
+    if (firstInvalidField) {
+        firstInvalidField.focus();
+    }
+    return isValid;
+}
+
+// ─── Attach on-blur validation to each field ───
+for (const fieldName in validationRules) {
+    const input = supplierForm.elements[fieldName];
+    if (input) {
+        input.addEventListener('blur', function() {
+            const error = validateField(fieldName, this.value || '');
+            if (error) {
+                showFieldError(fieldName, error);
+            } else {
+                clearFieldError(fieldName);
+            }
+        });
+        // Clear error on input (live feedback)
+        input.addEventListener('input', function() {
+            const error = validateField(fieldName, this.value || '');
+            if (!error) {
+                clearFieldError(fieldName);
+            }
+        });
+    }
+}
+
+// ─── Modal open/close ───
 document.getElementById('openSupplierModal').onclick = () => {
     supplierForm.reset();
+    clearAllErrors();
     supplierForm.action = "{% url 'add_supplier' %}";
     modalTitle.innerText = "Add Supplier";
+    isEditMode = false;
     imagePreviewContainer.classList.add('hidden');
     imagePreview.src = '';
     supplierModal.classList.remove('hidden');
@@ -581,32 +755,32 @@ document.getElementById('openSupplierModal').onclick = () => {
 function hideSupplierModal() {
     supplierModal.classList.add('hidden');
     supplierModal.classList.remove('flex');
+    clearAllErrors();
 }
 
-if (closeSupplierModalTop) {
-    closeSupplierModalTop.onclick = hideSupplierModal;
-}
+if (closeSupplierModalTop) closeSupplierModalTop.onclick = hideSupplierModal;
+if (closeSupplierModalBottom) closeSupplierModalBottom.onclick = hideSupplierModal;
 
-if (closeSupplierModalBottom) {
-    closeSupplierModalBottom.onclick = hideSupplierModal;
-}
-
+// ─── Password toggle ───
 if (togglePasswordBtn && passwordInput && passwordEyeIcon) {
     togglePasswordBtn.addEventListener('click', () => {
         const isHidden = passwordInput.type === 'password';
         passwordInput.type = isHidden ? 'text' : 'password';
-
         passwordEyeIcon.classList.toggle('fa-eye', !isHidden);
         passwordEyeIcon.classList.toggle('fa-eye-slash', isHidden);
     });
 }
 
+// ─── Edit modal ───
 function openEditModal(editUrl, name, email, first_name, last_name, mbno, state, city, address, gender, status, profilePictureUrl) {
+    supplierForm.reset();
+    clearAllErrors();
     supplierModal.classList.remove('hidden');
     supplierModal.classList.add('flex');
 
     modalTitle.innerText = "Edit Supplier";
     supplierForm.action = editUrl;
+    isEditMode = true;
 
     supplierForm.name.value = name;
     supplierForm.email.value = email;
@@ -628,6 +802,7 @@ function openEditModal(editUrl, name, email, first_name, last_name, mbno, state,
     }
 }
 
+// ─── Delete modal ───
 function openDeleteModal(deleteUrl) {
     deleteModal.classList.remove('hidden');
     deleteModal.classList.add('flex');
@@ -636,16 +811,24 @@ function openDeleteModal(deleteUrl) {
 
 function closeDeleteModal() {
     deleteModal.classList.add('hidden');
+    deleteModal.classList.remove('flex');
 }
 
+// ─── Email exists modal ───
+function openEmailExistsModal() {
+    emailExistsModal.classList.remove('hidden');
+    emailExistsModal.classList.add('flex');
+}
 
+function closeEmailExistsModal() {
+    emailExistsModal.classList.add('hidden');
+    emailExistsModal.classList.remove('flex');
+}
 
+// ─── View modal ───
 const viewModal = document.getElementById('viewModal');
 
-function openViewModal(
-    id, name, email, first_name, last_name, mbno,
-    state, city, address, gender, status, profile
-) {
+function openViewModal(id, name, email, first_name, last_name, mbno, state, city, address, gender, status, profile) {
     document.getElementById('viewId').innerText = id;
     document.getElementById('viewName').innerText = name;
     document.getElementById('viewEmail').innerText = email;
@@ -668,13 +851,10 @@ function openViewModal(
 
 function closeViewModal() {
     viewModal.classList.add('hidden');
+    viewModal.classList.remove('flex');
 }
 
-const imagePreviewContainer = document.getElementById('imagePreviewContainer');
-const imagePreview = document.getElementById('imagePreview');
-const removeImagePreviewBtn = document.getElementById('removeImagePreview');
-const profilePictureInput = supplierForm.profile_picture;
-
+// ─── Image preview ───
 if (profilePictureInput) {
     profilePictureInput.addEventListener('change', function() {
         const file = this.files[0];
@@ -697,6 +877,7 @@ if (removeImagePreviewBtn) {
     });
 }
 
+// ─── Search filter ───
 const supplierSearchInput = document.getElementById('supplierSearch');
 const suppliersTBody = document.getElementById('suppliersTableBody');
 let noMatchRow = null;
@@ -730,33 +911,35 @@ if (supplierSearchInput && suppliersTBody) {
     });
 }
 
-// WebSocket Implementation for Suppliers
+// ─── WebSocket ───
 (function() {
     const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const socket = new WebSocket(`${proto}://${window.location.host}/ws/suppliers/`);
-
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
         if (data.type === 'supplier_added' || data.type === 'supplier_updated' || data.type === 'supplier_deleted') {
-            // For now, reload to keep it simple but fulfill "without refresh" by using AJAX if possible.
-            // However, a full table update without refresh requires an API or manual DOM manipulation.
-            // Since there's no suppliers API yet, we'll reload, but the user's request was mainly about the buyer side.
-            // If we want to be truly "no refresh", we'd need to manually update the DOM.
-            
-            if (data.type === 'supplier_deleted') {
-                const row = document.querySelector(`tr:has(button[onclick*="'${data.id}'"])`);
-                if (row) row.remove();
-            } else {
-                window.location.reload(); 
-            }
+            window.location.reload();
         }
     };
 })();
 
-// AJAX form submission for Supplier
+// ─── Form Submission with Validation ───
 if (supplierForm) {
     supplierForm.addEventListener('submit', function(e) {
         e.preventDefault();
+
+        // Step 1: Run client-side validation
+        if (!validateAllFields()) {
+            return; // No loader, no fetch — just show errors
+        }
+
+        // Step 2: Validation passed — NOW show the loader
+        const submitBtn = document.getElementById('supplierSubmitBtn');
+        submitBtn.disabled = true;
+        submitBtn.querySelector('span').textContent = 'Saving...';
+        if (typeof showLoader === 'function') showLoader();
+
+        // Step 3: Submit via AJAX
         const formData = new FormData(this);
         fetch(this.action, {
             method: 'POST',
@@ -764,12 +947,32 @@ if (supplierForm) {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }
-        }).then(res => {
-            if (res.ok) {
+        })
+        .then(res => res.json().then(data => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
+            if (ok && data.status === 'success') {
+                // Success! Close modal and reload to show all records
                 hideSupplierModal();
-                // The socket will handle the update or we can manually refresh parts
+                window.location.reload();
+            } else if (data.error === 'email_exists') {
+                // Show the Email Exists modal
+                if (typeof hideLoader === 'function') hideLoader();
+                openEmailExistsModal();
+                showFieldError('email', data.message);
+                submitBtn.disabled = false;
+                submitBtn.querySelector('span').textContent = 'Save Supplier';
+            } else {
+                if (typeof hideLoader === 'function') hideLoader();
+                submitBtn.disabled = false;
+                submitBtn.querySelector('span').textContent = 'Save Supplier';
             }
-        }).catch(err => console.error('Error adding supplier:', err));
+        })
+        .catch(err => {
+            console.error('Error saving supplier:', err);
+            if (typeof hideLoader === 'function') hideLoader();
+            submitBtn.disabled = false;
+            submitBtn.querySelector('span').textContent = 'Save Supplier';
+        });
     });
 }
 </script>

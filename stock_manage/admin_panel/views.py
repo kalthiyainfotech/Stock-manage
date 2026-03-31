@@ -138,9 +138,18 @@ def auth_suppliers(request):
 @login_required(login_url='auth_login')
 def add_supplier(request):
     if request.method == "POST":
+        email = request.POST.get('email', '').strip()
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        # Check for duplicate email
+        if Suppliers.objects.filter(email=email).exists():
+            if is_ajax:
+                return JsonResponse({'status': 'error', 'error': 'email_exists', 'message': 'A supplier with this email already exists.'}, status=400)
+            return redirect('auth_suppliers')
+
         Suppliers.objects.create(
             name=request.POST['name'],
-            email=request.POST['email'],
+            email=email,
             password=request.POST['password'],
             first_name=request.POST['first_name'],
             last_name=request.POST['last_name'],
@@ -153,9 +162,23 @@ def add_supplier(request):
             profile_picture=request.FILES.get('profile_picture'),
             document=request.FILES.get('document'),
         )
+        if is_ajax:
+            return JsonResponse({'status': 'success', 'message': 'Supplier added successfully'})
         return redirect('auth_suppliers')
 
     return redirect('auth_suppliers')
+
+
+@never_cache
+@login_required(login_url='auth_login')
+def check_supplier_email(request):
+    """API endpoint to check if a supplier email already exists."""
+    email = request.GET.get('email', '').strip()
+    supplier_id = request.GET.get('supplier_id', '')  # Exclude current supplier when editing
+    qs = Suppliers.objects.filter(email=email)
+    if supplier_id:
+        qs = qs.exclude(id=supplier_id)
+    return JsonResponse({'exists': qs.exists()})
 
 @never_cache
 @login_required(login_url='auth_login')

@@ -8,6 +8,7 @@ urlpatterns = [
     path('auth_logout/',auth_logout,name='auth_logout'),
     path('auth_suppliers/',auth_suppliers,name='auth_suppliers'),
     path('add-supplier/', add_supplier, name='add_supplier'),
+    path('api/check-supplier-email/', check_supplier_email, name='check_supplier_email'),
     path('supplier/edit/<int:id>/', edit_supplier, name='edit_supplier'),
     path('supplier/delete/<int:id>/', delete_supplier, name='delete_supplier'),
     path('category/delete/<int:id>/', delete_category, name='delete_category'),
