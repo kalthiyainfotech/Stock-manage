@@ -40,8 +40,8 @@ def worker_login(request):
             
             request.session['worker_id'] = worker.id
             request.session['worker_email'] = worker.email
-            request.session['worker_name'] = worker.name
-            messages.success(request, f"Welcome back, {worker.name}!", extra_tags="worker")
+            request.session['worker_name'] = f"{worker.first_name} {worker.last_name}"
+            messages.success(request, f"Welcome back, {worker.first_name} {worker.last_name}!", extra_tags="worker")
             return redirect('work_dash')
 
         except Workers.DoesNotExist:
@@ -165,7 +165,7 @@ def add_leave(request):
             payload = {
                 "id": leave.id,
                 "worker_id": worker.id,
-                "worker_name": worker.name,
+                "worker_name": f"{worker.first_name} {worker.last_name}",
                 "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
                 "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
                 "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),
@@ -208,7 +208,7 @@ def edit_leave(request, id):
             payload = {
                 "id": leave.id,
                 "worker_id": worker.id,
-                "worker_name": worker.name,
+                "worker_name": f"{worker.first_name} {worker.last_name}",
                 "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
                 "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
                 "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),

@@ -186,8 +186,17 @@ def edit_supplier(request, id):
     supplier = Suppliers.objects.get(id=id)
 
     if request.method == "POST":
+        email = request.POST.get('email', '').strip()
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        # Check for duplicate email excluding this supplier
+        if Suppliers.objects.filter(email=email).exclude(id=id).exists():
+            if is_ajax:
+                return JsonResponse({'status': 'error', 'error': 'email_exists', 'message': 'A supplier with this email already exists.'}, status=400)
+            return redirect('auth_suppliers')
+
         supplier.name = request.POST['name']
-        supplier.email = request.POST['email']
+        supplier.email = email
         supplier.first_name = request.POST['first_name']
         supplier.last_name = request.POST['last_name']
         supplier.mbno = request.POST['mbno']
@@ -197,6 +206,10 @@ def edit_supplier(request, id):
         supplier.gender = request.POST['gender']
         supplier.status = request.POST['status']
 
+        password = request.POST.get('password')
+        if password:
+            supplier.password = password
+
         if request.FILES.get('profile_picture'):
             supplier.profile_picture = request.FILES['profile_picture']
 
@@ -204,6 +217,9 @@ def edit_supplier(request, id):
             supplier.document = request.FILES['document']
 
         supplier.save()
+
+        if is_ajax:
+            return JsonResponse({'status': 'success', 'message': 'Supplier updated successfully'})
 
     return redirect('auth_suppliers')
 
@@ -229,22 +245,31 @@ def auth_workers(request):
 @login_required(login_url='auth_login')
 def add_worker(request):
     if request.method == "POST":
+        email = request.POST.get('email', '').strip()
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        if Workers.objects.filter(email=email).exists():
+            if is_ajax:
+                return JsonResponse({'status': 'error', 'error': 'email_exists', 'message': 'Email already exists.'}, status=400)
+            return redirect('auth_workers')
+
         Workers.objects.create(
-            name=request.POST['name'],
-            email=request.POST['email'],
-            password=request.POST['password'],
-            first_name=request.POST['first_name'],
-            last_name=request.POST['last_name'],
+            email=email,
+            password=request.POST.get('password', ''),
+            first_name=request.POST.get('first_name', ''),
+            last_name=request.POST.get('last_name', ''),
             state=request.POST.get('state'),
             city=request.POST.get('city'),
             address=request.POST.get('address'),
-            mbno=request.POST['mbno'],
+            mbno=request.POST.get('mbno', 0),
             salary=request.POST.get('salary') or 0,
-            gender=request.POST['gender'],
-            status=request.POST['status'],
+            gender=request.POST.get('gender', 'Other'),
+            status=request.POST.get('status', 'Active'),
             profile_picture=request.FILES.get('profile_picture'),
             document=request.FILES.get('document'),
         )
+        if is_ajax:
+            return JsonResponse({'status': 'success'})
         return redirect('auth_workers')
 
     return redirect('auth_workers') 
@@ -255,17 +280,24 @@ def edit_worker(request, id):
     worker = Workers.objects.get(id=id)
 
     if request.method == "POST":
-        worker.name = request.POST['name']
-        worker.email = request.POST['email']
-        worker.first_name = request.POST['first_name']
-        worker.last_name = request.POST['last_name']
-        worker.mbno = request.POST['mbno']
+        email = request.POST.get('email', '').strip()
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        if Workers.objects.filter(email=email).exclude(id=id).exists():
+            if is_ajax:
+                return JsonResponse({'status': 'error', 'error': 'email_exists', 'message': 'Email already exists.'}, status=400)
+            return redirect('auth_workers')
+
+        worker.email = email
+        worker.first_name = request.POST.get('first_name', '')
+        worker.last_name = request.POST.get('last_name', '')
+        worker.mbno = request.POST.get('mbno', worker.mbno)
         worker.salary = request.POST.get('salary') or worker.salary
         worker.state = request.POST.get('state')
         worker.city = request.POST.get('city')
         worker.address = request.POST.get('address')
-        worker.gender = request.POST['gender']
-        worker.status = request.POST['status']
+        worker.gender = request.POST.get('gender')
+        worker.status = request.POST.get('status')
 
         if request.FILES.get('profile_picture'):
             worker.profile_picture = request.FILES['profile_picture']
@@ -274,6 +306,9 @@ def edit_worker(request, id):
             worker.document = request.FILES['document']
 
         worker.save()
+        if is_ajax:
+            return JsonResponse({'status': 'success'})
+        return redirect('auth_workers')
 
     return redirect('auth_workers')
 
@@ -390,7 +425,7 @@ def auth_work_salary(request):
     days_in_month = calendar.monthrange(year, month)[1]
     month_start = date(year, month, 1)
     month_end = date(year, month, days_in_month)
-    workers = Workers.objects.all().order_by('name')
+    workers = Workers.objects.all().order_by('first_name')
     data = []
     for w in workers:
         qs = Leave.objects.filter(worker=w, status='Approved', start_date__lte=month_end, end_date__gte=month_start)
@@ -434,7 +469,7 @@ def approve_leave(request, id):
         payload = {
             "id": leave.id,
             "worker_id": leave.worker.id,
-            "worker_name": leave.worker.name,
+            "worker_name": f"{leave.worker.first_name} {leave.worker.last_name}",
             "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
             "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
             "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),
@@ -461,7 +496,7 @@ def reject_leave(request, id):
         payload = {
             "id": leave.id,
             "worker_id": leave.worker.id,
-            "worker_name": leave.worker.name,
+            "worker_name": f"{leave.worker.first_name} {leave.worker.last_name}",
             "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
             "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
             "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),
@@ -499,7 +534,7 @@ def edit_leave_admin(request, id):
             payload = {
                 "id": leave.id,
                 "worker_id": leave.worker.id,
-                "worker_name": leave.worker.name,
+                "worker_name": f"{leave.worker.first_name} {leave.worker.last_name}",
                 "start_date": getattr(leave.start_date, "isoformat", lambda: str(leave.start_date))(),
                 "end_date": getattr(leave.end_date, "isoformat", lambda: str(leave.end_date))(),
                 "start_time": (leave.start_time.strftime("%H:%M") if hasattr(leave.start_time, "strftime") else (leave.start_time if leave.start_time else None)),

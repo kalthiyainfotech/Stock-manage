@@ -38,7 +38,6 @@ class Suppliers(models.Model):
 
 
 class Workers(models.Model):
-    name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
 
     GENDER_CHOICES = [('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')]
@@ -269,7 +268,7 @@ class Leave(models.Model):
         ordering = ['-created_at', '-id']
 
     def __str__(self):
-        return f"{self.worker.name} {self.start_date} - {self.end_date} [{self.category}/{self.status}]"
+        return f"{self.worker.first_name} {self.worker.last_name} {self.start_date} - {self.end_date} [{self.category}/{self.status}]"
 
     def compute_total_minutes(self):
         from datetime import datetime, date, time, timedelta

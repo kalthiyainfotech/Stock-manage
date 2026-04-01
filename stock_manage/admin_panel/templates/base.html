@@ -522,6 +522,86 @@
                 });
             }
         })();
+
+        // ─── Custom Dropdown Logic ───
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.dropdown-btn');
+            if (btn) {
+                const dropdown = btn.closest('.custom-dropdown');
+                const menu = dropdown.querySelector('.dropdown-menu');
+                const arrow = dropdown.querySelector('.dropdown-arrow');
+                const isOpen = !menu.classList.contains('invisible');
+                
+                document.querySelectorAll('.custom-dropdown .dropdown-menu').forEach(m => {
+                    m.classList.add('invisible', 'opacity-0', 'translate-y-2');
+                    const a = m.parentElement.querySelector('.dropdown-arrow');
+                    if(a) a.style.transform = '';
+                });
+
+                if (!isOpen) {
+                    menu.classList.remove('invisible', 'opacity-0', 'translate-y-2');
+                    if(arrow) arrow.style.transform = 'rotate(180deg)';
+                }
+                return;
+            }
+
+            const item = e.target.closest('.dropdown-item');
+            if (item) {
+                const dropdown = item.closest('.custom-dropdown');
+                const menu = dropdown.querySelector('.dropdown-menu');
+                const arrow = dropdown.querySelector('.dropdown-arrow');
+                const input = dropdown.querySelector('input[type="hidden"]');
+                const label = dropdown.querySelector('.dropdown-label');
+
+                const val = item.getAttribute('data-value');
+                input.value = val;
+                label.innerText = item.innerText;
+                label.classList.remove('text-slate-400');
+                label.classList.add('text-slate-800');
+                menu.classList.add('invisible', 'opacity-0', 'translate-y-2');
+                if(arrow) arrow.style.transform = '';
+
+                let err = dropdown.closest('.space-y-1\\.5');
+                if(err) err = err.querySelector('.field-error');
+                if(err) {
+                    err.classList.add('hidden');
+                    dropdown.querySelector('.dropdown-btn').classList.remove('border-rose-500', 'bg-rose-50/50', 'ring-4', 'ring-rose-500/10');
+                }
+                return;
+            }
+
+            document.querySelectorAll('.custom-dropdown .dropdown-menu').forEach(m => {
+                m.classList.add('invisible', 'opacity-0', 'translate-y-2');
+                const a = m.parentElement.querySelector('.dropdown-arrow');
+                if(a) a.style.transform = '';
+            });
+        });
+
+        function setCustomDropdown(dropdownName, value) {
+            const dropdown = document.querySelector(`.custom-dropdown[data-name="${dropdownName}"]`);
+            if(dropdown) {
+                const input = dropdown.querySelector('input[type="hidden"]');
+                const label = dropdown.querySelector('.dropdown-label');
+                const val = (value || '').toString().trim();
+                if(val) {
+                    input.value = val;
+                    const item = dropdown.querySelector(`.dropdown-item[data-value="${val}"]`);
+                    if(item) {
+                        label.textContent = item.textContent.trim();
+                    } else {
+                        label.textContent = val;
+                    }
+                    label.classList.remove('text-slate-400');
+                    label.classList.add('text-slate-800');
+                } else {
+                    input.value = '';
+                    const defaultText = dropdown.getAttribute('data-default') || 'Select...';
+                    label.textContent = defaultText;
+                    label.classList.remove('text-slate-800');
+                    label.classList.add('text-slate-400');
+                }
+            }
+        }
     </script>
 </body>
 </html> 
