@@ -1,103 +1,387 @@
 {% extends "by_base.html" %}
 {% block buyer_layout %}
 {% load static %}
-    <div class="pt-32 pb-16 bg-brand-50 relative overflow-hidden">
-        <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-brand-500 rounded-full blur-3xl opacity-10"></div>
-        <div class="absolute -top-20 -right-20 w-64 h-64 bg-pink-500 rounded-full blur-3xl opacity-10"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">The Luxe Journal</h1>
-            <p class="text-gray-500 max-w-xl mx-auto text-lg hover:text-gray-800 transition-colors">Style tips, modern
-                fashion news, and stories straight from our designers.</p>
+
+<!-- ─── Perfect Hero Slider Section ─── -->
+<div class="relative h-[70vh] md:h-[85vh] min-h-[500px] w-full overflow-hidden bg-slate-900">
+    <!-- Slider Container -->
+    <div id="heroSlider" class="absolute inset-0 z-0">
+        {% for b in blogs|slice:":5" %}
+            {% if b.image %}
+            <div class="hero-slide absolute inset-0 opacity-0 transition-all duration-[1200ms] ease-in-out transform scale-105 {% if forloop.first %}opacity-100 scale-100 active-slide{% endif %}" data-index="{{ forloop.counter0 }}">
+                <img src="{{ b.image.url }}" class="w-full h-full object-cover object-center brightness-[0.7] contrast-[1.1]" alt="{{ b.title }}">
+                <!-- Sophisticated Gradient Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+            </div>
+            {% endif %}
+        {% empty %}
+            <div class="hero-slide absolute inset-0 opacity-100 active-slide">
+                <div class="w-full h-full bg-[#0F172A] flex items-center justify-center">
+                    <i class="fa-solid fa-newspaper text-slate-800 text-9xl"></i>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Content Overlay (Responsive Centered/Left) -->
+    <div class="absolute inset-0 z-10 flex items-center justify-center lg:justify-start">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 w-full">
+            <div class="max-w-4xl space-y-6 md:space-y-10 text-center lg:text-left">
+                <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-indigo-300 text-[10px] font-black uppercase tracking-[0.4em] animate-fade-in-down">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                    </span>
+                    Live Stories
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl lg:text-9xl font-black text-white leading-[0.9] tracking-tighter drop-shadow-2xl animate-fade-in-up">
+                    The Luxe <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-rose-300 to-violet-400">Journal</span>
+                </h1>
+                
+                <p class="text-base md:text-xl lg:text-2xl text-slate-200 font-medium leading-relaxed max-w-2xl opacity-80 drop-shadow-lg mx-auto lg:mx-0 animate-fade-in-up-delay">
+                    A curated archive of high-fashion news, designer insights, and the latest collection stories.
+                </p>
+
+                <div class="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 animate-fade-in-up-delay-2">
+                    <button class="px-8 py-4 rounded-full bg-white text-slate-950 text-xs font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-xl shadow-white/5 active:scale-95" onclick="document.getElementById('blogs-grid').scrollIntoView({behavior:'smooth'})">
+                        Explore Stories
+                    </button>
+                    
+                    <div class="flex items-center gap-3">
+                        <button onclick="prevSlide()" class="h-14 w-14 rounded-full border border-white/20 flex items-center justify-center text-white backdrop-blur-md hover:bg-white hover:text-slate-950 transition-all">
+                            <i class="fa-solid fa-arrow-left text-sm"></i>
+                        </button>
+                        <button onclick="nextSlide()" class="h-14 w-14 rounded-full border border-white/20 flex items-center justify-center text-white backdrop-blur-md hover:bg-white hover:text-slate-950 transition-all">
+                            <i class="fa-solid fa-arrow-right text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="blogs-grid">
+
+    <!-- Scroll Indicator -->
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3 animate-bounce opacity-30">
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest">Scroll</span>
+        <div class="h-10 w-[1px] bg-gradient-to-b from-white to-transparent"></div>
+    </div>
+    
+    <!-- Visual Dots -->
+    <div class="absolute bottom-12 right-12 z-20 hidden lg:flex flex-col gap-3">
+        {% for b in blogs|slice:":5" %}
+        {% if b.image %}
+        <div class="hero-dot w-2 h-2 rounded-full bg-white/20 cursor-pointer transition-all hover:bg-white/50 {% if forloop.first %}bg-indigo-500 w-8{% endif %}" onclick="goToSlide({{ forloop.counter0 }})"></div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ─── Blog Feed Section ─── -->
+<main class="bg-[#FDFDFD] min-h-screen relative">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-24">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-16" id="blogs-grid">
             {% for b in blogs %}
-            <article data-id="{{ b.id }}" data-by="{{ b.by }}" data-date="{{ b.date }}" data-image-url="{% if b.image %}{{ b.image.url }}{% endif %}" data-des="{{ b.des|escape }}" class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
-                <div class="relative h-64 overflow-hidden">
-                    {% if b.image %}<img src="{{ b.image.url }}" alt="Blog Post" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                    {% else %}<div class="w-full h-full bg-gray-200"></div>{% endif %}
-                    <div class="absolute top-4 left-4"><span class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">By {{ b.by }}</span></div>
+            <article data-id="{{ b.id }}" 
+                     data-title="{{ b.title|default:'' }}" 
+                     data-by="{{ b.by }}" 
+                     data-date="{{ b.date }}" 
+                     data-image-url="{% if b.image %}{{ b.image.url }}{% endif %}" 
+                     data-des="{{ b.des|escape }}" 
+                     class="blog-entry group flex flex-col items-start bg-transparent transition-all duration-500 cursor-pointer"
+                     onclick="openReaderModal(this)">
+                
+                <!-- Image Wrapper -->
+                <div class="relative w-full aspect-[4/5] rounded-[2.5rem] overflow-hidden mb-10 shadow-2xl shadow-indigo-900/5 group-hover:shadow-indigo-900/10 transition-shadow">
+                    {% if b.image %}
+                    <img src="{{ b.image.url }}" alt="Blog Post" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000">
+                    {% else %}
+                    <div class="w-full h-full bg-slate-100 flex items-center justify-center">
+                        <i class="fa-solid fa-image text-slate-300 text-4xl"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="absolute bottom-8 left-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                        <div class="inline-flex items-center gap-2 bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-2xl shadow-lg border border-white/20">
+                            <div class="h-7 w-7 rounded-full bg-indigo-600 flex items-center justify-center">
+                                <i class="fa-solid fa-feather text-white text-[10px]"></i>
+                            </div>
+                            <span class="text-[11px] font-extrabold text-slate-900 uppercase tracking-widest">{{ b.by }}</span>
+                        </div>
+                    </div>
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 </div>
-                <div class="p-6">
-                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i class="far fa-calendar-alt mr-1"></i> {{ b.date }}</span></div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3 leading-tight">{{ b.des|slice:":60" }}{% if b.des|length > 60 %}…{% endif %}</h3>
-                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">{{ b.des }}</p>
+
+                <!-- Text Content -->
+                <div class="flex flex-col flex-1 w-full relative">
+                    <div class="flex items-center gap-3 text-[10px] font-bold text-indigo-500 uppercase tracking-[0.25em] mb-4">
+                        <i class="fa-solid fa-calendar-alt"></i>
+                        <span>{{ b.date }}</span>
+                        <span class="w-10 h-[1px] bg-slate-200"></span>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-2">
+                        {{ b.title|default:"Untitled Publication" }}
+                    </h3>
+
+                    <p class="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3">
+                        {{ b.des }}
+                    </p>
+
+                    <div class="mt-auto pt-8 border-t border-slate-50 w-full group/footer">
+                        <button class="inline-flex items-center gap-2 text-xs font-black text-slate-900 uppercase tracking-widest hover:gap-4 transition-all">
+                            Read Full Article
+                            <i class="fa-solid fa-arrow-right-long text-indigo-500 group-hover:text-indigo-600"></i>
+                        </button>
+                    </div>
                 </div>
             </article>
             {% empty %}
-            <div id="no-blogs-msg" class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">No blogs yet.</div>
+            <div id="no-blogs-msg" class="col-span-full py-32 flex flex-col items-center justify-center text-center">
+                <div class="h-24 w-24 rounded-full bg-slate-50 flex items-center justify-center mb-6">
+                    <i class="fa-solid fa-newspaper text-slate-200 text-4xl"></i>
+                </div>
+                <h4 class="text-2xl font-bold text-slate-900">No Stories Found</h4>
+                <p class="text-slate-500 text-sm mt-1">Our designers are currently crafting new content. Check back soon.</p>
+            </div>
             {% endfor %}
         </div>
-        
-    </main>
+    </div>
+</main>
 
-    <script>
-    (function() {
-        const grid = document.getElementById('blogs-grid');
-        function cardHtml(blog) {
-            const img = blog.image_url ? blog.image_url : "";
-            const short = (blog.des || '').length > 60 ? (blog.des || '').slice(0,60) + '…' : (blog.des || '');
-            const imgTag = img ? `<img src="${img}" alt="Blog Post" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">` : `<div class="w-full h-full bg-gray-200"></div>`;
-            return `
-            <article data-id="${blog.id}" data-by="${blog.by || ''}" data-date="${blog.date || ''}" data-image-url="${img}" data-des="${(blog.des || '').replace(/"/g, '&quot;')}" class="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
-                <div class="relative h-64 overflow-hidden">
-                    ${imgTag}
-                    <div class="absolute top-4 left-4"><span class="bg-white/90 backdrop-blur text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">By ${blog.by || ''}</span></div>
+<!-- ─── Premium Article Reader Modal ─── -->
+<div id="readerModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/80 backdrop-blur-3xl px-4 py-4 sm:p-10 transition-all duration-300">
+    <div class="relative w-full max-w-6xl h-full max-h-[850px] rounded-[3rem] bg-white shadow-2xl overflow-hidden flex flex-col lg:flex-row animate-reader-enter border border-white/40">
+        
+        <!-- Modal Image (Left) -->
+        <div class="relative lg:w-1/2 h-64 lg:h-full bg-slate-100 overflow-hidden shrink-0">
+            <img id="modalImage" src="" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
+            <button onclick="closeReaderModal()" class="lg:hidden absolute top-6 right-6 h-12 w-12 rounded-full bg-black/40 text-white backdrop-blur-md flex items-center justify-center border border-white/20">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 flex flex-col h-full overflow-hidden bg-white">
+            <div class="px-8 pt-10 pb-8 lg:px-16 lg:pt-16 border-b border-slate-50">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3 text-[10px] font-black text-indigo-600 uppercase tracking-[0.4em]">
+                        <i class="fa-solid fa-calendar-day"></i>
+                        <span id="modalDate"></span>
+                    </div>
+                    <button onclick="closeReaderModal()" class="hidden lg:flex h-12 w-12 rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-950 transition-all items-center justify-center border border-slate-100">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
                 </div>
-                <div class="p-6">
-                    <div class="flex items-center text-xs text-gray-400 mb-3"><span><i class="far fa-calendar-alt mr-1"></i> ${blog.date || ''}</span></div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3 leading-tight">${short}</h3>
-                    <p class="text-gray-500 text-sm mb-5 line-clamp-2">${blog.des || ''}</p>
+                <h2 id="modalTitleText" class="text-4xl lg:text-6xl font-black text-slate-900 leading-[1.1] tracking-tight"></h2>
+                
+                <div class="mt-10 flex items-center gap-4">
+                    <div class="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30">
+                        <i class="fa-solid fa-feather text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Editorial By</p>
+                        <p id="modalAuthor" class="text-base font-black text-slate-900 uppercase tracking-widest"></p>
+                    </div>
                 </div>
-            </article>`;
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-8 py-10 lg:px-16 lg:py-14 custom-scrollbar">
+                <div class="prose prose-slate max-w-none">
+                    <p id="modalDescription" class="text-slate-600 text-xl leading-relaxed font-serif whitespace-pre-wrap"></p>
+                </div>
+            </div>
+
+            <div class="px-8 py-8 lg:px-16 bg-slate-50 flex items-center justify-between border-t border-slate-100">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Share Article</span>
+                <div class="flex gap-6 text-slate-600">
+                    <i class="fa-brands fa-x-twitter cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                    <i class="fa-brands fa-facebook-f cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                    <i class="fa-brands fa-instagram cursor-pointer hover:text-indigo-600 transition-colors"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .animate-fade-in-down { animation: fadeInDown 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .animate-fade-in-up { animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .animate-fade-in-up-delay { animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+    .animate-fade-in-up-delay-2 { animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+
+    .hero-slide { transform-origin: center; }
+    .active-slide { transform: scale(1) !important; }
+
+    .blog-entry { perspective: 1000px; }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    #blogs-grid article { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    {% for i in "123456789" %}
+    #blogs-grid article:nth-child({{ forloop.counter }}) { animation-delay: {{ forloop.counter|add:2 }}00ms; }
+    {% endfor %}
+
+    @keyframes readerEnter { from { opacity: 0; transform: scale(0.9) translateY(40px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .animate-reader-enter { animation: readerEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+</style>
+
+<script>
+(function() {
+    const grid = document.getElementById('blogs-grid');
+    const modal = document.getElementById('readerModal');
+    
+    // ─── Perfect Hero Slider Logic ───
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.hero-dot');
+    const totalSlides = slides.length;
+    let slideInterval;
+
+    function startAutoSlide() {
+        clearInterval(slideInterval);
+        slideInterval = setInterval(nextSlide, 6000);
+    }
+
+    function showSlide(index) {
+        if (totalSlides === 0) return;
+        
+        slides.forEach(s => s.classList.replace('opacity-100', 'opacity-0'));
+        dots.forEach(d => {
+            d.classList.remove('bg-indigo-500', 'w-8');
+            d.classList.add('bg-white/20');
+        });
+
+        currentSlide = (index + totalSlides) % totalSlides;
+        
+        slides[currentSlide].classList.replace('opacity-0', 'opacity-100');
+        if (dots[currentSlide]) {
+            dots[currentSlide].classList.remove('bg-white/20');
+            dots[currentSlide].classList.add('bg-indigo-500', 'w-8');
         }
-        function blogFromCard(el) {
-            if (!el) return null;
-            return {
-                id: el.getAttribute('data-id'),
-                by: el.getAttribute('data-by') || '',
-                date: el.getAttribute('data-date') || '',
-                image_url: el.getAttribute('data-image-url') || '',
-                des: el.getAttribute('data-des') || ''
-            };
+        startAutoSlide();
+    }
+
+    window.nextSlide = () => showSlide(currentSlide + 1);
+    window.prevSlide = () => showSlide(currentSlide - 1);
+    window.goToSlide = (idx) => showSlide(idx);
+
+    if (totalSlides > 0) {
+        showSlide(0);
+        startAutoSlide();
+    }
+
+    // ─── Reader Modal ───
+    window.openReaderModal = function(el) {
+        const title = el.getAttribute('data-title') || 'Untitled Publication';
+        const by = el.getAttribute('data-by');
+        const date = el.getAttribute('data-date');
+        const img = el.getAttribute('data-image-url');
+        const des = el.getAttribute('data-des');
+
+        document.getElementById('modalTitleText').innerText = title;
+        document.getElementById('modalAuthor').innerText = by;
+        document.getElementById('modalDate').innerText = date;
+        document.getElementById('modalDescription').innerText = des;
+        document.getElementById('modalImage').src = img || '';
+        document.getElementById('modalImage').parentElement.style.display = img ? 'block' : 'none';
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeReaderModal = function() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    };
+
+    modal.onclick = (e) => { if (e.target === modal) closeReaderModal(); };
+
+    function cardHtml(blog) {
+        const title = (blog.title || 'Untitled Publication').replace(/"/g, '&quot;');
+        const img = blog.image_url ? blog.image_url : "";
+        const shortDes = (blog.des || '').length > 150 ? (blog.des || '').slice(0,150) + '…' : (blog.des || '');
+        const imgTag = img 
+            ? `<img src="${img}" alt="Blog Post" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000">` 
+            : `<div class="w-full h-full bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-image text-slate-300 text-4xl"></i></div>`;
+        
+        return `
+        <article data-id="${blog.id}" data-title="${title}" data-by="${blog.by || ''}" data-date="${blog.date || ''}" data-image-url="${img}" data-des="${(blog.des || '').replace(/"/g, '&quot;')}" 
+                 class="blog-entry group flex flex-col items-start bg-transparent transition-all duration-500 cursor-pointer" onclick="openReaderModal(this)">
+            <div class="relative w-full aspect-[4/5] rounded-[2.5rem] overflow-hidden mb-10 shadow-2xl shadow-indigo-900/5 group-hover:shadow-indigo-900/10 transition-shadow">
+                ${imgTag}
+                <div class="absolute bottom-8 left-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    <div class="inline-flex items-center gap-2 bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-2xl shadow-lg border border-white/20">
+                        <div class="h-7 w-7 rounded-full bg-indigo-600 flex items-center justify-center"><i class="fa-solid fa-feather text-white text-[10px]"></i></div>
+                        <span class="text-[11px] font-extrabold text-slate-900 uppercase tracking-widest">${blog.by || ''}</span>
+                    </div>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            </div>
+            <div class="flex flex-col flex-1 w-full relative">
+                <div class="flex items-center gap-3 text-[10px] font-bold text-indigo-500 uppercase tracking-[0.25em] mb-4">
+                    <i class="fa-solid fa-calendar-alt"></i><span>${blog.date || ''}</span><span class="w-10 h-[1px] bg-slate-200"></span>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-900 mb-4 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-2">${blog.title || 'Untitled Publication'}</h3>
+                <p class="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3">${blog.des || ''}</p>
+                <div class="mt-auto pt-8 border-t border-slate-50 w-full group/footer">
+                    <button class="inline-flex items-center gap-2 text-xs font-black text-slate-900 uppercase tracking-widest hover:gap-4 transition-all">
+                        Read Full Article<i class="fa-solid fa-arrow-right-long text-indigo-500 group-hover:text-indigo-600"></i>
+                    </button>
+                </div>
+            </div>
+        </article>`;
+    }
+
+    function onAdded(blog) {
+        const existing = grid.querySelector(`article[data-id="${blog.id}"]`);
+        if (existing) existing.outerHTML = cardHtml(blog);
+        else {
+            grid.insertAdjacentHTML('afterbegin', cardHtml(blog));
+            const noMsg = document.getElementById('no-blogs-msg');
+            if (noMsg) noMsg.remove();
         }
-        function onAdded(blog) {
-            const existing = grid.querySelector(`article[data-id="${blog.id}"]`);
-            if (existing) existing.outerHTML = cardHtml(blog);
-            else {
-                grid.insertAdjacentHTML('afterbegin', cardHtml(blog));
-                const noMsg = document.getElementById('no-blogs-msg');
-                if (noMsg) noMsg.remove();
+    }
+
+    function onUpdated(blog) {
+        const card = grid.querySelector(`article[data-id="${blog.id}"]`);
+        if (card) card.outerHTML = cardHtml(blog);
+    }
+
+    function onDeleted(id) {
+        const card = grid.querySelector(`article[data-id="${id}"]`);
+        if (card) {
+            card.remove();
+            if (grid.children.length === 0) {
+                grid.innerHTML = '<div class="col-span-full py-32 text-center text-slate-400">No stories found.</div>';
             }
         }
-        function onUpdated(blog) {
-            const card = grid.querySelector(`article[data-id="${blog.id}"]`);
-            if (card) {
-                card.outerHTML = cardHtml(blog);
-            }
-        }
-        function onDeleted(id) {
-            const card = grid.querySelector(`article[data-id="${id}"]`);
-            if (card) {
-                card.remove();
-                if (grid.children.length === 0) {
-                    grid.innerHTML = '<div id="no-blogs-msg" class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500">No blogs yet.</div>';
-                }
-            }
-        }
-        try {
-            const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
-            const socket = new WebSocket(`${proto}://${location.host}/ws/blogs/`);
-            socket.onmessage = (e) => {
-                try {
-                    const data = JSON.parse(e.data);
-                    if (data.type === 'blog_added') onAdded(data.blog);
-                    else if (data.type === 'blog_updated') onUpdated(data.blog);
-                    else if (data.type === 'blog_deleted') onDeleted(data.id);
-                } catch (err) {}
-            };
-        } catch (err) {}
-    })();
-    </script>
+    }
+
+    try {
+        const proto = (location.protocol === 'https:') ? 'wss' : 'ws';
+        const socket = new WebSocket(`${proto}://${location.host}/ws/blogs/`);
+        socket.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            if (data.type === 'blog_added') onAdded(data.blog);
+            else if (data.type === 'blog_updated') onUpdated(data.blog);
+            else if (data.type === 'blog_deleted') onDeleted(data.id);
+        };
+    } catch (err) {}
+})();
+</script>
 {% endblock buyer_layout %}

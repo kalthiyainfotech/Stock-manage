@@ -214,13 +214,14 @@ class VariantSpec(models.Model):
     
 
 class Blogs(models.Model):
+    title = models.CharField(max_length=255, blank=True, null=True)
     image = models.ImageField(upload_to='blogs/', blank=True, null=True)
     des = models.TextField()
     by = models.CharField(max_length=100)
     date = models.DateField()
 
     def __str__(self):
-        return f"{self.by} - {self.date}"
+        return f"{self.title or self.by} - {self.date}"
 
 
 class Contact(models.Model):

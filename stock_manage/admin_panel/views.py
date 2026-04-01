@@ -1108,6 +1108,7 @@ def auth_blogs(request):
 def add_blogs(request):
     if request.method == "POST":
         blog = Blogs.objects.create(
+            title=request.POST.get('title'),
             image=request.FILES.get('image'),
             des=request.POST.get('des'),
             by=request.POST.get('by'),
@@ -1117,6 +1118,7 @@ def add_blogs(request):
         if layer:
             data = {
                 "id": blog.id,
+                "title": blog.title,
                 "des": blog.des,
                 "by": blog.by,
                 "date": str(blog.date),
@@ -1131,6 +1133,7 @@ def edit_blogs(request, id):
     blog = get_object_or_404(Blogs, id=id)
 
     if request.method == "POST":
+        blog.title = request.POST.get('title')
         blog.des = request.POST.get('des')
         blog.by = request.POST.get('by')
         blog.date = request.POST.get('date')
@@ -1143,6 +1146,7 @@ def edit_blogs(request, id):
         if layer:
             data = {
                 "id": blog.id,
+                "title": blog.title,
                 "des": blog.des,
                 "by": blog.by,
                 "date": str(blog.date),
