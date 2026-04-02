@@ -467,16 +467,16 @@
                                 <button
                                     onclick="openViewModal(
                                         '{{ supplier.id }}',
-                                        '{{ supplier.name }}',
-                                        '{{ supplier.email }}',
-                                        '{{ supplier.first_name }}',
-                                        '{{ supplier.last_name }}',
-                                        '{{ supplier.mbno }}',
-                                        '{{ supplier.state }}',
-                                        '{{ supplier.city }}',
-                                        '{{ supplier.address }}',
-                                        '{{ supplier.gender }}',
-                                        '{{ supplier.status }}',
+                                        '{{ supplier.name|escapejs }}',
+                                        '{{ supplier.email|escapejs }}',
+                                        '{{ supplier.first_name|escapejs }}',
+                                        '{{ supplier.last_name|escapejs }}',
+                                        '{{ supplier.mbno|escapejs }}',
+                                        '{{ supplier.state|escapejs }}',
+                                        '{{ supplier.city|escapejs }}',
+                                        '{{ supplier.address|escapejs }}',
+                                        '{{ supplier.gender|escapejs }}',
+                                        '{{ supplier.status|escapejs }}',
                                         '{% if supplier.profile_picture %}{{ supplier.profile_picture.url }}{% endif %}'
                                     )"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
