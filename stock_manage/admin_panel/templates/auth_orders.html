@@ -13,166 +13,153 @@
         </div>
     </div>
 
-    <section
-        class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
+    <!-- Main Table Card -->
+    <section class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden relative">
 
-        <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="space-y-0.5">
-                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
-                    Overview
-                </p>
-                <p class="text-sm text-slate-500">
-                    Showing
-                    <span class="font-semibold text-slate-900">
-                        {{ orders.start_index }}–{{ orders.end_index }}
-                    </span>
-                    of
-                    <span class="font-semibold text-slate-900">
-                        {{ orders.paginator.count }}
-                    </span>
-                    orders.
-                </p>
+
+        <!-- Table Toolbar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b border-slate-100 bg-slate-50/30">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-filter text-slate-400 text-xs"></i>
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Order Management</h3>
             </div>
 
-            <div class="w-full sm:w-auto">
-                <label class="relative block">
-                    <span class="sr-only">Search orders</span>
-                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </span>
-                    <input
-                        id="orderSearch"
-                        type="text"
-                        placeholder="Search by order number, buyer, or email…"
-                        class="w-full sm:w-72 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
-                               text-slate-700 placeholder:text-slate-400 shadow-sm
-                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
-                </label>
+            <div class="relative w-full sm:w-80">
+                <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input
+                    id="orderSearch"
+                    type="text"
+                    placeholder="Search order #, buyer, email..."
+                    class="w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm
+                           text-slate-700 placeholder:text-slate-400 shadow-sm
+                           focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
             </div>
         </div>
 
-        <div class="overflow-x-auto border-t border-slate-100">
-            <table class="min-w-full text-left text-sm text-slate-700">
-                <thead
-                    class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50/50 border-b border-slate-100">
                     <tr>
-                        <th class="px-4 py-3 font-medium text-center">No.</th>
-                        <th class="px-4 py-3 font-medium">Order Number</th>
-                        <th class="px-4 py-3 font-medium">Buyer Name</th>
-                        <th class="px-4 py-3 font-medium">Email</th>
-                        <th class="px-4 py-3 font-medium text-right">Total</th>
-                        <th class="px-4 py-3 font-medium text-center">Status</th>
-                        <th class="px-4 py-3 font-medium whitespace-nowrap">Date</th>
-                        <th class="px-4 py-3 font-medium text-center">Action</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-center">No.</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Order Number</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Buyer Details</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-right">Total Amount</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-center">Status</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Date</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-center">Action</th>
                     </tr>
                 </thead>
+
                 <tbody id="ordersTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for order in orders %}
-                    <tr class="hover:bg-slate-50/80 transition-colors" data-order-id="{{ order.id }}">
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
-                            {{ forloop.counter }}
+                    <tr class="group hover:bg-slate-50/50 transition-all duration-300" data-order-id="{{ order.id }}">
+                        <td class="px-6 py-6 align-top">
+                             <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500 mx-auto">
+                                {{ forloop.counter }}
+                            </span>
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm font-semibold text-blue-600">
-                            {{ order.order_number }}
+                        <td class="px-6 py-6 align-top">
+                            <span class="text-sm font-black text-indigo-600">#{{ order.order_number }}</span>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Live Order</span>
+                            </div>
                         </td>
-                        <td class="px-4 py-3 align-middle text-sm text-slate-800">
-                            {{ order.first_name }} {{ order.last_name }}
+                        <td class="px-6 py-6 align-top">
+                            <h4 class="text-sm font-black text-slate-900 mb-0.5">{{ order.first_name }} {{ order.last_name }}</h4>
+                            <p class="text-[10px] font-bold text-slate-400 lowercase tracking-tight">{{ order.email }}</p>
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
-                            {{ order.email }}
+                        <td class="px-6 py-6 align-top text-right">
+                            <span class="text-sm font-black text-slate-900">₹{{ order.total|intcomma }}</span>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{{ order.get_payment_method_display }}</p>
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm font-semibold text-slate-900 text-right">
-                            ₹{{ order.total|intcomma }}
-                        </td>
-                        <td class="px-4 py-3 align-middle text-center">
+                        <td class="px-6 py-6 align-top text-center">
                             <span
-                                class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold
+                                class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest
                                 {% if order.status == 'pending' %}
-                                    bg-yellow-50 text-yellow-800 ring-1 ring-yellow-100
+                                    bg-yellow-50 text-yellow-600 border border-yellow-100
                                 {% elif order.status == 'processing' %}
-                                    bg-sky-50 text-sky-800 ring-1 ring-sky-100
+                                    bg-sky-50 text-sky-600 border border-sky-100
                                 {% elif order.status == 'shipped' %}
-                                    bg-purple-50 text-purple-800 ring-1 ring-purple-100
+                                    bg-purple-50 text-purple-600 border border-purple-100
                                 {% elif order.status == 'delivered' %}
-                                    bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100
+                                    bg-emerald-50 text-emerald-600 border border-emerald-100
                                 {% elif order.status == 'cancelled' %}
-                                    bg-rose-50 text-rose-800 ring-1 ring-rose-100
+                                    bg-rose-50 text-rose-600 border border-rose-100
                                 {% elif order.status == 'return_requested' %}
-                                    bg-amber-50 text-amber-800 ring-1 ring-amber-100
+                                    bg-amber-50 text-amber-600 border border-amber-100
                                 {% elif order.status == 'returned' %}
-                                    bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100
+                                    bg-emerald-50 text-emerald-600 border border-emerald-100
                                 {% else %}
-                                    bg-slate-50 text-slate-700 ring-1 ring-slate-100
+                                    bg-slate-50 text-slate-600 border border-slate-100
                                 {% endif %}">
                                 <span class="h-1.5 w-1.5 rounded-full
-                                    {% if order.status == 'pending' %}
-                                        bg-yellow-400
-                                    {% elif order.status == 'processing' %}
-                                        bg-sky-400
-                                    {% elif order.status == 'shipped' %}
-                                        bg-purple-400
-                                    {% elif order.status == 'delivered' %}
-                                        bg-emerald-500
-                                    {% elif order.status == 'cancelled' %}
-                                        bg-rose-500
-                                    {% elif order.status == 'return_requested' %}
-                                        bg-amber-500
-                                    {% elif order.status == 'returned' %}
-                                        bg-emerald-500
-                                    {% else %}
-                                        bg-slate-400
+                                    {% if order.status == 'pending' %} bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.5)]
+                                    {% elif order.status == 'processing' %} bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.5)]
+                                    {% elif order.status == 'shipped' %} bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.5)]
+                                    {% elif order.status == 'delivered' %} bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]
+                                    {% elif order.status == 'cancelled' %} bg-rose-500 shadow-[0_0_8_rgba(244,63,94,0.5)]
+                                    {% elif order.status == 'return_requested' %} bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]
+                                    {% elif order.status == 'returned' %} bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]
+                                    {% else %} bg-slate-400
                                     {% endif %}"></span>
                                 {{ order.get_status_display }}
                             </span>
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
-                            {{ order.created_at|date:"Y-m-d H:i" }}
+                        <td class="px-6 py-6 align-top">
+                            <span class="text-xs font-bold text-slate-700 block">{{ order.created_at|date:"d M, Y" }}</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{{ order.created_at|date:"h:i A" }}</span>
                         </td>
-                        <td class="px-4 py-3 align-middle text-center">
+                        <td class="px-6 py-6 align-top text-center">
                             <div class="inline-flex items-center justify-center gap-2">
-                            <button
-                                onclick="openViewModal(
-                                    '{{ order.id }}',
-                                    '{{ order.order_number }}',
-                                    '{{ order.first_name }}',
-                                    '{{ order.last_name }}',
-                                    '{{ order.email }}',
-                                    '{{ order.phone }}',
-                                    '{{ order.address|escapejs }}',
-                                    '{% if order.address_line2 %}{{ order.address_line2|escapejs }}{% endif %}',
-                                    '{{ order.city }}',
-                                    '{{ order.state }}',
-                                    '{{ order.postal_code }}',
-                                    '{{ order.country }}',
-                                    '{{ order.subtotal }}',
-                                    '{{ order.total }}',
-                                    '{{ order.get_payment_method_display }}',
-                                    '{{ order.get_status_display }}',
-                                    '{{ order.created_at|date:"Y-m-d H:i" }}',
-                                    '{% if order.order_notes %}{{ order.order_notes|escapejs }}{% else %}N/A{% endif %}',
-                                    '{{ order.ship_to_different_address }}',
-                                    '{% if order.shipping_first_name %}{{ order.shipping_first_name }}{% endif %}',
-                                    '{% if order.shipping_last_name %}{{ order.shipping_last_name }}{% endif %}',
-                                    '{% if order.shipping_address %}{{ order.shipping_address|escapejs }}{% endif %}',
-                                    '{% if order.shipping_city %}{{ order.shipping_city }}{% endif %}',
-                                    '{% if order.shipping_state %}{{ order.shipping_state }}{% endif %}',
-                                    '{% if order.shipping_postal_code %}{{ order.shipping_postal_code }}{% endif %}',
-                                    '{% if order.shipping_country %}{{ order.shipping_country }}{% endif %}',
-                                    '{% for item in order.items.all %}{{ item.product_name|escapejs }}|{{ item.quantity }}|{{ item.price }}|{{ item.total }}{% if not forloop.last %}|||{% endif %}{% endfor %}'
-                                )"
-                                class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
-                                title="View">
-                                <i class="fa-solid fa-eye text-xs"></i>
-                                <span class="sr-only">View</span>
-                            </button>
-                            <button
-                                onclick="openDeleteModal('{% url 'delete_order' order.id %}')"
-                                class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
-                                title="Delete">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                                <span class="sr-only">Delete</span>
-                            </button>
-                        </div>
+                                <button
+                                    onclick="openViewModal(
+                                        '{{ order.id }}',
+                                        '{{ order.order_number }}',
+                                        '{{ order.first_name }}',
+                                        '{{ order.last_name }}',
+                                        '{{ order.email }}',
+                                        '{{ order.phone }}',
+                                        '{{ order.address|escapejs }}',
+                                        '{% if order.address_line2 %}{{ order.address_line2|escapejs }}{% endif %}',
+                                        '{{ order.city }}',
+                                        '{{ order.state }}',
+                                        '{{ order.postal_code }}',
+                                        '{{ order.country }}',
+                                        '{{ order.subtotal }}',
+                                        '{{ order.total }}',
+                                        '{{ order.get_payment_method_display }}',
+                                        '{{ order.get_status_display }}',
+                                        '{{ order.created_at|date:"Y-m-d H:i" }}',
+                                        '{% if order.order_notes %}{{ order.order_notes|escapejs }}{% else %}N/A{% endif %}',
+                                        '{{ order.ship_to_different_address }}',
+                                        '{% if order.shipping_first_name %}{{ order.shipping_first_name }}{% endif %}',
+                                        '{% if order.shipping_last_name %}{{ order.shipping_last_name }}{% endif %}',
+                                        '{% if order.shipping_address %}{{ order.shipping_address|escapejs }}{% endif %}',
+                                        '{% if order.shipping_city %}{{ order.shipping_city }}{% endif %}',
+                                        '{% if order.shipping_state %}{{ order.shipping_state }}{% endif %}',
+                                        '{% if order.shipping_postal_code %}{{ order.shipping_postal_code }}{% endif %}',
+                                        '{% if order.shipping_country %}{{ order.shipping_country }}{% endif %}',
+                                        '{% for item in order.items.all %}{{ item.product_name|escapejs }}|{{ item.quantity }}|{{ item.price }}|{{ item.total }}{% if not forloop.last %}|||{% endif %}{% endfor %}'
+                                    )"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition shadow-sm"
+                                    title="View Full Details">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    <span class="sr-only">View</span>
+                                </button>
+
+                                <button
+                                    onclick="openDeleteModal('{% url 'delete_order' order.id %}')"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition shadow-sm"
+                                    title="Remove Order">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                    <span class="sr-only">Delete</span>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
