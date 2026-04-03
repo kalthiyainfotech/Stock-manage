@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,8 +109,8 @@
                                         </div>
                                     </td>
                                     <td class="py-6 text-center font-bold text-gray-900">{{ it.quantity }}</td>
-                                    <td class="py-6 text-right text-gray-600">₹{{ it.price|floatformat:2 }}</td>
-                                    <td class="py-6 text-right font-black text-gray-900">₹{{ it.total|floatformat:2 }}</td>
+                                    <td class="py-6 text-right text-gray-600">₹{{ it.price|floatformat:2|intcomma }}</td>
+                                    <td class="py-6 text-right font-black text-gray-900">₹{{ it.total|floatformat:2|intcomma }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -122,7 +123,7 @@
                     <div class="w-full sm:w-72 space-y-4">
                         <div class="flex justify-between text-gray-500">
                             <span>Subtotal</span>
-                            <span class="font-bold text-gray-900">₹{{ order.subtotal|floatformat:2 }}</span>
+                            <span class="font-bold text-gray-900">₹{{ order.subtotal|floatformat:2|intcomma }}</span>
                         </div>
                         <div class="flex justify-between text-gray-500">
                             <span>Shipping</span>
@@ -130,7 +131,7 @@
                         </div>
                         <div class="flex justify-between items-center pt-4 border-t-2 border-gray-900">
                             <span class="text-lg font-black text-gray-900 uppercase tracking-tighter">Grand Total</span>
-                            <span class="text-2xl font-black text-brand-600">₹{{ order.total|floatformat:2 }}</span>
+                            <span class="text-2xl font-black text-brand-600">₹{{ order.total|floatformat:2|intcomma }}</span>
                         </div>
                     </div>
                 </div>

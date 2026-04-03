@@ -28,6 +28,7 @@ urlpatterns = [
     path('auth_inventory/',auth_inventory,name='auth_inventory'),
     path('add_inventory/',add_inventory,name='add_inventory'),
     path('edit/inventory/<int:id>/',edit_inventory,name='edit_inventory'),
+    path('view/inventory/<int:id>/',view_inventory,name='view_inventory'),
     path('delete/inventory/<int:id>/',delete_inventory,name='delete_inventory'),
     path('delete/inventory/product/<int:product_id>/', delete_product_inventory, name='delete_product_inventory'),
 

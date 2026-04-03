@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block admin_dash %}
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
@@ -81,7 +82,7 @@
                             {{ order.email }}
                         </td>
                         <td class="px-4 py-3 align-middle text-xs sm:text-sm font-semibold text-slate-900 text-right">
-                            ₹{{ order.total }}
+                            ₹{{ order.total|intcomma }}
                         </td>
                         <td class="px-4 py-3 align-middle text-center">
                             <span
@@ -259,7 +260,7 @@
             '<td class="px-4 py-3 align-middle text-xs sm:text-sm font-semibold text-blue-600">'+(o.order_number||'')+'</td>'+
             '<td class="px-4 py-3 align-middle text-sm text-slate-800">'+(o.buyer_name||'')+'</td>'+
             '<td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">'+(o.email||'')+'</td>'+
-            '<td class="px-4 py-3 align-middle text-xs sm:text-sm font-semibold text-slate-900 text-right">₹'+(o.total||0)+'</td>'+
+            '<td class="px-4 py-3 align-middle text-xs sm:text-sm font-semibold text-slate-900 text-right">₹'+Number(o.total || 0).toLocaleString('en-IN')+'</td>'+
             '<td class="px-4 py-3 align-middle text-center">'+pill(o.status||'')+'</td>'+
             '<td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">'+(o.created_at||'')+'</td>'+
             '<td class="px-4 py-3 align-middle text-center"><div class="inline-flex items-center justify-center gap-2">'+viewBtn+delBtn+'</div></td>'+
@@ -511,8 +512,8 @@ function openViewModal(
                 row.innerHTML = `
                     <td class="px-4 py-2">${it.product_name || ''}</td>
                     <td class="px-4 py-2">${it.quantity || 0}</td>
-                    <td class="px-4 py-2">₹${typeof it.price === 'number' ? it.price.toFixed(2) : it.price}</td>
-                    <td class="px-4 py-2 font-semibold">₹${typeof it.total === 'number' ? it.total.toFixed(2) : it.total}</td>
+                    <td class="px-4 py-2">₹${(typeof it.price === 'number' ? it.price : Number(it.price)).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="px-4 py-2 font-semibold">₹${(typeof it.total === 'number' ? it.total : Number(it.total)).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 `;
                 itemsTable.appendChild(row);
             });
@@ -537,8 +538,8 @@ function openViewModal(
         fillItemsFromApi(id);
     }
 
-    document.getElementById('viewSubtotal').innerText = '₹' + subtotal;
-    document.getElementById('viewTotal').innerText = '₹' + total;
+    document.getElementById('viewSubtotal').innerText = '₹' + Number(subtotal).toLocaleString('en-IN');
+    document.getElementById('viewTotal').innerText = '₹' + Number(total).toLocaleString('en-IN');
 
     document.getElementById('viewOrderNotes').innerText = orderNotes || 'No notes';
 

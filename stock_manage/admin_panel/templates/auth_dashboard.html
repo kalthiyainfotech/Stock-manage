@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block admin_dash %}
 
 <!-- Include Chart.js -->
@@ -241,7 +242,7 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-3 text-sm font-medium text-slate-800">{{ o.order_number }}</td>
                             <td class="px-4 py-3 text-sm text-gray-700">{{ o.first_name }} {{ o.last_name }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 font-semibold">₹{{ o.total }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-semibold">₹{{ o.total|intcomma }}</td>
                             <td class="px-4 py-3 text-sm">
                                 <span class="px-2 py-1 text-xs rounded
                                     {% if o.status == 'pending' %}bg-yellow-100 text-yellow-800
@@ -340,10 +341,9 @@
             orders.forEach(o => {
                 const statusClass = getStatusClass(o.status);
                 const row = `
-                    <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 text-sm font-medium text-slate-800">${o.order_number}</td>
                         <td class="px-4 py-3 text-sm text-gray-700">${o.first_name} ${o.last_name}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900 font-semibold">₹${o.total}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900 font-semibold">₹${Number(o.total || 0).toLocaleString('en-IN')}</td>
                         <td class="px-4 py-3 text-sm">
                             <span class="px-2 py-1 text-xs rounded ${statusClass}">${o.status_display || o.status}</span>
                         </td>
@@ -425,7 +425,7 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: { callback: value => '₹' + value }
+                        ticks: { callback: value => '₹' + Number(value).toLocaleString('en-IN') }
                     }
                 }
             }

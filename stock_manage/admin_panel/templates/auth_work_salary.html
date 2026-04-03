@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block admin_dash %}
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
@@ -42,14 +43,14 @@
               </div>
               <div class="text-xs text-slate-500">{{ row.worker.email }}</div>
             </td>
-            <td class="px-4 py-3 text-right">₹ {{ row.base_salary|floatformat:2 }}</td>
+            <td class="px-4 py-3 text-right">₹ {{ row.base_salary|floatformat:2|intcomma }}</td>
             <td class="px-4 py-3 text-center">{{ row.days_in_month }}</td>
             <td class="px-4 py-3 text-center">{{ row.approved_leaves }}</td>
             <td class="px-4 py-3 text-center">{{ row.free_leaves }}</td>
             <td class="px-4 py-3 text-center">{{ row.unpaid_leaves }}</td>
-            <td class="px-4 py-3 text-right">₹ {{ row.per_day|floatformat:2 }}</td>
-            <td class="px-4 py-3 text-right text-rose-700">₹ {{ row.deduction|floatformat:2 }}</td>
-            <td class="px-4 py-3 text-right font-semibold text-emerald-700">₹ {{ row.net_salary|floatformat:2 }}</td>
+            <td class="px-4 py-3 text-right">₹ {{ row.per_day|floatformat:2|intcomma }}</td>
+            <td class="px-4 py-3 text-right text-rose-700">₹ {{ row.deduction|floatformat:2|intcomma }}</td>
+            <td class="px-4 py-3 text-right font-semibold text-emerald-700">₹ {{ row.net_salary|floatformat:2|intcomma }}</td>
           </tr>
           {% empty %}
           <tr>

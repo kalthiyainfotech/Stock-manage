@@ -3,25 +3,19 @@
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 mb-8">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
-                Suppliers
-            </h1>
-            
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight leading-tight">Supplier Management</h1>
+            <p class="text-slate-500 text-sm font-medium mt-1">Manage vendor profiles, contact details, and supply status.</p>
         </div>
 
         <button id="openSupplierModal"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700
-                   px-4 py-2.5 text-sm font-semibold text-white shadow-sm
-                   hover:from-slate-800 hover:via-slate-700 hover:to-slate-700
-                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50
-                   transition">
-            <span
-                class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-xs border border-white/20">
-                <i class="fa-solid fa-plus"></i>
+            class="inline-flex items-center justify-center gap-3 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-0.5 transition-all active:scale-95 group">
+            <span class="h-6 w-6 flex items-center justify-center rounded-lg bg-white/10 border border-white/20 group-hover:bg-white/20 transition-all">
+                <i class="fa-solid fa-plus text-[10px]"></i>
             </span>
-            <span>Add Supplier</span>
+            <span>Add New Supplier</span>
         </button>
     </div>
 

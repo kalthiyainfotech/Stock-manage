@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block admin_dash %}
+<main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
+    <!-- Header -->
+    <div class="max-w-5xl mx-auto mb-8">
+        <div class="flex items-center gap-4 mb-2">
+            <a href="{% url 'auth_inventory' %}" class="h-10 w-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm">
+                <i class="fa-solid fa-arrow-left text-sm"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Add New Inventory</h1>
+                <p class="text-sm text-slate-500">Create a new product listing with variants and specifications.</p>
+            </div>
+        </div>
+    </div>
+
+    <form id="inventoryForm" method="POST" action="{% url 'add_inventory' %}" enctype="multipart/form-data" class="max-w-5xl mx-auto space-y-8">
+        {% csrf_token %}
+
+        <!-- Product Hierarchy Card -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+                        <i class="fa-solid fa-sitemap text-white text-xs"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-900">Product Hierarchy</h2>
+                </div>
+            </div>
+            
+            <div class="p-6 sm:p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Category -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            Category <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="categorySelect" name="category" required
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                            <option value="">Select Category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.name }}">{{ category.name }}</option>
+                            {% endfor %}
+                            <option value="__new__">+ Add New Category</option>
+                        </select>
+                        <input type="text" id="newCategoryInput" name="new_category" placeholder="Enter New Category"
+                            class="hidden w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm mt-3 text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                    </div>
+
+                    <!-- Subcategory -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            Subcategory <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="subcategorySelect" name="subcategory" required disabled
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                            <option value="">Select Subcategory</option>
+                            <option value="__new__">+ Add New Subcategory</option>
+                        </select>
+                        <input type="text" id="newSubcategoryInput" name="new_subcategory" placeholder="Enter New Subcategory"
+                            class="hidden w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm mt-3 text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                    </div>
+
+                    <!-- Brand -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            Brand <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="brandSelect" name="brand" required disabled
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                            <option value="">Select Brand</option>
+                            <option value="__new__">+ Add New Brand</option>
+                        </select>
+                        <input type="text" id="newBrandInput" name="new_brand" placeholder="Enter New Brand"
+                            class="hidden w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm mt-3 text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                    </div>
+
+                    <!-- Product -->
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                            Product Name <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="productSelect" name="product" required disabled
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                            <option value="">Select Product</option>
+                            <option value="__new__">+ Add New Product</option>
+                        </select>
+                        <input type="text" id="newProductInput" name="new_product" placeholder="Enter New Product"
+                            class="hidden w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm mt-3 text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description & Specs Card -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-200">
+                        <i class="fa-solid fa-file-lines text-white text-xs"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-900">Description & Specifications</h2>
+                </div>
+            </div>
+            
+            <div class="p-6 sm:p-8 space-y-8">
+                <div class="space-y-2">
+                    <label class="text-sm font-semibold text-slate-700">Description</label>
+                    <textarea name="description" placeholder="Describe the product features, materials, and care instructions..."
+                        rows="4"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none"></textarea>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Additional Specifications</h3>
+                        <button type="button" id="addSpecRowBtn"
+                            class="text-xs px-4 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 font-semibold text-slate-700 shadow-sm transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Add Spec
+                        </button>
+                    </div>
+
+                    <div id="specsContainer" class="space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 spec-row">
+                            <input type="text" name="spec_name" placeholder="Name (e.g. Material)"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">
+                            <div class="flex gap-2">
+                                <input type="text" name="spec_value" placeholder="Value (e.g. Cotton)"
+                                    class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">
+                                <button type="button"
+                                    class="removeSpecRowBtn h-11 w-11 flex items-center justify-center rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Variants Card -->
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-200">
+                        <i class="fa-solid fa-layer-group text-white text-xs"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-900">Inventory Variants</h2>
+                </div>
+                <button type="button" id="addMainVariantBtn"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
+                    <i class="fa-solid fa-plus"></i>
+                    Add Color Variant
+                </button>
+            </div>
+            
+            <div id="variantRows" class="p-6 sm:p-8 space-y-6">
+                <!-- Variants will be injected here -->
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4">
+            <a href="{% url 'auth_inventory' %}"
+                class="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-8 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all">
+                Cancel
+            </a>
+
+            <button type="submit"
+                class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-200 hover:bg-indigo-700 transition-all">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Save Inventory
+            </button>
+        </div>
+
+    </form>
+</main>
+
+<script>
+    // Logic from original file to maintain functionality
+    const categorySelect = document.getElementById('categorySelect');
+    const subcategorySelect = document.getElementById('subcategorySelect');
+    const brandSelect = document.getElementById('brandSelect');
+    const productSelect = document.getElementById('productSelect');
+
+    const newCategoryInput = document.getElementById('newCategoryInput');
+    const newSubcategoryInput = document.getElementById('newSubcategoryInput');
+    const newBrandInput = document.getElementById('newBrandInput');
+    const newProductInput = document.getElementById('newProductInput');
+
+    // Cascading Select Logic
+    categorySelect.addEventListener('change', function() {
+        const val = this.value;
+        if (val === '__new__') {
+            newCategoryInput.classList.remove('hidden');
+            newCategoryInput.required = true;
+            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option><option value="__new__">+ Add New Subcategory</option>';
+            subcategorySelect.disabled = false;
+        } else if (val) {
+            newCategoryInput.classList.add('hidden');
+            newCategoryInput.required = false;
+            fetch(`/api/get-subcategories/?category_name=${encodeURIComponent(val)}`)
+                .then(r => r.json())
+                .then(data => {
+                    subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
+                    data.forEach(s => {
+                        subcategorySelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+                    });
+                    subcategorySelect.innerHTML += '<option value="__new__">+ Add New Subcategory</option>';
+                    subcategorySelect.disabled = false;
+                });
+        } else {
+            newCategoryInput.classList.add('hidden');
+            subcategorySelect.disabled = true;
+        }
+    });
+
+    subcategorySelect.addEventListener('change', function() {
+        const val = this.value;
+        const cat = categorySelect.value;
+        if (val === '__new__') {
+            newSubcategoryInput.classList.remove('hidden');
+            newSubcategoryInput.required = true;
+            brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
+            brandSelect.disabled = false;
+        } else if (val) {
+            newSubcategoryInput.classList.add('hidden');
+            newSubcategoryInput.required = false;
+            fetch(`/api/get-brands/?category_name=${encodeURIComponent(cat)}&subcategory_name=${encodeURIComponent(val)}`)
+                .then(r => r.json())
+                .then(data => {
+                    brandSelect.innerHTML = '<option value="">Select Brand</option>';
+                    data.forEach(b => {
+                        brandSelect.innerHTML += `<option value="${b.name}">${b.name}</option>`;
+                    });
+                    brandSelect.innerHTML += '<option value="__new__">+ Add New Brand</option>';
+                    brandSelect.disabled = false;
+                });
+        } else {
+            newSubcategoryInput.classList.add('hidden');
+            brandSelect.disabled = true;
+        }
+    });
+
+    brandSelect.addEventListener('change', function() {
+        const val = this.value;
+        const cat = categorySelect.value;
+        const sub = subcategorySelect.value;
+        if (val === '__new__') {
+            newBrandInput.classList.remove('hidden');
+            newBrandInput.required = true;
+            productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
+            productSelect.disabled = false;
+        } else if (val) {
+            newBrandInput.classList.add('hidden');
+            newBrandInput.required = false;
+            fetch(`/api/get-products/?category_name=${encodeURIComponent(cat)}&subcategory_name=${encodeURIComponent(sub)}&brand_name=${encodeURIComponent(val)}`)
+                .then(r => r.json())
+                .then(data => {
+                    productSelect.innerHTML = '<option value="">Select Product</option>';
+                    data.forEach(p => {
+                        productSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+                    });
+                    productSelect.innerHTML += '<option value="__new__">+ Add New Product</option>';
+                    productSelect.disabled = false;
+                });
+        } else {
+            newBrandInput.classList.add('hidden');
+            productSelect.disabled = true;
+        }
+    });
+
+    productSelect.addEventListener('change', function() {
+        if (this.value === '__new__') {
+            newProductInput.classList.remove('hidden');
+            newProductInput.required = true;
+        } else {
+            newProductInput.classList.add('hidden');
+            newProductInput.required = false;
+        }
+    });
+
+    // Variants & Specs JS (Migrated & Cleaned)
+    const specsContainer = document.getElementById('specsContainer');
+    document.getElementById('addSpecRowBtn').addEventListener('click', () => {
+        const row = document.createElement('div');
+        row.className = 'grid grid-cols-1 sm:grid-cols-2 gap-3 spec-row';
+        row.innerHTML = `
+            <input type="text" name="spec_name" placeholder="Name" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">
+            <div class="flex gap-2">
+                <input type="text" name="spec_value" placeholder="Value" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">
+                <button type="button" class="removeSpecRowBtn h-11 w-11 flex items-center justify-center rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        `;
+        specsContainer.appendChild(row);
+    });
+
+    specsContainer.addEventListener('click', e => {
+        if (e.target.closest('.removeSpecRowBtn')) {
+            e.target.closest('.spec-row').remove();
+        }
+    });
+
+    let mainVariantCounter = 0;
+    let subVariantCounter = 0;
+
+    function addMainVariant() {
+        const idx = mainVariantCounter++;
+        const block = document.createElement('div');
+        block.className = 'main-variant-block rounded-2xl border border-slate-100 bg-slate-50/30 p-5 space-y-4';
+        block.dataset.mediaIndex = idx;
+        block.innerHTML = `
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4 flex-1">
+                    <div class="space-y-1.5 min-w-[140px]">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Color</label>
+                        <input type="color" name="v_color_picker" class="block w-full h-10 rounded-lg cursor-pointer border-none p-0" value="#4f46e5">
+                        <input type="text" name="variant_color" placeholder="Color Name" value="Indigo" class="main-variant-color-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-1">
+                    </div>
+                    <div class="flex-1 space-y-3">
+                         <div class="flex items-center justify-between">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Media Asset</p>
+                            <label class="cursor-pointer text-[10px] font-bold text-indigo-600 hover:text-indigo-700">
+                                <i class="fa-solid fa-upload mr-1"></i> Upload Gallery
+                                <input type="file" name="variant_gallery_${idx}" multiple class="hidden main-variant-gallery-input" accept="image/*">
+                            </label>
+                         </div>
+                         <div class="flex items-center gap-4">
+                            <label class="relative flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50 transition-all">
+                                <input type="file" name="variant_image_${idx}" class="hidden main-variant-image-input" accept="image/*">
+                                <div class="main-variant-image-preview flex h-full w-full items-center justify-center text-slate-400">
+                                    <i class="fa-solid fa-camera text-xl"></i>
+                                </div>
+                            </label>
+                            <div class="main-variant-gallery-preview flex flex-wrap gap-2"></div>
+                         </div>
+                    </div>
+                </div>
+                <button type="button" class="remove-main-variant self-start h-8 w-8 flex items-center justify-center rounded-full bg-white text-slate-400 hover:text-rose-500 hover:shadow-sm transition-all border border-slate-100">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-3 pt-4 border-t border-slate-100">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sizes & Inventory</h4>
+                    <button type="button" class="add-sub-variant text-[10px] font-bold text-indigo-600 hover:underline">
+                        + Add Size
+                    </button>
+                </div>
+                <div class="sub-variants-container space-y-2">
+                    <!-- Sub-variants (Size/Price/Stock) -->
+                </div>
+            </div>
+        `;
+        document.getElementById('variantRows').appendChild(block);
+        
+        // Bind media events
+        bindMediaPreview(block);
+        // Add initial size row
+        addSubVariant(block);
+        
+        // Sync color picker with text
+        const picker = block.querySelector('input[type="color"]');
+        const text = block.querySelector('.main-variant-color-input');
+        picker.addEventListener('input', () => {
+            block.querySelectorAll('.sub-variant-color-hidden').forEach(h => h.value = picker.value);
+            // Optionally update text based on hex? Usually users name their colors.
+        });
+        text.addEventListener('input', () => {
+             block.querySelectorAll('.sub-variant-color-hidden').forEach(h => h.value = text.value);
+        });
+    }
+
+    function addSubVariant(block) {
+        const mediaIndex = block.dataset.mediaIndex;
+        const colorInput = block.querySelector('.main-variant-color-input');
+        const container = block.querySelector('.sub-variants-container');
+        const row = document.createElement('div');
+        row.className = 'sub-variant-row flex flex-wrap sm:flex-nowrap items-center gap-3 p-3 rounded-xl bg-white border border-slate-100 shadow-sm transition-all';
+        row.innerHTML = `
+            <input type="hidden" name="variant_index" value="${subVariantCounter++}">
+            <input type="hidden" name="variant_media_index" value="${mediaIndex}">
+            <input type="hidden" name="variant_color" value="${colorInput.value}" class="sub-variant-color-hidden">
+            
+            <div class="flex-1 min-w-[100px]">
+                <input type="text" name="variant_size" placeholder="Size (e.g. XL)" class="w-full rounded-lg border-none bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20">
+            </div>
+            <div class="flex-1 min-w-[100px]">
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">₹</span>
+                    <input type="number" step="0.01" name="variant_price" placeholder="Price" class="w-full rounded-lg border-none bg-slate-50 pl-7 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20">
+                </div>
+            </div>
+            <div class="flex-1 min-w-[100px]">
+                <input type="number" name="variant_stock" placeholder="Stock" class="w-full rounded-lg border-none bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20">
+            </div>
+            <div class="flex-1 min-w-[120px]">
+                <input type="text" name="variant_sku" placeholder="SKU" class="w-full rounded-lg border-none bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20">
+            </div>
+            <button type="button" class="remove-sub-variant h-8 w-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 transition-colors shrink-0">
+                <i class="fa-solid fa-circle-minus"></i>
+            </button>
+        `;
+        container.appendChild(row);
+    }
+
+    function bindMediaPreview(block) {
+        const mainInput = block.querySelector('.main-variant-image-input');
+        const mainPreview = block.querySelector('.main-variant-image-preview');
+        const galleryInput = block.querySelector('.main-variant-gallery-input');
+        const galleryPreview = block.querySelector('.main-variant-gallery-preview');
+        const galleryDT = new DataTransfer();
+
+        mainInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    mainPreview.innerHTML = `<img src="${e.target.result}" class="h-full w-full object-cover rounded-lg">`;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        galleryInput.addEventListener('change', function() {
+             Array.from(this.files).forEach(f => {
+                galleryDT.items.add(f);
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const div = document.createElement('div');
+                    div.className = 'group relative h-16 w-16 shrink-0';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" class="h-full w-full rounded-lg object-cover border border-slate-100">
+                        <button type="button" class="remove-gallery absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-all">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    `;
+                    galleryPreview.appendChild(div);
+                };
+                reader.readAsDataURL(f);
+             });
+             galleryInput.files = galleryDT.files;
+        });
+
+        galleryPreview.addEventListener('click', e => {
+            if (e.target.closest('.remove-gallery')) {
+                const div = e.target.closest('div');
+                const idx = Array.from(galleryPreview.children).indexOf(div);
+                const nextDT = new DataTransfer();
+                Array.from(galleryDT.files).forEach((f, i) => {
+                    if (i !== idx) nextDT.items.add(f);
+                });
+                galleryDT.items.clear();
+                Array.from(nextDT.files).forEach(f => galleryDT.items.add(f));
+                galleryInput.files = galleryDT.files;
+                div.remove();
+            }
+        });
+    }
+
+    document.getElementById('variantRows').addEventListener('click', e => {
+        if (e.target.closest('.add-sub-variant')) addSubVariant(e.target.closest('.main-variant-block'));
+        if (e.target.closest('.remove-sub-variant')) {
+            const container = e.target.closest('.sub-variants-container');
+            if (container.children.length > 1) e.target.closest('.sub-variant-row').remove();
+        }
+        if (e.target.closest('.remove-main-variant')) {
+            if (document.querySelectorAll('.main-variant-block').length > 1) e.target.closest('.main-variant-block').remove();
+        }
+    });
+
+    document.getElementById('addMainVariantBtn').addEventListener('click', addMainVariant);
+    
+    // Initial variant
+    addMainVariant();
+
+</script>
+{% endblock admin_dash %}

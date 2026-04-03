@@ -795,7 +795,8 @@ def add_inventory(request):
         messages.success(request, "Inventory added successfully")
         return redirect('auth_inventory')
 
-    return redirect('auth_inventory')
+    categories = Category.objects.filter(status=True).order_by('name')
+    return render(request, 'add_inventory.html', {'categories': categories})
 
 @never_cache
 @login_required(login_url='auth_login')
@@ -987,7 +988,23 @@ def edit_inventory(request, id):
         messages.success(request, "Inventory updated successfully")
         return redirect('auth_inventory')
 
-    return redirect('auth_inventory')
+    categories = Category.objects.filter(status=True).order_by('name')
+    return render(request, 'edit_inventory.html', {
+        'inventory': inventory,
+        'categories': categories
+    })
+
+@never_cache
+@login_required(login_url='auth_login')
+def view_inventory(request, id):
+    inventory = get_object_or_404(ProductVariant, id=id)
+    # Get all variants of the same product for comparison if needed
+    product_variants = ProductVariant.objects.filter(product=inventory.product).select_related('color', 'size')
+    
+    return render(request, 'view_inventory.html', {
+        'inventory': inventory,
+        'product_variants': product_variants
+    })
 
 @never_cache
 @login_required(login_url='auth_login')

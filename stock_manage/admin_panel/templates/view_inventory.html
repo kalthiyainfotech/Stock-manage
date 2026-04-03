@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block admin_dash %}
+<main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
+    <!-- Breadcrumbs & Header -->
+    <div class="max-w-7xl mx-auto mb-8">
+        <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
+            <a href="{% url 'auth_inventory' %}" class="hover:text-indigo-600 transition-colors">Inventory</a>
+            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            <span class="text-slate-900">Product Details</span>
+        </nav>
+
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-5">
+                <div class="h-16 w-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                    {% if inventory.product.image %}
+                        <img src="{{ inventory.product.image.url }}" class="h-12 w-12 object-contain">
+                    {% else %}
+                        <i class="fa-solid fa-box text-slate-300 text-2xl"></i>
+                    {% endif %}
+                </div>
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tight">{{ inventory.product.name }}</h1>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                        <span class="text-sm font-bold text-indigo-600">{{ inventory.product.brand.name }}</span>
+                        <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+                        <span class="text-sm text-slate-500">{{ inventory.product.brand.subcetegory.category.name }} > {{ inventory.product.brand.subcetegory.name }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="{% url 'edit_inventory' inventory.id %}" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
+                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                    Edit Product
+                </a>
+                <button onclick="history.back()" class="h-12 w-12 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Section: Gallery and Pricing Grid -->
+    <div class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+        <!-- Left Section (Gallery) -->
+        <div class="lg:col-span-7">
+            <!-- Gallery Card -->
+            <div class="bg-[#1E293B] rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden p-4 sm:p-8">
+                <div class="aspect-[4/3] bg-slate-50 rounded-[2rem] overflow-hidden relative group border border-slate-100">
+                    <img id="mainDisplayImage" src="{% if inventory.image %}{{ inventory.image.url }}{% elif inventory.product.image %}{{ inventory.product.image.url }}{% else %}https://placehold.co/800x600?text=No+Image{% endif %}" 
+                        class="absolute inset-0 w-full h-full object-contain p-8 mix-blend-multiply transition-transform duration-700 group-hover:scale-105">
+                    
+                    <div class="absolute top-6 left-6">
+                        <span class="px-4 py-2 rounded-full bg-white/90 backdrop-blur shadow-sm text-[10px] font-black text-slate-900 uppercase tracking-widest border border-slate-200/50">
+                            {{ inventory.color.name }} / {{ inventory.size.name }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-4 mt-8 justify-center">
+                    <!-- Base Product Image -->
+                    {% if inventory.product.image %}
+                    <button onclick="updateMainImage('{{ inventory.product.image.url }}', this)" 
+                        class="h-20 w-20 rounded-2xl border-2 border-indigo-600 p-1 bg-white shadow-sm transition-all focus:outline-none thumb-btn">
+                        <img src="{{ inventory.product.image.url }}" class="h-full w-full object-contain rounded-xl">
+                    </button>
+                    {% endif %}
+
+                    <!-- Variant Images -->
+                    {% for img in inventory.gallery_images.all %}
+                    <button onclick="updateMainImage('{{ img.image.url }}', this)" 
+                        class="h-20 w-20 rounded-2xl border-2 border-transparent p-1 bg-white shadow-sm hover:border-slate-200 transition-all focus:outline-none thumb-btn">
+                        <img src="{{ img.image.url }}" class="h-full w-full object-contain rounded-xl">
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section: Pricing & Variants -->
+        <div class="lg:col-span-5 space-y-8">
+            <!-- Pricing Card -->
+            <div class="bg-[#1E293B] rounded-[2.5rem] p-8 text-white shadow-2xl shadow-indigo-200 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
+                <div class="absolute -left-10 -top-10 h-40 w-40 rounded-full bg-indigo-400/20 blur-3xl"></div>
+                
+                <div class="relative z-10">
+                    <p class="text-xs font-bold text-indigo-100 uppercase tracking-widest mb-1">Current Variant Price</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-5xl font-black tracking-tight">₹{{ inventory.price|floatformat:2|intcomma }}</span>
+                        <span class="text-sm font-semibold text-indigo-200">incl. taxes</span>
+                    </div>
+
+                    <div class="mt-8 grid grid-cols-2 gap-4">
+                        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+                            <p class="text-[10px] font-bold text-indigo-100 uppercase tracking-widest mb-1">Stock Level</p>
+                            <p class="text-2xl font-black">{{ inventory.stock }} <small class="text-xs font-medium ml-1">Units</small></p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+                            <p class="text-[10px] font-bold text-indigo-100 uppercase tracking-widest mb-1">Status</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span class="text-sm font-bold">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Stock Card -->
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 flex flex-col items-center justify-center text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <h3 class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Total Stock</h3>
+                
+                <div class="mb-4">
+                    <div class="text-5xl font-black text-slate-900 tracking-tighter">{{ inventory.product.total_stock }}</div>
+                    <div class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1">Units</div>
+                </div>
+
+                {% if inventory.product.total_stock > 0 %}
+                    <div class="inline-flex items-center px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+                        In Stock
+                    </div>
+                {% else %}
+                    <div class="inline-flex items-center px-4 py-2 rounded-full bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest border border-rose-100">
+                        Out of Stock
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Other Variants Card -->
+            <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm p-8 max-h-[460px] overflow-hidden flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Available Variants</h3>
+                    <span class="text-[10px] font-bold px-2 py-1 bg-slate-100 text-slate-500 rounded-lg">{{ product_variants|length }} Total</span>
+                </div>
+
+                <div class="space-y-3 overflow-y-auto pr-2 no-scrollbar">
+                    {% for variant in product_variants %}
+                    <a href="{% url 'view_inventory' variant.id %}" 
+                        class="group flex items-center justify-between p-4 rounded-2xl border {% if variant.id == inventory.id %}border-indigo-600 bg-indigo-50/30{% else %}border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50{% endif %} transition-all duration-300">
+                        <div class="flex items-center gap-4">
+                            <span class="h-5 w-5 rounded-full border border-white shadow-sm group-hover:scale-110 transition-transform" style="background-color: {{ variant.color.name }}"></span>
+                            <div>
+                                <p class="text-sm font-bold text-slate-900">{{ variant.color.name }} / {{ variant.size.name }}</p>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{{ variant.sku|default:"NO SKU" }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs font-black text-slate-900 group-hover:text-indigo-600 transition-colors">₹{{ variant.price|floatformat:2|intcomma }}</p>
+                            <p class="text-[10px] text-slate-500 font-medium">{{ variant.stock }} In Stock</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Section: Horizontal Description & Specs -->
+    <div class="max-w-[1400px] mx-auto">
+        <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-10 md:p-14 space-y-12">
+            <div class="space-y-4">
+                <h6 class="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Product Description</h6>
+                <p class="text-slate-600 leading-relaxed text-xl font-medium max-w-5xl">{{ inventory.product.description|default:"No description provided for this product." }}</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pt-10 border-t border-slate-50">
+                {% if inventory.specs.all %}
+                    {% for spec in inventory.specs.all %}
+                    <div class="bg-indigo-50/50 p-8 rounded-[2.5rem] border border-indigo-100/50 hover:bg-white hover:border-indigo-400 hover:shadow-2xl hover:shadow-indigo-100 transition-all duration-500 group">
+                        <span class="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 group-hover:text-indigo-600">{{ spec.name }}</span>
+                        <span class="text-base font-black text-slate-800 leading-relaxed">{{ spec.value }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-span-full py-16 text-center bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
+                        <p class="text-slate-400 font-medium italic">Technical specifications will appear here.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .thumb-btn.border-indigo-600 {
+        @apply ring-4 ring-indigo-500/10;
+    }
+</style>
+
+<script>
+    function updateMainImage(src, btn) {
+        document.getElementById('mainDisplayImage').src = src;
+        document.querySelectorAll('.thumb-btn').forEach(b => {
+             b.classList.remove('border-indigo-600');
+             b.classList.add('border-transparent');
+        });
+        btn.classList.add('border-indigo-600');
+        btn.classList.remove('border-transparent');
+    }
+</script>
+{% endblock admin_dash %}

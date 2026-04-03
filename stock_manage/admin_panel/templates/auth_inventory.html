@@ -1,418 +1,149 @@
 {% extends "base.html" %}
-{% block admin_dash %}
+{% load static %}
 
+{% block admin_dash %}
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 mb-8">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
-                Inventory
-            </h1>
-                
+            <h1 class="text-3xl font-black text-slate-900 tracking-tight leading-tight">Inventory Management</h1>
+            <p class="text-slate-500 text-sm font-medium mt-1">Manage your product stock, variants, and pricing.</p>
         </div>
 
-        <button id="openinventoryModal"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700
-                   px-4 py-2.5 text-sm font-semibold text-white shadow-sm
-                   hover:from-slate-800 hover:via-slate-700 hover:to-slate-700
-                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50
-                   transition">
-            <span
-                class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-xs border border-white/20">
-                <i class="fa-solid fa-plus"></i>
+        <a href="{% url 'add_inventory' %}"
+            class="inline-flex items-center justify-center gap-3 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-0.5 transition-all active:scale-95 group">
+            <span class="h-6 w-6 flex items-center justify-center rounded-lg bg-white/10 border border-white/20 group-hover:bg-white/20 transition-all">
+                <i class="fa-solid fa-plus text-[10px]"></i>
             </span>
-            <span>Add Inventory</span>
-        </button>
+            <span>Add New Item</span>
+        </a>
     </div>
 
-    <div id="inventoryModal"
-        class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
+    
 
-        <div
-            class="relative w-full max-w-2xl rounded-2xl bg-white shadow-xl shadow-slate-300/40 max-h-[90vh] overflow-y-auto">
-
-            <div
-                class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
-                <div>
-                    <h2 id="modalTitle" class="text-base sm:text-lg font-semibold text-slate-900">
-                        Add Inventory
-                    </h2>
-                    <p class="mt-0.5 text-xs sm:text-sm text-slate-500">
-                        Select or create product details and specify pricing, stock, and attributes.
-                    </p>
-                </div>
-                <button id="closeinventoryModal"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
-                    <span class="sr-only">Close</span>
-                    ✕
-                </button>
+    <!-- Main Table Card -->
+    <section class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden relative">
+        <!-- Table Toolbar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b border-slate-100 bg-slate-50/30">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-filter text-slate-400 text-xs"></i>
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Product Inventory</h3>
             </div>
 
-            <div id="oldDataSection" class="hidden mx-4 mt-4 sm:mx-6 p-4 rounded-xl border border-slate-200 bg-slate-50/50">
-                <div class="flex items-center gap-2 mb-3">
-                    <div class="h-6 w-1 bg-amber-500 rounded-full"></div>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Original Item Details</h3>
-                </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-y-3 gap-x-4 text-[11px]">
-                    <div class="space-y-0.5">
-                        <p class="text-slate-400 font-medium">Category</p>
-                        <p id="oldCategory" class="text-slate-900 font-semibold"></p>
-                    </div>
-                    <div class="space-y-0.5">
-                        <p class="text-slate-400 font-medium">Subcategory</p>
-                        <p id="oldSubcategory" class="text-slate-900 font-semibold"></p>
-                    </div>
-                    <div class="space-y-0.5">
-                        <p class="text-slate-400 font-medium">Brand</p>
-                        <p id="oldBrand" class="text-slate-900 font-semibold"></p>
-                    </div>
-                    <div class="space-y-0.5">
-                        <p class="text-slate-400 font-medium">Product</p>
-                        <p id="oldProduct" class="text-slate-900 font-semibold"></p>
-                    </div>
-                    <div class="space-y-0.5">
-                        <p class="text-slate-400 font-medium">Color</p>
-                        <div class="flex items-center gap-1.5">
-                            <span id="oldColorCircle" class="h-3 w-3 rounded-full border border-slate-300"></span>
-                            <span id="oldColorValue" class="text-slate-900 font-semibold uppercase"></span>
-                        </div>
-                    </div>
-                    <div class="space-y-0.5">
-                        <p class="text-slate-400 font-medium">Size</p>
-                        <p id="oldSize" class="text-slate-900 font-semibold"></p>
-                    </div>
-                    <div class="space-y-0.5">
-                        <p class="text-slate-400 font-medium">Price</p>
-                        <p id="oldPrice" class="text-slate-900 font-semibold"></p>
-                    </div>
-                    <div class="space-y-0.5">
-                        <p class="text-slate-400 font-medium">Stock</p>
-                        <p id="oldStock" class="text-slate-900 font-semibold"></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
-                <form id="inventoryForm" method="POST"
-                    action="{% url 'add_inventory' %}"
-                    enctype="multipart/form-data"
-                    class="space-y-6">
-
-                    {% csrf_token %}
-
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Product Hierarchy
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Category</label>
-                                <select id="categorySelect" name="category" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                                    <option value="">Select Category</option>
-                                    {% for category in categories %}
-                                    <option value="{{ category.name }}">{{ category.name }}</option>
-                                    {% endfor %}
-                                    <option value="__new__">+ Add New Category</option>
-                                </select>
-                                <input type="text" id="newCategoryInput" placeholder="Enter New Category"
-                                    class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Subcategory</label>
-                                <select id="subcategorySelect" name="subcategory" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
-                                    disabled>
-                                    <option value="">Select Subcategory</option>
-                                    <option value="__new__">+ Add New Subcategory</option>
-                                </select>
-                                <input type="text" id="newSubcategoryInput" placeholder="Enter New Subcategory"
-                                    class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Brand</label>
-                                <select id="brandSelect" name="brand" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
-                                    disabled>
-                                    <option value="">Select Brand</option>
-                                    <option value="__new__">+ Add New Brand</option>
-                                </select>
-                                <input type="text" id="newBrandInput" placeholder="Enter New Brand"
-                                    class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Product</label>
-                                <select id="productSelect" name="product" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
-                                    disabled>
-                                    <option value="">Select Product</option>
-                                    <option value="__new__">+ Add New Product</option>
-                                </select>
-                                <input type="text" id="newProductInput" placeholder="Enter New Product"
-                                    class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Description & Attributes
-                        </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                            <div class="space-y-1.5 sm:col-span-2">
-                                <label class="text-xs font-medium text-slate-700">Description</label>
-                                <textarea name="description" placeholder="Short description of this product or variant"
-                                    rows="3"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 resize-none"></textarea>
-                            </div>
-
-                            <div class="sm:col-span-2 space-y-3 mt-2">
-                                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                                    <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                                        Variants (Color, Size, Price, Stock)
-                                    </h3>
-                                    <button type="button" id="addMainVariantBtn"
-                                        class="text-xs px-3 py-1.5 rounded-md border border-slate-300 bg-white hover:bg-slate-50 font-medium text-slate-700 flex items-center gap-1 transition">
-                                        <i class="fa-solid fa-plus"></i> Add Main Variant
-                                    </button>
-                                </div>
-                                <div id="variantRows" class="space-y-3">
-                                    <!-- Variant rows will be appended here via JS -->
-                                </div>
-                            </div>
-
-                            <div class="sm:col-span-2 rounded-lg border border-slate-200 p-3 bg-slate-50/60">
-                                <div class="flex items-center justify-between gap-3 mb-2">
-                                    <p class="text-sm font-medium text-slate-800">Specifications (optional)</p>
-                                    <button type="button" id="addSpecRowBtn"
-                                        class="text-xs px-3 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50">
-                                        + Add Spec
-                                    </button>
-                                </div>
-
-                                <div id="specsContainer" class="space-y-2">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 spec-row">
-                                        <input type="text" name="spec_name" placeholder="Spec name (e.g., Storage, RAM)"
-                                            class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm">
-                                        <div class="flex gap-2">
-                                            <input type="text" name="spec_value" placeholder="Spec value (e.g., 128GB, 8GB)"
-                                                class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm">
-                                            <button type="button"
-                                                class="removeSpecRowBtn px-3 rounded border border-slate-300 bg-white hover:bg-slate-50">
-                                                ✕
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <p class="mt-2 text-xs text-slate-500">
-                                    Add only what you need (Storage/RAM/Processor/Weight/Material/etc.). Leave empty if not required.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                    
-
-
-                    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-2 border-t border-slate-100">
-                        <button type="button" id="closeinventoryModalBottom"
-                            class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">
-                            Cancel
-                        </button>
-
-                        <button type="submit"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
-                            <i class="fa-solid fa-floppy-disk text-xs"></i>
-                            <span>Save Inventory</span>
-                        </button>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <section
-        class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
-
-        <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="space-y-0.5">
-                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
-                    Overview
-                </p>
-                <p class="text-sm text-slate-500">
-                    Showing
-                    <span class="font-semibold text-slate-900">
-                        {{ inventorys.start_index }}–{{ inventorys.end_index }}
-                    </span>
-                    of
-                    <span class="font-semibold text-slate-900">
-                        {{ inventorys.paginator.count }}
-                    </span>
-                    items.
-                </p>
-            </div>
-
-            <div class="w-full sm:w-auto">
-                <label class="relative block">
-                    <span class="sr-only">Search inventory</span>
-                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </span>
-                    <input
-                        id="inventorySearch"
-                        type="text"
-                        placeholder="Search by product, brand, or category…"
-                        class="w-full sm:w-64 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
-                               text-slate-700 placeholder:text-slate-400 shadow-sm
-                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
-                </label>
+            <div class="relative w-full sm:w-72">
+                <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input
+                    id="inventorySearch"
+                    type="text"
+                    placeholder="Search products, brands..."
+                    class="w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm
+                           text-slate-700 placeholder:text-slate-400 shadow-sm
+                           focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
             </div>
         </div>
 
-        <div class="overflow-x-auto border-t border-slate-100">
-            <table class="w-full min-w-[1000px] text-left text-sm text-slate-700">
-                <thead
-                    class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
+        <!-- Table Container -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50/50 border-b border-slate-100">
                     <tr>
-                        <th class="px-2 sm:px-4 py-3 font-medium text-center">ID</th>
-                        <th class="px-2 sm:px-4 py-3 font-medium">Category</th>
-                        <th class="px-2 sm:px-4 py-3 font-medium">Color</th>
-                        <th class="px-2 sm:px-4 py-3 font-medium">Size</th>
-                        <th class="px-2 sm:px-4 py-3 font-medium text-center">Stock</th>
-                        <th class="px-2 sm:px-4 py-3 font-medium text-center">Status</th>
-                        <th class="px-2 sm:px-4 py-3 font-medium text-center">Action</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">ID</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Main Product</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Variants Info</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-center">Total Stock</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-center">Action</th>
                     </tr>
                 </thead>
 
-                <tbody id="inventoryTableBody" class="divide-y divide-slate-100 bg-white">
+                <tbody id="inventoryTableBody" class="divide-y divide-slate-100">
                     {% for group in inventory_groups %}
                     {% with first=group.variants.0 %}
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
-                            {{ forloop.counter }}
+                    <tr class="group hover:bg-slate-50/50 transition-all duration-300">
+                        <td class="px-6 py-6 align-top">
+                            <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500">
+                                {{ forloop.counter }}
+                            </span>
                         </td>
-                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-700">
-                            {{ first.product.brand.subcetegory.category.name }}
-                        </td>
-                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
-                            <div class="flex flex-wrap gap-1.5 max-w-[180px]">
-                                {% for v in group.unique_color_variants %}
-                                <button
-                                    type="button"
-                                    class="inline-block w-4 h-4 rounded-full border border-slate-300 hover:ring-2 hover:ring-slate-300 edit-variant-color-btn shrink-0"
-                                    title="Edit Variant: {{ v.color.name }}"
-                                    style="background-color: {{ v.color.name }}"
-                                    data-edit-url="{% url 'edit_inventory' v.id %}"
-                                    data-category="{{ v.product.brand.subcetegory.category.name|escapejs }}"
-                                    data-subcategory="{{ v.product.brand.subcetegory.name|escapejs }}"
-                                    data-brand="{{ v.product.brand.name|escapejs }}"
-                                    data-product="{{ v.product.name|escapejs }}"
-                                    data-description="{{ v.product.description|default_if_none:''|escapejs }}"
-                                    data-color="{{ v.color.name|escapejs }}"
-                                    data-size="{{ v.size.name|escapejs }}"
-                                    data-price="{{ v.price }}"
-                                    data-stock="{{ v.stock }}"
-                                    data-sku="{{ v.sku|escapejs }}"
-                                    data-image="{% if first.product.image %}{{ first.product.image.url }}{% endif %}"
-                                    data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                    data-variant-image="{% if v.image %}{{ v.image.url }}{% endif %}"
-                                    data-variant-gallery="{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                    data-specs='[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
-                                ></button>
-                                {% endfor %}
+                        <td class="px-6 py-6 align-top">
+                            <div class="flex items-center gap-4">
+                                <div class="h-12 w-12 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200 overflow-hidden shrink-0 group-hover:scale-110 transition-transform shadow-sm">
+                                    {% if first.product.image %}
+                                        <img src="{{ first.product.image.url }}" class="h-full w-full object-contain p-1">
+                                    {% else %}
+                                        <i class="fa-solid fa-box text-slate-300"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-900 mb-0.5 line-clamp-1">{{ first.product.name }}</h4>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-tighter">{{ first.product.brand.name }}</span>
+                                        <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{{ first.product.brand.subcetegory.category.name }}</span>
+                                    </div>
+                                </div>
                             </div>
                         </td>
-                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
-                            <div class="flex flex-wrap gap-1.5 max-w-[200px]">
-                                {% for v in group.unique_size_variants|slice:":2" %}
-                                <button
-                                    type="button"
-                                    class="px-2 py-0.5 rounded border text-[11px] hover:bg-slate-100 edit-variant-size-btn shrink-0"
-                                    title="Edit Variant: {{ v.size.name }}"
-                                    data-edit-url="{% url 'edit_inventory' v.id %}"
-                                    data-category="{{ v.product.brand.subcetegory.category.name|escapejs }}"
-                                    data-subcategory="{{ v.product.brand.subcetegory.name|escapejs }}"
-                                    data-brand="{{ v.product.brand.name|escapejs }}"
-                                    data-product="{{ v.product.name|escapejs }}"
-                                    data-description="{{ v.product.description|default_if_none:''|escapejs }}"
-                                    data-color="{{ v.color.name|escapejs }}"
-                                    data-size="{{ v.size.name|escapejs }}"
-                                    data-price="{{ v.price }}"
-                                    data-stock="{{ v.stock }}"
-                                    data-sku="{{ v.sku|escapejs }}"
-                                    data-image="{% if first.product.image %}{{ first.product.image.url }}{% endif %}"
-                                    data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                    data-variant-image="{% if v.image %}{{ v.image.url }}{% endif %}"
-                                    data-variant-gallery="{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                    data-specs='[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
-                                >
-                                    {{ v.size.name }}
-                                </button>
-                                {% endfor %}
-                                {% if group.unique_size_variants|length > 2 %}
-                                <span class="px-2 py-0.5 rounded border text-[11px] bg-slate-50 text-slate-500 shrink-0">
-                                    +{{ group.unique_size_variants|length|add:"-2" }} more
-                                </span>
+                        <td class="px-6 py-6 align-top">
+                            <div class="space-y-3">
+                                <!-- Colors -->
+                                <div class="flex flex-wrap gap-1.5">
+                                    {% for v in group.unique_color_variants %}
+                                    <div class="group/c relative">
+                                        <div class="h-5 w-5 rounded-full border border-white shadow-sm ring-1 ring-slate-200 transition-all group-hover/c:scale-125"
+                                             style="background-color: {{ v.color.name }}"
+                                             title="{{ v.color.name }}"></div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <!-- Sizes Overview -->
+                                <div class="flex flex-wrap gap-1">
+                                    {% for v in group.unique_size_variants|slice:":3" %}
+                                    <span class="px-2 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-600">
+                                        {{ v.size.name }}
+                                    </span>
+                                    {% endfor %}
+                                    {% if group.unique_size_variants|length > 3 %}
+                                    <span class="px-2 py-0.5 rounded-lg bg-white border border-slate-100 text-[10px] font-bold text-slate-400">
+                                        +{{ group.unique_size_variants|length|add:"-3" }} more
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-6 align-top text-center">
+                            <div class="inline-flex flex-col items-center">
+                                <span class="text-lg font-black text-slate-900 leading-none">{{ first.product.total_stock }}</span>
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Units</span>
+                                {% if first.product.total_stock < 10 %}
+                                    <span class="mt-2 px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 text-[8px] font-black uppercase tracking-widest border border-rose-100">Low Stock</span>
+                                {% else %}
+                                    <span class="mt-2 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[8px] font-black uppercase tracking-widest border border-emerald-100">In Stock</span>
                                 {% endif %}
                             </div>
                         </td>
-                        <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-700 text-center">
-                            {{ first.stock }}
-                        </td>
-                        <td class="px-2 sm:px-4 py-3 align-middle text-center">
-                            <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
-                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                Active
-                            </span>
-                        </td>
-                        <td class="px-2 sm:px-4 py-3 align-middle text-center">
+                        <td class="px-6 py-6 align-top text-center">
                             <div class="inline-flex items-center justify-center gap-2">
-                                <button
-                                    type="button"
-                                    onclick="openViewModal(this)"
-                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition shrink-0"
-                                    title="View"
-                                    data-product-name="{{ first.product.name|escapejs }}"
-                                    data-brand="{{ first.product.brand.name|escapejs }}"
-                                    data-category="{{ first.product.brand.subcetegory.category.name|escapejs }}"
-                                    data-subcategory="{{ first.product.brand.subcetegory.name|escapejs }}"
-                                    data-description="{{ first.product.description|default_if_none:''|escapejs }}"
-                                    data-variants='[{% for v in group.variants %}{"id":"{{ v.id }}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","sku":"{{ v.sku|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"imageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","galleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
-                                >
-                                    <i class="fa-solid fa-eye text-xs"></i>
-                                    <span class="sr-only">View</span>
-                                </button>
-                                <div class="relative inline-block shrink-0">
-                                    <button
-                                        type="button"
-                                        class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition"
-                                        title="Edit"
-                                        data-category="{{ first.product.brand.subcetegory.category.name|escapejs }}"
-                                        data-subcategory="{{ first.product.brand.subcetegory.name|escapejs }}"
-                                        data-brand="{{ first.product.brand.name|escapejs }}"
-                                        data-product="{{ first.product.name|escapejs }}"
-                                        data-description="{{ first.product.description|default_if_none:''|escapejs }}"
-                                        data-image="{% if first.product.image %}{{ first.product.image.url }}{% endif %}"
-                                        data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                        data-variants='[{% for v in group.variants %}{"editUrl":"{% url "edit_inventory" v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","sku":"{{ v.sku|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"variantImageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","variantGalleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
-                                    >
-                                        <i class="fa-solid fa-pen-to-square text-xs"></i>
-                                        <span class="sr-only">Edit</span>
-                                    </button>
-                                </div>
-                                <button
-                                    type="button"
-                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition shrink-0"
-                                    title="Delete"
-                                    data-product-id="{{ first.product.id }}"
-                                    data-delete-variants='[{% for v in group.variants %}{"deleteUrl":"{% url 'delete_inventory' v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }}}{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                                <a href="{% url 'view_inventory' first.id %}"
+                                   class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition shadow-sm"
+                                   title="View Details">
+                                   <i class="fa-solid fa-eye text-xs"></i>
+                                   <span class="sr-only">View</span>
+                                </a>
+                                
+                                <a href="{% url 'edit_inventory' first.id %}"
+                                   class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition shadow-sm"
+                                   title="Edit Product">
+                                   <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                   <span class="sr-only">Edit</span>
+                                </a>
+
+                                <button type="button"
+                                    onclick="openDeleteModal('{% url 'delete_inventory' first.id %}')"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition shadow-sm"
+                                    title="Delete Item">
                                     <i class="fa-solid fa-trash text-xs"></i>
                                     <span class="sr-only">Delete</span>
                                 </button>
@@ -425,1653 +156,112 @@
             </table>
         </div>
 
+        <!-- Empty State (Hidden by JS if no results) -->
+        <div id="noResults" class="hidden py-20 bg-white text-center">
+             <div class="h-20 w-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                <i class="fa-solid fa-magnifying-glass text-slate-300 text-2xl"></i>
+             </div>
+             <h3 class="text-lg font-bold text-slate-900">No matching items found</h3>
+             <p class="text-slate-500 text-sm">Try adjusting your search query for better results.</p>
+        </div>
+
+        <!-- Footer / Pagination -->
+        <div class="p-6 border-t border-slate-50 bg-slate-50/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Showing <span class="text-slate-900">{{ inventorys.start_index }} - {{ inventorys.end_index }}</span> of {{ inventorys.paginator.count }} items
+            </p>
+
+            {% if inventorys.paginator.num_pages > 1 %}
+            <nav class="flex items-center gap-1.5">
+                {% if inventorys.has_previous %}
+                    <a href="?page={{ inventorys.previous_page_number }}" class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                        <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                    </a>
+                {% endif %}
+
+                {% for num in inventorys.paginator.page_range %}
+                    {% if num == inventorys.number %}
+                        <span class="h-9 w-9 flex items-center justify-center rounded-xl bg-slate-900 text-white text-xs font-black shadow-lg shadow-slate-200">{{ num }}</span>
+                    {% elif num > inventorys.number|add:'-3' and num < inventorys.number|add:'3' %}
+                        <a href="?page={{ num }}" class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if inventorys.has_next %}
+                    <a href="?page={{ inventorys.next_page_number }}" class="h-9 w-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </a>
+                {% endif %}
+            </nav>
+            {% endif %}
+        </div>
     </section>
 
 </main>
 
-<div id="deleteModal"
-     class="fixed inset-0 z-50 hidden bg-black/50">
+<!-- Delete Confirmation Drawer/Modal -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl overflow-hidden p-8 animate-in fade-in zoom-in duration-300">
+        <div class="h-16 w-16 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-6 text-2xl border border-rose-100">
+            <i class="fa-solid fa-trash-can"></i>
+        </div>
+        <h2 class="text-xl font-black text-slate-900 text-center mb-2">Are you sure?</h2>
+        <p class="text-center text-slate-500 text-sm mb-8 px-4 leading-relaxed">This action cannot be undone. This item will be permanently removed from inventory.</p>
 
-    <div class="flex h-full w-full items-center justify-center px-4">
-        <div class="w-full max-w-sm bg-white rounded-lg shadow-lg p-6">
-
-            <h2 class="text-lg font-semibold text-gray-800 mb-3">
-                Confirm Delete
-            </h2>
-
-            <p class="text-sm text-gray-600 mb-6">
-                Are you sure you want to delete this inventory?
-            </p>
-
-            <div class="flex justify-end gap-3">
-                <button
-                    type="button"
-                    onclick="closeDeleteModal()"
-                    class="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300">
-                    Cancel
-                </button>
-
-                <a id="confirmDeleteBtn"
-                   class="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700">
-                    Delete
-                </a>
-            </div>
-
+        <div class="flex gap-3">
+            <button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
+            <a id="confirmDeleteBtn" href="#" class="flex-1 py-3 rounded-xl bg-rose-600 text-white text-xs font-black uppercase tracking-widest text-center shadow-lg shadow-rose-200 hover:bg-rose-700 transition-all">Delete</a>
         </div>
     </div>
-</div>
-<!-- Hierarchical View Modal: Colors & Sizes -->
-<div id="viewModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[60] px-4 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl relative">
-        <div class="flex items-center justify-between p-4 border-b border-slate-100 bg-slate-50/50">
-            <div>
-                <h2 id="viewProductName" class="text-xl font-bold text-slate-900 leading-tight"></h2>
-                <p id="viewProductMeta" class="text-xs text-slate-500 font-medium"></p>
-            </div>
-            <button onclick="closeViewModal()" class="h-8 w-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <div class="p-6 max-h-[70vh] overflow-y-auto">
-            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-l-4 border-emerald-500 pl-3">Variants by Color</h3>
-            <div id="viewVariantsList" class="space-y-6">
-                <!-- Color groups injected here -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Level 3: Individual Variant Detail Modal -->
-<div id="variantDetailModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[70] px-3 sm:px-6 backdrop-blur-sm lg:p-8 py-6">
-    <div class="bg-white w-full max-w-5xl rounded-[2rem] shadow-2xl relative animate-in fade-in zoom-in duration-300 flex flex-col md:flex-row max-h-[90vh] md:max-h-[85vh] md:h-[85vh] overflow-y-auto md:overflow-hidden">
-        
-        <!-- Premium sticky close button -->
-        <button onclick="closeVariantDetailModal()" class="absolute top-4 right-4 md:top-6 md:right-6 z-[100] h-10 w-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 shadow-sm hover:bg-slate-200 hover:text-slate-900 transition">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <!-- Left: Image Section -->
-        <div class="bg-slate-50/70 p-6 md:p-8 lg:p-12 flex flex-col gap-6 w-full md:w-[45%] lg:w-[45%] shrink-0 h-auto md:h-full overflow-visible md:overflow-y-auto border-b md:border-b-0 md:border-r border-slate-100/60 custom-scrollbar lg:justify-center relative">
-            <div class="aspect-square rounded-[1.5rem] overflow-hidden bg-white shadow-sm ring-1 ring-slate-200 relative">
-                <img id="detailMainImage" src="" class="absolute inset-0 w-full h-full object-contain p-6 mix-blend-multiply">
-            </div>
-            <div id="detailGallery" class="flex flex-wrap gap-3 pb-2">
-                <!-- Gallery thumbnails -->
-            </div>
-        </div>
-
-        <!-- Right: Info Section -->
-        <div class="p-6 md:p-8 lg:p-12 space-y-8 w-full md:w-[55%] lg:w-[55%] h-auto md:h-full overflow-visible md:overflow-y-auto custom-scrollbar relative">
-            <div class="space-y-2 pr-12">
-                <div id="detailBadge" class="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest bg-emerald-100/80 text-emerald-700 ring-1 ring-emerald-200/50">Active</div>
-                <h2 id="detailTitle" class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-tight pt-2"></h2>
-                <p id="detailSKU" class="text-xs font-mono text-slate-400 uppercase tracking-widest pt-1"></p>
-            </div>
-            
-            <div class="flex flex-wrap sm:flex-nowrap gap-x-10 gap-y-6 py-5 border-y border-slate-100">
-                <div class="space-y-1.5 w-full sm:w-auto sm:flex-1 min-w-[120px]">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Price</p>
-                    <p id="detailPrice" class="text-3xl font-black text-emerald-600 break-all sm:break-normal"></p>
-                </div>
-                <div class="hidden sm:block w-px bg-slate-100"></div>
-                <div class="space-y-1.5 w-full sm:w-auto sm:flex-1 min-w-[120px]">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stock Level</p>
-                    <p id="detailStock" class="text-3xl font-black text-slate-900 break-all sm:break-normal"></p>
-                </div>
-            </div>
-
-            <div class="space-y-8">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category</p>
-                        <p id="detailCategory" class="text-base font-semibold text-slate-800 break-words"></p>
-                    </div>
-                    <div class="space-y-2">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Brand</p>
-                        <p id="detailBrand" class="text-base font-semibold text-slate-800 break-words"></p>
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest relative">
-                        <span>Description</span>
-                    </p>
-                    <p id="detailDesc" class="text-sm text-slate-600 leading-relaxed max-w-prose"></p>
-                </div>
-
-                <div id="detailSpecsContainer" class="space-y-4 pt-6 mt-6 border-t border-slate-100 hidden">
-                    <p class="text-[10px] items-center flex gap-2 font-bold text-slate-400 uppercase tracking-[0.2em]">
-                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> 
-                        Specifications
-                    </p>
-                    <div id="detailSpecs" class="flex flex-col gap-3"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-{% if inventorys.paginator.num_pages > 1 %}
-<div class="flex justify-end mb-4 mr-4">
-    <nav class="flex items-center gap-1 p-2 rounded">
-
-        {% if inventorys.has_previous %}
-            <a href="?page={{ inventorys.previous_page_number }}"
-               class="h-9 w-9 flex items-center justify-center
-                      rounded border border-gray-300
-                      hover:bg-gray-100">
-                ‹
-            </a>
-        {% else %}
-            <span class="h-9 w-9 flex items-center justify-center
-                         rounded border border-gray-200 text-gray-400">
-                ‹
-            </span>
-        {% endif %}
-
-        {% for num in inventorys.paginator.page_range %}
-            {% if num == inventorys.number %}
-                <span class="h-9 w-9 flex items-center justify-center
-                             rounded bg-slate-900 text-white font-medium">
-                    {{ num }}
-                </span>
-            {% elif num > inventorys.number|add:'-2' and num < inventorys.number|add:'2' %}
-                <a href="?page={{ num }}"
-                   class="h-9 w-9 flex items-center justify-center
-                          rounded border border-gray-300
-                          hover:bg-gray-100">
-                    {{ num }}
-                </a>
-            {% elif num == 1 or num == inventorys.paginator.num_pages %}
-                <a href="?page={{ num }}"
-                   class="h-9 w-9 flex items-center justify-center
-                          rounded border border-gray-300
-                          hover:bg-gray-100">
-                    {{ num }}
-                </a>
-            {% elif num == inventorys.number|add:'-3' or num == inventorys.number|add:'3' %}
-                <span class="px-2">…</span>
-            {% endif %}
-        {% endfor %}
-
-        {% if inventorys.has_next %}
-            <a href="?page={{ inventorys.next_page_number }}"
-               class="h-9 w-9 flex items-center justify-center
-                      rounded border border-gray-300
-                      hover:bg-gray-100">
-                ›
-            </a>
-        {% else %}
-            <span class="h-9 w-9 flex items-center justify-center
-                         rounded border border-gray-200 text-gray-400">
-                ›
-            </span>
-        {% endif %}
-
-    </nav>
-</div>
-{% endif %}
-
-
-
-
-
-
-
-<div id="variantPickerModal"
-     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">
-    <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl shadow-slate-300/40">
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
-            <h2 class="text-base sm:text-lg font-semibold text-slate-900">Choose Variant</h2>
-            <button id="closeVariantPicker"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">✕</button>
-        </div>
-        <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4 space-y-3">
-            <input id="variantSearch"
-                   type="text"
-                   placeholder="Search by color or size"
-                   class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
-            <div id="variantPickerList" class="max-h-72 overflow-y-auto divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white"></div>
-        </div>
-    </div>
-    <div class="sr-only" id="variantPickerBackdrop"></div>
-</div>
-
-<div id="variantDeletePickerModal"
-     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">
-    <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl shadow-slate-300/40">
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
-            <div class="flex items-center gap-3">
-                <h2 class="text-base sm:text-lg font-semibold text-slate-900">Delete Variant</h2>
-                <button id="deleteAllVariantsBtn"
-                        title="Delete All Variants"
-                        class="inline-flex h-7 w-7 items-center justify-center rounded-full text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition border border-rose-100">
-                    <i class="fa-solid fa-trash-can text-xs"></i>
-                </button>
-            </div>
-            <button id="closeVariantDeletePicker"
-                    class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">✕</button>
-        </div>
-        <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4 space-y-3">
-            <input id="variantDeleteSearch"
-                   type="text"
-                   placeholder="Search by color or size"
-                   class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500/40">
-            <div id="variantDeletePickerList" class="max-h-72 overflow-y-auto divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white"></div>
-        </div>
-    </div>
-    <div class="sr-only" id="variantDeletePickerBackdrop"></div>
 </div>
 
 <script>
-
-
-const inventoryModal = document.getElementById('inventoryModal');
-const deleteModal = document.getElementById('deleteModal');
-const inventoryForm = document.getElementById('inventoryForm');
-const modalTitle = document.getElementById('modalTitle');
-const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-const closeInventoryModalTop = document.getElementById('closeinventoryModal');
-const closeInventoryModalBottom = document.getElementById('closeinventoryModalBottom');
-
-const categorySelect = document.getElementById('categorySelect');
-const subcategorySelect = document.getElementById('subcategorySelect');
-const brandSelect = document.getElementById('brandSelect');
-const productSelect = document.getElementById('productSelect');
-
-const newCategoryInput = document.getElementById('newCategoryInput');
-const newSubcategoryInput = document.getElementById('newSubcategoryInput');
-const newBrandInput = document.getElementById('newBrandInput');
-const newProductInput = document.getElementById('newProductInput');
-
-const specsContainer = document.getElementById('specsContainer');
-const addSpecRowBtn = document.getElementById('addSpecRowBtn');
-const colorPicker = document.getElementById('colorPicker');
-const variantRows = document.getElementById('variantRows');
-const addMainVariantBtn = document.getElementById('addMainVariantBtn');
-
-function addSpecRow(name = '', value = '') {
-    const row = document.createElement('div');
-    row.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2 spec-row';
-    row.innerHTML = `
-        <input type="text" name="spec_name" placeholder="Spec name (e.g., Storage, RAM)"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" value="${(name || '').replace(/"/g, '&quot;')}">
-        <div class="flex gap-2">
-            <input type="text" name="spec_value" placeholder="Spec value (e.g., 128GB, 8GB)"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" value="${(value || '').replace(/"/g, '&quot;')}">
-            <button type="button" class="removeSpecRowBtn px-3 rounded border border-gray-300 hover:bg-gray-50">✕</button>
-        </div>
-    `;
-    specsContainer.appendChild(row);
-}
-
-function resetSpecs() {
-    specsContainer.innerHTML = '';
-    addSpecRow();
-}
-
-specsContainer.addEventListener('click', function(e) {
-    const btn = e.target.closest('.removeSpecRowBtn');
-    if (!btn) return;
-    const row = btn.closest('.spec-row');
-    if (!row) return;
-    if (specsContainer.querySelectorAll('.spec-row').length <= 1) {
-        row.querySelector('input[name="spec_name"]').value = '';
-        row.querySelector('input[name="spec_value"]').value = '';
-        return;
-    }
-    row.remove();
-});
-
-addSpecRowBtn.addEventListener('click', function() {
-    addSpecRow();
-});
-
-let mainVariantCounter = 0;
-let subVariantCounter = 0;
-
-function bindMediaPreview(block) {
-    const mainInput = block.querySelector('.main-variant-image-input');
-    const mainPreview = block.querySelector('.main-variant-image-preview');
-    const galleryInput = block.querySelector('.main-variant-gallery-input');
-    const galleryPreview = block.querySelector('.main-variant-gallery-preview');
-    const galleryDT = new DataTransfer();
-
-    mainInput.addEventListener('change', function () {
-        if (!this.files || !this.files[0]) return;
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            mainPreview.innerHTML = `<img src="${e.target.result}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">`;
-        };
-        reader.readAsDataURL(this.files[0]);
-    });
-
-    function renderGallery() {
-        galleryPreview.innerHTML = '';
-        Array.from(galleryDT.files).forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const div = document.createElement('div');
-                div.className = 'relative inline-block';
-                div.innerHTML = `
-                    <img src="${e.target.result}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md">
-                    <button type="button" data-remove-idx="${index}" class="remove-gallery-item absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600">
-                        <i class="fa-solid fa-xmark text-[10px]"></i>
-                    </button>
-                `;
-                galleryPreview.appendChild(div);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    galleryInput.addEventListener('change', function () {
-        if (!this.files) return;
-        Array.from(this.files).forEach(f => galleryDT.items.add(f));
-        galleryInput.files = galleryDT.files;
-        renderGallery();
-    });
-
-    block.addEventListener('click', function (e) {
-        const removeBtn = e.target.closest('.remove-gallery-item');
-        if (!removeBtn) return;
-        const removeIdx = parseInt(removeBtn.dataset.removeIdx);
-        const next = new DataTransfer();
-        Array.from(galleryDT.files).forEach((file, i) => {
-            if (i !== removeIdx) next.items.add(file);
-        });
-        galleryDT.items.clear();
-        Array.from(next.files).forEach(f => galleryDT.items.add(f));
-        galleryInput.files = galleryDT.files;
-        renderGallery();
-    });
-}
-
-function addSubVariantRow(block, initial = {}) {
-    const colorInput = block.querySelector('.main-variant-color-input');
-    const mediaIndex = block.dataset.mediaIndex;
-    const row = document.createElement('div');
-    row.className = 'sub-variant-row grid grid-cols-1 sm:grid-cols-5 gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/40';
-    row.innerHTML = `
-        <input type="hidden" name="variant_index" value="${subVariantCounter++}">
-        <input type="hidden" name="variant_media_index" value="${mediaIndex}">
-        <input type="hidden" name="variant_color" value="${colorInput.value}" class="sub-variant-color-hidden">
-        <input type="text" name="variant_size" placeholder="Size (M/L/XL...)" value="${(initial.size || '').replace(/"/g, '&quot;')}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-        <input type="number" step="0.01" name="variant_price" placeholder="Price" value="${initial.price || ''}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-        <input type="number" name="variant_stock" placeholder="Stock" value="${initial.stock || ''}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-        <input type="text" name="variant_sku" placeholder="SKU (optional)" value="${(initial.sku || '').replace(/"/g, '&quot;')}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-        <button type="button" class="removeSubVariantBtn rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-600 hover:text-white">Remove</button>
-    `;
-    block.querySelector('.sub-variant-rows').appendChild(row);
-}
-
-function syncSubColors(block) {
-    const colorVal = block.querySelector('.main-variant-color-input').value || '#000000';
-    block.querySelectorAll('.sub-variant-color-hidden').forEach(input => {
-        input.value = colorVal;
-    });
-}
-
-function addMainVariantBlock(initial = {}) {
-    const mediaIndex = mainVariantCounter++;
-    const colorValue = /^#([A-Fa-f0-9]{6})$/.test(initial.color || '') ? initial.color : '#000000';
-    const block = document.createElement('div');
-    block.className = 'main-variant-block p-4 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4';
-    block.dataset.mediaIndex = mediaIndex;
-    block.innerHTML = `
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-                <h4 class="text-sm font-bold text-slate-900">Main Variant (Color)</h4>
-                <p class="text-xs text-slate-500">Add sub variants like size, price, stock and SKU</p>
-            </div>
-            <button type="button" class="removeMainVariantBtn rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-600 hover:text-white">Remove Color</button>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div class="space-y-2">
-                <label class="text-xs font-semibold text-slate-600">Main Variant Type</label>
-                <input type="text" value="Color" readonly class="w-full rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm text-slate-700">
-            </div>
-            <div class="space-y-2">
-                <label class="text-xs font-semibold text-slate-600">Color Value</label>
-                <div class="flex items-center gap-2">
-                    <div class="relative group">
-                        <input type="color" class="main-variant-color-picker h-10 w-20 rounded cursor-pointer border-2 border-slate-200 hover:border-slate-400 transition-all" value="${colorValue}">
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 leading-none mb-1 tracking-wider">Hex Code</span>
-                        <span class="text-sm font-mono font-bold text-slate-700 color-code-display">${colorValue}</span>
-                    </div>
-                    <input type="hidden" class="main-variant-color-input" value="${colorValue}">
-                </div>
-            </div>
-            <div class="space-y-2">
-                <label class="text-xs font-semibold text-slate-600">Main Image</label>
-                <input type="file" name="variant_image_${mediaIndex}" accept="image/*" class="main-variant-image-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs">
-                <div class="main-variant-image-preview">
-                    ${initial.variantImageUrl ? `
-                        <div class="relative inline-block mt-2 existing-main-image-container">
-                            <img src="${initial.variantImageUrl}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">
-                            <button type="button" class="remove-existing-main absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition" title="Delete Main Image">
-                                <i class="fa-solid fa-xmark text-xs"></i>
-                            </button>
-                            <input type="hidden" name="delete_variant_main_${mediaIndex}" value="false" class="delete-main-input">
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        </div>
-        <div class="space-y-2">
-            <label class="text-xs font-semibold text-slate-600">Gallery Images</label>
-            <input type="file" name="variant_gallery_${mediaIndex}" multiple accept="image/*" class="main-variant-gallery-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs">
-            <div class="main-variant-gallery-preview flex flex-wrap gap-2"></div>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-            <div class="flex items-center justify-between mb-3">
-                <h5 class="text-xs font-semibold text-slate-700 uppercase tracking-wide">Sub Variants (Size)</h5>
-                <button type="button" class="addSubVariantBtn rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-700 hover:text-white">Add Sub Variant</button>
-            </div>
-            <div class="sub-variant-rows space-y-2"></div>
-        </div>
-    `;
-    variantRows.appendChild(block);
-
-    // Populate existing gallery images
-    if (initial.variantGalleryUrls) {
-        const galleryPreview = block.querySelector('.main-variant-gallery-preview');
-        const urls = initial.variantGalleryUrls.split(',');
-        urls.forEach(url => {
-            if (!url.trim()) return;
-            const div = document.createElement('div');
-            div.className = 'relative inline-block existing-gallery-item';
-            div.innerHTML = `
-                <img src="${url.trim()}" class="h-16 w-16 rounded-xl object-cover border-2 border-white shadow-md">
-                <button type="button" class="remove-existing-gallery absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition" data-url="${url.trim()}">
-                    <i class="fa-solid fa-xmark text-[10px]"></i>
-                </button>
-                <input type="hidden" name="delete_variant_gallery_${mediaIndex}" value="" class="delete-gallery-input">
-            `;
-            galleryPreview.appendChild(div);
-        });
-    }
-
-    // Attach event listeners for existing image removal
-    block.querySelectorAll('.remove-existing-main').forEach(btn => {
-        btn.onclick = function() {
-            const container = this.closest('.existing-main-image-container');
-            container.querySelector('.delete-main-input').value = "true";
-            container.style.opacity = "0.3";
-            container.style.pointerEvents = "none";
-            this.remove();
-        };
-    });
-
-    block.querySelectorAll('.remove-existing-gallery').forEach(btn => {
-        btn.onclick = function() {
-            const item = this.closest('.existing-gallery-item');
-            item.querySelector('.delete-gallery-input').value = this.dataset.url;
-            item.style.opacity = "0.3";
-            item.style.pointerEvents = "none";
-            this.remove();
-        };
-    });
-
-    // If editing, add the first sub-variant row automatically
-    // (Only if no rows exist yet to prevent duplication)
-    if (initial.size && block.querySelectorAll('.sub-variant-row').length === 0) {
-        addSubVariantRow(block, initial);
-    }
-
-    const picker = block.querySelector('.main-variant-color-picker');
-    const input = block.querySelector('.main-variant-color-input');
-    const display = block.querySelector('.color-code-display');
-    picker.addEventListener('input', () => {
-        input.value = picker.value;
-        if (display) display.innerText = picker.value;
-        syncSubColors(block);
-    });
-
-    block.querySelector('.addSubVariantBtn').addEventListener('click', () => addSubVariantRow(block));
-    block.querySelector('.removeMainVariantBtn').addEventListener('click', () => block.remove());
-    bindMediaPreview(block);
-}
-
-if (addMainVariantBtn && variantRows) {
-    addMainVariantBtn.addEventListener('click', function () {
-        addMainVariantBlock();
-    });
-}
-
-if (variantRows) {
-    variantRows.addEventListener('click', function (e) {
-        const subRemoveBtn = e.target.closest('.removeSubVariantBtn');
-        if (!subRemoveBtn) return;
-        const subRow = subRemoveBtn.closest('.sub-variant-row');
-        const block = subRemoveBtn.closest('.main-variant-block');
-        if (subRow) subRow.remove();
-        if (block && block.querySelectorAll('.sub-variant-row').length === 0) {
-            addSubVariantRow(block);
-            syncSubColors(block);
-        }
-    });
-}
-
-document.getElementById('openinventoryModal').onclick = () => {
-    inventoryForm.reset();
-    inventoryForm.action = "{% url 'add_inventory' %}";
-    modalTitle.innerText = "Add Inventory";
-    resetImagePreviews();
-    
-    categorySelect.value = '';
-    categorySelect.setAttribute('required', 'required');
-    categorySelect.setAttribute('name', 'category');
-    
-    subcategorySelect.setAttribute('name', 'subcategory');
-    brandSelect.setAttribute('name', 'brand');
-    productSelect.setAttribute('name', 'product');
-    
-    newCategoryInput.value = '';
-    newCategoryInput.removeAttribute('name');
-    newCategoryInput.removeAttribute('required');
-    newCategoryInput.classList.add('hidden');
-    
-    newSubcategoryInput.value = '';
-    newSubcategoryInput.removeAttribute('name');
-    newSubcategoryInput.removeAttribute('required');
-    newSubcategoryInput.classList.add('hidden');
-    
-    newBrandInput.value = '';
-    newBrandInput.removeAttribute('name');
-    newBrandInput.removeAttribute('required');
-    newBrandInput.classList.add('hidden');
-    
-    newProductInput.value = '';
-    newProductInput.removeAttribute('name');
-    newProductInput.removeAttribute('required');
-    newProductInput.classList.add('hidden');
-    
-    resetDropdowns();
-    resetSpecs();
-    if (variantRows) {
-        mainVariantCounter = 0;
-        subVariantCounter = 0;
-        variantRows.innerHTML = '';
-    }
-    const oldSection = document.getElementById('oldDataSection');
-    if (oldSection) oldSection.classList.add('hidden');
-    inventoryModal.classList.remove('hidden');
-    inventoryModal.classList.add('flex');
-};
-
-function hideInventoryModal() {
-    inventoryModal.classList.add('hidden');
-    inventoryModal.classList.remove('flex');
-    resetImagePreviews();
-}
-
-if (closeInventoryModalTop) {
-    closeInventoryModalTop.onclick = hideInventoryModal;
-}
-
-if (closeInventoryModalBottom) {
-    closeInventoryModalBottom.onclick = hideInventoryModal;
-}
-
-function resetDropdowns() {
-    subcategorySelect.innerHTML = '<option value="">Select Subcategory</option><option value="__new__">+ Add New Subcategory</option>';
-    brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
-    productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
-    
-    subcategorySelect.disabled = true;
-    brandSelect.disabled = true;
-    productSelect.disabled = true;
-    
-    newCategoryInput.classList.add('hidden');
-    newCategoryInput.value = '';
-    newCategoryInput.removeAttribute('required');
-    newCategoryInput.removeAttribute('name');
-    
-    newSubcategoryInput.classList.add('hidden');
-    newSubcategoryInput.value = '';
-    newSubcategoryInput.removeAttribute('required');
-    newSubcategoryInput.removeAttribute('name');
-    
-    newBrandInput.classList.add('hidden');
-    newBrandInput.value = '';
-    newBrandInput.removeAttribute('required');
-    newBrandInput.removeAttribute('name');
-    
-    newProductInput.classList.add('hidden');
-    newProductInput.value = '';
-    newProductInput.removeAttribute('required');
-    newProductInput.removeAttribute('name');
-    
-    subcategorySelect.setAttribute('name', 'subcategory');
-    brandSelect.setAttribute('name', 'brand');
-    productSelect.setAttribute('name', 'product');
-}
-
-categorySelect.addEventListener('change', function() {
-    const selectedValue = this.value;
-    
-    if (selectedValue === '__new__') {
-        newCategoryInput.classList.remove('hidden');
-        newCategoryInput.required = true;
-        newCategoryInput.value = ''; 
-        this.removeAttribute('required');
-        this.setAttribute('name', ''); 
-        
-        subcategorySelect.innerHTML = '<option value="">Select Subcategory</option><option value="__new__">+ Add New Subcategory</option>';
-        subcategorySelect.disabled = false;
-        subcategorySelect.value = '';
-        subcategorySelect.setAttribute('name', 'subcategory');
-        subcategorySelect.setAttribute('required', 'required');
-        
-        brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
-        brandSelect.disabled = true;
-        brandSelect.value = '';
-        
-        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
-        productSelect.disabled = true;
-        productSelect.value = '';
-        
-        newSubcategoryInput.classList.add('hidden');
-        newSubcategoryInput.value = '';
-        newSubcategoryInput.removeAttribute('required');
-        newSubcategoryInput.removeAttribute('name');
-        
-        newBrandInput.classList.add('hidden');
-        newBrandInput.value = '';
-        newBrandInput.removeAttribute('required');
-        newBrandInput.removeAttribute('name');
-        
-        newProductInput.classList.add('hidden');
-        newProductInput.value = '';
-        newProductInput.removeAttribute('required');
-        newProductInput.removeAttribute('name');
-    } else if (selectedValue && selectedValue !== '') {
-        newCategoryInput.classList.add('hidden');
-        newCategoryInput.removeAttribute('required');
-        newCategoryInput.value = '';
-        newCategoryInput.removeAttribute('name'); 
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'category'); 
-        
-        loadSubcategories(selectedValue);
-    } else {
-        newCategoryInput.classList.add('hidden');
-        newCategoryInput.removeAttribute('required');
-        newCategoryInput.value = '';
-        newCategoryInput.removeAttribute('name');
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'category');
-        resetDropdowns();
-    }
-});
-
-subcategorySelect.addEventListener('change', function() {
-    const selectedValue = this.value;
-    const categoryValue = categorySelect.value;
-    
-    if (selectedValue === '__new__') {
-        newSubcategoryInput.classList.remove('hidden');
-        newSubcategoryInput.required = true;
-        newSubcategoryInput.value = ''; 
-        this.removeAttribute('required');
-        this.setAttribute('name', '');
-        
-        brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
-        brandSelect.disabled = false;
-        brandSelect.value = '';
-        brandSelect.setAttribute('name', 'brand');
-        brandSelect.setAttribute('required', 'required');
-        
-        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
-        productSelect.disabled = true;
-        productSelect.value = '';
-        
-        newBrandInput.classList.add('hidden');
-        newBrandInput.value = '';
-        newBrandInput.removeAttribute('required');
-        newBrandInput.removeAttribute('name');
-        
-        newProductInput.classList.add('hidden');
-        newProductInput.value = '';
-        newProductInput.removeAttribute('required');
-        newProductInput.removeAttribute('name');
-    } else if (selectedValue && selectedValue !== '' && categoryValue && categoryValue !== '__new__') {
-        newSubcategoryInput.classList.add('hidden');
-        newSubcategoryInput.removeAttribute('required');
-        newSubcategoryInput.value = ''; 
-        newSubcategoryInput.removeAttribute('name');
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'subcategory');
-        
-        loadBrands(selectedValue);
-    } else if (selectedValue && selectedValue !== '' && categoryValue === '__new__') {
-        newSubcategoryInput.classList.add('hidden');
-        newSubcategoryInput.removeAttribute('required');
-        newSubcategoryInput.value = '';
-        newSubcategoryInput.removeAttribute('name');
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'subcategory');
-        
-        brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
-        brandSelect.disabled = false;
-        brandSelect.setAttribute('name', 'brand');
-        brandSelect.setAttribute('required', 'required');
-        
-        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
-        productSelect.disabled = true;
-    } else if (selectedValue === '') {
-        newSubcategoryInput.classList.add('hidden');
-        newSubcategoryInput.removeAttribute('required');
-        newSubcategoryInput.value = '';
-        newSubcategoryInput.removeAttribute('name');
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'subcategory');
-        brandSelect.disabled = true;
-        productSelect.disabled = true;
-    }
-});
-
-brandSelect.addEventListener('change', function() {
-    const selectedValue = this.value;
-    const categoryValue = categorySelect.value;
-    const subcategoryValue = subcategorySelect.value;
-    
-    if (selectedValue === '__new__') {
-        newBrandInput.classList.remove('hidden');
-        newBrandInput.required = true;
-        newBrandInput.value = ''; 
-        this.removeAttribute('required');
-        this.setAttribute('name', '');
-        
-        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
-        productSelect.disabled = false;
-        productSelect.value = '';
-        productSelect.setAttribute('name', 'product');
-        productSelect.setAttribute('required', 'required');
-        
-        newProductInput.classList.add('hidden');
-        newProductInput.value = '';
-        newProductInput.removeAttribute('required');
-        newProductInput.removeAttribute('name');
-    } else if (selectedValue && selectedValue !== '' && categoryValue !== '__new__' && subcategoryValue !== '__new__') {
-        newBrandInput.classList.add('hidden');
-        newBrandInput.removeAttribute('required');
-        newBrandInput.value = ''; 
-        newBrandInput.removeAttribute('name');
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'brand');
-        loadProducts(selectedValue);
-    } else if (selectedValue && selectedValue !== '') {
-        newBrandInput.classList.add('hidden');
-        newBrandInput.removeAttribute('required');
-        newBrandInput.value = '';
-        newBrandInput.removeAttribute('name');
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'brand');
-        
-        productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
-        productSelect.disabled = false;
-        productSelect.setAttribute('name', 'product');
-        productSelect.setAttribute('required', 'required');
-    } else if (selectedValue === '') {
-        newBrandInput.classList.add('hidden');
-        newBrandInput.removeAttribute('required');
-        newBrandInput.value = '';
-        newBrandInput.removeAttribute('name');
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'brand');
-        productSelect.disabled = true;
-    }
-});
-
-productSelect.addEventListener('change', function() {
-    const selectedValue = this.value;
-    
-    if (selectedValue === '__new__') {
-        newProductInput.classList.remove('hidden');
-        newProductInput.required = true;
-        newProductInput.value = ''; 
-        this.removeAttribute('required');
-        this.setAttribute('name', '');
-    } else if (selectedValue && selectedValue !== '') {
-        newProductInput.classList.add('hidden');
-        newProductInput.removeAttribute('required');
-        newProductInput.value = '';
-        newProductInput.removeAttribute('name');
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'product');
-    } else if (selectedValue === '') {
-        newProductInput.classList.add('hidden');
-        newProductInput.removeAttribute('required');
-        newProductInput.value = '';
-        newProductInput.removeAttribute('name');
-        this.setAttribute('required', 'required');
-        this.setAttribute('name', 'product');
-    }
-});
-
-function loadSubcategories(categoryName) {
-    if (!categoryName) return Promise.resolve();
-    const f = (typeof __origFetch !== 'undefined') ? __origFetch : fetch;
-    return f(`{% url 'get_subcategories' %}?category_name=${encodeURIComponent(categoryName)}`)
-        .then(response => response.json())
-        .then(data => {
-            subcategorySelect.innerHTML = '<option value="">Select Subcategory</option>';
-            data.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.name;
-                option.textContent = item.name;
-                subcategorySelect.appendChild(option);
-            });
-            subcategorySelect.innerHTML += '<option value="__new__">+ Add New Subcategory</option>';
-            subcategorySelect.disabled = false;
-            brandSelect.innerHTML = '<option value="">Select Brand</option><option value="__new__">+ Add New Brand</option>';
-            productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
-            brandSelect.disabled = true;
-            productSelect.disabled = true;
-        }).catch(() => {
-            subcategorySelect.disabled = false;
-        });
-}
-
-function loadBrands(subcategoryName) {
-    const categoryName = categorySelect.value;
-    if (!subcategoryName || !categoryName) return Promise.resolve();
-    const f = (typeof __origFetch !== 'undefined') ? __origFetch : fetch;
-    return f(`{% url 'get_brands' %}?category_name=${encodeURIComponent(categoryName)}&subcategory_name=${encodeURIComponent(subcategoryName)}`)
-        .then(response => response.json())
-        .then(data => {
-            brandSelect.innerHTML = '<option value="">Select Brand</option>';
-            data.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.name;
-                option.textContent = item.name;
-                brandSelect.appendChild(option);
-            });
-            brandSelect.innerHTML += '<option value="__new__">+ Add New Brand</option>';
-            brandSelect.disabled = false;
-            productSelect.innerHTML = '<option value="">Select Product</option><option value="__new__">+ Add New Product</option>';
-            productSelect.disabled = true;
-        }).catch(() => {
-            brandSelect.disabled = false;
-        });
-}
-
-function loadProducts(brandName) {
-    const categoryName = categorySelect.value;
-    const subcategoryName = subcategorySelect.value;
-    if (!brandName || !subcategoryName || !categoryName) return Promise.resolve();
-    const f = (typeof __origFetch !== 'undefined') ? __origFetch : fetch;
-    return f(`{% url 'get_products' %}?category_name=${encodeURIComponent(categoryName)}&subcategory_name=${encodeURIComponent(subcategoryName)}&brand_name=${encodeURIComponent(brandName)}`)
-        .then(response => response.json())
-        .then(data => {
-            productSelect.innerHTML = '<option value="">Select Product</option>';
-            data.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.name;
-                option.textContent = item.name;
-                productSelect.appendChild(option);
-            });
-            productSelect.innerHTML += '<option value="__new__">+ Add New Product</option>';
-            productSelect.disabled = false;
-        }).catch(() => {
-            productSelect.disabled = false;
-        });
-}
-
-inventoryForm.addEventListener('submit', function(e) {
-    let hasErrors = false;
-    
-    if (categorySelect.value === '__new__') {
-        if (!newCategoryInput.value.trim()) {
-            e.preventDefault();
-            alert('Please enter a new category name');
-            hasErrors = true;
-            return false;
-        }
-        if (!categorySelect.hasAttribute('name') || categorySelect.getAttribute('name') === '') {
-            categorySelect.removeAttribute('name');
-            newCategoryInput.setAttribute('name', 'new_category');
-        }
-    } else if (!categorySelect.value || categorySelect.value === '') {
-        e.preventDefault();
-        alert('Please select or add a category');
-        hasErrors = true;
-        return false;
-    } else {
-        categorySelect.setAttribute('name', 'category');
-        newCategoryInput.removeAttribute('name');
-        newCategoryInput.value = '';
-    }
-    
-    if (subcategorySelect.value === '__new__') {
-        if (!newSubcategoryInput.value.trim()) {
-            e.preventDefault();
-            alert('Please enter a new subcategory name');
-            hasErrors = true;
-            return false;
-        }
-        if (!subcategorySelect.hasAttribute('name') || subcategorySelect.getAttribute('name') === '') {
-            subcategorySelect.removeAttribute('name');
-            newSubcategoryInput.setAttribute('name', 'new_subcategory');
-        }
-    } else if (!subcategorySelect.value || subcategorySelect.value === '') {
-        e.preventDefault();
-        alert('Please select or add a subcategory');
-        hasErrors = true;
-        return false;
-    } else {
-        subcategorySelect.setAttribute('name', 'subcategory');
-        newSubcategoryInput.removeAttribute('name');
-        newSubcategoryInput.value = '';
-    }
-    
-    if (brandSelect.value === '__new__') {
-        if (!newBrandInput.value.trim()) {
-            e.preventDefault();
-            alert('Please enter a new brand name');
-            hasErrors = true;
-            return false;
-        }
-        if (!brandSelect.hasAttribute('name') || brandSelect.getAttribute('name') === '') {
-            brandSelect.removeAttribute('name');
-            newBrandInput.setAttribute('name', 'new_brand');
-        }
-    } else if (!brandSelect.value || brandSelect.value === '') {
-        e.preventDefault();
-        alert('Please select or add a brand');
-        hasErrors = true;
-        return false;
-    } else {
-        brandSelect.setAttribute('name', 'brand');
-        newBrandInput.removeAttribute('name');
-        newBrandInput.value = '';
-    }
-    
-    if (productSelect.value === '__new__') {
-        if (!newProductInput.value.trim()) {
-            e.preventDefault();
-            alert('Please enter a new product name');
-            hasErrors = true;
-            return false;
-        }
-        if (!productSelect.hasAttribute('name') || productSelect.getAttribute('name') === '') {
-            productSelect.removeAttribute('name');
-            newProductInput.setAttribute('name', 'new_product');
-        }
-    } else if (!productSelect.value || productSelect.value === '') {
-        e.preventDefault();
-        alert('Please select or add a product');
-        hasErrors = true;
-        return false;
-    } else {
-        productSelect.setAttribute('name', 'product');
-        newProductInput.removeAttribute('name');
-        newProductInput.value = '';
-    }
-    
-    if (hasErrors) {
-        return false;
-    }
-});
-
-const productPictureInput = null;
-const productPicturePreview = null;
-const productPictureImg = null;
-const removeProductPictureBtn = null;
-
-const extraImagesInput = null;
-const extraImagesPreview = null;
-
-
-
-function resetImagePreviews() {
-    // Media section removed. Variant image previews are handled per-row.
-}
-
-function unescapeJS(str) {
-    if (!str) return '';
-    return str.replace(/\\u0027/g, "'")
-              .replace(/\\u0022/g, '"')
-              .replace(/\\u0026/g, '&')
-              .replace(/\\u003C/g, '<')
-              .replace(/\\u003E/g, '>')
-              .replace(/\\u005C/g, '\\')
-              .replace(/\\u002D/g, '-');
-}
-
-async function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, sku, specsJson, imageUrl = '', galleryUrls = '', variantImageUrl = '', variantGalleryUrls = '') {
-    inventoryModal.classList.remove('hidden');
-    inventoryModal.classList.add('flex');
-
-    modalTitle.innerText = "Edit inventory";
-    inventoryForm.action = editUrl;
-    
-    resetImagePreviews();
-
-    // Unescape all incoming strings
-    const cat = unescapeJS(category);
-    const sub = unescapeJS(subcategory);
-    const brd = unescapeJS(brand);
-    const prd = unescapeJS(product);
-    const desc = unescapeJS(description);
-
-    // 1. Category
-    categorySelect.value = cat;
-    
-    if (cat) {
-        try {
-            // 2. Subcategory
-            await loadSubcategories(cat);
-            if (sub) {
-                const subOpt = Array.from(subcategorySelect.options).find(o => o.value === sub || o.textContent.trim() === sub);
-                if (subOpt) {
-                    subcategorySelect.value = subOpt.value;
-                    
-                    // 3. Brand
-                    await loadBrands(subcategorySelect.value);
-                    if (brd) {
-                        const brandOpt = Array.from(brandSelect.options).find(o => o.value === brd || o.textContent.trim() === brd);
-                        if (brandOpt) {
-                            brandSelect.value = brandOpt.value;
-                            
-                            // 4. Product
-                            await loadProducts(brandSelect.value);
-                            if (prd) {
-                                const prodOpt = Array.from(productSelect.options).find(o => o.value === prd || o.textContent.trim() === prd);
-                                if (prodOpt) {
-                                    productSelect.value = prodOpt.value;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (err) {
-            console.error("Error pre-populating cascading selects:", err);
-        }
-    }
-    
-    inventoryForm.description.value = desc;
-    
-    // Show and populate Old Data Section for comparison
-    const oldSection = document.getElementById('oldDataSection');
-    if (oldSection) {
-        oldSection.classList.remove('hidden');
-        document.getElementById('oldCategory').innerText = cat || '-';
-        document.getElementById('oldSubcategory').innerText = sub || '-';
-        document.getElementById('oldBrand').innerText = brd || '-';
-        document.getElementById('oldProduct').innerText = prd || '-';
-        document.getElementById('oldColorCircle').style.backgroundColor = color || 'transparent';
-        document.getElementById('oldColorValue').innerText = color || '-';
-        document.getElementById('oldSize').innerText = size || '-';
-        const oldSkuEl = document.getElementById('oldSku');
-        if (oldSkuEl) oldSkuEl.innerText = sku || '-';
-        document.getElementById('oldPrice').innerText = price || '-';
-        document.getElementById('oldStock').innerText = stock || '-';
-    }
-
-    if (variantRows) {
-        mainVariantCounter = 0;
-        subVariantCounter = 0;
-        variantRows.innerHTML = '';
-        addMainVariantBlock({ 
-            color: color, 
-            size: size, 
-            price: price, 
-            stock: stock,
-            sku: sku,
-            variantImageUrl: variantImageUrl,
-            variantGalleryUrls: variantGalleryUrls
-        });
-        if (addMainVariantBtn) addMainVariantBtn.classList.remove('hidden');
-    }
-
-    resetSpecs();
-    try {
-        const specs = JSON.parse(specsJson || '[]');
-        if (Array.isArray(specs) && specs.length) {
-            specsContainer.innerHTML = '';
-            specs.forEach(s => addSpecRow(s.name, s.value));
-        } else {
-            addSpecRow();
-        }
-    } catch (e) {
-        addSpecRow();
-    }
-    
-    newCategoryInput.classList.add('hidden');
-    newSubcategoryInput.classList.add('hidden');
-    newBrandInput.classList.add('hidden');
-    newProductInput.classList.add('hidden');
-    newCategoryInput.removeAttribute('name');
-    newSubcategoryInput.removeAttribute('name');
-    newBrandInput.removeAttribute('name');
-    newProductInput.removeAttribute('name');
-}
-
-if (colorPicker && inventoryForm.color) {
-    colorPicker.addEventListener('input', function () {
-        inventoryForm.color.value = this.value;
-    });
-    inventoryForm.color.addEventListener('input', function () {
-        const v = (this.value || '').trim();
-        if (/^#([A-Fa-f0-9]{6})$/.test(v)) {
-            colorPicker.value = v;
-        }
-    });
-}
-
-const variantPickerModal = document.getElementById('variantPickerModal');
-const variantPickerList = document.getElementById('variantPickerList');
-const variantSearch = document.getElementById('variantSearch');
-const closeVariantPicker = document.getElementById('closeVariantPicker');
-
-function showVariantPicker() {
-    variantPickerModal.classList.remove('hidden');
-    variantPickerModal.classList.add('flex');
-}
-function hideVariantPicker() {
-    variantPickerModal.classList.add('hidden');
-    variantPickerModal.classList.remove('flex');
-    variantPickerList.innerHTML = '';
-    if (variantSearch) variantSearch.value = '';
-}
-if (closeVariantPicker) {
-    closeVariantPicker.onclick = hideVariantPicker;
-}
-variantPickerModal.addEventListener('click', function(e) {
-    const card = e.target.closest('.rounded-2xl');
-    if (!card) hideVariantPicker();
-});
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') hideVariantPicker();
-});
-
-function renderVariantItems(common, variants) {
-    variantPickerList.innerHTML = '';
-    const norm = (s) => (s || '').toLowerCase();
-    const q = norm(variantSearch ? variantSearch.value : '');
-    const filtered = Array.isArray(variants) ? variants.filter(v => q === '' || norm(v.color).includes(q) || norm(v.size).includes(q)) : [];
-    if (!filtered.length) {
-        const empty = document.createElement('div');
-        empty.className = 'px-4 py-10 text-center text-slate-500';
-        empty.innerText = 'No matching variants';
-        variantPickerList.appendChild(empty);
-        return;
-    }
-    filtered.forEach(v => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition';
-        btn.innerHTML = `
-            <span class="inline-block h-4 w-4 rounded-full border border-slate-300" style="background-color: ${(v.color || '').replace(/"/g, '&quot;')}"></span>
-            <span class="px-2 py-0.5 rounded border text-[11px]">${(v.size || '').replace(/"/g, '&quot;')}</span>
-            <span class="ml-auto text-[11px] text-slate-500">Price ${v.price} • Stock ${v.stock}</span>
-        `;
-        btn.addEventListener('click', function() {
-            openEditModal(
-                v.editUrl || '',
-                common.category || '',
-                common.subcategory || '',
-                common.brand || '',
-                common.product || '',
-                common.description || '',
-                v.color || '',
-                v.size || '',
-                v.price || '',
-                v.stock || '',
-                v.sku || '',
-                JSON.stringify(v.specs || []),
-                common.imageUrl || '',
-                common.galleryUrls || '',
-                v.variantImageUrl || '',
-                v.variantGalleryUrls || ''
-            );
-            hideVariantPicker();
-        });
-        variantPickerList.appendChild(btn);
-    });
-}
-
-document.querySelectorAll('button[title="Edit"]').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const d = this.dataset;
-        let variants = [];
-        try { variants = JSON.parse(d.variants || '[]'); } catch (e) {}
-        const common = {
-            category: d.category || '',
-            subcategory: d.subcategory || '',
-            brand: d.brand || '',
-            product: d.product || '',
-            description: d.description || '',
-            imageUrl: d.image || '',
-            galleryUrls: d.gallery || ''
-        };
-        showVariantPicker();
-        renderVariantItems(common, variants);
-        if (variantSearch) {
-            variantSearch.oninput = function() {
-                renderVariantItems(common, variants);
-            };
-        }
-    });
-});
-
-const variantDeletePickerModal = document.getElementById('variantDeletePickerModal');
-const variantDeletePickerList = document.getElementById('variantDeletePickerList');
-const variantDeleteSearch = document.getElementById('variantDeleteSearch');
-const closeVariantDeletePicker = document.getElementById('closeVariantDeletePicker');
-
-function showVariantDeletePicker(productId) {
-    variantDeletePickerModal.classList.remove('hidden');
-    variantDeletePickerModal.classList.add('flex');
-    const deleteAllBtn = document.getElementById('deleteAllVariantsBtn');
-    if (deleteAllBtn) {
-        deleteAllBtn.onclick = () => {
-            const bulkUrl = `/delete/inventory/product/${productId}/`;
-            openDeleteModal(bulkUrl);
-            hideVariantDeletePicker();
-        };
-    }
-}
-function hideVariantDeletePicker() {
-    variantDeletePickerModal.classList.add('hidden');
-    variantDeletePickerModal.classList.remove('flex');
-    variantDeletePickerList.innerHTML = '';
-    if (variantDeleteSearch) variantDeleteSearch.value = '';
-}
-if (closeVariantDeletePicker) {
-    closeVariantDeletePicker.onclick = hideVariantDeletePicker;
-}
-variantDeletePickerModal.addEventListener('click', function(e) {
-    const card = e.target.closest('.rounded-2xl');
-    if (!card) hideVariantDeletePicker();
-});
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') hideVariantDeletePicker();
-});
-
-function renderDeleteVariantItems(variants) {
-    variantDeletePickerList.innerHTML = '';
-    const norm = (s) => (s || '').toLowerCase();
-    const q = norm(variantDeleteSearch ? variantDeleteSearch.value : '');
-    const filtered = Array.isArray(variants) ? variants.filter(v => q === '' || norm(v.color).includes(q) || norm(v.size).includes(q)) : [];
-    if (!filtered.length) {
-        const empty = document.createElement('div');
-        empty.className = 'px-4 py-10 text-center text-slate-500';
-        empty.innerText = 'No matching variants';
-        variantDeletePickerList.appendChild(empty);
-        return;
-    }
-    filtered.forEach(v => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition';
-        btn.innerHTML = `
-            <span class="inline-block h-4 w-4 rounded-full border border-slate-300" style="background-color: ${(v.color || '').replace(/"/g, '&quot;')}"></span>
-            <span class="px-2 py-0.5 rounded border text-[11px]">${(v.size || '').replace(/"/g, '&quot;')}</span>
-            <span class="ml-auto text-[11px] text-slate-500">Price ${v.price} • Stock ${v.stock}</span>
-        `;
-        btn.addEventListener('click', function() {
-            openDeleteModal(v.deleteUrl || '');
-            hideVariantDeletePicker();
-        });
-        variantDeletePickerList.appendChild(btn);
-    });
-}
-
-document.querySelectorAll('button[title="Delete"]').forEach(btn => {
-    btn.addEventListener('click', function () {
-        let variants = [];
-        try { variants = JSON.parse(this.dataset.deleteVariants || '[]'); } catch (e) {}
-        const productId = this.dataset.productId;
-        showVariantDeletePicker(productId);
-        renderDeleteVariantItems(variants);
-        if (variantDeleteSearch) {
-            variantDeleteSearch.oninput = function() {
-                renderDeleteVariantItems(variants);
-            };
-        }
-    });
-});
-// Edit by clicking on color chips
-document.querySelectorAll('.edit-variant-color-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const d = this.dataset;
-        openEditModal(
-            d.editUrl || '',
-            d.category || '',
-            d.subcategory || '',
-            d.brand || '',
-            d.product || '',
-            d.description || '',
-            d.color || '',
-            d.size || '',
-            d.price || '',
-            d.stock || '',
-            d.sku || '',
-            d.specs || '[]',
-            d.image || '',
-            d.gallery || '',
-            d.variantImage || '',
-            d.variantGallery || ''
-        );
-    });
-});
-
-// Edit by clicking on size chips
-document.querySelectorAll('.edit-variant-size-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const d = this.dataset;
-        openEditModal(
-            d.editUrl || '',
-            d.category || '',
-            d.subcategory || '',
-            d.brand || '',
-            d.product || '',
-            d.description || '',
-            d.color || '',
-            d.size || '',
-            d.price || '',
-            d.stock || '',
-            d.sku || '',
-            d.specs || '[]',
-            d.image || '',
-            d.gallery || '',
-            d.variantImage || '',
-            d.variantGallery || ''
-        );
-    });
-});
-function openDeleteModal(deleteUrl) {
-    deleteModal.classList.remove('hidden');
-    deleteModal.classList.add('flex');
-    confirmDeleteBtn.href = deleteUrl;
-}
-
-function closeDeleteModal() {
-    deleteModal.classList.add('hidden');
-}
-
-
-
-const viewModal = document.getElementById('viewModal');
-const variantDetailModal = document.getElementById('variantDetailModal');
-
-function openViewModal(btn) {
-    const d = btn.dataset;
-    let variants = [];
-    try {
-        variants = JSON.parse(d.variants || '[]');
-    } catch (e) { console.error("Error parsing variants:", e); }
-
-    document.getElementById('viewProductName').innerText = d.productName;
-    document.getElementById('viewProductMeta').innerText = `${d.brand} • ${d.category} > ${d.subcategory}`;
-
-    // Group variants by color
-    const groups = {};
-    variants.forEach(v => {
-        if (!groups[v.color]) groups[v.color] = [];
-        groups[v.color].push(v);
-    });
-
-    const list = document.getElementById('viewVariantsList');
-    list.innerHTML = '';
-
-    Object.keys(groups).forEach(color => {
-        const groupDiv = document.createElement('div');
-        groupDiv.className = 'p-5 rounded-2xl border border-slate-100 bg-slate-50/40 hover:bg-white hover:shadow-sm transition-all duration-300';
-        
-        const colorName = color || 'No Color';
-        
-        let sizesHtml = '';
-        groups[color].forEach((v, idx) => {
-            // We'll store the variant data in a global map for the detail modal to pick up
-            const vKey = `v_${v.id}`;
-            window[vKey] = v;
-            window[`common_${v.id}`] = d;
-
-            sizesHtml += `
-                <button onclick="showVariantDetail('${v.id}')" 
-                        class="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-[13px] font-bold text-slate-700 hover:border-emerald-500 hover:text-emerald-600 hover:shadow-md transition-all active:scale-95 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    ${v.size}
-                </button>
-            `;
-        });
-
-        groupDiv.innerHTML = `
-            <div class="flex items-center gap-3 mb-4">
-                <span class="h-6 w-6 rounded-full border-2 border-white shadow-sm" style="background-color: ${color}"></span>
-                <span class="text-[11px] font-black text-slate-400 uppercase tracking-[2px]">${colorName}</span>
-            </div>
-            <div class="flex flex-wrap gap-3">
-                ${sizesHtml}
-            </div>
-        `;
-        list.appendChild(groupDiv);
-    });
-
-    viewModal.classList.remove('hidden');
-    viewModal.classList.add('flex');
-}
-
-function closeViewModal() {
-    viewModal.classList.add('hidden');
-}
-
-function showVariantDetail(vId) {
-    const v = window[`v_${vId}`];
-    const common = window[`common_${vId}`];
-    if (!v || !common) return;
-
-    document.getElementById('detailTitle').innerText = `${common.productName} (${v.color} - ${v.size})`;
-    document.getElementById('detailSKU').innerText = v.sku ? `SKU: ${v.sku}` : 'NO SKU ASSIGNED';
-    document.getElementById('detailPrice').innerText = `₹${parseFloat(v.price).toFixed(2)}`;
-    document.getElementById('detailStock').innerText = v.stock;
-    document.getElementById('detailCategory').innerText = common.category;
-    document.getElementById('detailBrand').innerText = common.brand;
-    document.getElementById('detailDesc').innerText = common.description || 'No description available for this product.';
-
-    const mainImg = document.getElementById('detailMainImage');
-    mainImg.src = v.imageUrl || 'https://placehold.co/600x800?text=No+Image';
-
-    const gallery = document.getElementById('detailGallery');
-    gallery.innerHTML = '';
-    
-    // Collect all images (main + gallery)
-    const galleryUrls = (v.galleryUrls || '').split(',').filter(u => u.trim() !== '');
-    const allImages = v.imageUrl ? [v.imageUrl, ...galleryUrls] : galleryUrls;
-    
-    allImages.forEach(url => {
-        const img = document.createElement('img');
-        img.src = url.trim();
-        img.className = 'h-16 w-16 rounded-xl object-cover cursor-pointer border-2 border-white shadow-sm hover:border-emerald-500 transition-all';
-        img.onclick = () => {
-            mainImg.src = url.trim();
-            // Highlight active thumb
-            gallery.querySelectorAll('img').forEach(i => i.classList.remove('border-emerald-500'));
-            img.classList.add('border-emerald-500');
-        };
-        gallery.appendChild(img);
-    });
-
-    // Specifications
-    const specsCont = document.getElementById('detailSpecsContainer');
-    const specsList = document.getElementById('detailSpecs');
-    specsList.innerHTML = '';
-    
-    if (v.specs && v.specs.length > 0) {
-        specsCont.classList.remove('hidden');
-        v.specs.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'flex flex-col sm:flex-row sm:items-start p-4 rounded-2xl bg-slate-50/50 border border-slate-100/60 group hover:border-emerald-200 hover:bg-white hover:shadow-sm transition-all duration-300 gap-2 sm:gap-6';
-            div.innerHTML = `
-                <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider shrink-0 sm:w-1/3 sm:pt-0.5 group-hover:text-emerald-500 transition-colors">${s.name}</span>
-                <span class="text-sm font-semibold text-slate-800 break-words leading-relaxed">${s.value}</span>
-            `;
-            specsList.appendChild(div);
-        });
-    } else {
-        specsCont.classList.add('hidden');
-    }
-
-    variantDetailModal.classList.remove('hidden');
-    variantDetailModal.classList.add('flex');
-}
-
-function closeVariantDetailModal() {
-    variantDetailModal.classList.add('hidden');
-}
-
-// Click outside to close modals
-window.addEventListener('click', (e) => {
-    if (e.target === viewModal) closeViewModal();
-    if (e.target === variantDetailModal) closeVariantDetailModal();
-});
-const inventorySearchInput = document.getElementById('inventorySearch');
-const inventoryTBody = document.getElementById('inventoryTableBody');
-let noMatchRowInventory = null;
-function ensureNoMatchRowInventory() {
-    if (!noMatchRowInventory) {
-        noMatchRowInventory = document.createElement('tr');
-        const td = document.createElement('td');
-        td.colSpan = 8;
-        td.className = 'px-4 py-6 text-center text-slate-500';
-        td.innerText = 'No matching items.';
-        noMatchRowInventory.appendChild(td);
-    }
-}
-if (inventorySearchInput && inventoryTBody) {
-    inventorySearchInput.addEventListener('input', function () {
-        const q = this.value.trim().toLowerCase();
-        const rows = Array.from(inventoryTBody.querySelectorAll('tr'));
-        let visibleCount = 0;
-        rows.forEach(row => {
-            const txt = row.textContent.toLowerCase();
-            const show = q === '' || txt.includes(q);
-            row.style.display = show ? '' : 'none';
-            if (show) visibleCount += 1;
-        });
-        ensureNoMatchRowInventory();
-        if (visibleCount === 0) {
-            if (noMatchRowInventory.parentElement !== inventoryTBody) inventoryTBody.appendChild(noMatchRowInventory);
-        } else {
-            if (noMatchRowInventory.parentElement === inventoryTBody) inventoryTBody.removeChild(noMatchRowInventory);
-        }
-    });
-}
-
-// Socket Implementation
-const inventorySocket = new WebSocket(
-    (window.location.protocol === 'https:' ? 'wss://' : 'ws://') +
-    window.location.host +
-    '/ws/inventory/'
-);
-
-inventorySocket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    if (data.type === 'inventory_updated') {
-        const inv = data.inventory;
-        
-        // 1. Update individual size pills (the ones that open individual modals)
-        const targetPills = document.querySelectorAll(`button[data-edit-url*="/${inv.id}/"]`);
-        targetPills.forEach(pill => {
-            pill.dataset.price = inv.price;
-            pill.dataset.stock = inv.stock;
-            if (inv.image_url) pill.dataset.variantImage = inv.image_url;
-            if (inv.gallery_urls) pill.dataset.variantGallery = inv.gallery_urls.join(',');
-            
-            if (pill.classList.contains('edit-variant-size-btn')) {
-                pill.title = `Edit Variant: ${pill.dataset.size} (Stock: ${inv.stock}, Price: ${inv.price})`;
-            }
-        });
-
-        // 2. Update the parent row's VIEW and EDIT group buttons (crucial for hierarchical modals)
-        const rows = document.querySelectorAll('#inventoryTableBody tr');
-        rows.forEach(row => {
-            const viewBtn = row.querySelector('button[onclick*="openViewModal"]');
-            const editBtn = row.querySelector('button[title="Edit"]');
-            
-            [viewBtn, editBtn].forEach(btn => {
-                if (!btn || !btn.dataset.variants) return;
-                try {
-                    let vts = JSON.parse(btn.dataset.variants);
-                    let rowUpdated = false;
-                    vts.forEach(vt => {
-                        // For View button, we have vt.id. For Edit button, it's often vt.editUrl containing ID
-                        const vtId = vt.id || (vt.editUrl ? vt.editUrl.split('/').filter(Boolean).pop() : null);
-                        
-                        if (String(vtId) === String(inv.id)) {
-                            vt.price = inv.price;
-                            vt.stock = inv.stock;
-                            // Update all possible image keys used by different modals
-                            if (inv.image_url) {
-                                vt.imageUrl = inv.image_url;
-                                vt.variantImageUrl = inv.image_url;
-                            }
-                            if (inv.gallery_urls) {
-                                const gStr = inv.gallery_urls.join(',');
-                                vt.galleryUrls = gStr;
-                                vt.variantGalleryUrls = gStr;
-                            }
-                            rowUpdated = true;
-                        }
-                    });
-                    
-                    if (rowUpdated) {
-                        btn.dataset.variants = JSON.stringify(vts);
-                        // Recalculate and update the overall stock count shown in the table
-                        const stockCell = row.querySelector('td:nth-last-child(3)');
-                        if (stockCell) {
-                            const totalStock = vts.reduce((sum, v) => sum + (parseInt(v.stock) || 0), 0);
-                            stockCell.innerText = totalStock;
-                        }
-                    }
-                } catch (e) {
-                    console.error("Error parsing variants for live update:", e);
+    // Simple Search Logic
+    const inventorySearchInput = document.getElementById('inventorySearch');
+    const inventoryTBody = document.getElementById('inventoryTableBody');
+    const noResults = document.getElementById('noResults');
+
+    if (inventorySearchInput && inventoryTBody) {
+        inventorySearchInput.addEventListener('input', function() {
+            const q = this.value.trim().toLowerCase();
+            const rows = Array.from(inventoryTBody.querySelectorAll('tr'));
+            let matchCount = 0;
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(q)) {
+                    row.classList.remove('hidden');
+                    matchCount++;
+                } else {
+                    row.classList.add('hidden');
                 }
             });
+
+            if (matchCount === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
         });
-
-        showToast(`Inventory updated: ${inv.product_name} (${inv.color_name} - ${inv.stock} left)`, 'info');
-    } else if (data.type === 'inventory_added') {
-        showToast(`New inventory added: ${data.inventory.product_name}`, 'success');
-        // Page refresh is recommended for entirely new items to maintain table indexing
-    } else if (data.type === 'inventory_deleted') {
-        showToast(`Inventory deleted`, 'error');
-        // Refresh or remove row...
     }
-};
 
-inventorySocket.onclose = function(e) {
-    console.error('Inventory socket closed unexpectedly');
-};
+    // Modal Logic
+    const deleteModal = document.getElementById('deleteModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
-function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-xl shadow-2xl transform transition-all duration-300 translate-y-20 z-[100] flex items-center gap-3 font-bold text-sm ${
-        type === 'success' ? 'bg-emerald-500 text-white' : 
-        type === 'error' ? 'bg-rose-500 text-white' : 
-        'bg-sky-500 text-white'
-    }`;
-    
-    const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
-    toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
-    
-    document.body.appendChild(toast);
-    setTimeout(() => toast.classList.remove('translate-y-20'), 100);
-    setTimeout(() => {
-        toast.classList.add('translate-y-20');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
+    function openDeleteModal(url) {
+        deleteModal.classList.remove('hidden');
+        deleteModal.classList.add('flex');
+        confirmDeleteBtn.href = url;
+    }
+
+    function closeDeleteModal() {
+        deleteModal.classList.add('hidden');
+    }
+
+    window.onclick = e => {
+        if (e.target === deleteModal) closeDeleteModal();
+    }
 </script>
-
 
 {% endblock admin_dash %}

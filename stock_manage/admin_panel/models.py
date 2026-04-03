@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from asgiref.sync import async_to_sync
@@ -139,6 +140,10 @@ class Product(models.Model):
     base_price = models.DecimalField(max_digits=10,decimal_places=2)
     image  = models.ImageField(upload_to='products/',blank=True,null=True)
     status = models.BooleanField(default=True)
+
+    @property
+    def total_stock(self):
+        return self.variants.aggregate(total=Sum('stock'))['total'] or 0
 
     def __str__(self):
         return self.name

@@ -1,6 +1,7 @@
 {% extends "by_base.html" %}
 {% block buyer_layout %}
 {% load static %}
+{% load humanize %}
 
     <!-- Page Header -->
     <div class="pt-16 pb-8 bg-brand-50">
@@ -55,7 +56,7 @@
                                     <span class="w-px h-3 bg-gray-200"></span>
                                     <span><span class="font-bold text-gray-400">Size:</span> {{ item.variant.size.name }}</span>
                                 </div>
-                                <p class="text-brand-500 font-bold block sm:hidden mt-1">₹{{ item.variant.price }}</p>
+                                <p class="text-brand-500 font-bold block sm:hidden mt-1">₹{{ item.variant.price|floatformat:2|intcomma }}</p>
                             </div>
                         </div>
                         <div class="col-span-1 sm:col-span-3 flex justify-start sm:justify-center">
@@ -71,7 +72,7 @@
                             </div>
                         </div>
                         <div class="hidden sm:block sm:col-span-2 text-right">
-                            <span class="font-black text-gray-900 text-lg" id="line-total-{{ item.id }}">₹{{ item.total_price }}</span>
+                            <span class="font-black text-gray-900 text-lg" id="line-total-{{ item.id }}">₹{{ item.total_price|floatformat:2|intcomma }}</span>
                         </div>
                         <div class="col-span-1 flex justify-end">
                             <a href="{% url 'by_remove_from_cart' item.id %}"
@@ -109,7 +110,7 @@
                 <div class="space-y-4 mb-6 border-b border-gray-800 pb-6 relative z-10 text-gray-300">
                     <div class="flex justify-between">
                         <p>Subtotal ({{ cart_items|length }} items)</p>
-                        <p class="font-bold text-white" id="subtotal-amount">₹{{ subtotal }}</p>
+                        <p class="font-bold text-white" id="subtotal-amount">₹{{ subtotal|floatformat:2|intcomma }}</p>
                     </div>
                     <div class="flex justify-between">
                         <p>Shipping</p>
@@ -134,7 +135,7 @@
                 <div class="flex justify-between items-end mb-8 relative z-10">
                     <div>
                         <p class="text-gray-400 text-sm mb-1">Total</p>
-                        <p class="text-3xl font-black text-white" id="total-amount">₹{{ total }}</p>
+                        <p class="text-3xl font-black text-white" id="total-amount">₹{{ total|floatformat:2|intcomma }}</p>
                     </div>
                 </div>
 
@@ -175,12 +176,12 @@
                 if (data && typeof data.subtotal !== 'undefined') {
                     const subEl = document.getElementById('subtotal-amount');
                     const totEl = document.getElementById('total-amount');
-                    if (subEl) subEl.textContent = `₹${data.subtotal}`;
-                    if (totEl) totEl.textContent = `₹${data.total}`;
+                    if (subEl) subEl.textContent = `₹${Number(data.subtotal).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+                    if (totEl) totEl.textContent = `₹${Number(data.total).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
                     const item = data.items.find(i => i.id === itemId);
                     const lineEl = document.getElementById(`line-total-${itemId}`);
                     if (item && lineEl) {
-                        lineEl.textContent = `₹${item.line_total}`;
+                        lineEl.textContent = `₹${Number(item.line_total).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
                     }
                 }
             }).catch(() => {});

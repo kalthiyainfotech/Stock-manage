@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load humanize %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -196,7 +197,7 @@
                             <div class="space-y-2">
                                 <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">Base Salary</label>
                                 <div class="w-full px-5 py-4 bg-emerald-50/50 border border-emerald-100/50 rounded-2xl text-sm font-bold text-emerald-700 shadow-sm">
-                                    ₹{{ worker.salary }}
+                                    ₹{{ worker.salary|intcomma }}
                                 </div>
                             </div>
                         </div>

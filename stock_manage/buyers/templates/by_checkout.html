@@ -1,6 +1,7 @@
 {% extends "by_base.html" %}
 {% block buyer_layout %}
 {% load static %}
+{% load humanize %}
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
@@ -117,7 +118,7 @@
 
                 <button type="submit"
                     class="w-full py-6 sm:py-7 bg-[#2D0FB1] text-white font-extrabold text-base sm:text-lg rounded-2xl hover:bg-[#250b93] transition-all shadow-xl shadow-[#2D0FB1]/40 hover:-translate-y-[2px] mb-6 flex justify-center items-center gap-3">
-                    <i class="fas fa-lock text-sm"></i> Pay ₹{{ total|floatformat:2 }}
+                    <i class="fas fa-lock text-sm"></i> Pay ₹{{ total|floatformat:2|intcomma }}
                 </button>
             </form>
         </main>
@@ -143,7 +144,7 @@
                             <h4 class="font-bold text-gray-800 text-sm">{{ item.variant.product.name }}</h4>
                             <p class="text-xs text-gray-500">{{ item.variant.size.name }} / {{ item.variant.color.name }}</p>
                         </div>
-                        <span class="font-bold text-gray-900">₹{{ item.variant.price|floatformat:2 }}</span>
+                        <span class="font-bold text-gray-900">₹{{ item.variant.price|floatformat:2|intcomma }}</span>
                     </div>
                     {% endfor %}
                 </div>
@@ -152,7 +153,7 @@
                 <div class="space-y-3 pt-6 border-t border-gray-300 text-sm">
                     <div class="flex justify-between text-gray-600">
                         <span>Subtotal</span>
-                        <span class="font-medium">₹{{ subtotal|floatformat:2 }}</span>
+                        <span class="font-medium">₹{{ subtotal|floatformat:2|intcomma }}</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span>Shipping</span>
@@ -170,7 +171,7 @@
                         <span class="text-lg font-bold text-gray-900">Total</span>
                         <div class="text-right">
                             <span class="text-xs text-gray-500 mr-2">INR</span>
-                            <span class="text-3xl font-black text-gray-900">₹{{ total|floatformat:2 }}</span>
+                            <span class="text-3xl font-black text-gray-900">₹{{ total|floatformat:2|intcomma }}</span>
                         </div>
                     </div>
                 </div>
