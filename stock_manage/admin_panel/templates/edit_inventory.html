@@ -77,11 +77,19 @@
             
             <div class="p-6 sm:p-8 space-y-6">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-sm font-semibold text-slate-700">Color Name</label>
-                        <input type="text" name="color" value="{{ inventory.color.name }}" placeholder="e.g. Midnight Blue"
-                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                    <div class="flex flex-col gap-1.5 w-40 shrink-0">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">Color</label>
+                        <div class="space-y-2">
+                            <div class="relative h-8 w-full group/picker">
+                                <input type="color" id="colorPicker" 
+                                    class="absolute inset-0 w-full h-full rounded-lg cursor-pointer border-2 border-slate-200 p-0.5 bg-white transition-all group-hover/picker:border-slate-300" 
+                                    value="{{ inventory.color.name|default:'#4f46e5' }}">
+                            </div>
+                            <input type="text" name="color" id="colorNameInput" value="{{ inventory.color.name }}" placeholder="Color Code or Name"
+                                class="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                        </div>
                     </div>
+
                     <div class="space-y-2">
                         <label class="text-sm font-semibold text-slate-700">Size</label>
                         <input type="text" name="size" value="{{ inventory.size.name }}" placeholder="e.g. XL"
@@ -125,9 +133,12 @@
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Main display Image</label>
                         <div class="relative group h-64 w-full rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center hover:border-indigo-400 hover:bg-white transition-all cursor-pointer">
                             <input type="file" name="variant_image_0" class="absolute inset-0 opacity-0 cursor-pointer z-10" id="mainImageInput" accept="image/*">
-                            <div id="mainImagePreview" class="h-full w-full flex items-center justify-center p-4">
+                            <div id="mainImagePreview" class="relative h-full w-full flex items-center justify-center p-4">
                                 {% if inventory.image %}
-                                    <img src="{{ inventory.image.url }}" class="h-full w-full object-contain rounded-2xl">
+                                    <img src="{{ inventory.image.url }}" class="h-full w-full object-cover rounded-2xl">
+                                    <button type="button" class="remove-main-image absolute top-2 right-2 h-7 w-7 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-xl hover:bg-rose-600 transition-all z-20">
+                                        <i class="fa-solid fa-xmark text-sm"></i>
+                                    </button>
                                 {% else %}
                                     <div class="text-center text-slate-400 space-y-2">
                                         <i class="fa-solid fa-camera text-4xl"></i>
@@ -140,6 +151,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Gallery Edit -->
                     <div class="space-y-4">
@@ -273,9 +285,48 @@
         if (this.files && this.files[0]) {
             const reader = new FileReader();
             reader.onload = e => {
-                mainImagePreview.innerHTML = `<img src="${e.target.result}" class="h-full w-full object-contain rounded-2xl">`;
+                mainImagePreview.innerHTML = `
+                    <img src="${e.target.result}" class="h-full w-full object-cover rounded-2xl">
+                    <button type="button" class="remove-main-image absolute top-2 right-2 h-7 w-7 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-xl hover:bg-rose-600 transition-all z-20">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                `;
             };
             reader.readAsDataURL(this.files[0]);
+        }
+    });
+
+    mainImagePreview.addEventListener('click', e => {
+        if (e.target.closest('.remove-main-image')) {
+            e.preventDefault();
+            e.stopPropagation();
+            mainImageInput.value = "";
+            mainImagePreview.innerHTML = `
+                <div class="text-center text-slate-400 space-y-2">
+                    <i class="fa-solid fa-camera text-4xl"></i>
+                    <p class="text-xs font-bold uppercase tracking-wider">Click to upload image</p>
+                </div>
+            `;
+        }
+    });
+
+
+    // Color Picker & Sync
+    const colorPicker = document.getElementById('colorPicker');
+    const colorNameInput = document.getElementById('colorNameInput');
+
+    colorPicker.addEventListener('input', () => {
+        // Only update text if it already looks like a hex code or is empty
+        if(/^#[0-9A-F]{6}$/i.test(colorNameInput.value.trim()) || !colorNameInput.value.trim()){
+            colorNameInput.value = colorPicker.value.toUpperCase();
+        }
+    });
+
+    colorNameInput.addEventListener('input', () => {
+        const val = colorNameInput.value.trim();
+        // Update picker if a valid hex code is pasted
+        if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
+            colorPicker.value = val;
         }
     });
 

@@ -143,12 +143,13 @@
         <!-- Variants Card -->
         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-                <div class="flex items-center gap-3">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                     <div class="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-200">
                         <i class="fa-solid fa-layer-group text-white text-xs"></i>
                     </div>
                     <h2 class="text-lg font-bold text-slate-900">Inventory Variants</h2>
                 </div>
+
                 <button type="button" id="addMainVariantBtn"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
                     <i class="fa-solid fa-plus"></i>
@@ -314,13 +315,23 @@
         block.className = 'main-variant-block rounded-2xl border border-slate-100 bg-slate-50/30 p-5 space-y-4';
         block.dataset.mediaIndex = idx;
         block.innerHTML = `
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex items-center gap-4 flex-1">
-                    <div class="space-y-1.5 min-w-[140px]">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Color</label>
-                        <input type="color" name="v_color_picker" class="block w-full h-10 rounded-lg cursor-pointer border-none p-0" value="#4f46e5">
-                        <input type="text" name="variant_color" placeholder="Color Name" value="Indigo" class="main-variant-color-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-1">
+            <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
+                <div class="flex flex-col sm:flex-row items-start gap-6 w-full">
+
+                    <div class="flex flex-col gap-1.5 w-full sm:w-32 shrink-0">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">Color</label>
+                        <div class="space-y-1.5">
+                            <div class="relative h-9 w-full group/picker">
+                                <input type="color" name="v_color_picker" 
+                                    class="absolute inset-0 w-full h-full rounded-lg cursor-pointer border-2 border-slate-200 p-0.5 bg-white transition-all group-hover/picker:border-slate-300" 
+                                    value="#4f46e5">
+                            </div>
+                            <input type="text" name="variant_color" placeholder="Color Name" 
+                                class="main-variant-color-input w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-bold text-slate-700 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all">
+                        </div>
                     </div>
+
+
                     <div class="flex-1 space-y-3">
                          <div class="flex items-center justify-between">
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Media Asset</p>
@@ -332,18 +343,20 @@
                          <div class="flex items-center gap-4">
                             <label class="relative flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-white hover:border-indigo-400 hover:bg-indigo-50 transition-all">
                                 <input type="file" name="variant_image_${idx}" class="hidden main-variant-image-input" accept="image/*">
-                                <div class="main-variant-image-preview flex h-full w-full items-center justify-center text-slate-400">
-                                    <i class="fa-solid fa-camera text-xl"></i>
-                                </div>
+                               <div class="main-variant-image-preview relative flex h-full w-full items-center justify-center text-slate-400">
+                                   <i class="fa-solid fa-camera text-xl"></i>
+                               </div>
                             </label>
                             <div class="main-variant-gallery-preview flex flex-wrap gap-2"></div>
                          </div>
+
                     </div>
                 </div>
-                <button type="button" class="remove-main-variant self-start h-8 w-8 flex items-center justify-center rounded-full bg-white text-slate-400 hover:text-rose-500 hover:shadow-sm transition-all border border-slate-100">
+                <button type="button" class="remove-main-variant h-8 w-8 shrink-0 flex items-center justify-center rounded-full bg-white text-slate-400 hover:text-rose-500 hover:shadow-sm transition-all border border-slate-100">
                     <i class="fa-solid fa-trash-can text-xs"></i>
                 </button>
             </div>
+
             
             <div class="space-y-3 pt-4 border-t border-slate-100">
                 <div class="flex items-center justify-between">
@@ -365,15 +378,26 @@
         addSubVariant(block);
         
         // Sync color picker with text
-        const picker = block.querySelector('input[type="color"]');
+        const picker = block.querySelector('input[name="v_color_picker"]');
         const text = block.querySelector('.main-variant-color-input');
+        
         picker.addEventListener('input', () => {
             block.querySelectorAll('.sub-variant-color-hidden').forEach(h => h.value = picker.value);
-            // Optionally update text based on hex? Usually users name their colors.
+            // Optionally update text if it's currently a hex to stay in sync
+            if(/^#[0-9A-F]{6}$/i.test(text.value.trim()) || !text.value.trim()) {
+                text.value = picker.value.toUpperCase();
+            }
         });
+        
         text.addEventListener('input', () => {
-             block.querySelectorAll('.sub-variant-color-hidden').forEach(h => h.value = text.value);
+            const val = text.value.trim();
+            // Update picker if a valid hex code is pasted
+            if (/^#([0-9A-F]{3}){1,2}$/i.test(val)) {
+                picker.value = val;
+            }
+            block.querySelectorAll('.sub-variant-color-hidden').forEach(h => h.value = val);
         });
+
     }
 
     function addSubVariant(block) {
@@ -381,31 +405,38 @@
         const colorInput = block.querySelector('.main-variant-color-input');
         const container = block.querySelector('.sub-variants-container');
         const row = document.createElement('div');
-        row.className = 'sub-variant-row flex flex-wrap sm:flex-nowrap items-center gap-3 p-3 rounded-xl bg-white border border-slate-100 shadow-sm transition-all';
+        row.className = 'sub-variant-row grid grid-cols-1 sm:grid-cols-12 items-center gap-3 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm transition-all hover:border-indigo-200';
         row.innerHTML = `
             <input type="hidden" name="variant_index" value="${subVariantCounter++}">
             <input type="hidden" name="variant_media_index" value="${mediaIndex}">
             <input type="hidden" name="variant_color" value="${colorInput.value}" class="sub-variant-color-hidden">
             
-            <div class="flex-1 min-w-[100px]">
-                <input type="text" name="variant_size" placeholder="Size (e.g. XL)" class="w-full rounded-lg border-none bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20">
+            <div class="sm:col-span-3">
+                <label class="block sm:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Size</label>
+                <input type="text" name="variant_size" placeholder="Size (e.g. XL)" class="w-full rounded-xl border-none bg-slate-50 px-3 py-2.5 text-sm focus:ring-4 focus:ring-indigo-500/10">
             </div>
-            <div class="flex-1 min-w-[100px]">
+            <div class="sm:col-span-3">
+                <label class="block sm:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Price</label>
                 <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">₹</span>
-                    <input type="number" step="0.01" name="variant_price" placeholder="Price" class="w-full rounded-lg border-none bg-slate-50 pl-7 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20">
+                    <input type="number" step="0.01" name="variant_price" placeholder="Price" class="w-full rounded-xl border-none bg-slate-50 pl-7 pr-3 py-2.5 text-sm focus:ring-4 focus:ring-indigo-500/10">
                 </div>
             </div>
-            <div class="flex-1 min-w-[100px]">
-                <input type="number" name="variant_stock" placeholder="Stock" class="w-full rounded-lg border-none bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20">
+            <div class="sm:col-span-2">
+                <label class="block sm:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Stock</label>
+                <input type="number" name="variant_stock" placeholder="Stock" class="w-full rounded-xl border-none bg-slate-50 px-3 py-2.5 text-sm focus:ring-4 focus:ring-indigo-500/10">
             </div>
-            <div class="flex-1 min-w-[120px]">
-                <input type="text" name="variant_sku" placeholder="SKU" class="w-full rounded-lg border-none bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500/20">
+            <div class="sm:col-span-3">
+                <label class="block sm:hidden text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">SKU</label>
+                <input type="text" name="variant_sku" placeholder="SKU" class="w-full rounded-xl border-none bg-slate-50 px-3 py-2.5 text-sm focus:ring-4 focus:ring-indigo-500/10">
             </div>
-            <button type="button" class="remove-sub-variant h-8 w-8 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 transition-colors shrink-0">
-                <i class="fa-solid fa-circle-minus"></i>
-            </button>
+            <div class="sm:col-span-1 flex items-center justify-end">
+                <button type="button" class="remove-sub-variant h-9 w-9 flex items-center justify-center rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all shrink-0">
+                    <i class="fa-solid fa-circle-minus"></i>
+                </button>
+            </div>
         `;
+
         container.appendChild(row);
     }
 
@@ -420,11 +451,26 @@
             if (this.files && this.files[0]) {
                 const reader = new FileReader();
                 reader.onload = e => {
-                    mainPreview.innerHTML = `<img src="${e.target.result}" class="h-full w-full object-cover rounded-lg">`;
+                    mainPreview.innerHTML = `
+                        <img src="${e.target.result}" class="h-full w-full object-cover rounded-lg">
+                        <button type="button" class="remove-main-image absolute -top-2 -right-2 h-6 w-6 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-lg hover:bg-rose-600 transition-all z-20">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    `;
                 };
                 reader.readAsDataURL(this.files[0]);
             }
         });
+
+        mainPreview.addEventListener('click', e => {
+            if (e.target.closest('.remove-main-image')) {
+                e.preventDefault();
+                e.stopPropagation();
+                mainInput.value = "";
+                mainPreview.innerHTML = `<i class="fa-solid fa-camera text-xl"></i>`;
+            }
+        });
+
 
         galleryInput.addEventListener('change', function() {
              Array.from(this.files).forEach(f => {
