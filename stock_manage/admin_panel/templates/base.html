@@ -11,6 +11,38 @@
         html, body { max-width: 100%; overflow-x: hidden; }
         main { max-width: 100vw; overflow-x: hidden; }
         .lg\:ml-64 { max-width: 100vw; }
+        @keyframes modal-enter {
+            from { opacity: 0; transform: scale(0.95) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal-enter { animation: modal-enter 0.3s ease-out forwards; }
+
+        /* Custom Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0F182A;
+            border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e293b;
+        }
+
+        /* Support for Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #0F182A transparent;
+        }
+
+        /* Custom Scrollbar Utility */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
 
         /* Custom Loader */
         .loader {
@@ -82,44 +114,37 @@
         <span class="font-medium">Suppliers</span>
     </a>
 
-    <div class="relative">
-        <a href="{% url 'auth_workers' %}"
-           class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-            <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-                <i class="fa-solid fa-user-gear text-sm"></i>
-            </span>
-            <span class="font-medium">Workers</span>
-           
-        </a>
-        <button id="workersNavDropdownToggle" class="absolute inset-y-0 right-2 my-auto h-7 w-7 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:text-white transition">
-            <svg id="workersNavChevronBtn" class="h-3 w-3 transition-transform duration-200 mx-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-    </div>
-    <div id="workersNavDropdownMenuNav" class="hidden flex-col gap-1 px-4 mt-1">
-        <a href="{% url 'auth_holiday' %}"
-           class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-white/80 hover:text-white hover:bg-white/10 transition">
-            <span class="h-7 w-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                <i class="fa-solid fa-calendar-days text-[10px]"></i>
-            </span>
-            <span class="font-medium">Holiday</span>
-        </a>
-        <a href="{% url 'auth_leaves' %}"
-           class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-white/80 hover:text-white hover:bg-white/10 transition">
-            <span class="h-7 w-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                <i class="fa-solid fa-calendar-minus text-[10px]"></i>
-            </span>
-            <span class="font-medium">Leaves</span>
-        </a>
-        <a href="{% url 'auth_work_salary' %}"
-           class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-white/80 hover:text-white hover:bg-white/10 transition">
-            <span class="h-7 w-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i>
-            </span>
-            <span class="font-medium">Salary</span>
-        </a>
-    </div>
+    <div class="flex flex-col">
+        <div class="relative flex items-center justify-between group">
+            <a href="{% url 'auth_workers' %}"
+               class="nav-link flex-1 flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
+                    <i class="fa-solid fa-user-gear text-sm"></i>
+                </span>
+                <span class="font-medium">Workers</span>
+            </a>
+            <button id="workersNavDropdownToggle" class="absolute right-2 flex items-center justify-center h-8 w-8 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition z-10 focus:outline-none">
+                <svg id="workersNavChevronBtn" class="h-4 w-4 transition-transform duration-300 transform" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+        
+        <div id="workersNavDropdownMenuNav" class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-in-out pl-4 pr-2">
+            <div class="overflow-hidden">
+                <div class="flex flex-col gap-1 mt-1 border-l border-white/10 ml-5 pl-4 pb-2">
+                    <a href="{% url 'auth_holiday' %}" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition">
+                        Holiday
+                    </a>
+                    <a href="{% url 'auth_leaves' %}" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition">
+                        Leaves
+                    </a>
+                    <a href="{% url 'auth_work_salary' %}" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/70 hover:text-white hover:bg-white/10 transition">
+                        Salary
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <a href="{% url 'auth_inventory' %}"
@@ -202,9 +227,11 @@
                 <div class="flex items-center gap-3 sm:gap-4">
                     
 
-                    <div class="flex items-center gap-2 sm:gap-3">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base shadow">
-                            {% if request.user.is_authenticated %}
+                    <div class="flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="toggleProfileModal()">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base shadow overflow-hidden">
+                            {% if admin_profile.profile_image %}
+                                <img src="{{ admin_profile.profile_image.url }}" alt="Admin Avatar" class="w-full h-full object-cover">
+                            {% elif request.user.is_authenticated %}
                                 {% if request.user.first_name or request.user.last_name %}
                                     {{ request.user.first_name|default:''|slice:":1" }}{{ request.user.last_name|default:''|slice:":1" }}
                                 {% else %}
@@ -214,7 +241,7 @@
                                 GU
                             {% endif %}
                         </div>
-                        <span class="hidden sm:block text-sm font-medium text-gray-700">
+                        <span class="hidden sm:block text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors">
                             {% if request.user.is_authenticated %}
                                 {% if request.user.get_full_name %}
                                     {{ request.user.get_full_name }}
@@ -229,6 +256,91 @@
                 </div>
             </div>
         </header>
+
+        <!-- Profile Modal -->
+         <div id="profileModal" class="fixed inset-0 z-[100] overflow-y-auto hidden">
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleProfileModal()"></div>
+            <div class="flex min-h-full items-center justify-center p-4 sm:p-0">
+                <div class="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl transition-all transform animate-modal-enter">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-6 sm:p-8">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                                <i class="fa-solid fa-user-gear text-blue-400"></i>
+                                Admin Settings
+                            </h3>
+                            <button onclick="toggleProfileModal()" class="text-white/60 hover:text-white transition-colors">
+                                <i class="fa-solid fa-xmark text-xl"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <form action="{% url 'auth_profile' %}" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6">
+                        {% csrf_token %}
+                        <!-- Avatar Section -->
+                        <div class="flex flex-col items-center sm:flex-row sm:items-start gap-6 pb-6 border-b border-gray-100">
+                            <div class="relative group">
+                                <div class="h-24 w-24 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden">
+                                    {% if admin_profile.profile_image %}
+                                        <img id="avatarPreview" src="{{ admin_profile.profile_image.url }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <div id="avatarPlaceholder" class="text-slate-400 flex flex-col items-center gap-1">
+                                            <i class="fa-solid fa-camera text-2xl"></i>
+                                            <span class="text-[10px] font-medium">No Image</span>
+                                        </div>
+                                        <img id="avatarPreview" src="" class="hidden w-full h-full object-cover">
+                                    {% endif %}
+                                </div>
+                                <label for="profile_image" class="absolute -bottom-2 -right-2 h-8 w-8 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
+                                    <i class="fa-solid fa-plus text-xs"></i>
+                                    <input type="file" id="profile_image" name="profile_image" class="hidden" accept="image/*" onchange="previewAvatar(this)">
+                                </label>
+                            </div>
+                            <div class="text-center sm:text-left pt-2">
+                                <h4 class="font-bold text-slate-800">{{ request.user.username }}</h4>
+                                <p class="text-xs text-slate-500 mt-1">Super Administrator</p>
+                                <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-3 font-bold">Account Access</p>
+                            </div>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">First Name</label>
+                                <input type="text" name="first_name" value="{{ request.user.first_name }}" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm" placeholder="First Name">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Last Name</label>
+                                <input type="text" name="last_name" value="{{ request.user.last_name }}" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm" placeholder="Last Name">
+                            </div>
+                            <div class="space-y-1.5 sm:col-span-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email Address</label>
+                                <input type="email" name="email" value="{{ request.user.email }}" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm" placeholder="admin@example.com">
+                            </div>
+                            <div class="space-y-1.5 sm:col-span-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Phone Number</label>
+                                <input type="text" name="phone" value="{{ admin_profile.phone }}" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm" placeholder="+1 (555) 000-0000">
+                            </div>
+                            <div class="space-y-1.5 sm:col-span-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Office Address</label>
+                                <textarea name="address" rows="2" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm resize-none" placeholder="Location details...">{{ admin_profile.address }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="pt-4 flex gap-3">
+                            <button type="button" onclick="toggleProfileModal()" class="flex-1 px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" class="flex-2 px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-95">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+         </div>
 
         {% block admin_dash %}
         
@@ -303,6 +415,31 @@
             overlay.classList.toggle('hidden');
         }
 
+        function toggleProfileModal() {
+            const modal = document.getElementById('profileModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function previewAvatar(input) {
+            const preview = document.getElementById('avatarPreview');
+            const placeholder = document.getElementById('avatarPlaceholder');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    if(placeholder) placeholder.classList.add('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         (function () {
             const path = window.location.pathname.replace(/\/+$/, '');
             const links = document.querySelectorAll('a.nav-link');
@@ -336,29 +473,36 @@
             const toggle = document.getElementById('workersNavDropdownToggle');
             const menuNav = document.getElementById('workersNavDropdownMenuNav');
             const chevronBtn = document.getElementById('workersNavChevronBtn');
-            if (toggle && menuNav) {
-                // If any child is highlighted as active, open the menu by default
-                if (menuNav.querySelector('a.bg-white\\/15')) {
-                    menuNav.classList.remove('hidden');
-                    menuNav.classList.add('flex');
-                    if (chevronBtn) chevronBtn.classList.add('rotate-180');
+            
+            // Auto open menu if child is active
+            if (activeText && ['Holiday', 'Leaves', 'Salary'].includes(activeText)) {
+                if (menuNav) {
+                    menuNav.classList.remove('grid-rows-[0fr]');
+                    menuNav.classList.add('grid-rows-[1fr]');
                 }
-                
+                if (chevronBtn) chevronBtn.classList.add('rotate-180');
+            }
+
+            if (toggle && menuNav) {
                 toggle.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    const isHidden = menuNav.classList.contains('hidden');
-                    if (isHidden) {
-                        menuNav.classList.remove('hidden');
-                        menuNav.classList.add('flex');
+                    const isOpen = menuNav.classList.contains('grid-rows-[1fr]');
+                    
+                    if (isOpen) {
+                        menuNav.classList.remove('grid-rows-[1fr]');
+                        menuNav.classList.add('grid-rows-[0fr]');
+                        if (chevronBtn) chevronBtn.classList.remove('rotate-180');
                     } else {
-                        menuNav.classList.remove('flex');
-                        menuNav.classList.add('hidden');
+                        menuNav.classList.remove('grid-rows-[0fr]');
+                        menuNav.classList.add('grid-rows-[1fr]');
+                        if (chevronBtn) chevronBtn.classList.add('rotate-180');
                     }
-                    if (chevronBtn) chevronBtn.classList.toggle('rotate-180', isHidden);
                 });
             }
         })();
     </script>
 </body>
 </html> 
+{% comment %} venv\Scripts\activate
+git merge origin/ {% endcomment %}

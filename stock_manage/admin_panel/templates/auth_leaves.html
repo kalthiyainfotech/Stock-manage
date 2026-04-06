@@ -2,13 +2,18 @@
 {% block admin_dash %}
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen overflow-x-hidden">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Leaves</h1>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 tracking-tight">
+                Leave Management
+            </h1>
+            <p class="text-sm text-slate-500 mt-1 font-medium">Manage worker leaves, requests, and attendance records.</p>
         </div>
     </div>
 
-    <section class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
+    <section
+        class="mt-8 rounded-2xl border-0 ring-1 ring-slate-100 bg-white/90 backdrop-blur-md shadow-2xl shadow-indigo-100/40 relative overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-1 bg-[#192335]"></div>
         <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-0.5">
                 <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
@@ -37,16 +42,17 @@
                         id="leaveSearch"
                         type="text"
                         placeholder="Search by worker, category, or status…"
-                        class="w-full sm:w-64 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
-                               text-slate-700 placeholder:text-slate-400 shadow-sm
-                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                        class="w-full sm:w-72 rounded-xl border-0 bg-slate-50 px-9 py-2.5 text-sm
+                               text-slate-700 placeholder:text-slate-400 ring-1 ring-inset ring-slate-200
+                               focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-all duration-200">
                 </label>
             </div>
         </div>
 
         <div class="overflow-x-auto border-t border-slate-100">
             <table class="min-w-full text-left text-sm text-slate-700">
-                <thead class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
+                <thead
+                    class="bg-slate-50/80 text-xs uppercase tracking-[0.15em] font-extrabold text-slate-500 border-b border-slate-100">
                     <tr>
                         <th class="px-4 py-3 font-medium">Worker</th>
                         <th class="px-4 py-3 font-medium">Category</th>
@@ -139,110 +145,173 @@
     </section>
 </main>
 
-<div id="leaveViewModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
-    <div class="bg-white w-full max-w-2xl rounded-xl p-5 sm:p-6 relative">
-        <button onclick="closeLeaveView()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">✖</button>
-        <div class="space-y-4">
+<div id="leaveViewModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm items-center justify-center px-3 sm:px-6 transition-all duration-300">
+    <div class="relative w-full max-w-lg rounded-[2rem] bg-white shadow-2xl shadow-slate-900/40 overflow-hidden transform transition-all animate-modal-enter">
+            
+        <!-- Banner Header -->
+        <div class="relative h-24 bg-[#161F32] overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;40&quot; height=&quot;40&quot; viewBox=&quot;0 0 40 40&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot; fill-rule=&quot;evenodd&quot;%3E%3Cpath d=&quot;M0 40L40 0H20L0 20M40 40V20L20 40&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+            <button onclick="closeLeaveView()"
+                class="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-black/20 text-white hover:bg-black/40 flex items-center justify-center backdrop-blur-md transition-all">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <div class="px-6 pb-8 -mt-8 relative z-10 custom-scrollbar max-h-[85vh] overflow-y-auto">
+            <div class="h-16 w-16 mb-4 rounded-xl shadow-lg border-4 border-white bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-user-clock text-2xl text-indigo-500"></i>
+            </div>
+            
             <div>
-                <p class="text-xs font-medium text-slate-500">Worker</p>
-                <p id="lvWorker" class="text-sm font-semibold text-slate-900"></p>
+                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Worker</p>
+                <h2 id="lvWorker" class="text-2xl font-bold text-slate-800 tracking-tight"></h2>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <p class="text-xs font-medium text-slate-500">Start date</p>
-                    <p id="lvStartDate" class="text-sm text-slate-800"></p>
+            
+            <div class="mt-6 space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fa-regular fa-calendar-check text-slate-400"></i>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Start Date</p>
+                        </div>
+                        <p id="lvStartDate" class="text-sm font-semibold text-slate-700"></p>
+                        <p id="lvStartTime" class="text-xs text-slate-500 mt-0.5">—</p>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="fa-regular fa-calendar-xmark text-slate-400"></i>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">End Date</p>
+                        </div>
+                        <p id="lvEndDate" class="text-sm font-semibold text-slate-700"></p>
+                        <p id="lvEndTime" class="text-xs text-slate-500 mt-0.5">—</p>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-xs font-medium text-slate-500">End date</p>
-                    <p id="lvEndDate" class="text-sm text-slate-800"></p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Category</p>
+                        <p id="lvCategory" class="text-sm font-semibold text-slate-700"></p>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Status</p>
+                        <p id="lvStatus" class="text-sm font-semibold text-slate-700"></p>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-xs font-medium text-slate-500">Start time</p>
-                    <p id="lvStartTime" class="text-sm text-slate-800">—</p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-slate-500">End time</p>
-                    <p id="lvEndTime" class="text-sm text-slate-800">—</p>
+                
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Reason</p>
+                    <p id="lvReason" class="text-sm font-medium text-slate-600 leading-relaxed whitespace-pre-wrap"></p>
                 </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <p class="text-xs font-medium text-slate-500">Category</p>
-                    <p id="lvCategory" class="text-sm text-slate-800"></p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium text-slate-500">Status</p>
-                    <p id="lvStatus" class="text-sm text-slate-800"></p>
-                </div>
-            </div>
-            <div>
-                <p class="text-xs font-medium text-slate-500">Reason</p>
-                <p id="lvReason" class="text-sm text-slate-800 whitespace-pre-wrap"></p>
+
+            <div class="mt-6 pt-6 border-t border-slate-100 flex justify-end">
+                <button onclick="closeLeaveView()"
+                    class="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 active:scale-95 transition-all">
+                    Close Details
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="leaveEditModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-3 sm:px-6">
-    <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
-            <div>
-                <h2 class="text-base sm:text-lg font-semibold text-slate-900">Edit Leave</h2>
-                <p class="text-xs text-slate-500">Update the leave details</p>
+<div id="leaveEditModal"
+    class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm items-center justify-center px-3 sm:px-6 transition-all duration-300">
+
+    <div
+        class="relative w-full max-w-2xl rounded-[2rem] bg-white shadow-2xl shadow-slate-900/40 max-h-[90vh] overflow-hidden flex flex-col transform transition-all animate-modal-enter">
+
+        <!-- Modal Header -->
+        <div class="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-6 py-5 sm:px-8 sm:py-6 shrink-0">
+            <div class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-50"></div>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Edit Leave</h2>
+                    <p class="mt-1.5 text-xs sm:text-sm text-indigo-200/80 font-medium tracking-wide">Update the leave details</p>
+                </div>
+            
+                <button onclick="closeLeaveEdit()"
+                        class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition backdrop-blur-md">
+                        <span class="sr-only">Close</span>
+                        ✕
+                </button>
             </div>
-            <button onclick="closeLeaveEdit()" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
         </div>
-        <form id="leaveEditForm" method="POST" action="#" class="p-4 sm:p-6 space-y-4">
-            {% csrf_token %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Start date</label>
-                    <input id="leStart" type="date" name="start_date" required class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
+
+        <div class="px-6 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/30">
+            <form id="leaveEditForm" method="POST" action="#" class="space-y-8">
+                {% csrf_token %}
+
+                <div class="bg-white rounded-2xl p-5 sm:p-6 ring-1 ring-slate-100 shadow-sm shadow-slate-200/50">
+                    
+                    <div class="mb-5 flex items-center gap-3">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                            <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+                        </span>
+                        <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-800">Leave Duration & Status</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Start date</label>
+                            <input id="leStart" type="date" name="start_date" required class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">End date</label>
+                            <input id="leEnd" type="date" name="end_date" required class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Start time</label>
+                            <input id="leStartTime" type="time" name="start_time" class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">End time</label>
+                            <input id="leEndTime" type="time" name="end_time" class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Category</label>
+                            <select id="leCategory" name="category" class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                <option value="Casual">Casual</option>
+                                <option value="Sick">Sick</option>
+                                <option value="Emergency">Emergency</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Status</label>
+                            <select id="leStatus" name="status" class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                <option value="Pending">Pending</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Reason</label>
+                        <textarea id="leReason" name="reason" rows="3" class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none resize-none" placeholder="Optional"></textarea>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">End date</label>
-                    <input id="leEnd" type="date" name="end_date" required class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
+
+                <!-- Action Buttons -->
+                <div class="pt-6 mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end border-t border-slate-200">
+                    <button type="button" onclick="closeLeaveEdit()"
+                        class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                        class="group relative inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 text-sm font-bold text-white shadow-xl shadow-slate-900/20 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/30 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
+                        <span class="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+                        <i class="fa-solid fa-floppy-disk relative z-10 transition-transform group-hover:scale-110"></i>
+                        <span class="relative z-10">Save</span>
+                    </button>
                 </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Start time</label>
-                    <input id="leStartTime" type="time" name="start_time" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">End time</label>
-                    <input id="leEndTime" type="time" name="end_time" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Category</label>
-                    <select id="leCategory" name="category" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                        <option value="Casual">Casual</option>
-                        <option value="Sick">Sick</option>
-                        <option value="Emergency">Emergency</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                    <select id="leStatus" name="status" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                        <option value="Pending">Pending</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                    </select>
-                </div>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Reason</label>
-                <textarea id="leReason" name="reason" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300" placeholder="Optional"></textarea>
-            </div>
-            <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
-                <button type="button" onclick="closeLeaveEdit()" class="px-4 py-2 text-sm bg-slate-200 rounded hover:bg-slate-300">Cancel</button>
-                <button class="px-4 py-2 text-sm bg-slate-900 text-white rounded hover:bg-slate-800">Save</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 

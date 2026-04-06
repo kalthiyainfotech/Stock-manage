@@ -2,63 +2,128 @@
 {% block admin_dash %}
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Holidays</h1>
-            
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 tracking-tight">
+                Holiday Dashboard
+            </h1>
+            <p class="text-sm text-slate-500 mt-1 font-medium">Manage company holidays, non-working days, and events.</p>
         </div>
+
         <button id="openHolidayModal"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-slate-800 hover:via-slate-700 hover:to-slate-700">
-            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/10 text-xs border border-white/20">
+            class="group relative inline-flex items-center justify-center gap-3 rounded-full bg-slate-900
+                   px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-400/30
+                   hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2
+                   transition-all duration-300">
+            <span class="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-xs shadow-inner backdrop-blur-sm transition-transform group-hover:rotate-90">
                 <i class="fa-solid fa-plus"></i>
             </span>
-            <span>Add Holiday</span>
+            <span class="relative z-10 tracking-wide">Add Holiday</span>
         </button>
     </div>
 
-    <div id="holidayModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
-        <div class="relative w-full max-w-md rounded-2xl bg-white shadow-xl max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 bg-slate-50/60 rounded-t-2xl">
-                <div>
-                    <h2 id="holidayModalTitle" class="text-base sm:text-lg font-semibold text-slate-900">Add Holiday</h2>
+    <div id="holidayModal"
+        class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm items-center justify-center px-3 sm:px-6 transition-all duration-300">
+
+        <div
+            class="relative w-full max-w-2xl rounded-[2rem] bg-white shadow-2xl shadow-slate-900/40 max-h-[90vh] overflow-hidden flex flex-col transform transition-all animate-modal-enter">
+
+            <!-- Modal Header -->
+            <div class="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-6 py-5 sm:px-8 sm:py-6 shrink-0">
+                <div class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-50"></div>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 id="holidayModalTitle" class="text-xl sm:text-2xl font-bold text-white tracking-tight">Add Holiday</h2>
+                        <p class="mt-1.5 text-xs sm:text-sm text-indigo-200/80 font-medium tracking-wide">Create non-working day or event</p>
+                    </div>
+                
+                    <button id="closeHolidayModal"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition backdrop-blur-md">
+                            <span class="sr-only">Close</span>
+                            ✕
+                    </button>
                 </div>
-                <button id="closeHolidayModal" class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100">✕</button>
             </div>
-            <div class="px-4 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-4">
-                <form id="holidayForm" method="POST" action="{% url 'add_holiday' %}" class="space-y-4">
+
+            <div class="px-6 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/30">
+                <form id="holidayForm" method="POST" action="{% url 'add_holiday' %}" class="space-y-8">
                     {% csrf_token %}
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-medium text-slate-700">Name</label>
-                        <input type="text" name="name" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+
+                    <div class="bg-white rounded-2xl p-5 sm:p-6 ring-1 ring-slate-100 shadow-sm shadow-slate-200/50">
+                        <div class="mb-5 flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                                <i class="fa-solid fa-calendar-star text-sm"></i>
+                            </span>
+                            <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-800">Holiday Details</h3>
+                        </div>
+
+                        <div class="space-y-5">
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Name</label>
+                                <input type="text" name="name" required class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                            </div>
+                            
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Date</label>
+                                <input type="date" name="date" required class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                            </div>
+                            
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Description</label>
+                                <textarea name="description" rows="3" class="w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 px-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none resize-none"></textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-medium text-slate-700">Date</label>
-                        <input type="date" name="date" required class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="text-xs font-medium text-slate-700">Description</label>
-                        <textarea name="description" rows="3" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                        <button type="button" id="closeHolidayModalBottom" class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm">Cancel</button>
-                        <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Save</button>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-6 mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end border-t border-slate-200">
+                        <button type="button" id="closeHolidayModalBottom"
+                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">
+                            Cancel
+                        </button>
+
+                        <button type="submit" id="holidaySubmitBtn"
+                            class="group relative inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 text-sm font-bold text-white shadow-xl shadow-slate-900/20 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/30 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
+                            <span class="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+                            <i class="fa-solid fa-floppy-disk relative z-10 transition-transform group-hover:scale-110"></i>
+                            <span class="relative z-10">Save Holiday</span>
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <section class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm">
+    <section
+        class="mt-8 rounded-2xl border-0 ring-1 ring-slate-100 bg-white/90 backdrop-blur-md shadow-2xl shadow-indigo-100/40 relative overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-1 bg-[#192335]"></div>
+
         <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-0.5">
-                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">Overview</p>
-                <p class="text-sm text-slate-500">Showing <span class="font-semibold text-slate-900">{{ holidays.start_index }}–{{ holidays.end_index }}</span> of <span class="font-semibold text-slate-900">{{ holidays.paginator.count }}</span> holidays.</p>
+                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                    Overview
+                </p>
+                <p class="text-sm text-slate-500">
+                    Showing
+                    <span class="font-semibold text-slate-900">
+                        {{ holidays.start_index }}–{{ holidays.end_index }}
+                    </span>
+                    of
+                    <span class="font-semibold text-slate-900">
+                        {{ holidays.paginator.count }}
+                    </span>
+                    holidays.
+                </p>
             </div>
         </div>
 
         <div class="overflow-x-auto border-t border-slate-100">
             <table class="min-w-full text-left text-sm text-slate-700">
-                <thead class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
+                <thead
+                    class="bg-slate-50/80 text-xs uppercase tracking-[0.15em] font-extrabold text-slate-500 border-b border-slate-100">
                     <tr>
                         <th class="px-4 py-3 font-medium text-center">No.</th>
                         <th class="px-4 py-3 font-medium">Name</th>
@@ -101,13 +166,47 @@
         </div>
     </section>
 
-    <div id="holidayViewModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 px-3 sm:px-6">
-        <div class="bg-white w-full max-w-md rounded-xl p-5 sm:p-6 relative">
-            <button onclick="closeHolidayView()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">✖</button>
-            <div class="space-y-3 text-sm">
-                <p><strong>Name:</strong> <span id="viewHolidayName"></span></p>
-                <p><strong>Date:</strong> <span id="viewHolidayDate"></span></p>
-                <p><strong>Description:</strong> <span id="viewHolidayDesc"></span></p>
+    <div id="holidayViewModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm items-center justify-center px-3 sm:px-6 transition-all duration-300">
+        <div class="relative w-full max-w-md rounded-[2rem] bg-white shadow-2xl shadow-slate-900/40 overflow-hidden transform transition-all animate-modal-enter">
+            
+            <!-- Banner Header -->
+            <div class="relative h-24 bg-[#161F32] overflow-hidden">
+                <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;40&quot; height=&quot;40&quot; viewBox=&quot;0 0 40 40&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot; fill-rule=&quot;evenodd&quot;%3E%3Cpath d=&quot;M0 40L40 0H20L0 20M40 40V20L20 40&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+                <button onclick="closeHolidayView()"
+                    class="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-black/20 text-white hover:bg-black/40 flex items-center justify-center backdrop-blur-md transition-all">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <div class="px-6 pb-8 -mt-8 relative z-10">
+                <div class="h-16 w-16 mb-4 rounded-xl shadow-lg border-4 border-white bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-calendar-day text-2xl text-indigo-500"></i>
+                </div>
+                <h2 id="viewHolidayName" class="text-2xl font-bold text-slate-800 tracking-tight"></h2>
+                
+                <div class="mt-6 space-y-4">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center gap-3">
+                        <div class="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+                            <i class="fa-regular fa-calendar text-slate-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Date</p>
+                            <p id="viewHolidayDate" class="text-sm font-semibold text-slate-700"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Description</p>
+                        <p id="viewHolidayDesc" class="text-sm font-medium text-slate-600 leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-slate-100 flex justify-end">
+                    <button onclick="closeHolidayView()"
+                        class="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 active:scale-95 transition-all">
+                        Close Details
+                    </button>
+                </div>
             </div>
         </div>
     </div>

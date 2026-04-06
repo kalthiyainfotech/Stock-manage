@@ -3,17 +3,18 @@
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 tracking-tight">
                 Contact Messages
             </h1>
-            
+            <p class="text-sm text-slate-500 mt-1 font-medium">Review and respond to messages submitted through the contact form.</p>
         </div>
     </div>
 
-    <section
-        class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
+    <section class="rounded-2xl border-0 ring-1 ring-slate-100 bg-white/90 backdrop-blur-md shadow-2xl shadow-indigo-100/40 relative overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-1 bg-[#192335]"></div>
 
         <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-0.5">
@@ -39,17 +40,16 @@
                         id="contactSearch"
                         type="text"
                         placeholder="Search by name, email, or message…"
-                        class="w-full sm:w-72 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
-                               text-slate-700 placeholder:text-slate-400 shadow-sm
-                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                        class="w-full sm:w-72 rounded-xl border-0 bg-slate-50 px-9 py-2.5 text-sm
+                               text-slate-700 placeholder:text-slate-400 ring-1 ring-inset ring-slate-200
+                               focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-all duration-200">
                 </label>
             </div>
         </div>
 
         <div class="overflow-x-auto border-t border-slate-100">
             <table class="min-w-full text-left text-sm text-slate-700">
-                <thead
-                    class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
+                <thead class="bg-slate-50/80 text-xs uppercase tracking-[0.15em] font-extrabold text-slate-500 border-b border-slate-100">
                     <tr>
                         <th class="px-4 py-3 font-medium text-center">No.</th>
                         <th class="px-4 py-3 font-medium">Name</th>
@@ -63,28 +63,42 @@
                 <tbody id="contactsTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for contact in contacts %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
+                        <td class="px-5 py-4 align-middle text-xs sm:text-sm text-slate-500 text-center font-semibold">
                             {{ forloop.counter }}
                         </td>
-                        <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900">
-                            {{ contact.first_name }} {{ contact.last_name }}
+                        <td class="px-5 py-4 align-middle text-sm font-bold text-slate-900">
+                            <div class="flex items-center gap-3">
+                                <div class="h-8 w-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-xs ring-1 ring-indigo-100 uppercase">
+                                    {{ contact.first_name|make_list|first }}{{ contact.last_name|make_list|first }}
+                                </div>
+                                {{ contact.first_name }} {{ contact.last_name }}
+                            </div>
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
-                            {{ contact.email }}
+                        <td class="px-5 py-4 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap font-medium">
+                            <a href="mailto:{{ contact.email }}" class="hover:text-indigo-600 transition-colors">{{ contact.email }}</a>
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
+                        <td class="px-5 py-4 align-middle text-xs sm:text-sm text-slate-600">
                             {{ contact.message|truncatechars:80 }}
                         </td>
-                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
+                        <td class="px-5 py-4 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap font-medium">
                             {{ contact.created_at|date:"Y-m-d H:i" }}
                         </td>
-                        <td class="px-4 py-3 align-middle text-center">
-                            <a href="{% url 'delete_contact' contact.id %}"
-                               class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
-                               title="Delete">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                                <span class="sr-only">Delete</span>
-                            </a>
+                        <td class="px-5 py-4 align-middle text-center border-l border-slate-50">
+                            <div class="inline-flex items-center justify-center gap-2">
+                                <button
+                                    onclick="openContactView('{{ contact.first_name|escapejs }} {{ contact.last_name|escapejs }}', '{{ contact.email|escapejs }}', '{{ contact.message|escapejs|linebreaksbr }}', '{{ contact.created_at|date:'Y-m-d H:i' }}')"
+                                    class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
+                                    title="View Message">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                    <span class="sr-only">View</span>
+                                </button>
+                                <a href="{% url 'delete_contact' contact.id %}"
+                                   class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition hover:scale-105 active:scale-95"
+                                   title="Delete">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                    <span class="sr-only">Delete</span>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
@@ -102,8 +116,80 @@
 
 </main>
 
+<div id="contactViewModal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm items-center justify-center px-3 sm:px-6 transition-all duration-300">
+    <div class="relative w-full max-w-xl rounded-[2rem] bg-white shadow-2xl shadow-slate-900/40 overflow-hidden transform transition-all animate-modal-enter">
+            
+        <!-- Banner Header -->
+        <div class="relative h-24 bg-[#161F32] overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;40&quot; height=&quot;40&quot; viewBox=&quot;0 0 40 40&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot; fill-rule=&quot;evenodd&quot;%3E%3Cpath d=&quot;M0 40L40 0H20L0 20M40 40V20L20 40&quot;/%3E%3C/g%3E%3C/svg%3E');"></div>
+            <button onclick="closeContactView()"
+                class="absolute top-4 right-4 z-10 h-8 w-8 rounded-full bg-black/20 text-white hover:bg-black/40 flex items-center justify-center backdrop-blur-md transition-all">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <div class="px-6 pb-8 -mt-8 relative z-10 custom-scrollbar max-h-[85vh] overflow-y-auto">
+            <div class="h-16 w-16 mb-4 rounded-xl shadow-lg border-4 border-white bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                <i class="fa-regular fa-envelope-open text-2xl text-indigo-500"></i>
+            </div>
+            
+            <div class="flex items-center justify-between gap-4 mb-6">
+                <div>
+                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Sender</p>
+                    <h2 id="cvName" class="text-2xl font-bold text-slate-800 tracking-tight"></h2>
+                </div>
+                <div class="text-right">
+                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Received Date</p>
+                    <p id="cvDate" class="text-sm font-semibold text-slate-700"></p>
+                </div>
+            </div>
+            
+            <div class="mt-2 space-y-4">
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between gap-3 group">
+                    <div class="flex flex-col">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Reply To Email</p>
+                        <a id="cvEmail" href="#" class="text-sm font-semibold text-indigo-600 hover:text-indigo-800"></a>
+                    </div>
+                    <div class="h-10 w-10 rounded-full bg-white flex items-center justify-center shadow-sm text-slate-400 group-hover:text-indigo-500 transition-colors">
+                        <i class="fa-solid fa-reply"></i>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 shadow-inner">
+                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fa-regular fa-comment-dots"></i> Message Content
+                    </p>
+                    <p id="cvMessage" class="text-sm font-medium text-slate-700 leading-relaxed max-h-[40vh] overflow-y-auto custom-scrollbar pr-2"></p>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t border-slate-100 flex justify-end">
+                <button onclick="closeContactView()"
+                    class="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold shadow-lg shadow-slate-900/10 hover:shadow-slate-900/20 active:scale-95 transition-all">
+                    Close Message
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 <script>
+function openContactView(name, email, message, date) {
+    const modal = document.getElementById('contactViewModal');
+    document.getElementById('cvName').innerText = name;
+    document.getElementById('cvEmail').innerText = email;
+    document.getElementById('cvEmail').href = 'mailto:' + email;
+    document.getElementById('cvMessage').innerHTML = message;
+    document.getElementById('cvDate').innerText = date;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeContactView() {
+    document.getElementById('contactViewModal').classList.add('hidden');
+}
+
 const contactSearchInput = document.getElementById('contactSearch');
 const contactsTBody = document.getElementById('contactsTableBody');
 let noMatchRowContacts = null;

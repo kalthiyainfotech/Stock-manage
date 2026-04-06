@@ -4,18 +4,25 @@
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
     <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-3xl font-black text-slate-900 tracking-tight leading-tight">Worker Management</h1>
-            <p class="text-slate-500 text-sm font-medium mt-1">Manage worker profiles, details, and employment status.</p>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 tracking-tight">
+                Worker Dashboard
+            </h1>
+            <p class="text-sm text-slate-500 mt-1 font-medium">Manage worker profiles, details, and employment status.</p>
         </div>
 
         <button id="openworkerModal"
-            class="inline-flex items-center justify-center gap-3 rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-slate-200 hover:bg-slate-800 hover:-translate-y-0.5 transition-all active:scale-95 group">
-            <span class="h-6 w-6 flex items-center justify-center rounded-lg bg-white/10 border border-white/20 group-hover:bg-white/20 transition-all">
-                <i class="fa-solid fa-plus text-[10px]"></i>
+            class="group relative inline-flex items-center justify-center gap-3 rounded-full bg-slate-900
+                   px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-400/30
+                   hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2
+                   transition-all duration-300">
+            <span class="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-xs shadow-inner backdrop-blur-sm transition-transform group-hover:rotate-90">
+                <i class="fa-solid fa-plus"></i>
             </span>
-            <span>Add New Worker</span>
+            <span class="relative z-10 tracking-wide">Add Worker</span>
         </button>
     </div>
 
@@ -23,26 +30,26 @@
         class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm items-center justify-center px-3 sm:px-6 transition-all duration-300">
 
         <div
-            class="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl shadow-slate-900/20 max-h-[92vh] overflow-y-auto no-scrollbar animate-modal-enter">
+            class="relative w-full max-w-4xl rounded-[2rem] bg-white shadow-2xl shadow-slate-900/40 max-h-[90vh] overflow-hidden flex flex-col transform transition-all animate-modal-enter">
 
             <!-- Modal Header -->
-            <div class="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-8 bg-gradient-to-r from-[#161F32] to-slate-800">
-                <div class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-sm border border-white/20">
-                        <i class="fa-solid fa-user-plus text-sm"></i>
-                    </div>
+            <div class="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-6 py-5 sm:px-8 sm:py-6 shrink-0">
+                <div class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-50"></div>
+                <div class="flex items-center justify-between">
                     <div>
-                        <h2 id="modalTitle" class="text-base sm:text-lg font-bold text-white tracking-tight">Add Worker</h2>
-                        <p class="text-[10px] sm:text-xs text-slate-300 uppercase tracking-widest font-medium">Create New Profile</p>
+                        <h2 id="modalTitle" class="text-xl sm:text-2xl font-bold text-white tracking-tight">Add Worker</h2>
+                        <p class="mt-1.5 text-xs sm:text-sm text-indigo-200/80 font-medium tracking-wide">Create New Profile</p>
                     </div>
+                
+                    <button id="closeworkerModal"
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition backdrop-blur-md">
+                            <span class="sr-only">Close</span>
+                            ✕
+                    </button>
                 </div>
-                <button id="closeworkerModal"
-                    class="h-8 w-8 rounded-full flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
             </div>
 
-            <div class="p-5 sm:p-8">
+            <div class="px-6 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/30">
                 <form id="workerForm" method="POST" data-ajax-form="true"
                     action="{% url 'add_worker' %}"
                     enctype="multipart/form-data"
@@ -51,10 +58,12 @@
                     {% csrf_token %}
 
                     <!-- Personal Information -->
-                    <div class="space-y-5">
-                        <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
-                            <i class="fa-solid fa-id-card text-indigo-500 text-xs"></i>
-                            <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Personal Details</h3>
+                    <div class="bg-white rounded-2xl p-5 sm:p-6 ring-1 ring-slate-100 shadow-sm shadow-slate-200/50">
+                        <div class="mb-5 flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                                <i class="fa-solid fa-id-card text-sm"></i>
+                            </span>
+                            <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-800">Personal Details</h3>
                         </div>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -140,10 +149,12 @@
                     </div>
 
                     <!-- Location & Status -->
-                    <div class="space-y-5">
-                        <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
-                            <i class="fa-solid fa-location-dot text-emerald-500 text-xs"></i>
-                            <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Position & Location</h3>
+                    <div class="bg-white rounded-2xl p-5 sm:p-6 ring-1 ring-slate-100 shadow-sm shadow-slate-200/50">
+                        <div class="mb-5 flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                                <i class="fa-solid fa-location-dot text-sm"></i>
+                            </span>
+                            <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-800">Position & Location</h3>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -213,10 +224,12 @@
                     </div>
 
                     <!-- Attachments -->
-                    <div class="space-y-5">
-                        <div class="flex items-center gap-2 border-b border-slate-100 pb-2">
-                            <i class="fa-solid fa-paperclip text-amber-500 text-xs"></i>
-                            <h3 class="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Worker Attachments</h3>
+                    <div class="bg-white rounded-2xl p-5 sm:p-6 ring-1 ring-slate-100 shadow-sm shadow-slate-200/50">
+                        <div class="mb-5 flex items-center gap-3">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                                <i class="fa-solid fa-paperclip text-sm"></i>
+                            </span>
+                            <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-800">Worker Attachments</h3>
                         </div>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -287,16 +300,17 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end pt-5 border-t border-slate-100 sticky bottom-0 bg-white z-10 -mx-5 sm:-mx-8 px-5 sm:px-8 pb-1">
+                    <div class="pt-6 mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end border-t border-slate-200">
                         <button type="button" id="closeworkerModalBottom"
-                            class="inline-flex items-center justify-center rounded-xl bg-slate-100 px-6 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-200 transition-all active:scale-95">
+                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">
                             Cancel
                         </button>
 
                         <button type="submit" id="workerSubmitBtn"
-                            class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-slate-900 to-indigo-900 px-8 py-2.5 text-sm font-bold text-white shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 active:scale-95 transition-all">
-                            <i class="fa-solid fa-floppy-disk text-xs"></i>
-                            <span>Save Worker</span>
+                            class="group relative inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 text-sm font-bold text-white shadow-xl shadow-slate-900/20 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/30 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
+                            <span class="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+                            <i class="fa-solid fa-floppy-disk relative z-10 transition-transform group-hover:scale-110"></i>
+                            <span class="relative z-10">Save Worker</span>
                         </button>
                     </div>
 
@@ -306,7 +320,8 @@
     </div>
 
     <section
-        class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
+        class="mt-8 rounded-2xl border-0 ring-1 ring-slate-100 bg-white/90 backdrop-blur-md shadow-2xl shadow-indigo-100/40 relative overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-1 bg-[#192335]"></div>
 
         <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="space-y-0.5">
@@ -336,9 +351,9 @@
                         id="workerSearch"
                         type="text"
                         placeholder="Search by name, email, or ID…"
-                        class="w-full sm:w-64 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
-                               text-slate-700 placeholder:text-slate-400 shadow-sm
-                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                        class="w-full sm:w-72 rounded-xl border-0 bg-slate-50 px-9 py-2.5 text-sm
+                               text-slate-700 placeholder:text-slate-400 ring-1 ring-inset ring-slate-200
+                               focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-all duration-200">
                 </label>
             </div>
         </div>
@@ -346,7 +361,7 @@
         <div class="overflow-x-auto border-t border-slate-100">
             <table class="min-w-full text-left text-sm text-slate-700">
                 <thead
-                    class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
+                    class="bg-slate-50/80 text-xs uppercase tracking-[0.15em] font-extrabold text-slate-500 border-b border-slate-100">
                     <tr>
                         <th class="px-4 py-3 font-medium text-center">Profile</th>
                         <th class="px-4 py-3 font-medium">Name</th>
@@ -384,18 +399,13 @@
 
                         <td class="px-4 py-3 align-middle text-center">
                             <span
-                                class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold
+                                class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider
                                 {% if worker.status == 'Active' %}
-                                    bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100
+                                    bg-emerald-50 text-emerald-600 border border-emerald-100/50
                                 {% else %}
-                                    bg-rose-50 text-rose-700 ring-1 ring-rose-100
+                                    bg-rose-50 text-rose-600 border border-rose-100/50
                                 {% endif %}">
-                                <span class="h-1.5 w-1.5 rounded-full
-                                    {% if worker.status == 'Active' %}
-                                        bg-emerald-500
-                                    {% else %}
-                                        bg-rose-500
-                                    {% endif %}"></span>
+                                <span class="h-1.5 w-1.5 rounded-full {% if worker.status == 'Active' %} animate-pulse bg-emerald-500 {% else %} bg-rose-500 {% endif %}"></span>
                                 {{ worker.status }}
                             </span>
                         </td>
@@ -686,6 +696,79 @@
 
 <!-- JS -->
 <script>
+// ─── Custom Dropdown Logic ───
+function setCustomDropdown(fieldName, value) {
+    const container = document.querySelector(`.custom-dropdown[data-name="${fieldName}"]`);
+    if (!container) return;
+    const input = container.querySelector('input');
+    const label = container.querySelector('.dropdown-label');
+    const defaultValue = container.getAttribute('data-default') || 'Select Option';
+    
+    // Ensure value is set correctly or fallback to default
+    if (value && value !== 'None' && value.trim() !== '') {
+        input.value = value;
+        label.textContent = value;
+    } else {
+        input.value = '';
+        label.textContent = defaultValue;
+    }
+    
+    // Trigger input event to re-validate immediately when updated programmatically
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+        const btn = dropdown.querySelector('.dropdown-btn');
+        const menu = dropdown.querySelector('.dropdown-menu');
+        const input = dropdown.querySelector('input');
+        const label = dropdown.querySelector('.dropdown-label');
+        const arrow = dropdown.querySelector('.dropdown-arrow');
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = !menu.classList.contains('opacity-0');
+            
+            // Close others
+            document.querySelectorAll('.custom-dropdown .dropdown-menu').forEach(m => {
+                m.classList.add('opacity-0', 'invisible', 'translate-y-2');
+            });
+            document.querySelectorAll('.custom-dropdown .dropdown-arrow').forEach(a => {
+                a.classList.remove('rotate-180');
+            });
+
+            if (!isOpen) {
+                menu.classList.remove('opacity-0', 'invisible', 'translate-y-2');
+                arrow.classList.add('rotate-180');
+            }
+        });
+
+        menu.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const value = item.getAttribute('data-value');
+                input.value = value;
+                label.textContent = value;
+                
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('blur', { bubbles: true }));
+
+                menu.classList.add('opacity-0', 'invisible', 'translate-y-2');
+                arrow.classList.remove('rotate-180');
+            });
+        });
+    });
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.custom-dropdown .dropdown-menu').forEach(m => {
+            m.classList.add('opacity-0', 'invisible', 'translate-y-2');
+        });
+        document.querySelectorAll('.custom-dropdown .dropdown-arrow').forEach(a => {
+            a.classList.remove('rotate-180');
+        });
+    });
+});
+
 // ─── Elements ───
 const workerModal = document.getElementById('workerModal');
 const deleteModal = document.getElementById('deleteModal');
