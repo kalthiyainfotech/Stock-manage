@@ -11,12 +11,41 @@
         html, body { max-width: 100%; overflow-x: hidden; }
         main { max-width: 100vw; overflow-x: hidden; }
         .lg\:ml-64 { max-width: 100vw; }
+
+        /* Custom Loader */
+        .loader {
+            width: 50px;
+            aspect-ratio: 1;
+            display: grid;
+            -webkit-mask: conic-gradient(from 15deg, #0000, #000);
+            mask: conic-gradient(from 15deg, #0000, #000);
+            animation: l26 1s infinite steps(12);
+        }
+        .loader,
+        .loader:before,
+        .loader:after {
+            background:
+                radial-gradient(closest-side at 50% 12.5%, #1e3a8a 96%, #0000) 50% 0/20% 80% repeat-y,
+                radial-gradient(closest-side at 12.5% 50%, #1e3a8a 96%, #0000) 0 50%/80% 20% repeat-x;
+        }
+        .loader:before,
+        .loader:after {
+            content: "";
+            grid-area: 1/1;
+            transform: rotate(30deg);
+        }
+        .loader:after {
+            transform: rotate(60deg);
+        }
+        @keyframes l26 {
+            100% { transform: rotate(1turn); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div id="globalLoader" class="fixed inset-0 z-[1000] bg-white/70 backdrop-blur-sm hidden">
         <div class="h-full w-full flex items-center justify-center">
-            <div class="h-12 w-12 rounded-full border-4 border-slate-300 border-t-slate-900 animate-spin"></div>
+            <div class="loader"></div>
         </div>
     </div>
     <aside id="sidebar" class="fixed top-0 left-0 z-40 h-screen w-64 bg-gradient-to-b from-slate-900 to-slate-800 shadow-xl transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
@@ -62,38 +91,35 @@
             <span class="font-medium">Workers</span>
            
         </a>
-        <button id="workersNavDropdownToggle" class="absolute inset-y-0 right-2 my-auto h-7 w-7 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:text-white">
+        <button id="workersNavDropdownToggle" class="absolute inset-y-0 right-2 my-auto h-7 w-7 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:text-white transition">
             <svg id="workersNavChevronBtn" class="h-3 w-3 transition-transform duration-200 mx-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
         </button>
-        <div id="workersNavDropdownMenuNav"
-             class="absolute left-0 right-0 top-full mt-1 rounded-xl bg-gradient-to-b from-slate-900 to-slate-800 border border-white/10 shadow-xl backdrop-blur
-                    opacity-0 pointer-events-none transition-all duration-200 ease-out origin-top scale-95">
-            <a href="{% url 'auth_holiday' %}"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                    <i class="fa-solid fa-calendar-days text-sm"></i>
-                </span>
-                <span class="font-medium">Holiday</span>
-            </a>
-            <a href="{% url 'auth_leaves' %}"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                    <i class="fa-solid fa-calendar-minus text-sm"></i>
-                </span>
-                <span class="font-medium">Leaves</span>
-            </a>
-            <a href="{% url 'auth_work_salary' %}"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                    <i class="fa-solid fa-calendar-minus text-sm"></i>
-                </span>
-                <span class="font-medium">Salary</span>
-            </a>
-        </div>
-        
-        
+    </div>
+    <div id="workersNavDropdownMenuNav" class="hidden flex-col gap-1 px-4 mt-1">
+        <a href="{% url 'auth_holiday' %}"
+           class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-white/80 hover:text-white hover:bg-white/10 transition">
+            <span class="h-7 w-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                <i class="fa-solid fa-calendar-days text-[10px]"></i>
+            </span>
+            <span class="font-medium">Holiday</span>
+        </a>
+        <a href="{% url 'auth_leaves' %}"
+           class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-white/80 hover:text-white hover:bg-white/10 transition">
+            <span class="h-7 w-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                <i class="fa-solid fa-calendar-minus text-[10px]"></i>
+            </span>
+            <span class="font-medium">Leaves</span>
+        </a>
+        <a href="{% url 'auth_work_salary' %}"
+           class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-white/80 hover:text-white hover:bg-white/10 transition">
+            <span class="h-7 w-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                <i class="fa-solid fa-indian-rupee-sign text-[10px]"></i>
+            </span>
+            <span class="font-medium">Salary</span>
+        </a>
+    </div>
     </div>
 
     <a href="{% url 'auth_inventory' %}"
@@ -309,28 +335,27 @@
 
             const toggle = document.getElementById('workersNavDropdownToggle');
             const menuNav = document.getElementById('workersNavDropdownMenuNav');
-            const chevronAnchor = document.getElementById('workersNavChevron');
             const chevronBtn = document.getElementById('workersNavChevronBtn');
             if (toggle && menuNav) {
+                // If any child is highlighted as active, open the menu by default
+                if (menuNav.querySelector('a.bg-white\\/15')) {
+                    menuNav.classList.remove('hidden');
+                    menuNav.classList.add('flex');
+                    if (chevronBtn) chevronBtn.classList.add('rotate-180');
+                }
+                
                 toggle.addEventListener('click', (e) => {
+                    e.preventDefault();
                     e.stopPropagation();
-                    const isOpen = menuNav.classList.contains('opacity-100');
-                    menuNav.classList.toggle('opacity-100', !isOpen);
-                    menuNav.classList.toggle('pointer-events-auto', !isOpen);
-                    menuNav.classList.toggle('opacity-0', isOpen);
-                    menuNav.classList.toggle('pointer-events-none', isOpen);
-                    menuNav.classList.toggle('scale-100', !isOpen);
-                    menuNav.classList.toggle('scale-95', isOpen);
-                    if (chevronAnchor) chevronAnchor.classList.toggle('rotate-180', !isOpen);
-                    if (chevronBtn) chevronBtn.classList.toggle('rotate-180', !isOpen);
-                });
-                document.addEventListener('click', (e) => {
-                    if (!menuNav.contains(e.target) && !toggle.contains(e.target)) {
-                        menuNav.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
-                        menuNav.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
-                        if (chevronAnchor) chevronAnchor.classList.remove('rotate-180');
-                        if (chevronBtn) chevronBtn.classList.remove('rotate-180');
+                    const isHidden = menuNav.classList.contains('hidden');
+                    if (isHidden) {
+                        menuNav.classList.remove('hidden');
+                        menuNav.classList.add('flex');
+                    } else {
+                        menuNav.classList.remove('flex');
+                        menuNav.classList.add('hidden');
                     }
+                    if (chevronBtn) chevronBtn.classList.toggle('rotate-180', isHidden);
                 });
             }
         })();
