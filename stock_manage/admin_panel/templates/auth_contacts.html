@@ -12,73 +12,76 @@
         </div>
     </div>
 
-    <!-- Main Table Card -->
-    <section class="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden relative">
+    <section
+        class="mt-5 rounded-xl border border-slate-200 bg-white/80 backdrop-blur-sm shadow-sm shadow-slate-100">
 
-
-        <!-- Table Toolbar -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b border-slate-100 bg-slate-50/30">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-filter text-slate-400 text-xs"></i>
-                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Contact Inquiries</h3>
+        <div class="flex flex-col gap-3 px-4 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="space-y-0.5">
+                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                    Overview
+                </p>
+                <p class="text-sm text-slate-500">
+                    Showing
+                    <span class="font-semibold text-slate-900">
+                        {{ contacts|length }}
+                    </span>
+                    contact messages.
+                </p>
             </div>
 
-            <div class="relative w-full sm:w-72">
-                <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                </span>
-                <input
-                    id="contactSearch"
-                    type="text"
-                    placeholder="Search name, msg, email..."
-                    class="w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm
-                           text-slate-700 placeholder:text-slate-400 shadow-sm
-                           focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
+            <div class="w-full sm:w-auto">
+                <label class="relative block">
+                    <span class="sr-only">Search contacts</span>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input
+                        id="contactSearch"
+                        type="text"
+                        placeholder="Search by name, email, or message…"
+                        class="w-full sm:w-72 rounded-lg border border-slate-200 bg-white px-8 py-2 text-xs sm:text-sm
+                               text-slate-700 placeholder:text-slate-400 shadow-sm
+                               focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/50">
+                </label>
             </div>
         </div>
 
-
-        <!-- Table Container -->
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-50/50 border-b border-slate-100">
+        <div class="overflow-x-auto border-t border-slate-100">
+            <table class="min-w-full text-left text-sm text-slate-700">
+                <thead
+                    class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-xs uppercase tracking-wide text-slate-100">
                     <tr>
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-center">No.</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Sender Details</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Message Preview</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Date Received</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] text-center">Action</th>
+                        <th class="px-4 py-3 font-medium text-center">No.</th>
+                        <th class="px-4 py-3 font-medium">Name</th>
+                        <th class="px-4 py-3 font-medium">Email</th>
+                        <th class="px-4 py-3 font-medium">Message</th>
+                        <th class="px-4 py-3 font-medium whitespace-nowrap">Date</th>
+                        <th class="px-4 py-3 font-medium text-center">Action</th>
                     </tr>
                 </thead>
 
-
                 <tbody id="contactsTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for contact in contacts %}
-                    <tr class="group hover:bg-slate-50/50 transition-all duration-300">
-                        <td class="px-6 py-6 align-top">
-                             <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500 mx-auto">
-                                {{ forloop.counter }}
-                            </span>
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 text-center">
+                            {{ forloop.counter }}
                         </td>
-                        <td class="px-6 py-6 align-top">
-                            <h4 class="text-sm font-black text-slate-900 mb-0.5">{{ contact.first_name }} {{ contact.last_name }}</h4>
-                            <p class="text-[10px] font-bold text-indigo-600 lowercase tracking-tight">{{ contact.email }}</p>
+                        <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900">
+                            {{ contact.first_name }} {{ contact.last_name }}
                         </td>
-                        <td class="px-6 py-6 align-top max-w-sm">
-                            <p class="text-sm text-slate-600 font-medium leading-relaxed italic">"{{ contact.message|truncatechars:120 }}"</p>
-                            <div class="flex items-center gap-1.5 mt-2">
-                                <span class="h-1 w-1 rounded-full bg-slate-300"></span>
-                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Inquiry Message</span>
-                            </div>
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
+                            {{ contact.email }}
                         </td>
-                        <td class="px-6 py-6 align-top">
-                            <span class="text-xs font-bold text-slate-700 block">{{ contact.created_at|date:"d M, Y" }}</span>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{{ contact.created_at|date:"h:i A" }}</span>
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-600">
+                            {{ contact.message|truncatechars:80 }}
                         </td>
-                        <td class="px-6 py-6 align-top text-center">
+                        <td class="px-4 py-3 align-middle text-xs sm:text-sm text-slate-500 whitespace-nowrap">
+                            {{ contact.created_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td class="px-4 py-3 align-middle text-center">
                             <a href="{% url 'delete_contact' contact.id %}"
-                               class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition shadow-sm"
-                               title="Remove Inquiry">
+                               class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition"
+                               title="Delete">
                                 <i class="fa-solid fa-trash text-xs"></i>
                                 <span class="sr-only">Delete</span>
                             </a>
@@ -86,18 +89,12 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center">
-                                <div class="h-12 w-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-3">
-                                    <i class="fa-solid fa-envelope-open text-slate-300"></i>
-                                </div>
-                                <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">No Messages Found</p>
-                            </div>
+                        <td colspan="6" class="px-4 py-3 text-center text-gray-500">
+                            No contact messages yet.
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
-
             </table>
         </div>
 
@@ -140,5 +137,4 @@ if (contactSearchInput && contactsTBody) {
     });
 }
 </script>
-
 

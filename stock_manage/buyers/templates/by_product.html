@@ -48,9 +48,9 @@
 
                 <div class="border-y border-gray-100 py-6 mb-6">
                     <div class="flex items-end gap-3 mb-2">
-                        <span id="variant-price" class="text-3xl md:text-4xl font-black text-gray-900">₹{{ variant.price|intcomma }}</span>
+                        <span id="variant-price" class="text-3xl md:text-4xl font-black text-gray-900">₹{{ variant.price }}</span>
                         <div id="discount-container" class="flex items-end gap-3 {% if not product.base_price or product.base_price <= variant.price %}hidden{% endif %}">
-                            <span id="base-price" class="text-lg md:text-xl text-gray-400 line-through mb-1">₹{{ product.base_price|intcomma }}</span>
+                            <span id="base-price" class="text-lg md:text-xl text-gray-400 line-through mb-1">₹{{ product.base_price }}</span>
                             <span id="discount-badge" class="bg-red-100 text-red-600 font-bold px-2 py-1 rounded-lg text-xs md:text-sm mb-1 ml-2">
                                 -{{ discount_percent }}% OFF
                             </span>

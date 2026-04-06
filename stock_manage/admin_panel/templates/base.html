@@ -11,78 +11,12 @@
         html, body { max-width: 100%; overflow-x: hidden; }
         main { max-width: 100vw; overflow-x: hidden; }
         .lg\:ml-64 { max-width: 100vw; }
-        @keyframes modal-enter {
-            from { opacity: 0; transform: scale(0.95) translateY(-20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .animate-modal-enter { animation: modal-enter 0.3s ease-out forwards; }
-
-        /* Custom Loader */
-        .loader {
-            width: 50px;
-            aspect-ratio: 1;
-            display: grid;
-            -webkit-mask: conic-gradient(from 15deg, #0000, #000);
-            animation: l26 1s infinite steps(12);
-        }
-        .loader,
-        .loader:before,
-        .loader:after {
-            background:
-                radial-gradient(closest-side at 50% 12.5%, #1e3a8a 96%, #0000) 50% 0/20% 80% repeat-y,
-                radial-gradient(closest-side at 12.5% 50%, #1e3a8a 96%, #0000) 0 50%/80% 20% repeat-x;
-        }
-        .loader:before,
-        .loader:after {
-            content: "";
-            grid-area: 1/1;
-            transform: rotate(30deg);
-        }
-        .loader:after {
-            transform: rotate(60deg);
-        }
-        @keyframes l26 {
-            100% { transform: rotate(1turn); }
-        }
-
-        /* ── Modern Premium Scrollbar ── */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background-color: #192335;
-            border-radius: 20px;
-            border: 1px solid transparent;
-            background-clip: content-box;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: #192335;
-            width: 8px; /* Visual "growth" on hover */
-        }
-
-        /* Firefox Support */
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: #192335 transparent;
-        }
-
-        /* Keep the hidden scrollbar utility for specific areas if needed */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div id="globalLoader" class="fixed inset-0 z-[1000] bg-white/70 backdrop-blur-sm hidden">
         <div class="h-full w-full flex items-center justify-center">
-            <div class="loader"></div>
+            <div class="h-12 w-12 rounded-full border-4 border-slate-300 border-t-slate-900 animate-spin"></div>
         </div>
     </div>
     <aside id="sidebar" class="fixed top-0 left-0 z-40 h-screen w-64 bg-gradient-to-b from-slate-900 to-slate-800 shadow-xl transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
@@ -119,47 +53,48 @@
         <span class="font-medium">Suppliers</span>
     </a>
 
-    <!-- Workers Accordion -->
-    <div class="space-y-1">
-        <div class="relative flex items-center group">
-            <a href="{% url 'auth_workers' %}"
-               class="nav-link flex-1 flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
-                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
-                    <i class="fa-solid fa-user-gear text-sm"></i>
-                </span>
-                <span class="font-medium">Workers</span>
-            </a>
-            <button id="workersNavDropdownToggle" 
-                class="absolute right-2 h-8 w-8 rounded-lg bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center z-10">
-                <i id="workersNavChevronBtn" class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"></i>
-            </button>
-        </div>
-        
-        <div id="workersNavDropdownMenuNav" class="hidden overflow-hidden transition-all duration-300 ease-in-out pl-4 space-y-1">
+    <div class="relative">
+        <a href="{% url 'auth_workers' %}"
+           class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+            <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition">
+                <i class="fa-solid fa-user-gear text-sm"></i>
+            </span>
+            <span class="font-medium">Workers</span>
+           
+        </a>
+        <button id="workersNavDropdownToggle" class="absolute inset-y-0 right-2 my-auto h-7 w-7 rounded-lg bg-white/5 border border-white/10 text-white/80 hover:text-white">
+            <svg id="workersNavChevronBtn" class="h-3 w-3 transition-transform duration-200 mx-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        <div id="workersNavDropdownMenuNav"
+             class="absolute left-0 right-0 top-full mt-1 rounded-xl bg-gradient-to-b from-slate-900 to-slate-800 border border-white/10 shadow-xl backdrop-blur
+                    opacity-0 pointer-events-none transition-all duration-200 ease-out origin-top scale-95">
             <a href="{% url 'auth_holiday' %}"
-               class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition group">
-                <span class="h-8 w-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center group-hover:scale-110 transition">
-                    <i class="fa-solid fa-calendar-day text-xs"></i>
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                    <i class="fa-solid fa-calendar-days text-sm"></i>
                 </span>
-                <span class="text-sm font-medium">Holiday</span>
+                <span class="font-medium">Holiday</span>
             </a>
             <a href="{% url 'auth_leaves' %}"
-               class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition group">
-                <span class="h-8 w-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center group-hover:scale-110 transition">
-                    <i class="fa-solid fa-calendar-xmark text-xs"></i>
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                    <i class="fa-solid fa-calendar-minus text-sm"></i>
                 </span>
-                <span class="text-sm font-medium">Leaves</span>
+                <span class="font-medium">Leaves</span>
             </a>
             <a href="{% url 'auth_work_salary' %}"
-               class="nav-link flex items-center gap-3 px-4 py-2.5 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition group">
-                <span class="h-8 w-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center group-hover:scale-110 transition text-emerald-400">
-                    <i class="fa-solid fa-money-check-dollar text-xs"></i>
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
+                <span class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                    <i class="fa-solid fa-calendar-minus text-sm"></i>
                 </span>
-                <span class="text-sm font-medium">Salary</span>
+                <span class="font-medium">Salary</span>
             </a>
         </div>
+        
+        
     </div>
-
 
     <a href="{% url 'auth_inventory' %}"
        class="nav-link group flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:text-white hover:bg-white/10 transition">
@@ -241,11 +176,9 @@
                 <div class="flex items-center gap-3 sm:gap-4">
                     
 
-                    <div class="flex items-center gap-2 sm:gap-3 cursor-pointer group" onclick="toggleProfileModal()">
-                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base shadow overflow-hidden">
-                            {% if admin_profile.profile_image %}
-                                <img src="{{ admin_profile.profile_image.url }}" alt="Admin Avatar" class="w-full h-full object-cover">
-                            {% elif request.user.is_authenticated %}
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-sm sm:text-base shadow">
+                            {% if request.user.is_authenticated %}
                                 {% if request.user.first_name or request.user.last_name %}
                                     {{ request.user.first_name|default:''|slice:":1" }}{{ request.user.last_name|default:''|slice:":1" }}
                                 {% else %}
@@ -255,7 +188,7 @@
                                 GU
                             {% endif %}
                         </div>
-                        <span class="hidden sm:block text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors">
+                        <span class="hidden sm:block text-sm font-medium text-gray-700">
                             {% if request.user.is_authenticated %}
                                 {% if request.user.get_full_name %}
                                     {{ request.user.get_full_name }}
@@ -270,91 +203,6 @@
                 </div>
             </div>
         </header>
-
-        <!-- Profile Modal -->
-         <div id="profileModal" class="fixed inset-0 z-[100] overflow-y-auto hidden">
-            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="toggleProfileModal()"></div>
-            <div class="flex min-h-full items-center justify-center p-4 sm:p-0">
-                <div class="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl transition-all transform animate-modal-enter">
-                    <!-- Header -->
-                    <div class="bg-gradient-to-r from-slate-900 to-slate-800 p-6 sm:p-8">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-xl font-bold text-white flex items-center gap-3">
-                                <i class="fa-solid fa-user-gear text-blue-400"></i>
-                                Admin Settings
-                            </h3>
-                            <button onclick="toggleProfileModal()" class="text-white/60 hover:text-white transition-colors">
-                                <i class="fa-solid fa-xmark text-xl"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Body -->
-                    <form action="{% url 'auth_profile' %}" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6">
-                        {% csrf_token %}
-                        <!-- Avatar Section -->
-                        <div class="flex flex-col items-center sm:flex-row sm:items-start gap-6 pb-6 border-b border-gray-100">
-                            <div class="relative group">
-                                <div class="h-24 w-24 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden">
-                                    {% if admin_profile.profile_image %}
-                                        <img id="avatarPreview" src="{{ admin_profile.profile_image.url }}" class="w-full h-full object-cover">
-                                    {% else %}
-                                        <div id="avatarPlaceholder" class="text-slate-400 flex flex-col items-center gap-1">
-                                            <i class="fa-solid fa-camera text-2xl"></i>
-                                            <span class="text-[10px] font-medium">No Image</span>
-                                        </div>
-                                        <img id="avatarPreview" src="" class="hidden w-full h-full object-cover">
-                                    {% endif %}
-                                </div>
-                                <label for="profile_image" class="absolute -bottom-2 -right-2 h-8 w-8 bg-blue-600 text-white rounded-lg flex items-center justify-center shadow-lg cursor-pointer hover:bg-blue-700 transition-colors">
-                                    <i class="fa-solid fa-plus text-xs"></i>
-                                    <input type="file" id="profile_image" name="profile_image" class="hidden" accept="image/*" onchange="previewAvatar(this)">
-                                </label>
-                            </div>
-                            <div class="text-center sm:text-left pt-2">
-                                <h4 class="font-bold text-slate-800">{{ request.user.username }}</h4>
-                                <p class="text-xs text-slate-500 mt-1">Super Administrator</p>
-                                <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-3 font-bold">Account Access</p>
-                            </div>
-                        </div>
-
-                        <!-- Form Fields -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">First Name</label>
-                                <input type="text" name="first_name" value="{{ request.user.first_name }}" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm" placeholder="First Name">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Last Name</label>
-                                <input type="text" name="last_name" value="{{ request.user.last_name }}" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm" placeholder="Last Name">
-                            </div>
-                            <div class="space-y-1.5 sm:col-span-2">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email Address</label>
-                                <input type="email" name="email" value="{{ request.user.email }}" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm" placeholder="admin@example.com">
-                            </div>
-                            <div class="space-y-1.5 sm:col-span-2">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Phone Number</label>
-                                <input type="text" name="phone" value="{{ admin_profile.phone }}" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm" placeholder="+1 (555) 000-0000">
-                            </div>
-                            <div class="space-y-1.5 sm:col-span-2">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Office Address</label>
-                                <textarea name="address" rows="2" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-sm resize-none" placeholder="Location details...">{{ admin_profile.address }}</textarea>
-                            </div>
-                        </div>
-
-                        <!-- Footer -->
-                        <div class="pt-4 flex gap-3">
-                            <button type="button" onclick="toggleProfileModal()" class="flex-1 px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors">
-                                Cancel
-                            </button>
-                            <button type="submit" class="flex-2 px-8 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-95">
-                                Save Changes
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-         </div>
 
         {% block admin_dash %}
         
@@ -417,19 +265,9 @@
         function showLoader(){ if(__loaderEl) __loaderEl.classList.remove('hidden'); }
         function hideLoader(){ if(__loaderEl) __loaderEl.classList.add('hidden'); }
         const __origFetch = window.fetch;
-        window.fetch = async function(...args){
-            // Don't show loader for AJAX form submissions — they manage validation first
-            const isAjaxForm = (args[1] && args[1].headers && args[1].headers['X-Requested-With'] === 'XMLHttpRequest');
-            if (!isAjaxForm) showLoader();
-            try { const r = await __origFetch.apply(this, args); return r; }
-            finally { if (!isAjaxForm) hideLoader(); }
-        };
+        window.fetch = async function(...args){ showLoader(); try { const r = await __origFetch.apply(this, args); return r; } finally { hideLoader(); } };
         window.addEventListener('beforeunload', () => { showLoader(); });
-        document.addEventListener('submit', (e) => {
-            // Skip AJAX-managed forms — they control the loader themselves
-            if (e.target && e.target.hasAttribute('data-ajax-form')) return;
-            showLoader();
-        }, true);
+        document.addEventListener('submit', () => { showLoader(); }, true);
         document.addEventListener('DOMContentLoaded', () => { hideLoader(); });
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -437,31 +275,6 @@
             
             sidebar.classList.toggle('-translate-x-full');
             overlay.classList.toggle('hidden');
-        }
-
-        function toggleProfileModal() {
-            const modal = document.getElementById('profileModal');
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else {
-                modal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        function previewAvatar(input) {
-            const preview = document.getElementById('avatarPreview');
-            const placeholder = document.getElementById('avatarPlaceholder');
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.classList.remove('hidden');
-                    if(placeholder) placeholder.classList.add('hidden');
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
         }
 
         (function () {
@@ -496,114 +309,31 @@
 
             const toggle = document.getElementById('workersNavDropdownToggle');
             const menuNav = document.getElementById('workersNavDropdownMenuNav');
+            const chevronAnchor = document.getElementById('workersNavChevron');
             const chevronBtn = document.getElementById('workersNavChevronBtn');
-            
             if (toggle && menuNav) {
-                // Auto-expand if a sub-link is active
-                const hasActiveSublink = menuNav.querySelector('.bg-white\\/15');
-                if (hasActiveSublink) {
-                    menuNav.classList.remove('hidden');
-                    if (chevronBtn) chevronBtn.classList.add('rotate-180');
-                }
-
                 toggle.addEventListener('click', (e) => {
-                    e.preventDefault();
                     e.stopPropagation();
-                    
-                    const isHidden = menuNav.classList.contains('hidden');
-                    if (isHidden) {
-                        menuNav.classList.remove('hidden');
-                        if (chevronBtn) chevronBtn.classList.add('rotate-180');
-                    } else {
-                        menuNav.classList.add('hidden');
+                    const isOpen = menuNav.classList.contains('opacity-100');
+                    menuNav.classList.toggle('opacity-100', !isOpen);
+                    menuNav.classList.toggle('pointer-events-auto', !isOpen);
+                    menuNav.classList.toggle('opacity-0', isOpen);
+                    menuNav.classList.toggle('pointer-events-none', isOpen);
+                    menuNav.classList.toggle('scale-100', !isOpen);
+                    menuNav.classList.toggle('scale-95', isOpen);
+                    if (chevronAnchor) chevronAnchor.classList.toggle('rotate-180', !isOpen);
+                    if (chevronBtn) chevronBtn.classList.toggle('rotate-180', !isOpen);
+                });
+                document.addEventListener('click', (e) => {
+                    if (!menuNav.contains(e.target) && !toggle.contains(e.target)) {
+                        menuNav.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+                        menuNav.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+                        if (chevronAnchor) chevronAnchor.classList.remove('rotate-180');
                         if (chevronBtn) chevronBtn.classList.remove('rotate-180');
                     }
                 });
             }
-
         })();
-
-        // ─── Custom Dropdown Logic ───
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('.dropdown-btn');
-            if (btn) {
-                const dropdown = btn.closest('.custom-dropdown');
-                const menu = dropdown.querySelector('.dropdown-menu');
-                const arrow = dropdown.querySelector('.dropdown-arrow');
-                const isOpen = !menu.classList.contains('invisible');
-                
-                document.querySelectorAll('.custom-dropdown .dropdown-menu').forEach(m => {
-                    m.classList.add('invisible', 'opacity-0', 'translate-y-2');
-                    const a = m.parentElement.querySelector('.dropdown-arrow');
-                    if(a) a.style.transform = '';
-                });
-
-                if (!isOpen) {
-                    menu.classList.remove('invisible', 'opacity-0', 'translate-y-2');
-                    if(arrow) arrow.style.transform = 'rotate(180deg)';
-                }
-                return;
-            }
-
-            const item = e.target.closest('.dropdown-item');
-            if (item) {
-                const dropdown = item.closest('.custom-dropdown');
-                const menu = dropdown.querySelector('.dropdown-menu');
-                const arrow = dropdown.querySelector('.dropdown-arrow');
-                const input = dropdown.querySelector('input[type="hidden"]');
-                const label = dropdown.querySelector('.dropdown-label');
-
-                const val = item.getAttribute('data-value');
-                input.value = val;
-                label.innerText = item.innerText;
-                label.classList.remove('text-slate-400');
-                label.classList.add('text-slate-800');
-                menu.classList.add('invisible', 'opacity-0', 'translate-y-2');
-                if(arrow) arrow.style.transform = '';
-
-                let err = dropdown.closest('.space-y-1\\.5');
-                if(err) err = err.querySelector('.field-error');
-                if(err) {
-                    err.classList.add('hidden');
-                    dropdown.querySelector('.dropdown-btn').classList.remove('border-rose-500', 'bg-rose-50/50', 'ring-4', 'ring-rose-500/10');
-                }
-                return;
-            }
-
-            document.querySelectorAll('.custom-dropdown .dropdown-menu').forEach(m => {
-                m.classList.add('invisible', 'opacity-0', 'translate-y-2');
-                const a = m.parentElement.querySelector('.dropdown-arrow');
-                if(a) a.style.transform = '';
-            });
-        });
-
-        function setCustomDropdown(dropdownName, value) {
-            const dropdown = document.querySelector(`.custom-dropdown[data-name="${dropdownName}"]`);
-            if(dropdown) {
-                const input = dropdown.querySelector('input[type="hidden"]');
-                const label = dropdown.querySelector('.dropdown-label');
-                const val = (value || '').toString().trim();
-                if(val) {
-                    input.value = val;
-                    const item = dropdown.querySelector(`.dropdown-item[data-value="${val}"]`);
-                    if(item) {
-                        label.textContent = item.textContent.trim();
-                    } else {
-                        label.textContent = val;
-                    }
-                    label.classList.remove('text-slate-400');
-                    label.classList.add('text-slate-800');
-                } else {
-                    input.value = '';
-                    const defaultText = dropdown.getAttribute('data-default') || 'Select...';
-                    label.textContent = defaultText;
-                    label.classList.remove('text-slate-800');
-                    label.classList.add('text-slate-400');
-                }
-            }
-        }
     </script>
 </body>
 </html> 
-{% comment %} venv\Scripts\activate
-git merge origin/ {% endcomment %}
