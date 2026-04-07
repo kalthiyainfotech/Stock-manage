@@ -57,8 +57,95 @@ class Workers(models.Model):
 
     mbno = models.IntegerField()
     salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    joining_date = models.DateField(blank=True, null=True)
+    resignation_date = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+
+    def calculate_salary_for_month(self, year, month):
+        import calendar
+        from datetime import date
+        
+        month_start = date(year, month, 1)
+        _, days_in_month = calendar.monthrange(year, month)
+        month_end = date(year, month, days_in_month)
+
+        if self.joining_date and self.joining_date > month_end:
+            return None 
+        if self.resignation_date and self.resignation_date < month_start:
+            return None 
+
+        from .models import Leave
+        approved_leaves = Leave.objects.filter(
+            worker=self, 
+            status='Approved',
+            start_date__lte=month_end,
+            end_date__gte=month_start
+        )
+        
+        total_leave_days = 0.0
+        for l in approved_leaves:
+            total_leave_days += l.compute_leave_days(month=month, year=year)
+
+        base_salary = float(self.salary)
+        per_day_salary = base_salary / days_in_month
+        
+        extra_payment = 0.0
+        deduction = 0.0
+        final_salary = base_salary
+
+        if total_leave_days < 2:
+            extra_payment = (2.0 - total_leave_days) * per_day_salary
+            final_salary = base_salary + extra_payment
+        elif total_leave_days == 2:
+            final_salary = base_salary
+        else:
+            deduction_days = total_leave_days - 2.0
+            deduction = deduction_days * per_day_salary
+            final_salary = base_salary - deduction
+
+        return {
+            'year': year,
+            'month': month,
+            'month_name': calendar.month_name[month],
+            'base_salary': round(base_salary, 2),
+            'total_leave_days': total_leave_days,
+            'extra_payment': round(extra_payment, 2),
+            'deduction': round(deduction, 2),
+            'final_salary': round(final_salary, 2),
+            'days_in_month': days_in_month,
+            'quota_used': min(2.0, total_leave_days)
+        }
+
+    def get_salary_history(self):
+        from datetime import date
+        import calendar
+        
+        if not self.joining_date:
+            return []
+            
+        start = date(self.joining_date.year, self.joining_date.month, 1)
+        end = self.resignation_date or date.today()
+        _, d = calendar.monthrange(end.year, end.month)
+        end = date(end.year, end.month, d)
+
+        history = []
+        curr = start
+        while curr <= end:
+            res = self.calculate_salary_for_month(curr.year, curr.month)
+            if res:
+                history.append(res)
+            # increment to next month
+            if curr.month == 12:
+                curr = date(curr.year + 1, 1, 1)
+            else:
+                curr = date(curr.year, curr.month + 1, 1)
+        
+        return history[::-1]
+
+    @property
+    def name(self):
+        return f"{self.first_name} {self.last_name}"
 
 class Category(models.Model):
     name = models.CharField(max_length=100,unique=True)
@@ -267,6 +354,7 @@ class Leave(models.Model):
     reason = models.TextField(blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
     total_minutes = models.IntegerField(default=0)
+    leave_days = models.FloatField(default=0)  # Total counted as 0, 0.5, 1.0 per day
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -276,34 +364,36 @@ class Leave(models.Model):
     def __str__(self):
         return f"{self.worker.first_name} {self.worker.last_name} {self.start_date} - {self.end_date} [{self.category}/{self.status}]"
 
+    def _to_date(self, v):
+        from datetime import date, datetime
+        if isinstance(v, date):
+            return v
+        if isinstance(v, str) and v:
+            try:
+                return datetime.strptime(v, "%Y-%m-%d").date()
+            except ValueError:
+                return None
+        return None
+
+    def _to_time(self, v):
+        from datetime import time, datetime
+        if isinstance(v, time):
+            return v
+        if isinstance(v, str) and v:
+            for fmt in ("%H:%M", "%H:%M:%S"):
+                try:
+                    return datetime.strptime(v, fmt).time()
+                except ValueError:
+                    continue
+        return None
+
     def compute_total_minutes(self):
         from datetime import datetime, date, time, timedelta
 
-        def to_date(v):
-            if isinstance(v, date):
-                return v
-            if isinstance(v, str) and v:
-                try:
-                    return datetime.strptime(v, "%Y-%m-%d").date()
-                except ValueError:
-                    return None
-            return None
-
-        def to_time(v):
-            if isinstance(v, time):
-                return v
-            if isinstance(v, str) and v:
-                for fmt in ("%H:%M", "%H:%M:%S"):
-                    try:
-                        return datetime.strptime(v, fmt).time()
-                    except ValueError:
-                        continue
-            return None
-
-        s_date = to_date(self.start_date)
-        e_date = to_date(self.end_date)
-        s_time_input = to_time(self.start_time)
-        e_time_input = to_time(self.end_time)
+        s_date = self._to_date(self.start_date)
+        e_date = self._to_date(self.end_date)
+        s_time_input = self._to_time(self.start_time)
+        e_time_input = self._to_time(self.end_time)
 
         if not s_date or not e_date:
             return 0
@@ -345,7 +435,59 @@ class Leave(models.Model):
 
     def save(self, *args, **kwargs):
         self.total_minutes = self.compute_total_minutes()
+        self.leave_days = self.compute_leave_days()
         super().save(*args, **kwargs)
+
+    def compute_leave_days(self, month=None, year=None):
+        """
+        Calculates leave days for this instance. If month/year provided,
+        only counts days within that specific month.
+        """
+        from datetime import datetime, date, time, timedelta
+        s_date = self._to_date(self.start_date)
+        e_date = self._to_date(self.end_date)
+        s_time_input = self._to_time(self.start_time)
+        e_time_input = self._to_time(self.end_time)
+
+        if not s_date or not e_date or e_date < s_date:
+            return 0
+        
+        office_start = time(9, 0)
+        lunch_start = time(13, 0)
+        lunch_end = time(14, 0)
+        office_end = time(18, 0)
+
+        def get_day_count(d, s, e):
+            s = s or office_start
+            e = e or office_end
+            s = max(s, office_start)
+            e = min(e, office_end)
+            if s >= e: return 0
+            mins = int((datetime.combine(d, e) - datetime.combine(d, s)).total_seconds() // 60)
+            ls = max(s, lunch_start)
+            le = min(e, lunch_end)
+            if ls < le:
+                mins -= int((datetime.combine(d, le) - datetime.combine(d, ls)).total_seconds() // 60)
+            mins = max(0, mins)
+            
+            if mins <= 120: return 0.0
+            if mins <= 240: return 0.5
+            return 1.0
+
+        total_days = 0.0
+        cur = s_date
+        while cur <= e_date:
+            # If month/year filter is applied
+            if month and year:
+                if cur.year != year or cur.month != month:
+                    cur += timedelta(days=1)
+                    continue
+            
+            s = s_time_input if cur == s_date and s_time_input else office_start
+            e = e_time_input if cur == e_date and e_time_input else office_end
+            total_days += get_day_count(cur, s, e)
+            cur += timedelta(days=1)
+        return total_days
 
     @property
     def total_hm(self):

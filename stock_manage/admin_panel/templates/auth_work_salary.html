@@ -36,56 +36,135 @@
                 </div>
             </div>
         </div>
-        
-        <div class="overflow-x-auto border-t border-slate-100">
-            <table class="min-w-full text-left text-sm text-slate-700">
-                <thead class="bg-slate-50/80 text-xs uppercase tracking-[0.15em] font-extrabold text-slate-500 border-b border-slate-100">
+                <div class="overflow-x-auto border-t border-slate-100">
+            <table class="min-w-full text-left text-sm text-slate-700 border-collapse">
+                <thead class="hidden lg:table-header-group bg-slate-50/80 text-xs uppercase tracking-[0.15em] font-extrabold text-slate-500 border-b border-slate-100">
                     <tr>
-                        <th class="px-5 py-4 font-medium">Worker</th>
-                        <th class="px-5 py-4 text-right font-medium">Base Salary</th>
-                        <th class="px-5 py-4 text-center font-medium">Days</th>
+                        <th class="px-5 py-4 font-medium text-center">Worker</th>
+                        <th class="px-5 py-4 text-center font-medium">Base Salary</th>
                         <th class="px-5 py-4 text-center font-medium">Approved Leaves</th>
-                        <th class="px-5 py-4 text-center font-medium">Free Leaves</th>
-                        <th class="px-5 py-4 text-center font-medium">Unpaid Leaves</th>
-                        <th class="px-5 py-4 text-right font-medium">Per Day</th>
-                        <th class="px-5 py-4 text-right font-medium">Deduction</th>
-                        <th class="px-5 py-4 text-right font-medium bg-slate-50">Net Salary</th>
+                        <th class="px-5 py-4 text-center font-medium">Quota Used</th>
+                        <th class="px-5 py-4 text-center font-medium">Extra Pay</th>
+                        <th class="px-5 py-4 text-center font-medium">Deduction</th>
+                        <th class="px-5 py-4 text-center font-medium bg-slate-50">Net Salary</th>
+                        <th class="px-5 py-4 text-center font-medium">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     {% for row in rows %}
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-5 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="h-9 w-9 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs uppercase">
-                                    {{ row.worker.first_name|make_list|first }}{{ row.worker.last_name|make_list|first }}
+                    <tr class="hover:bg-slate-50/80 transition-all duration-200">
+                        <!-- Worker Profile -->
+                        <td class="px-5 py-6">
+                            <div class="flex flex-col items-center justify-center gap-2 text-center">
+                                <div class="h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-white shadow-xl ring-1 ring-slate-100 group transition-transform hover:scale-110">
+                                    {% if row.worker.profile_picture %}
+                                        <img src="{{ row.worker.profile_picture.url }}" alt="{{ row.worker.name }}" class="h-full w-full object-cover">
+                                    {% else %}
+                                        <div class="h-full w-full flex items-center justify-center bg-indigo-50 text-indigo-600 font-bold text-sm uppercase">
+                                            {{ row.worker.first_name|first }}{{ row.worker.last_name|first }}
+                                        </div>
+                                    {% endif %}
                                 </div>
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-slate-900 tracking-tight">{{ row.worker.first_name }} {{ row.worker.last_name }}</span>
-                                        <span class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-600 ring-1 ring-inset ring-slate-200">#{{ row.worker.id }}</span>
-                                    </div>
-                                    <div class="text-xs text-slate-500 font-medium">{{ row.worker.email }}</div>
+                                <div class="w-full">
+                                    <p class="text-[14px] font-bold text-slate-900 tracking-tight leading-tight">{{ row.worker.first_name }} {{ row.worker.last_name }}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-5 py-4 text-right font-semibold text-slate-700">₹ {{ row.base_salary|floatformat:2|intcomma }}</td>
-                        <td class="px-5 py-4 text-center"><span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-slate-100 text-xs font-bold text-slate-700">{{ row.days_in_month }}</span></td>
-                        <td class="px-5 py-4 text-center"><span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-emerald-50 text-xs font-bold text-emerald-700 border border-emerald-100">{{ row.approved_leaves }}</span></td>
-                        <td class="px-5 py-4 text-center"><span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-sky-50 text-xs font-bold text-sky-700 border border-sky-100">{{ row.free_leaves }}</span></td>
-                        <td class="px-5 py-4 text-center"><span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-rose-50 text-xs font-bold text-rose-700 border border-rose-100">{{ row.unpaid_leaves }}</span></td>
-                        <td class="px-5 py-4 text-right text-slate-500 font-medium">₹ {{ row.per_day|floatformat:2|intcomma }}</td>
-                        <td class="px-5 py-4 text-right"><span class="text-rose-600 font-medium">₹ {{ row.deduction|floatformat:2|intcomma }}</span></td>
-                        <td class="px-5 py-4 text-right font-bold text-emerald-600 bg-emerald-50/30">₹ {{ row.net_salary|floatformat:2|intcomma }}</td>
+
+                        <!-- Base Salary -->
+                        <td class="px-5 py-6">
+                            <div class="flex flex-col items-center justify-center gap-1.5 text-center">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest lg:hidden">Base Salary</span>
+                                <span class="bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl font-bold text-sm tracking-tight border border-slate-200/50">
+                                    ₹ {{ row.base_salary|floatformat:2|intcomma }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Approved Leaves -->
+                        <td class="px-5 py-6">
+                            <div class="flex flex-col items-center justify-center gap-1.5 text-center">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest lg:hidden">Leaves</span>
+                                <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-emerald-50 text-xs font-bold text-emerald-700 border-2 border-emerald-100 shadow-sm">
+                                    {{ row.total_leave_days }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Quota Used -->
+                        <td class="px-5 py-6">
+                            <div class="flex flex-col items-center justify-center gap-1.5 text-center">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest lg:hidden">Quota</span>
+                                <span class="text-xs font-bold px-3 py-1 rounded-full {% if row.total_leave_days <= 2 %}bg-sky-50 text-sky-600 border border-sky-100{% else %}bg-rose-50 text-rose-600 border border-rose-100{% endif %}">
+                                    {{ row.quota_used }}/2
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Extra Pay -->
+                        <td class="px-5 py-6">
+                            <div class="flex flex-col items-center justify-center gap-1.5 text-center">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest lg:hidden">Extra Pay</span>
+                                <span class="text-emerald-600 font-bold text-sm">
+                                    {% if row.extra_payment > 0 %}
+                                        <span class="text-[10px] mr-1 opacity-60">+</span>₹ {{ row.extra_payment|floatformat:2|intcomma }}
+                                    {% else %}
+                                        <span class="text-slate-300">—</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Deduction -->
+                        <td class="px-5 py-6">
+                            <div class="flex flex-col items-center justify-center gap-1.5 text-center">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest lg:hidden">Deduction</span>
+                                <span class="text-rose-600 font-bold text-sm">
+                                    {% if row.deduction > 0 %}
+                                        <span class="text-[10px] mr-1 opacity-60">-</span>₹ {{ row.deduction|floatformat:2|intcomma }}
+                                    {% else %}
+                                        <span class="text-slate-300">—</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Net Salary -->
+                        <td class="px-5 py-6 bg-emerald-50/10">
+                            <div class="flex flex-col items-center justify-center gap-1.5 text-center">
+                                <span class="text-[10px] font-bold text-emerald-500/70 uppercase tracking-widest lg:hidden">Net Salary</span>
+                                <div class="bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-2xl shadow-sm">
+                                    <span class="text-emerald-700 font-black text-base tracking-tight">₹ {{ row.final_salary|floatformat:2|intcomma }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Action -->
+                        <td class="px-5 py-6">
+                            <div class="flex flex-col items-center justify-center gap-1.5 text-center">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest lg:hidden">History</span>
+                                <a href="{% url 'worker_salary_history' row.worker.id %}" class="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white hover:bg-slate-800 hover:-translate-y-1 transition-all shadow-lg shadow-slate-900/20" title="Salary History">
+                                    <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+                                </a>
+                            </div>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="9" class="px-5 py-10 text-center text-slate-500 font-medium">No salary records found for this period.</td>
+                        <td colspan="8" class="px-5 py-20 text-center">
+                            <div class="flex flex-col items-center gap-3">
+                                <div class="h-12 w-12 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                                    <i class="fa-solid fa-file-invoice text-2xl"></i>
+                                </div>
+                                <p class="text-slate-500 font-medium">No salary records found for this period.</p>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+      </div>
     </section>
 </main>
 {% endblock admin_dash %}

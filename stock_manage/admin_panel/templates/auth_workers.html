@@ -138,6 +138,32 @@
                                 </div>
                                 <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
                             </div>
+
+                            <!-- Joining Date -->
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Joining Date</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                        <i class="fa-solid fa-calendar-check text-xs"></i>
+                                    </span>
+                                    <input type="date" name="joining_date" id="worker_joining_date"
+                                        class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none">
+                                </div>
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
+                            </div>
+
+                            <!-- Resignation Date -->
+                            <div class="space-y-1.5">
+                                <label class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider ml-1">Resignation Date (Optional)</label>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-rose-500 transition-colors">
+                                        <i class="fa-solid fa-calendar-xmark text-xs"></i>
+                                    </span>
+                                    <input type="date" name="resignation_date" id="worker_resignation_date"
+                                        class="worker-field w-full rounded-xl border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-4 text-sm transition-all focus:border-rose-500 focus:bg-white focus:ring-4 focus:ring-rose-500/10 outline-none">
+                                </div>
+                                <p class="field-error text-[10px] text-rose-500 mt-1 ml-1 hidden"></p>
+                            </div>
                         </div>
                     </div>
 
@@ -420,7 +446,9 @@
                                         '{{ worker.address|escapejs }}',
                                         '{{ worker.gender }}',
                                         '{{ worker.status }}',
-                                        '{% if worker.profile_picture %}{{ worker.profile_picture.url }}{% endif %}'
+                                        '{% if worker.profile_picture %}{{ worker.profile_picture.url }}{% endif %}',
+                                        '{{ worker.joining_date|date:"Y-m-d" }}',
+                                        '{{ worker.resignation_date|date:"Y-m-d" }}'
                                     )"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition"
                                     title="View">
@@ -441,7 +469,9 @@
                                             '{{ worker.address|escapejs }}',
                                             '{{ worker.gender|escapejs }}',
                                             '{{ worker.status|escapejs }}',
-                                            '{% if worker.profile_picture %}{{ worker.profile_picture.url }}{% endif %}'
+                                            '{% if worker.profile_picture %}{{ worker.profile_picture.url }}{% endif %}',
+                                            '{{ worker.joining_date|date:"Y-m-d" }}',
+                                            '{{ worker.resignation_date|date:"Y-m-d" }}'
                                         )"
                                     class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition"
                                     title="Edit">
@@ -584,6 +614,14 @@
                     <div class="space-y-1">
                         <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Gender</p>
                         <p id="viewGender" class="text-sm font-bold text-slate-700 capitalize"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Joining Date</p>
+                        <p id="viewJoiningDate" class="text-sm font-bold text-slate-700"></p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Resignation Date</p>
+                        <p id="viewResignationDate" class="text-sm font-bold text-slate-700 text-rose-600"></p>
                     </div>
                 </div>
             </div>
@@ -890,7 +928,7 @@ if (toggleWorkerPasswordBtn && workerPasswordInput && workerPasswordEyeIcon) {
 }
 
 // ─── Edit Modal ───
-function openEditModal(editUrl, email, first_name, last_name, mbno, salary, state, city, address, gender, status, profilePictureUrl) {
+function openEditModal(editUrl, email, first_name, last_name, mbno, salary, state, city, address, gender, status, profilePictureUrl, joining_date, resignation_date) {
     workerForm.reset();
     clearAllErrors();
     resetUploadBoxes();
@@ -909,6 +947,8 @@ function openEditModal(editUrl, email, first_name, last_name, mbno, salary, stat
     workerForm.state.value = state;
     workerForm.city.value = city;
     workerForm.address.value = address;
+    workerForm.joining_date.value = joining_date || '';
+    workerForm.resignation_date.value = resignation_date || '';
     setTimeout(() => {
         setCustomDropdown('gender', gender);
         setCustomDropdown('status', status);
@@ -943,7 +983,7 @@ function closeDeleteModal() {
 }
 
 // ─── View Modal ───
-function openViewModal(id, email, first_name, last_name, mbno, salary, state, city, address, gender, status, profile) {
+function openViewModal(id, email, first_name, last_name, mbno, salary, state, city, address, gender, status, profile, joining_date, resignation_date) {
     document.getElementById('viewId').innerText = id;
     document.getElementById('viewEmail').innerText = email;
     document.getElementById('viewFirstName').innerText = first_name;
@@ -960,6 +1000,8 @@ function openViewModal(id, email, first_name, last_name, mbno, salary, state, ci
     document.getElementById('viewAddress').innerText = address;
     document.getElementById('viewGender').innerText = gender;
     document.getElementById('viewStatus').innerText = status;
+    document.getElementById('viewJoiningDate').innerText = joining_date || 'Not Set';
+    document.getElementById('viewResignationDate').innerText = resignation_date || 'N/A';
 
     const statusWrapper = document.getElementById('viewStatusWrapper');
     const statusDot = document.getElementById('viewStatusDot');

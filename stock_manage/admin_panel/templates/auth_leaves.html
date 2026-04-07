@@ -50,14 +50,29 @@
                         <th class="px-4 py-3 font-medium">Worker</th>
                         <th class="px-4 py-3 font-medium">Category</th>
                         <th class="px-4 py-3 font-medium text-center">Status</th>
+                        <th class="px-4 py-3 font-medium text-center">Approve / Reject</th>
                         <th class="px-4 py-3 font-medium text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody id="leavesTableBody" class="divide-y divide-slate-100 bg-white">
                     {% for l in leaves %}
                     <tr class="hover:bg-slate-50/80 transition-colors" data-leave-id="{{ l.id }}">
-                        <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900 truncate">
-                            {{ l.worker.name }}
+                        <td class="px-4 py-5 align-middle">
+                            <div class="flex flex-col items-center gap-2 text-center">
+                                <div class="relative shrink-0 group">
+                                    {% if l.worker.profile_picture %}
+                                    <img src="{{ l.worker.profile_picture.url }}" 
+                                         class="h-14 w-14 rounded-full object-cover ring-2 ring-white shadow-xl transition-transform group-hover:scale-105">
+                                    {% else %}
+                                    <div class="h-14 w-14 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-sm ring-2 ring-white shadow-lg border border-indigo-100/50">
+                                        {{ l.worker.first_name|make_list|first }}{{ l.worker.last_name|make_list|first }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="w-full">
+                                    <p class="text-[14px] font-bold text-slate-900 tracking-tight leading-tight">{{ l.worker.name }}</p>
+                                </div>
+                            </div>
                         </td>
                         <td class="px-4 py-3 align-middle">
                             <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold
@@ -76,6 +91,17 @@
                             </span>
                         </td>
                         <td class="px-4 py-3 align-middle text-center">
+                            <button type="button"
+                                data-leave-toggle
+                                data-approve-url="{% url 'approve_leave' l.id %}"
+                                data-reject-url="{% url 'reject_leave' l.id %}"
+                                data-initial="{{ l.status }}"
+                                class="inline-flex relative h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 bg-slate-200">
+                                <span class="sr-only">Toggle Status</span>
+                                <span data-knob aria-hidden="true" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+                            </button>
+                        </td>
+                        <td class="px-4 py-3 align-middle text-center">
                             <div class="inline-flex items-center justify-center gap-2">
                                 <button
                                     onclick="openLeaveView(
@@ -92,14 +118,6 @@
                                     title="View">
                                     <i class="fa-solid fa-eye text-xs"></i>
                                     <span class="sr-only">View</span>
-                                </button>
-                                <button type="button"
-                                    data-leave-toggle
-                                    data-approve-url="{% url 'approve_leave' l.id %}"
-                                    data-reject-url="{% url 'reject_leave' l.id %}"
-                                    data-initial="{{ l.status }}"
-                                    class="relative h-7 w-14 rounded-full bg-gray-300 transition-colors align-middle">
-                                    <span data-knob class="absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow transition-transform"></span>
                                 </button>
                                 <button
                                     onclick="openLeaveEdit(
@@ -129,7 +147,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="px-4 py-10 text-center text-slate-500">No leave requests.</td>
+                        <td colspan="5" class="px-4 py-10 text-center text-slate-500">No leave requests.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -333,14 +351,31 @@ function adminRowHtml(leave) {
     const endDate = leave.end_date || '';
     const reason = leave.reason || '';
     const workerName = leave.worker_name || '';
+    const workerImgUrl = leave.worker_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(workerName)}&background=F1F5F9&color=475569&bold=true`;
+    
     return `<tr class="hover:bg-slate-50/80 transition-colors" data-leave-id="${leave.id}">
-        <td class="px-4 py-3 align-middle text-sm font-semibold text-slate-900 truncate">${workerName}</td>
+        <td class="px-4 py-5 align-middle">
+            <div class="flex flex-col items-center gap-2 text-center">
+                <div class="relative shrink-0 group">
+                    <img src="${workerImgUrl}" 
+                         class="h-14 w-14 rounded-full object-cover ring-2 ring-white shadow-xl transition-transform group-hover:scale-105">
+                </div>
+                <div class="w-full">
+                    <p class="text-[14px] font-bold text-slate-900 tracking-tight leading-tight">${workerName}</p>
+                </div>
+            </div>
+        </td>
         <td class="px-4 py-3 align-middle"><span class="${catClass}">${leave.category || 'Casual'}</span></td>
         <td class="px-4 py-3 align-middle text-center"><span class="${stClass}">${st}</span></td>
         <td class="px-4 py-3 align-middle text-center">
+            <button type="button" data-leave-toggle data-approve-url="${approveUrl}" data-reject-url="${rejectUrl}" data-initial="${st}" class="inline-flex relative h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 bg-slate-200">
+                <span class="sr-only">Toggle Status</span>
+                <span data-knob aria-hidden="true" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+            </button>
+        </td>
+        <td class="px-4 py-3 align-middle text-center">
             <div class="inline-flex items-center justify-center gap-2">
                 <button onclick="openLeaveView('${workerName.replace(/'/g, "\\'")}','${startDate}','${endDate}','${startTime}','${endTime}','${leave.category || ''}','${reason.replace(/'/g, "\\'")}','${st}')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 transition" title="View"><i class="fa-solid fa-eye text-xs"></i><span class="sr-only">View</span></button>
-                <button type="button" data-leave-toggle data-approve-url="${approveUrl}" data-reject-url="${rejectUrl}" data-initial="${st}" class="relative h-7 w-14 rounded-full bg-gray-300 transition-colors align-middle"><span data-knob class="absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow transition-transform"></span></button>
                 <button onclick="openLeaveEdit('${editUrl}','${startDate}','${endDate}','${startTime}','${endTime}','${leave.category || ''}','${reason.replace(/'/g, "\\'")}','${st}')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:border-sky-300 transition" title="Edit"><i class="fa-solid fa-pen-to-square text-xs"></i><span class="sr-only">Edit</span></button>
                 <button onclick="openLeaveDelete('${deleteUrl}')" class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition" title="Delete"><i class="fa-solid fa-trash text-xs"></i><span class="sr-only">Delete</span></button>
             </div>
@@ -353,18 +388,18 @@ function adminRowHtml(leave) {
         const on = initial === 'Approved';
         const knob = el.querySelector('[data-knob]');
         function setState(active, rejected) {
-            el.classList.remove('bg-gray-200','bg-emerald-500','bg-rose-500','bg-gray-300');
+            el.classList.remove('bg-slate-200','bg-emerald-500','bg-rose-600');
             if (active) {
                 el.classList.add('bg-emerald-500');
-                knob.classList.add('translate-x-7');
+                knob.classList.add('translate-x-4');
             } else {
-                knob.classList.remove('translate-x-7');
-                if (rejected) el.classList.add('bg-rose-500'); else el.classList.add('bg-gray-300');
+                knob.classList.remove('translate-x-4');
+                if (rejected) el.classList.add('bg-rose-600'); else el.classList.add('bg-slate-200');
             }
         }
         setState(on, initial === 'Rejected');
         el.addEventListener('click', () => {
-            const isActive = knob.classList.contains('translate-x-7');
+            const isActive = knob.classList.contains('translate-x-4');
             const targetUrl = isActive ? el.dataset.rejectUrl : el.dataset.approveUrl;
             fetch(targetUrl).catch(()=>{});
         });
@@ -465,22 +500,22 @@ document.querySelectorAll('[data-leave-toggle]').forEach(el => {
     const on = initial === 'Approved';
     const knob = el.querySelector('[data-knob]');
     function setState(active, rejected) {
-        el.classList.remove('bg-gray-200','bg-emerald-500','bg-rose-500','bg-gray-300');
+        el.classList.remove('bg-slate-200','bg-emerald-500','bg-rose-600');
         if (active) {
             el.classList.add('bg-emerald-500');
-            knob.classList.add('translate-x-7');
+            knob.classList.add('translate-x-4');
         } else {
-            knob.classList.remove('translate-x-7');
+            knob.classList.remove('translate-x-4');
             if (rejected) {
-                el.classList.add('bg-rose-500');
+                el.classList.add('bg-rose-600');
             } else {
-                el.classList.add('bg-gray-300');
+                el.classList.add('bg-slate-200');
             }
         }
     }
     setState(on, initial === 'Rejected');
     el.addEventListener('click', () => {
-        const isActive = knob.classList.contains('translate-x-7');
+        const isActive = knob.classList.contains('translate-x-4');
         const targetUrl = isActive ? el.dataset.rejectUrl : el.dataset.approveUrl;
         window.location.href = targetUrl;
     });
@@ -492,7 +527,7 @@ function ensureNoMatchRowLeaves() {
     if (!noMatchRowLeaves) {
         noMatchRowLeaves = document.createElement('tr');
         const td = document.createElement('td');
-        td.colSpan = 4;
+        td.colSpan = 5;
         td.className = 'px-4 py-6 text-center text-slate-500';
         td.innerText = 'No matching leaves.';
         noMatchRowLeaves.appendChild(td);

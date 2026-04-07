@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block admin_dash %}
+
+<main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
+    <!-- Breadcrumb & Header -->
+    <div class="mb-8">
+        <a href="{% url 'auth_work_salary' %}" class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors mb-4">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Monthly Overview
+        </a>
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-[2rem] shadow-sm ring-1 ring-slate-100">
+            <div class="flex items-center gap-4">
+                <div class="h-16 w-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-indigo-200 overflow-hidden">
+                    {% if worker.profile_picture %}
+                        <img src="{{ worker.profile_picture.url }}" alt="{{ worker.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        {{ worker.first_name|make_list|first }}{{ worker.last_name|make_list|first }}
+                    {% endif %}
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">{{ worker.name }}</h1>
+                    <p class="text-slate-500 font-medium">Salary History & Leave Insights</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-slate-50 px-4 py-3 rounded-2xl border border-slate-100">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Base Salary</p>
+                    <p class="text-lg font-bold text-slate-900">₹ {{ worker.salary|floatformat:2|intcomma }}</p>
+                </div>
+                <div class="bg-indigo-50/50 px-4 py-3 rounded-2xl border border-indigo-100">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 mb-1">Joined On</p>
+                    <p class="text-sm font-bold text-indigo-900">{{ worker.joining_date|default:"Not Set" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="rounded-2xl border-0 ring-1 ring-slate-100 bg-white/90 backdrop-blur-md shadow-2xl shadow-indigo-100/40 relative overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-1 bg-[#192335]"></div>
+        
+        <div class="px-6 py-5 border-b border-slate-100">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-slate-800">Monthly breakdown</h3>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-sm text-slate-700">
+                <thead class="bg-slate-50/80 text-xs uppercase tracking-[0.15em] font-extrabold text-slate-500 border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-4 font-medium">Month</th>
+                        <th class="px-6 py-4 text-center font-medium">Approved Leaves</th>
+                        <th class="px-6 py-4 text-center font-medium">Quota Used</th>
+                        <th class="px-6 py-4 text-right font-medium">Extra Pay</th>
+                        <th class="px-6 py-4 text-right font-medium">Deduction</th>
+                        <th class="px-6 py-4 text-right font-medium bg-slate-50">Final Salary</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in history %}
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="px-6 py-4">
+                            <span class="font-bold text-slate-900">{{ item.month_name }}</span>
+                            <span class="text-slate-400 font-medium ml-1.5">{{ item.year }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-emerald-50 text-xs font-bold text-emerald-700 border border-emerald-100">
+                                {{ item.total_leave_days }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="text-xs font-bold {% if item.total_leave_days <= 2 %}text-sky-600{% else %}text-rose-600{% endif %}">
+                                {{ item.quota_used }}/2
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-emerald-600 font-medium">
+                                {% if item.extra_payment > 0 %}+₹ {{ item.extra_payment|floatformat:2|intcomma }}{% else %}—{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-rose-600 font-medium">
+                                {% if item.deduction > 0 %}-₹ {{ item.deduction|floatformat:2|intcomma }}{% else %}—{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right font-bold text-slate-900 bg-slate-50/50">
+                            ₹ {{ item.final_salary|floatformat:2|intcomma }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-slate-500 font-medium">No salary history available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+{% endblock admin_dash %}

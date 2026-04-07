@@ -266,6 +266,8 @@ def add_worker(request):
             address=request.POST.get('address'),
             mbno=request.POST.get('mbno', 0),
             salary=request.POST.get('salary') or 0,
+            joining_date=request.POST.get('joining_date') or None,
+            resignation_date=request.POST.get('resignation_date') or None,
             gender=request.POST.get('gender', 'Other'),
             status=request.POST.get('status', 'Active'),
             profile_picture=request.FILES.get('profile_picture'),
@@ -299,6 +301,8 @@ def edit_worker(request, id):
         worker.state = request.POST.get('state')
         worker.city = request.POST.get('city')
         worker.address = request.POST.get('address')
+        worker.joining_date = request.POST.get('joining_date') or None
+        worker.resignation_date = request.POST.get('resignation_date') or None
         worker.gender = request.POST.get('gender')
         worker.status = request.POST.get('status')
 
@@ -431,40 +435,34 @@ def auth_work_salary(request):
             year, month = today.year, today.month
     else:
         year, month = today.year, today.month
-    days_in_month = calendar.monthrange(year, month)[1]
-    month_start = date(year, month, 1)
-    month_end = date(year, month, days_in_month)
+
     workers = Workers.objects.all().order_by('first_name')
     data = []
+    import calendar
     for w in workers:
-        qs = Leave.objects.filter(worker=w, status='Approved', start_date__lte=month_end, end_date__gte=month_start)
-        total_leave_days = 0
-        for lv in qs:
-            s = lv.start_date if lv.start_date > month_start else month_start
-            e = lv.end_date if lv.end_date < month_end else month_end
-            if e >= s:
-                total_leave_days += (e - s).days + 1
-        unpaid_leaves = max(0, total_leave_days - 2)
-        per_day = Decimal(w.salary) / Decimal(days_in_month) if days_in_month else Decimal('0')
-        deduction = per_day * Decimal(unpaid_leaves)
-        net_salary = Decimal(w.salary) - deduction
-        data.append({
-            'worker': w,
-            'base_salary': w.salary,
-            'days_in_month': days_in_month,
-            'approved_leaves': total_leave_days,
-            'free_leaves': 2,
-            'unpaid_leaves': unpaid_leaves,
-            'per_day': per_day,
-            'deduction': deduction,
-            'net_salary': net_salary,
-        })
+        res = w.calculate_salary_for_month(year, month)
+        if res:
+            data.append({
+                'worker': w,
+                **res
+            })
+
     return render(request, 'auth_work_salary.html', {
         'month': f"{year:04d}-{month:02d}",
         'year': year,
         'month_num': month,
-        'days_in_month': days_in_month,
         'rows': data,
+        'days_in_month': calendar.monthrange(year, month)[1]
+    })
+
+@never_cache
+@login_required(login_url='auth_login')
+def worker_salary_history(request, id):
+    worker = get_object_or_404(Workers, id=id)
+    history = worker.get_salary_history()
+    return render(request, 'worker_salary_history.html', {
+        'worker': worker,
+        'history': history
     })
 
 @never_cache
@@ -487,6 +485,7 @@ def approve_leave(request, id):
             "reason": leave.reason or "",
             "status": leave.status,
             "total_minutes": leave.total_minutes,
+            "worker_image": leave.worker.profile_picture.url if leave.worker.profile_picture else None,
         }
         async_to_sync(layer.group_send)("leaves", {
             "type": "leave_updated",
@@ -514,6 +513,7 @@ def reject_leave(request, id):
             "reason": leave.reason or "",
             "status": leave.status,
             "total_minutes": leave.total_minutes,
+            "worker_image": leave.worker.profile_picture.url if leave.worker.profile_picture else None,
         }
         async_to_sync(layer.group_send)("leaves", {
             "type": "leave_updated",
@@ -552,6 +552,7 @@ def edit_leave_admin(request, id):
                 "reason": leave.reason or "",
                 "status": leave.status,
                 "total_minutes": leave.total_minutes,
+                "worker_image": leave.worker.profile_picture.url if leave.worker.profile_picture else None,
             }
             async_to_sync(layer.group_send)("leaves", {
                 "type": "leave_updated",

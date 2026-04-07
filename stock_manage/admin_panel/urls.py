@@ -39,6 +39,7 @@ urlpatterns = [
     path('leave/delete/<int:id>/', delete_leave_admin, name='delete_leave_admin'),
 
     path('auth_work_salary/', auth_work_salary, name='auth_work_salary'),
+    path('worker_salary_history/<int:id>/', worker_salary_history, name='worker_salary_history'),
 
     path('auth_buyers/',auth_buyers,name='auth_buyers'),
     path('delete/buyer/<int:id>/',delete_buyer,name='delete_buyer'),

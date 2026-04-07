@@ -174,6 +174,7 @@ def add_leave(request):
                 "reason": leave.reason or "",
                 "status": leave.status,
                 "total_minutes": leave.total_minutes,
+                "worker_image": worker.profile_picture.url if worker.profile_picture else None,
             }
             async_to_sync(layer.group_send)("leaves", {
                 "type": "leave_added",
@@ -217,6 +218,7 @@ def edit_leave(request, id):
                 "reason": leave.reason or "",
                 "status": leave.status,
                 "total_minutes": leave.total_minutes,
+                "worker_image": worker.profile_picture.url if worker.profile_picture else None,
             }
             async_to_sync(layer.group_send)("leaves", {
                 "type": "leave_updated",

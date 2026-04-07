@@ -11,10 +11,28 @@
         html, body { max-width: 100%; overflow-x: hidden; }
         main { max-width: 100vw; overflow-x: hidden; }
         .lg\:ml-64 { max-width: 100vw; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+        /* Custom Small Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10182B;
+            border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e293b;
+        }
+        
+        /* For Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #10182B transparent;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -85,7 +103,6 @@
                         </span>
                         <div>
                             <h2 id="wkPageTitle" class="text-lg sm:text-xl font-semibold text-gray-800 leading-tight">Dashboard</h2>
-                            <p class="hidden sm:block text-xs text-gray-500 leading-tight">Welcome back</p>
                         </div>
                     </div>
                 </div>
