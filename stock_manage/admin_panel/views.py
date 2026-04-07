@@ -210,6 +210,9 @@ def edit_supplier(request, id):
         if password:
             supplier.password = password
 
+        if request.POST.get('remove_profile_picture') == 'true':
+            supplier.profile_picture = None
+
         if request.FILES.get('profile_picture'):
             supplier.profile_picture = request.FILES['profile_picture']
 
@@ -298,6 +301,12 @@ def edit_worker(request, id):
         worker.address = request.POST.get('address')
         worker.gender = request.POST.get('gender')
         worker.status = request.POST.get('status')
+
+        if request.POST.get('remove_profile_picture') == 'true':
+            worker.profile_picture = None
+
+        if request.POST.get('remove_document') == 'true':
+            worker.document = None
 
         if request.FILES.get('profile_picture'):
             worker.profile_picture = request.FILES['profile_picture']
@@ -848,6 +857,10 @@ def auth_inventory(request):
                 g['sizes_seen'].add(v.size.name)
                 g['unique_size_variants'].append(v)
 
+    # Calculate total stock per group
+    for g in groups:
+        g['total_stock'] = sum(v.stock for v in g['variants'])
+
     groups = [g for g in groups if g['variants']]
 
     return render(request, 'auth_inventory.html', {
@@ -947,19 +960,68 @@ def edit_inventory(request, id):
         
         indexes = request.POST.getlist('variant_index')
         idx = indexes[0] if indexes else 0
+        
+        # 1. Handle Main Image Deletion/Update
+        delete_main = request.POST.get(f'delete_variant_main_{idx}') == 'true'
         v_image = request.FILES.get(f'variant_image_{idx}')
+        
         if v_image:
+            # New image uploaded - update and save
             inventory.image = v_image
             inventory.save()
             # If product has no image, use the edited variant's image as default
             if not product.image:
                 product.image = v_image
                 product.save()
+        elif delete_main:
+            # Explicit delete requested
+            if inventory.image:
+                # Permanent deletion from disk (optional but requested "permanently")
+                inventory.image.delete(save=False)
+                inventory.image = None
+                inventory.save()
+
+        # 2. Sync image color-wise
+        color_variants = ProductVariant.objects.filter(
+            product=product,
+            color=color
+        ).exclude(id=inventory.id)
+        
+        for v in color_variants:
+            # Sync main image
+            v.image = inventory.image
+            v.save()
             
+        # 3. Handle Gallery Deletions
+        delete_gallery_urls = request.POST.getlist(f'delete_variant_gallery_{idx}')
+        for url in delete_gallery_urls:
+            if url:
+                # Find the VariantImage by URL
+                # Note: This is an approximation based on storage path
+                for vi in VariantImage.objects.filter(variant=inventory):
+                    if vi.image and url.endswith(vi.image.url):
+                        vi.image.delete(save=False)
+                        vi.delete()
+                        break
+            
+        # 4. Handle Gallery Additions
         v_galleries = request.FILES.getlist(f'variant_gallery_{idx}')
+        new_gallery_added = False
         for gi in v_galleries:
             if gi:
                 VariantImage.objects.create(variant=inventory, image=gi)
+                new_gallery_added = True
+
+        # 5. Sync gallery color-wise
+        if delete_gallery_urls or new_gallery_added:
+            source_gallery = list(VariantImage.objects.filter(variant=inventory))
+            for v in color_variants:
+                # Clear target gallery
+                # Important: delete files only if they are not the ones we just kept
+                VariantImage.objects.filter(variant=v).delete()
+                for source_img in source_gallery:
+                    # Point to the same file
+                    VariantImage.objects.create(variant=v, image=source_img.image.name)
 
         spec_names = request.POST.getlist('spec_name')
         spec_values = request.POST.getlist('spec_value')
@@ -979,6 +1041,7 @@ def edit_inventory(request, id):
                 "category_name": product.brand.subcetegory.category.name,
                 "price": float(inventory.price),
                 "stock": inventory.stock,
+                "image_url": inventory.image.url if inventory.image else None,
             }
             async_to_sync(layer.group_send)("inventory", {
                 "type": "inventory_updated",
@@ -1154,6 +1217,9 @@ def edit_blogs(request, id):
         blog.des = request.POST.get('des')
         blog.by = request.POST.get('by')
         blog.date = request.POST.get('date')
+
+        if request.POST.get('remove_image') == 'true':
+            blog.image = None
 
         if request.FILES.get('image'):
             blog.image = request.FILES.get('image')

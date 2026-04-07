@@ -4,14 +4,7 @@
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
     <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 tracking-tight">
-                Worker Dashboard
-            </h1>
-            <p class="text-sm text-slate-500 mt-1 font-medium">Manage worker profiles, details, and employment status.</p>
-        </div>
-
+    <div class="flex justify-end mb-8">
         <button id="openworkerModal"
             class="group relative inline-flex items-center justify-center gap-3 rounded-full bg-slate-900
                    px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-400/30
@@ -259,6 +252,7 @@
                                         onclick="event.stopPropagation()">
                                         <i class="fa-solid fa-xmark text-xs"></i>
                                     </button>
+                                    <input type="hidden" name="remove_profile_picture" id="removeWorkerProfileFlag" value="false">
                                     <input type="file" name="profile_picture" class="hidden" accept="image/*">
                                 </div>
                             </div>
@@ -293,6 +287,7 @@
                                         onclick="event.stopPropagation()">
                                         <i class="fa-solid fa-xmark text-xs"></i>
                                     </button>
+                                    <input type="hidden" name="remove_document" id="removeWorkerDocFlag" value="false">
                                     <input type="file" name="document" class="hidden">
                                 </div>
                             </div>
@@ -845,6 +840,7 @@ function resetUploadBoxes() {
     removeWorkerImagePreviewBtn.classList.add('hidden');
     workerProfileUploadBox.classList.add('border-dashed');
     workerProfileUploadBox.classList.remove('border-solid', 'border-indigo-300');
+    if (document.getElementById('removeWorkerProfileFlag')) document.getElementById('removeWorkerProfileFlag').value = 'false';
 
     // Reset Document
     documentInput.value = '';
@@ -854,6 +850,7 @@ function resetUploadBoxes() {
     removeWorkerDocPreviewBtn.classList.add('hidden');
     workerDocUploadBox.classList.add('border-dashed');
     workerDocUploadBox.classList.remove('border-solid', 'border-emerald-300');
+    if (document.getElementById('removeWorkerDocFlag')) document.getElementById('removeWorkerDocFlag').value = 'false';
 }
 
 // ─── Modal Controls ───
@@ -924,10 +921,12 @@ function openEditModal(editUrl, email, first_name, last_name, mbno, salary, stat
         removeWorkerImagePreviewBtn.classList.remove('hidden');
         workerProfileUploadBox.classList.remove('border-dashed');
         workerProfileUploadBox.classList.add('border-solid', 'border-indigo-300');
+        document.getElementById('removeWorkerProfileFlag').value = 'false';
     } else {
         workerImagePreviewContainer.classList.add('hidden');
         workerProfilePlaceholder.classList.remove('hidden');
         workerImagePreview.src = '';
+        document.getElementById('removeWorkerProfileFlag').value = 'false';
     }
 }
 
@@ -1003,6 +1002,7 @@ if (profilePictureInput) {
                 removeWorkerImagePreviewBtn.classList.remove('hidden');
                 workerProfileUploadBox.classList.remove('border-dashed');
                 workerProfileUploadBox.classList.add('border-solid', 'border-indigo-300');
+                document.getElementById('removeWorkerProfileFlag').value = 'false';
             };
             reader.readAsDataURL(file);
         }
@@ -1012,7 +1012,14 @@ if (profilePictureInput) {
 if (removeWorkerImagePreviewBtn) {
     removeWorkerImagePreviewBtn.onclick = (e) => {
         e.stopPropagation();
-        resetUploadBoxes(); // Simplest way
+        profilePictureInput.value = '';
+        workerImagePreview.src = '';
+        workerImagePreviewContainer.classList.add('hidden');
+        workerProfilePlaceholder.classList.remove('hidden');
+        removeWorkerImagePreviewBtn.classList.add('hidden');
+        workerProfileUploadBox.classList.add('border-dashed');
+        workerProfileUploadBox.classList.remove('border-solid', 'border-indigo-300');
+        document.getElementById('removeWorkerProfileFlag').value = 'true';
     };
 }
 
@@ -1026,6 +1033,7 @@ if (documentInput) {
             removeWorkerDocPreviewBtn.classList.remove('hidden');
             workerDocUploadBox.classList.remove('border-dashed');
             workerDocUploadBox.classList.add('border-solid', 'border-emerald-300');
+            document.getElementById('removeWorkerDocFlag').value = 'false';
         }
     });
 }
@@ -1040,6 +1048,7 @@ if (removeWorkerDocPreviewBtn) {
         removeWorkerDocPreviewBtn.classList.add('hidden');
         workerDocUploadBox.classList.add('border-dashed');
         workerDocUploadBox.classList.remove('border-solid', 'border-emerald-300');
+        document.getElementById('removeWorkerDocFlag').value = 'true';
     };
 }
 

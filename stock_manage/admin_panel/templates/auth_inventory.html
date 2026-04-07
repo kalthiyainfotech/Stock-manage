@@ -3,14 +3,7 @@
 
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 tracking-tight">
-                Inventory Dashboard
-            </h1>
-            <p class="text-sm text-slate-500 mt-1 font-medium">Manage your product catalog and variants</p>
-        </div>
-
+    <div class="flex justify-end mb-8">
         <button id="openinventoryModal"
             class="group relative inline-flex items-center justify-center gap-3 rounded-full bg-slate-900
                    px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-400/30
@@ -58,7 +51,7 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-y-3 gap-x-4 text-[11px]">
                     <div class="space-y-0.5">
                         <p class="text-slate-400 font-medium">Category</p>
-                        <p id="oldCategory" class="text-slate-900 font-semibold"></p>
+                        <p id="oldCategory" class="text-slate-900 font-semibold rounded-xl"></p>
                     </div>
                     <div class="space-y-0.5">
                         <p class="text-slate-400 font-medium">Subcategory</p>
@@ -376,7 +369,7 @@
                             </div>
                         </td>
                         <td class="px-2 sm:px-4 py-3 align-middle text-xs sm:text-sm text-slate-700 text-center">
-                            {{ first.stock }}
+                            {{ group.total_stock }}
                         </td>
                         <td class="px-2 sm:px-4 py-3 align-middle text-center">
                             <span class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-100/50">

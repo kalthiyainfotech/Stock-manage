@@ -4,39 +4,30 @@
 <main class="p-4 sm:p-6 lg:p-10 bg-[#F8FAFC] min-h-screen">
 
     <!-- ─── Page Header ─── -->
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
-        <div class="space-y-1">
-            <h1 class="text-3xl font-extrabold text-[#0F172A] tracking-tight sm:text-4xl">
-                 <span class="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Blog</span>
-            </h1>
-            
+    <div class="flex flex-col sm:flex-row justify-end items-center gap-3 mb-10">
+        <div class="relative group">
+            <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+            </span>
+            <input
+                id="blogSearch"
+                type="text"
+                placeholder="Search blogs, authors..."
+                class="w-full sm:w-72 rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-3 text-sm
+                       text-slate-700 placeholder:text-slate-400 shadow-sm focus:shadow-md
+                       focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-3">
-            <div class="relative group">
-                <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 group-focus-within:text-indigo-500 transition-colors">
-                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
-                </span>
-                <input
-                    id="blogSearch"
-                    type="text"
-                    placeholder="Search blogs, authors..."
-                    class="w-full sm:w-72 rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-3 text-sm
-                           text-slate-700 placeholder:text-slate-400 shadow-sm focus:shadow-md
-                           focus:border-indigo-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all">
-            </div>
-
-            <button id="openBlogModal"
-                class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F172A]
-                       px-6 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/20
-                       hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0
-                       focus:outline-none focus:ring-4 focus:ring-slate-900/20 transition-all group">
-                <span class="inline-flex h-5 w-5 items-center justify-center rounded-lg bg-white/10 group-hover:bg-white/20 transition-colors">
-                    <i class="fa-solid fa-plus text-[10px]"></i>
-                </span>
-                <span>Add New Post</span>
-            </button>
-        </div>
+        <button id="openBlogModal"
+            class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F172A]
+                   px-6 py-3 text-sm font-bold text-white shadow-lg shadow-slate-900/20
+                   hover:bg-slate-800 hover:-translate-y-0.5 active:translate-y-0
+                   focus:outline-none focus:ring-4 focus:ring-slate-900/20 transition-all group">
+            <span class="inline-flex h-5 w-5 items-center justify-center rounded-lg bg-white/10 group-hover:bg-white/20 transition-colors">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+            </span>
+            <span>Add New Post</span>
+        </button>
     </div>
 
     <!-- ─── Blog Grid Section ─── -->
@@ -224,6 +215,7 @@
                         <button type="button" id="removeImagePreview" class="hidden absolute top-4 right-4 h-9 w-9 rounded-xl bg-black/40 backdrop-blur-md text-white hover:bg-rose-500 transition-all flex items-center justify-center shadow-lg" onclick="event.stopPropagation()">
                             <i class="fa-solid fa-trash-can text-sm"></i>
                         </button>
+                        <input type="hidden" name="remove_image" id="removeBlogImageFlag" value="false">
                         <input type="file" name="image" class="hidden" accept="image/*">
                     </div>
                 </div>
@@ -346,6 +338,7 @@ function resetUploadBox() {
     removeImagePreviewBtn.classList.remove('flex');
     imageUploadBox.classList.add('border-dashed');
     imageUploadBox.classList.remove('border-solid', 'border-indigo-300', 'bg-white');
+    if (document.getElementById('removeBlogImageFlag')) document.getElementById('removeBlogImageFlag').value = 'false';
 }
 
 // ─── Modal Event Listeners ───
@@ -382,6 +375,7 @@ if (imageInput) {
                 removeImagePreviewBtn.classList.add('flex');
                 imageUploadBox.classList.remove('border-dashed');
                 imageUploadBox.classList.add('border-solid', 'border-indigo-300', 'bg-white');
+                document.getElementById('removeBlogImageFlag').value = 'false';
             }
             reader.readAsDataURL(file);
         }
@@ -393,6 +387,7 @@ if (removeImagePreviewBtn) {
         e.stopPropagation();
         imageInput.value = '';
         resetUploadBox();
+        document.getElementById('removeBlogImageFlag').value = 'true';
     });
 }
 
@@ -420,6 +415,9 @@ function openEditModal(url, title, by, date, des, imageUrl) {
         removeImagePreviewBtn.classList.add('flex');
         imageUploadBox.classList.remove('border-dashed');
         imageUploadBox.classList.add('border-solid', 'border-indigo-300', 'bg-white');
+        document.getElementById('removeBlogImageFlag').value = 'false';
+    } else {
+        document.getElementById('removeBlogImageFlag').value = 'false';
     }
 }
 

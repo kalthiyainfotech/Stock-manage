@@ -4,14 +4,7 @@
 <main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
 
     <!-- Header Section -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div>
-            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-700 to-slate-800 tracking-tight">
-                Supplier Dashboard
-            </h1>
-            <p class="text-sm text-slate-500 mt-1 font-medium">Manage vendor profiles, contact details, and supply status.</p>
-        </div>
-
+    <div class="flex justify-end mb-8">
         <button id="openSupplierModal"
             class="group relative inline-flex items-center justify-center gap-3 rounded-full bg-slate-900
                    px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-400/30
@@ -80,7 +73,7 @@
                                         <i class="fa-solid fa-building text-slate-400 text-xs"></i>
                                     </span>
                                     <input type="text" name="name"
-                                        placeholder="e.g. Darpan Traders"
+                                        placeholder="e.g. Traders"
                                         class="supplier-field w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-9 pr-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all duration-200">
                                 </div>
                                 <p class="field-error text-[11px] text-rose-500 mt-0.5 hidden" data-field="name"></p>
@@ -300,6 +293,7 @@
                                         onclick="event.stopPropagation()">
                                         <i class="fa-solid fa-xmark text-xs"></i>
                                     </button>
+                                    <input type="hidden" name="remove_profile_picture" id="removeProfilePictureFlag" value="false">
                                     <input type="file" name="profile_picture" class="hidden" accept="image/*">
                                 </div>
                             </div>
@@ -1050,9 +1044,21 @@ function openEditModal(editUrl, name, email, first_name, last_name, mbno, state,
     if (profilePictureUrl) {
         imagePreview.src = profilePictureUrl;
         imagePreviewContainer.classList.remove('hidden');
+        profileUploadPlaceholder.classList.add('hidden');
+        removeImagePreviewBtn.classList.remove('hidden');
+        removeImagePreviewBtn.classList.add('flex');
+        profileUploadBox.classList.remove('border-dashed');
+        profileUploadBox.classList.add('border-solid', 'border-indigo-300');
+        document.getElementById('removeProfilePictureFlag').value = 'false';
     } else {
         imagePreviewContainer.classList.add('hidden');
         imagePreview.src = '';
+        profileUploadPlaceholder.classList.remove('hidden');
+        removeImagePreviewBtn.classList.add('hidden');
+        removeImagePreviewBtn.classList.remove('flex');
+        profileUploadBox.classList.add('border-dashed');
+        profileUploadBox.classList.remove('border-solid', 'border-indigo-300');
+        document.getElementById('removeProfilePictureFlag').value = 'false';
     }
 }
 
@@ -1142,40 +1148,42 @@ const profileUploadBox = document.getElementById('profileUploadBox');
 const docUploadBox = document.getElementById('docUploadBox');
 
 // Profile Picture change — show full-bleed preview inside box
-if (profilePictureInput) {
-    profilePictureInput.addEventListener('change', function(e) {
-        e.stopPropagation();
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                imagePreview.src = ev.target.result;
-                profileUploadPlaceholder.classList.add('hidden');
-                imagePreviewContainer.classList.remove('hidden');
-                removeImagePreviewBtn.classList.remove('hidden');
-                removeImagePreviewBtn.classList.add('flex');
-                profileUploadBox.classList.remove('border-dashed');
-                profileUploadBox.classList.add('border-solid', 'border-indigo-300');
+    if (profilePictureInput) {
+        profilePictureInput.addEventListener('change', function(e) {
+            e.stopPropagation();
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    imagePreview.src = ev.target.result;
+                    profileUploadPlaceholder.classList.add('hidden');
+                    imagePreviewContainer.classList.remove('hidden');
+                    removeImagePreviewBtn.classList.remove('hidden');
+                    removeImagePreviewBtn.classList.add('flex');
+                    profileUploadBox.classList.remove('border-dashed');
+                    profileUploadBox.classList.add('border-solid', 'border-indigo-300');
+                    document.getElementById('removeProfilePictureFlag').value = 'false';
+                }
+                reader.readAsDataURL(file);
             }
-            reader.readAsDataURL(file);
-        }
-    });
-}
+        });
+    }
 
 // Remove profile picture — revert to upload state
-if (removeImagePreviewBtn) {
-    removeImagePreviewBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        profilePictureInput.value = '';
-        imagePreview.src = '';
-        imagePreviewContainer.classList.add('hidden');
-        profileUploadPlaceholder.classList.remove('hidden');
-        removeImagePreviewBtn.classList.add('hidden');
-        removeImagePreviewBtn.classList.remove('flex');
-        profileUploadBox.classList.add('border-dashed');
-        profileUploadBox.classList.remove('border-solid', 'border-indigo-300');
-    });
-}
+    if (removeImagePreviewBtn) {
+        removeImagePreviewBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            profilePictureInput.value = '';
+            imagePreview.src = '';
+            imagePreviewContainer.classList.add('hidden');
+            profileUploadPlaceholder.classList.remove('hidden');
+            removeImagePreviewBtn.classList.add('hidden');
+            removeImagePreviewBtn.classList.remove('flex');
+            profileUploadBox.classList.add('border-dashed');
+            profileUploadBox.classList.remove('border-solid', 'border-indigo-300');
+            document.getElementById('removeProfilePictureFlag').value = 'true';
+        });
+    }
 
 // Document change
 if (documentInput) {

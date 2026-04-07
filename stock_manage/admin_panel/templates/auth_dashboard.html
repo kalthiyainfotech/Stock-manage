@@ -7,28 +7,6 @@
 
 <main class="p-4 sm:p-6 lg:p-8 space-y-6">
 
-    <div class="rounded-2xl bg-gradient-to-r from-slate-900 to-slate-700 text-white p-5 sm:p-7 shadow">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-            </div>
-            <div class="flex flex-wrap gap-2">
-                <a href="{% url 'auth_order' %}"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition text-sm">
-                    <i class="fa-solid fa-bag-shopping"></i> Orders
-                </a>
-                <a href="{% url 'auth_inventory' %}"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition text-sm">
-                    <i class="fa-solid fa-boxes-stacked"></i> Inventory
-                </a>
-                <a href="{% url 'auth_contacts' %}"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 transition text-sm">
-                    <i class="fa-solid fa-envelope"></i> Messages
-                </a>
-            </div>
-        </div>
-    </div>
-
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <div class="flex items-center justify-between">
