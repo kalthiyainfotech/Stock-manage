@@ -633,13 +633,11 @@ def add_inventory(request):
             brand=brand,
             name=product_name,
             defaults={
-                'description': request.POST.get('description', ''),
                 'base_price': request.POST.get('price') or 0,
             }
         )
         
         if not _:
-            product.description = request.POST.get('description', '')
             product.base_price = request.POST.get('price') or 0
             product.save()
 
@@ -649,6 +647,8 @@ def add_inventory(request):
         prices = request.POST.getlist('variant_price')
         stocks = request.POST.getlist('variant_stock')
         skus = request.POST.getlist('variant_sku')
+        scent_names = request.POST.getlist('variant_scent_name')
+        variant_descriptions = request.POST.getlist('variant_description')
         media_indexes = request.POST.getlist('variant_media_index')
 
         spec_names = request.POST.getlist('spec_name')
@@ -668,6 +668,8 @@ def add_inventory(request):
                 size_name = size_name or 'Default'
                 price_val = prices[i] if i < len(prices) and prices[i] else 0
                 stock_val = stocks[i] if i < len(stocks) and stocks[i] else 0
+                scent_name = scent_names[i] if i < len(scent_names) else ''
+                v_description = variant_descriptions[i] if i < len(variant_descriptions) else ''
                 input_sku = skus[i].strip() if i < len(skus) and skus[i] else ''
 
                 color, _ = Color.objects.get_or_create(name=color_name)
@@ -681,13 +683,17 @@ def add_inventory(request):
                     defaults={
                         'price': price_val,
                         'stock': stock_val,
-                        'sku': sku
+                        'sku': sku,
+                        'scent_name': scent_name,
+                        'description': v_description
                     }
                 )
                 if not created:
                     variant.price = price_val
                     variant.stock = stock_val
                     variant.sku = sku
+                    variant.scent_name = scent_name
+                    variant.description = v_description
                     variant.save()
                     
                 v_image = request.FILES.get(f'variant_image_{media_idx}')
@@ -765,6 +771,8 @@ def add_inventory(request):
             if not created:
                 variant.price = request.POST.get('price') or 0
                 variant.stock = request.POST.get('stock') or 0
+                variant.scent_name = request.POST.get('scent_name')
+                variant.description = request.POST.get('variant_description') or request.POST.get('description', '')
                 variant.save()
 
             v_image = request.FILES.get('variant_image_0')
@@ -924,7 +932,6 @@ def edit_inventory(request, id):
         product = inventory.product
         product.brand = brand
         product.name = product_name
-        product.description = request.POST.get('description', '')
         product.base_price = request.POST.get('price') or 0
         product.save()
 
@@ -932,12 +939,16 @@ def edit_inventory(request, id):
         size_names = request.POST.getlist('variant_size')
         price_vals = request.POST.getlist('variant_price')
         stock_vals = request.POST.getlist('variant_stock')
+        scent_vals = request.POST.getlist('variant_scent_name')
+        desc_vals = request.POST.getlist('variant_description')
 
         # Fallback to single fields if variant_color list is empty
         color_name = (color_names[0] if color_names else request.POST.get('color', '')).strip()
         size_name = (size_names[0] if size_names else request.POST.get('size', '')).strip()
         price_val = (price_vals[0] if price_vals else request.POST.get('price')) or 0
         stock_val = (stock_vals[0] if stock_vals else request.POST.get('stock')) or 0
+        scent_val = (scent_vals[0] if scent_vals else request.POST.get('scent_name')) or ''
+        desc_val = (desc_vals[0] if desc_vals else request.POST.get('description')) or ''
 
         if not color_name:
             color_name = 'Default'
@@ -956,6 +967,8 @@ def edit_inventory(request, id):
         inventory.size = size
         inventory.price = price_val
         inventory.stock = stock_val
+        inventory.scent_name = scent_val
+        inventory.description = desc_val
         inventory.sku = f"{product.id}-{color.id}-{size.id}"
         inventory.save()
         
@@ -995,15 +1008,18 @@ def edit_inventory(request, id):
             
         # 3. Handle Gallery Deletions
         delete_gallery_urls = request.POST.getlist(f'delete_variant_gallery_{idx}')
+        import os
         for url in delete_gallery_urls:
             if url:
-                # Find the VariantImage by URL
-                # Note: This is an approximation based on storage path
+                # Find the VariantImage by filename comparison for robustness
+                target_filename = os.path.basename(url.split('?')[0])
                 for vi in VariantImage.objects.filter(variant=inventory):
-                    if vi.image and url.endswith(vi.image.url):
-                        vi.image.delete(save=False)
-                        vi.delete()
-                        break
+                    if vi.image:
+                        vi_filename = os.path.basename(vi.image.name)
+                        if vi_filename == target_filename or url.endswith(vi.image.url):
+                            vi.image.delete(save=False)
+                            vi.delete()
+                            break
             
         # 4. Handle Gallery Additions
         v_galleries = request.FILES.getlist(f'variant_gallery_{idx}')
@@ -1322,6 +1338,66 @@ def admin_order_items_api(request, order_id):
             "size": getattr(getattr(it.variant, "size", None), "name", ""),
         })
     return JsonResponse({"items": items})
+
+@never_cache
+@login_required(login_url='auth_login')
+def auth_sliders(request):
+    slider_list = Slider.objects.all().order_by('order', '-created_at')
+    
+    # Pagination
+    paginator = Paginator(slider_list, 10)  # Show 10 sliders per page
+    page_number = request.GET.get('page')
+    sliders = paginator.get_page(page_number)
+    
+    return render(request, 'auth_sliders.html', {'sliders': sliders})
+
+@never_cache
+@login_required(login_url='auth_login')
+def add_slider(request):
+    if request.method == "POST":
+        Slider.objects.create(
+            image=request.FILES.get('image'),
+            title=request.POST.get('title'),
+            subtitle=request.POST.get('subtitle', ''),
+            button_text=request.POST.get('button_text', ''),
+            button_link=request.POST.get('button_link', ''),
+            order=request.POST.get('order', 0) or 0,
+            status=request.POST.get('status') == 'on'
+        )
+
+    return redirect('auth_sliders')
+
+@never_cache
+@login_required(login_url='auth_login')
+def edit_slider(request, id):
+    slider = get_object_or_404(Slider, id=id)
+    if request.method == "POST":
+        if request.FILES.get('image'):
+            slider.image = request.FILES.get('image')
+        slider.title = request.POST.get('title')
+        slider.subtitle = request.POST.get('subtitle', '')
+        slider.button_text = request.POST.get('button_text', '')
+        slider.button_link = request.POST.get('button_link', '')
+        slider.order = request.POST.get('order', 0) or 0
+        slider.status = request.POST.get('status') == 'on'
+        slider.save()
+
+    return redirect('auth_sliders')
+
+@never_cache
+@login_required(login_url='auth_login')
+def delete_slider(request, id):
+    Slider.objects.filter(id=id).delete()
+
+    return redirect('auth_sliders')
+
+@never_cache
+@login_required(login_url='auth_login')
+def toggle_slider_status(request, id):
+    slider = get_object_or_404(Slider, id=id)
+    slider.status = not slider.status
+    slider.save()
+    return JsonResponse({'status': 'success', 'new_status': slider.status})
 
 @never_cache
 @login_required(login_url='auth_login')

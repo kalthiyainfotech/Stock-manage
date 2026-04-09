@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+{% block admin_dash %}
+
+<main class="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-[calc(100vh-4rem)] flex flex-col">
+    <div class="flex justify-end items-center mb-8">
+        <button id="openSliderModal"
+            class="group relative inline-flex items-center justify-center gap-3 rounded-full bg-slate-900
+                   px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-400/30
+                   hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Slider</span>
+        </button>
+    </div>
+
+
+
+    <!-- Slider Table -->
+    <section class="mt-8 rounded-2xl border-0 ring-1 ring-slate-100 bg-white/90 backdrop-blur-md shadow-2xl shadow-indigo-100/40 relative overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-1 bg-slate-900"></div>
+
+        <div class="flex flex-col gap-3 px-6 pt-6 pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="space-y-0.5">
+                <p class="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">Overview</p>
+                <p class="text-sm text-slate-500">
+                    Showing <span class="font-semibold text-slate-900">{{ sliders.start_index }}–{{ sliders.end_index }}</span> of <span class="font-semibold text-slate-900">{{ sliders.paginator.count }}</span> sliders.
+                </p>
+            </div>
+            <div class="w-full sm:w-auto">
+                <label class="relative block">
+                    <span class="sr-only">Search sliders</span>
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input
+                        id="sliderSearch"
+                        type="text"
+                        placeholder="Search by title or subtitle..."
+                        class="w-full sm:w-72 rounded-xl border-0 bg-slate-50 px-9 py-2.5 text-sm
+                               text-slate-700 placeholder:text-slate-400 ring-1 ring-inset ring-slate-200
+                               focus:bg-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-900 transition-all duration-200">
+                </label>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto border-t border-slate-100">
+            <table class="w-full min-w-[800px] text-left text-sm text-slate-700">
+                <thead class="bg-slate-50/80 text-xs uppercase tracking-[0.15em] font-extrabold text-slate-500 border-b border-slate-100">
+                    <tr>
+                        <th class="px-6 py-4 text-center">Order</th>
+                        <th class="px-6 py-4">Image</th>
+                        <th class="px-6 py-4">Title & Subtitle</th>
+                        <th class="px-6 py-4">Button</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                    {% for slider in sliders %}
+                    <tr class="hover:bg-slate-50/80 transition-colors group">
+                        <td class="px-6 py-6 font-mono text-xs text-slate-400 text-center">#{{ slider.order }}</td>
+                        <td class="px-6 py-6">
+                            <div class="h-20 w-40 rounded-2xl overflow-hidden ring-1 ring-slate-200 bg-slate-100 shadow-sm transition-transform duration-300 hover:scale-105">
+                                {% if slider.image %}
+                                <img src="{{ slider.image.url }}" class="h-full w-full object-cover">
+                                {% else %}
+                                <div class="flex items-center justify-center h-full text-slate-300 text-xs italic">No Image</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-6 align-middle">
+                            <div class="max-w-xs">
+                                <p class="font-bold text-slate-900 mb-1">{{ slider.title }}</p>
+                                <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed font-medium">{{ slider.subtitle }}</p>
+                            </div>
+                        </td>
+                        <td class="px-6 py-6 align-middle">
+                            {% if slider.button_text %}
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-600 ring-1 ring-slate-200">
+                                {{ slider.button_text }}
+                                <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                            </div>
+                            {% else %}
+                            <span class="text-slate-300 italic text-xs">No Button</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-6 text-center align-middle">
+                            <button onclick="toggleSliderStatus({{ slider.id }}, this)" 
+                                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all
+                                {% if slider.status %}bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200{% else %}bg-slate-100 text-slate-400 ring-1 ring-slate-200{% endif %}">
+                                <span class="h-1.5 w-1.5 rounded-full {% if slider.status %}bg-emerald-500 animate-pulse{% else %}bg-slate-300{% endif %}"></span>
+                                {{ slider.status|yesno:"Active,Inactive" }}
+                            </button>
+                        </td>
+                        <td class="px-6 py-6 align-middle">
+                            <div class="flex items-center justify-center gap-3">
+                                <button onclick="openEditModal({{ slider.id }}, '{{ slider.title|escapejs }}', '{{ slider.subtitle|escapejs }}', '{{ slider.button_text|escapejs }}', '{{ slider.button_link|escapejs }}', '{{ slider.order }}', {{ slider.status|yesno:'true,false' }}, '{% if slider.image %}{{ slider.image.url }}{% endif %}')"
+                                    class="h-9 w-9 flex items-center justify-center rounded-xl bg-sky-50 text-sky-700 border border-sky-100 hover:bg-sky-100 hover:border-sky-300 transition-all shadow-sm"
+                                    title="Edit">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </button>
+                                <button onclick="openDeleteModal({{ slider.id }})"
+                                    class="h-9 w-9 flex items-center justify-center rounded-xl bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 hover:border-rose-300 transition-all shadow-sm"
+                                    title="Delete">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-20 text-center">
+                            <div class="flex flex-col items-center justify-center gap-4 text-slate-400">
+                                <i class="fa-solid fa-images text-5xl opacity-20"></i>
+                                <p class="text-sm font-medium">No sliders found. Click "Add Slider" to begin.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    
+
+            {% for num in sliders.paginator.page_range %}
+                {% if num == sliders.number %}
+                    <span class="h-9 w-9 flex items-center justify-center
+                                 rounded bg-slate-900 text-white font-medium">
+                        {{ num }}
+                    </span>
+                {% elif num > sliders.number|add:'-2' and num < sliders.number|add:'2' %}
+                    <a href="?page={{ num }}"
+                       class="h-9 w-9 flex items-center justify-center
+                              rounded border border-gray-300
+                              hover:bg-gray-100 transition-colors">
+                        {{ num }}
+                    </a>
+                {% elif num == 1 or num == sliders.paginator.num_pages %}
+                    <a href="?page={{ num }}"
+                       class="h-9 w-9 flex items-center justify-center
+                              rounded border border-gray-300
+                              hover:bg-gray-100 transition-colors">
+                        {{ num }}
+                    </a>
+                {% elif num == sliders.number|add:'-3' or num == sliders.number|add:'3' %}
+                    <span class="px-2">…</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if sliders.has_next %}
+                <a href="?page={{ sliders.next_page_number }}"
+                   class="h-9 w-9 flex items-center justify-center
+                          rounded border border-gray-300
+                          hover:bg-gray-100 transition-colors">
+                    ›
+                </a>
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center
+                             rounded border border-gray-200 text-gray-400">
+                    ›
+                </span>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
+
+    <!-- Pagination ALWAYS visible -->
+    <div class="mt-auto pt-6 flex justify-end mb-4 mr-4 w-full">
+        <nav class="flex items-center gap-1 p-2 rounded">
+            {% if sliders.has_previous %}
+                <a href="?page={{ sliders.previous_page_number }}"
+                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
+                    ‹
+                </a>
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
+                    ‹
+                </span>
+            {% endif %}
+
+            {% if sliders.paginator %}
+                {% for num in sliders.paginator.page_range %}
+                    {% if num == sliders.number %}
+                        <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
+                            {{ num }}
+                        </span>
+                    {% elif num > sliders.number|add:'-2' and num < sliders.number|add:'2' %}
+                        <a href="?page={{ num }}"
+                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
+                            {{ num }}
+                        </a>
+                    {% elif num == 1 or num == sliders.paginator.num_pages %}
+                        <a href="?page={{ num }}"
+                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
+                            {{ num }}
+                        </a>
+                    {% elif num == sliders.number|add:'-3' or num == sliders.number|add:'3' %}
+                        <span class="px-2">…</span>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
+                    1
+                </span>
+            {% endif %}
+
+            {% if sliders.has_next %}
+                <a href="?page={{ sliders.next_page_number }}"
+                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
+                    ›
+                </a>
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
+                    ›
+                </span>
+            {% endif %}
+        </nav>
+    </div>
+
+
+    <!-- Pagination ALWAYS visible -->
+    <div class="mt-auto pt-6 flex justify-end mb-4 mr-4 w-full">
+        <nav class="flex items-center gap-1 p-2 rounded">
+            {% if sliders.has_previous %}
+                <a href="?page={{ sliders.previous_page_number }}"
+                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
+                    ‹
+                </a>
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
+                    ‹
+                </span>
+            {% endif %}
+
+            {% if sliders.paginator %}
+                {% for num in sliders.paginator.page_range %}
+                    {% if num == sliders.number %}
+                        <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
+                            {{ num }}
+                        </span>
+                    {% elif num > sliders.number|add:'-2' and num < sliders.number|add:'2' %}
+                        <a href="?page={{ num }}"
+                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
+                            {{ num }}
+                        </a>
+                    {% elif num == 1 or num == sliders.paginator.num_pages %}
+                        <a href="?page={{ num }}"
+                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
+                            {{ num }}
+                        </a>
+                    {% elif num == sliders.number|add:'-3' or num == sliders.number|add:'3' %}
+                        <span class="px-2">…</span>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
+                    1
+                </span>
+            {% endif %}
+
+            {% if sliders.has_next %}
+                <a href="?page={{ sliders.next_page_number }}"
+                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
+                    ›
+                </a>
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
+                    ›
+                </span>
+            {% endif %}
+        </nav>
+    </div>
+
+
+    <!-- Pagination ALWAYS visible -->
+    <div class="mt-auto pt-6 flex justify-end mb-4 mr-4 w-full">
+        <nav class="flex items-center gap-1 p-2 rounded">
+            {% if sliders.has_previous %}
+                <a href="?page={{ sliders.previous_page_number }}"
+                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
+                    ‹
+                </a>
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
+                    ‹
+                </span>
+            {% endif %}
+
+            {% if sliders.paginator %}
+                {% for num in sliders.paginator.page_range %}
+                    {% if num == sliders.number %}
+                        <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
+                            {{ num }}
+                        </span>
+                    {% elif num > sliders.number|add:'-2' and num < sliders.number|add:'2' %}
+                        <a href="?page={{ num }}"
+                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
+                            {{ num }}
+                        </a>
+                    {% elif num == 1 or num == sliders.paginator.num_pages %}
+                        <a href="?page={{ num }}"
+                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
+                            {{ num }}
+                        </a>
+                    {% elif num == sliders.number|add:'-3' or num == sliders.number|add:'3' %}
+                        <span class="px-2">…</span>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
+                    1
+                </span>
+            {% endif %}
+
+            {% if sliders.has_next %}
+                <a href="?page={{ sliders.next_page_number }}"
+                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
+                    ›
+                </a>
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
+                    ›
+                </span>
+            {% endif %}
+        </nav>
+    </div>
+</main>
+
+<!-- Slider Modal (Add/Edit) -->
+<div id="sliderModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+        <form id="sliderForm" method="POST" enctype="multipart/form-data" action="{% url 'add_slider' %}">
+            {% csrf_token %}
+            <div class="bg-slate-900 px-8 py-6 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-xl font-bold text-white tracking-tight">Add New Slider</h3>
+                <button type="button" onclick="closeModal()" class="text-white/50 hover:text-white transition">✕</button>
+            </div>
+            <div class="p-8 space-y-6">
+                <!-- Image Upload -->
+                <div class="space-y-2">
+                    <label class="text-[10px] uppercase tracking-widest font-black text-slate-400">Slider Image (1920x800 recommended)</label>
+                    <div class="relative group h-48 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden">
+                        <img id="imagePreview" src="#" class="absolute inset-0 h-full w-full object-cover hidden">
+                        <div id="uploadPlaceholder" class="flex flex-col items-center gap-3 text-slate-400 group-hover:text-slate-600 transition">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl"></i>
+                            <p class="text-[10px] font-bold uppercase">Click to upload image</p>
+                        </div>
+                        <input type="file" name="image" id="imageInput" class="absolute inset-0 opacity-0 cursor-pointer" onchange="previewImage(this)">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-widest font-black text-slate-400">Main Title</label>
+                        <input type="text" name="title" id="sliderTitle" required class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition shadow-sm">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-widest font-black text-slate-400">Order</label>
+                        <input type="number" name="order" id="sliderOrder" value="0" class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition shadow-sm">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] uppercase tracking-widest font-black text-slate-400">Short Description</label>
+                    <textarea name="subtitle" id="sliderSubtitle" rows="2" class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition shadow-sm resize-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-widest font-black text-slate-400">Button Text</label>
+                        <input type="text" name="button_text" id="sliderButtonText" class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition shadow-sm" placeholder="e.g. Shop Now">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] uppercase tracking-widest font-black text-slate-400">Button Link</label>
+                        <input type="text" name="button_link" id="sliderButtonLink" class="w-full bg-slate-50 border border-slate-200 px-4 py-3 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition shadow-sm" placeholder="e.g. /shop/">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 py-2">
+                    <input type="checkbox" name="status" id="sliderStatus" class="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900" checked>
+                    <label for="sliderStatus" class="text-xs font-bold uppercase tracking-widest text-slate-600 cursor-pointer">Set as Active</label>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-8 py-6 border-t border-slate-100 flex justify-end gap-3">
+                <button type="button" onclick="closeModal()" class="px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 transition">Cancel</button>
+                <button type="submit" class="bg-slate-900 text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-lg shadow-slate-900/20">Save Slider</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Confirmation -->
+<div id="deleteModal" class="fixed inset-0 z-50 hidden bg-slate-900/40 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl p-8 text-center animate-in zoom-in-95 duration-200">
+        <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fa-solid fa-trash-can text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2 tracking-tight">Are you sure?</h3>
+        <p class="text-sm text-slate-500 mb-8 leading-relaxed">This action will permanently delete this slider. This cannot be undone.</p>
+        <div class="flex justify-center gap-3">
+            <button onclick="closeDeleteModal()" class="px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-slate-600 transition">Go Back</button>
+            <a id="confirmDelete" href="#" class="bg-rose-500 text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-rose-600 transition shadow-lg shadow-rose-500/20">Confirm Delete</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('sliderModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const form = document.getElementById('sliderForm');
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+
+    document.getElementById('openSliderModal').onclick = () => {
+        form.action = "{% url 'add_slider' %}";
+        form.reset();
+        document.getElementById('modalTitle').textContent = "Add New Slider";
+        imagePreview.classList.add('hidden');
+        uploadPlaceholder.classList.remove('hidden');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    };
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function openEditModal(id, title, subtitle, btnText, btnLink, order, status, imageUrl) {
+        form.action = `/admin_panel/sliders/edit/${id}/`;
+        document.getElementById('modalTitle').textContent = "Edit Slider";
+        document.getElementById('sliderTitle').value = title;
+        document.getElementById('sliderSubtitle').value = subtitle;
+        document.getElementById('sliderButtonText').value = btnText;
+        document.getElementById('sliderButtonLink').value = btnLink;
+        document.getElementById('sliderOrder').value = order;
+        document.getElementById('sliderStatus').checked = status;
+        
+        imagePreview.src = imageUrl;
+        imagePreview.classList.remove('hidden');
+        uploadPlaceholder.classList.add('hidden');
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+                uploadPlaceholder.classList.add('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function openDeleteModal(id) {
+        document.getElementById('confirmDelete').href = `/admin_panel/sliders/delete/${id}/`;
+        deleteModal.classList.remove('hidden');
+        deleteModal.classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        deleteModal.classList.add('hidden');
+        deleteModal.classList.remove('flex');
+    }
+
+    function toggleSliderStatus(id, btn) {
+        fetch(`/admin_panel/sliders/toggle/${id}/`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const active = data.new_status;
+                    btn.className = `inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${active ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200' : 'bg-slate-100 text-slate-400 ring-1 ring-slate-200'}`;
+                    btn.innerHTML = `<span class="h-1.5 w-1.5 rounded-full ${active ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}"></span> ${active ? 'Active' : 'Inactive'}`;
+                }
+            });
+    }
+
+    // Search Filtering Logic
+    const sliderSearch = document.getElementById('sliderSearch');
+    const tableBody = document.querySelector('tbody');
+    const visibleCount = document.getElementById('visibleCount');
+
+    if (sliderSearch) {
+        sliderSearch.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            const rows = tableBody.querySelectorAll('tr');
+            let visible = 0;
+
+            rows.forEach(row => {
+                // Skip the "No sliders found" row if it exists
+                if (row.cells.length < 2) return;
+
+                const title = row.querySelector('p.font-bold').innerText.toLowerCase();
+                const subtitle = row.querySelector('p.text-xs').innerText.toLowerCase();
+
+                if (title.includes(query) || subtitle.includes(query)) {
+                    row.style.display = '';
+                    visible++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (visibleCount) visibleCount.innerText = visible;
+        });
+    }
+</script>
+
+{% endblock %}

@@ -1,283 +1,136 @@
 {% extends "by_base.html" %}
-{% block buyer_layout %}
 {% load static %}
-{% load humanize %}
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+{% block title %}Checkout | LUXE{% endblock %}
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col lg:flex-row gap-8 lg:gap-16">
+{% block extra_css %}
+<style>
+    .luxury-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(197, 160, 89, 0.1);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #dfc691; border-radius: 10px; }
+</style>
+{% endblock %}
 
-        <!-- Main Form -->
-        <main class="w-full lg:w-3/5">
-            <form id="checkout-form" action="{% url 'by_place_order' %}" method="post">
+{% block buyer_content %}
+<main class="max-w-7xl mx-auto px-4 py-16">
+    <div class="grid lg:grid-cols-12 gap-12">
+        <!-- Left Side: Forms -->
+        <div class="lg:col-span-8 space-y-12">
+            <form action="{% url 'by_checkout' %}" method="POST" id="checkout-form">
                 {% csrf_token %}
-                
+                <!-- Delivery Section -->
+                <section data-aos="fade-up">
+                    <div class="flex items-center space-x-4 mb-8">
+                        <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">1</span>
+                        <h2 class="text-2xl font-serif">Delivery Details</h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Recipient Name</label>
+                            <input type="text" name="name" required value="{{ user.get_full_name }}" placeholder="Recipient Name" class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Phone Number</label>
+                            <input type="tel" name="phone_number" required value="{{ user.phone_number|default:'' }}" placeholder="+91 98765 43210" class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors">
+                        </div>
+                        <div class="md:col-span-2 space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Street Address</label>
+                            <input type="text" name="address" required value="{{ user.address|default:'' }}" placeholder="Flat No. 402, Royal Residency" class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">City</label>
+                            <input type="text" name="city" required value="{{ user.city|default:'' }}" placeholder="Mumbai" class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Pincode</label>
+                            <input type="text" name="pincode" required value="{{ user.pincode|default:'' }}" placeholder="400001" class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors">
+                        </div>
+                    </div>
+                </section>
 
-               
-
-                <!-- Contact Info -->
-                <section class="mb-12">
-                    <div class="flex justify-between items-end mb-6">
-                        <h2 class="text-2xl font-black text-gray-900">Contact Information</h2>
-                        
+                <!-- Payment Section -->
+                <section data-aos="fade-up" class="pt-8 border-t border-gray-100 mt-12">
+                    <div class="flex items-center space-x-4 mb-8">
+                        <span class="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">2</span>
+                        <h2 class="text-2xl font-serif">Payment Method</h2>
                     </div>
                     <div class="space-y-4">
-                        <input name="c_email_address" type="email" placeholder="Email address" value="{{ buyer.email }}"
-                            class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                        <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer pl-1 group">
-                            <input type="checkbox"
-                                class="w-4 h-4 text-brand-500 rounded border-gray-300 focus:ring-brand-500" checked>
-                            <span class="group-hover:text-gray-900 transition-colors">Email me with news and
-                                offers</span>
-                        </label>
-                    </div>
-                </section>
-
-                <!-- Shipping Address -->
-                <section class="mb-12">
-                    <h2 class="text-2xl font-black text-gray-900 mb-6">Shipping Address</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <select name="c_country"
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow text-gray-700">
-                                <option>India</option>
-                                <option>United States</option>
-                                <option>United Kingdom</option>
-                                <option>Canada</option>
-                                <option>Australia</option>
-                            </select>
-                        </div>
-                        <div><input name="c_fname" type="text" placeholder="First name" value="{{ buyer.name|default:'' }}"
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                        </div>
-                        <div><input name="c_lname" type="text" placeholder="Last name"
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                        </div>
-                        <div class="md:col-span-2"><input name="c_address" type="text" placeholder="Address" value="{{ buyer.address|default:'' }}"
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                        </div>
-                        <div class="md:col-span-2"><input name="c_address_line2" type="text" placeholder="Apartment, suite, etc. (optional)"
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                        </div>
-                        <div><input name="c_state_country" type="text" placeholder="City / State" value="{{ buyer.city|default:'' }}"
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                        </div>
-                        <div><input name="c_postal_zip" type="text" placeholder="ZIP / Postal code" value="{{ buyer.pincode|default:'' }}"
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
-                        <div class="md:col-span-2"><input name="c_phone" type="tel" placeholder="Phone" value="{{ buyer.phone|default:'' }}"
-                                class="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow">
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Payment Info -->
-                <section class="mb-12">
-                    <h2 class="text-2xl font-black text-gray-900 mb-2">Payment</h2>
-                    <p class="text-sm text-gray-500 mb-6">All transactions are secure and encrypted.</p>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="payment_method" value="cash_on_delivery" class="sr-only peer" checked>
-                            <div class="p-5 rounded-2xl border border-gray-200 bg-white shadow-sm peer-checked:border-brand-500 peer-checked:shadow-md flex items-center justify-center gap-3 h-16">
-                                <i class="fas fa-truck text-gray-600"></i>
-                                <span class="font-bold text-gray-900">Cash on Delivery</span>
-                            </div>
-                        </label>
-                        <label class="block cursor-pointer">
-                            <input type="radio" name="payment_method" value="upi" class="sr-only peer">
-                            <div class="p-5 rounded-2xl border border-gray-200 bg-white shadow-sm peer-checked:border-brand-500 peer-checked:shadow-md flex items-center justify-center gap-3 h-16">
-                                <i class="fab fa-google text-black"></i>
-                                <span class="font-bold text-gray-900">Google Pay</span>
+                        <label class="block p-6 border-2 border-accent rounded-2xl bg-accent/5 cursor-pointer transition-all">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-gray-100">
+                                        <i data-lucide="credit-card" class="w-6 h-6 text-accent"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold">Cards, Netbanking, UPI</p>
+                                        <p class="text-xs text-gray-500">Secure digital payment</p>
+                                    </div>
+                                </div>
+                                <div class="w-5 h-5 rounded-full border-4 border-accent"></div>
                             </div>
                         </label>
                     </div>
-
-                    <div class="mt-6">
-                        <label class="flex items-center gap-2 text-sm text-gray-700">
-                            <input type="checkbox" name="c_ship_different_address" value="1" class="w-4 h-4 text-brand-500 rounded border-gray-300 focus:ring-brand-500">
-                            Ship to a different address
-                        </label>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <div><input name="c_diff_fname" type="text" placeholder="Shipping First name"
-                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
-                            <div><input name="c_diff_lname" type="text" placeholder="Shipping Last name"
-                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
-                            <div class="md:col-span-2"><input name="c_diff_address" type="text" placeholder="Shipping Address"
-                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
-                            <div class="md:col-span-2"><input name="c_diff_address_line2" type="text" placeholder="Shipping Address line 2"
-                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
-                            <div><input name="c_diff_state_country" type="text" placeholder="Shipping City / State"
-                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
-                            <div><input name="c_diff_postal_zip" type="text" placeholder="Shipping ZIP / Postal code"
-                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
-                            <div class="md:col-span-2"><input name="c_diff_country" type="text" placeholder="Shipping Country"
-                                class="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-shadow"></div>
-                        </div>
-                    </div>
                 </section>
-
-                <button type="submit"
-                    class="w-full py-6 sm:py-7 bg-[#2D0FB1] text-white font-extrabold text-base sm:text-lg rounded-2xl hover:bg-[#250b93] transition-all shadow-xl shadow-[#2D0FB1]/40 hover:-translate-y-[2px] mb-6 flex justify-center items-center gap-3">
-                    <i class="fas fa-lock text-sm"></i> Pay ₹{{ total|floatformat:2|intcomma }}
-                </button>
+                
+                <input type="submit" id="hidden-submit" class="hidden">
             </form>
-        </main>
+        </div>
 
-        <!-- Order Summary Sidebar -->
-        <aside class="w-full lg:w-2/5 mt-10 lg:mt-0">
-            <div class="bg-gray-100 rounded-3xl p-6 sm:p-8 lg:sticky lg:top-8 border border-gray-200">
-                <h3 class="text-xl font-bold mb-6 text-gray-900">Order Summary</h3>
-
-                <!-- Items -->
-                <div class="space-y-4 mb-8">
-                    {% for item in cart_items %}
-                    <div class="flex items-center gap-4">
-                        <div class="relative">
-                            {% if item.image_url %}
-                            <img src="{{ item.image_url }}" alt="{{ item.variant.product.name }}" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
-                            {% else %}
-                            <div class="w-16 h-16 rounded-xl bg-gray-200 shadow-sm"></div>
-                            {% endif %}
-                            <span class="absolute -top-2 -right-2 bg-gray-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">{{ item.quantity }}</span>
+        <!-- Right Side: Order Summary -->
+        <div class="lg:col-span-4">
+            <div class="sticky top-32 space-y-8" data-aos="fade-left">
+                <div class="luxury-card p-8 rounded-3xl border border-accent/20">
+                    <h3 class="text-xl font-serif mb-8 text-primary">Order Summary</h3>
+                    
+                    <!-- Mini Product List -->
+                    <div class="space-y-6 mb-8 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                        {% for item in cart_items %}
+                        <div class="flex space-x-4">
+                            <div class="w-16 h-20 bg-brandCream rounded-xl overflow-hidden flex-shrink-0">
+                                <img src="{{ item.product_variant.calculated_image_url|default:'https://images.unsplash.com/photo-1591336395442-99569fa40317?q=80&w=1887&auto=format&fit=crop' }}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-xs font-bold leading-tight">{{ item.product_variant.product.name }}</p>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">QTY: {{ item.quantity }}</p>
+                                <p class="text-sm font-bold mt-2 text-accent">₹{{ item.total_price }}</p>
+                            </div>
                         </div>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-gray-800 text-sm">{{ item.variant.product.name }}</h4>
-                            <p class="text-xs text-gray-500">{{ item.variant.size.name }} / {{ item.variant.color.name }}</p>
-                        </div>
-                        <span class="font-bold text-gray-900">₹{{ item.variant.price|floatformat:2|intcomma }}</span>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
+
+                    <!-- Totals -->
+                    <div class="space-y-4 pt-8 border-t border-gray-100">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Subtotal</span>
+                            <span class="font-bold">₹{{ cart_total }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Shipping</span>
+                            <span class="text-green-600 font-bold uppercase text-[10px] tracking-widest">Free</span>
+                        </div>
+                        <div class="flex justify-between text-xl font-serif pt-4 border-t border-primary">
+                            <span>Grand Total</span>
+                            <span class="text-accent">₹{{ cart_total }}</span>
+                        </div>
+                    </div>
+
+                    <button onclick="document.getElementById('hidden-submit').click()" class="w-full mt-10 bg-primary text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-black transition-all transform hover:scale-[1.02] shadow-xl shadow-primary/10 flex items-center justify-center space-x-3 group">
+                        <span>Place Order</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
                 </div>
-
-                <!-- Totals -->
-                <div class="space-y-3 pt-6 border-t border-gray-300 text-sm">
-                    <div class="flex justify-between text-gray-600">
-                        <span>Subtotal</span>
-                        <span class="font-medium">₹{{ subtotal|floatformat:2|intcomma }}</span>
-                    </div>
-                    <div class="flex justify-between text-gray-600">
-                        <span>Shipping</span>
-                        <span class="font-medium text-brand-600">Free</span>
-                    </div>
-                    <div class="flex justify-between text-gray-600">
-                        <span>Taxes</span>
-                        <span class="font-medium">₹0.00</span>
-                    </div>
-                </div>
-
-                <!-- Total -->
-                <div class="pt-6 mt-6 border-t border-gray-300">
-                    <div class="flex justify-between items-end">
-                        <span class="text-lg font-bold text-gray-900">Total</span>
-                        <div class="text-right">
-                            <span class="text-xs text-gray-500 mr-2">INR</span>
-                            <span class="text-3xl font-black text-gray-900">₹{{ total|floatformat:2|intcomma }}</span>
-                        </div>
-                    </div>
+                
+                <div class="flex items-center justify-center space-x-4 text-[10px] text-gray-400 uppercase tracking-widest">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    <span>100% SECURE CHECKOUT</span>
                 </div>
             </div>
-        </aside>
-
+        </div>
     </div>
-
-<script>
-document.getElementById('checkout-form').addEventListener('submit', async function(e) {
-    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-    
-    // Only intercept for UPI (Razorpay)
-    if (paymentMethod === 'upi') {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        
-        try {
-            const response = await fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (data.success && data.payment_method === 'upi') {
-                const options = {
-                    key: data.razorpay_key,
-                    amount: Math.round(data.amount * 100), // convert to paise correctly
-                    currency: data.currency,
-                    name: "Ecom Practice",
-                    description: "Order Payment",
-                    order_id: data.razorpay_order_id,
-                    handler: async function (response) {
-                        try {
-                            const verifyResponse = await fetch("{% url 'by_verify_payment' %}", {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                                },
-                                body: JSON.stringify({
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature,
-                                    orderId: data.order_id
-                                })
-                            });
-                            
-                            const verifyData = await verifyResponse.json();
-                            if (verifyData.success) {
-                                window.location.href = "{% url 'by_thankyou' %}";
-                            } else {
-                                alert("Payment verification failed: " + verifyData.error);
-                            }
-                        } catch (error) {
-                            console.error("Verification Error:", error);
-                            alert("Payment verification error. Please contact support.");
-                        }
-                    },
-                    modal: {
-                        ondismiss: async function () {
-                            try {
-                                await fetch("{% url 'by_cancel_unpaid_order' %}", {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-                                    },
-                                    body: JSON.stringify({
-                                        orderId: data.order_id
-                                    })
-                                });
-                                // toast.error('Payment cancelled');
-                            } catch (error) {
-                                console.error("Cancel Error:", error);
-                            }
-                        }
-                    },
-                    prefill: {
-                        name: data.name,
-                        email: data.email,
-                        contact: data.phone
-                    },
-                    theme: {
-                        color: "#000"
-                    }
-                };
-                
-                const rzp = new window.Razorpay(options);
-                rzp.open();
-            } else if (!data.success) {
-                alert("Order creation failed: " + data.error);
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("An error occurred. Please try again.");
-        }
-    }
-    // For COD, the form will submit normally
-});
-</script>
-
-{% endblock buyer_layout %}
+</main>
+{% endblock buyer_content %}

@@ -1,218 +1,95 @@
 {% extends "by_base.html" %}
-{% block buyer_layout %}
 {% load static %}
-{% load humanize %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-  <div class="flex flex-col lg:flex-row gap-8">
-    <aside class="w-full lg:w-1/4">
-      {% with active_page='history' %}
-        {% include "by_sidebar.html" %}
-      {% endwith %}
+
+{% block title %}Order History | LUXE{% endblock %}
+
+{% block buyer_content %}
+<main class="max-w-7xl mx-auto px-4 py-16 flex flex-col lg:flex-row gap-16">
+    <!-- Sidebar -->
+    <aside class="lg:w-72 shrink-0">
+        <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-50 overflow-hidden">
+            <!-- User Glance -->
+            <div class="p-8 text-center bg-gray-50 border-b border-gray-100">
+                <div class="w-24 h-24 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 text-accent font-serif text-3xl font-bold border-2 border-accent">
+                    {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                </div>
+                <h3 class="text-lg font-serif mb-1">{{ user.get_full_name }}</h3>
+                <p class="text-[10px] uppercase font-bold tracking-widest text-gray-400">Exclusive Member</p>
+            </div>
+            <!-- Menu -->
+            <nav class="p-6">
+                <ul class="space-y-4">
+                    <li><a href="{% url 'by_profile' %}" class="flex items-center space-x-4 p-4 rounded-2xl hover:bg-gray-50 text-[11px] uppercase tracking-widest font-bold text-gray-500 hover:text-primary transition-all"><i data-lucide="user" class="w-4 h-4"></i> <span>Profile Details</span></a></li>
+                    <li><a href="{% url 'by_order_history' %}" class="flex items-center space-x-4 p-4 rounded-2xl bg-primary text-white text-[11px] uppercase tracking-widest font-bold"><i data-lucide="package" class="w-4 h-4"></i> <span>Order History</span></a></li>
+                    <li><a href="{% url 'by_wishlist' %}" class="flex items-center space-x-4 p-4 rounded-2xl hover:bg-gray-50 text-[11px] uppercase tracking-widest font-bold text-gray-500 hover:text-primary transition-all"><i data-lucide="heart" class="w-4 h-4"></i> <span>Wishlist</span></a></li>
+                    <hr class="border-gray-100 mx-2">
+                    <li><a href="{% url 'by_logout' %}" class="flex items-center space-x-4 p-4 rounded-2xl hover:bg-red-50 text-[11px] uppercase tracking-widest font-bold text-red-400 transition-all"><i data-lucide="log-out" class="w-4 h-4"></i> <span>Logout</span></a></li>
+                </ul>
+            </nav>
+        </div>
     </aside>
 
-    <main id="buyer-main-content" class="w-full lg:w-3/4">
-      <div class="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
-        <div class="flex items-center justify-between mb-6">
-          <h1 class="text-2xl font-black text-gray-900">Order History</h1>
-          <div class="text-xs text-gray-500">All: {{ status_counts.all }} · Pending: {{ status_counts.pending }} · Delivered: {{ status_counts.delivered }}</div>
-        </div>
-        <div class="space-y-6" id="orderHistoryList">
-          {% for order in orders %}
-          <div class="rounded-2xl border border-gray-200 bg-gray-50" data-order-id="{{ order.id }}">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 sm:p-6 border-b border-gray-200">
-              <div class="space-y-1">
-                <div class="text-xs text-gray-500">Order Placed</div>
-                <div class="font-bold text-gray-900">{{ order.created_at|date:"F d, Y" }}</div>
-              </div>
-              <div class="space-y-1">
-                <div class="text-xs text-gray-500">Total</div>
-                <div class="font-bold text-gray-900">₹{{ order.total|floatformat:2|intcomma }}</div>
-              </div>
-              <div class="space-y-1">
-                <div class="text-xs text-gray-500">Order #</div>
-                <div class="font-bold text-gray-900">{{ order.order_number }}</div>
-              </div>
-              <div>
-                {% if order.status == "delivered" %}
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold"><i class="fas fa-check-circle"></i> Delivered</span>
-                {% elif order.status == "processing" %}
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold"><i class="fas fa-sync-alt"></i> Processing</span>
-                {% elif order.status == "cancelled" %}
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-bold"><i class="fas fa-times-circle"></i> Cancelled</span>
-                {% else %}
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold"><i class="fas fa-clock"></i> Pending</span>
-                {% endif %}
-              </div>
+    <!-- Order List -->
+    <div class="flex-grow space-y-10">
+        <h1 class="text-4xl font-serif mb-12">Your Purchase History</h1>
+
+        {% if orders %}
+        <div class="space-y-8">
+            {% for order in orders %}
+            <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-gray-50">
+                <div class="bg-gray-50 p-6 flex flex-col md:flex-row justify-between md:items-center gap-6 border-b border-gray-100">
+                    <div class="flex flex-wrap gap-10">
+                        <div>
+                            <p class="text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-1">Order Placed</p>
+                            <p class="text-xs font-bold">{{ order.date_time|date:"F d, Y" }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-1">Total Amount</p>
+                            <p class="text-xs font-bold">₹{{ order.total_bill }}</p>
+                        </div>
+                        <div>
+                            <p class="text-[9px] uppercase tracking-widest font-bold text-gray-400 mb-1">Status</p>
+                            <span class="bg-green-50 text-green-600 text-[9px] px-3 py-1 rounded-full uppercase font-bold tracking-widest">{{ order.status|title }}</span>
+                        </div>
+                    </div>
+                    <p class="text-[9px] uppercase tracking-[0.2em] font-bold text-gray-400">Order #{{ order.id|stringformat:"05d" }}</p>
+                </div>
+                <div class="p-8 flex flex-col md:flex-row items-center justify-between gap-10">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex -space-x-4">
+                            {% for item in order.items.all|slice:":2" %}
+                            <img src="{{ item.product_variant.calculated_image_url|default:'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&q=80&w=100' }}" class="w-16 h-20 object-cover rounded-lg border-2 border-white shadow-md">
+                            {% endfor %}
+                            {% if order.items.count > 2 %}
+                            <div class="w-16 h-20 rounded-lg border-2 border-white shadow-md bg-brandCream flex items-center justify-center text-[10px] font-bold text-gray-400">+{{ order.items.count|add:"-2" }}</div>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold mb-1">
+                                {{ order.items.first.product_variant.product.name }}
+                                {% if order.items.count > 1 %} + {{ order.items.count|add:"-1" }} other item{% if order.items.count > 2 %}s{% endif %}{% endif %}
+                            </h4>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest">Order Handled by LUXE Concierge</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="{% url 'by_order_receipt' order.id %}" class="bg-primary text-white px-8 py-3 rounded-xl text-[9px] uppercase tracking-widest font-bold hover:bg-accent transition-all">View Receipt</a>
+                        <button class="border border-gray-200 px-8 py-3 rounded-xl text-[9px] uppercase tracking-widest font-bold hover:bg-gray-50 transition-all">Download Invoice</button>
+                    </div>
+                </div>
             </div>
-            <div class="p-4 sm:p-6 space-y-4">
-              {% for it in order.items.all %}
-              <div class="flex items-center gap-4">
-                <div class="relative">
-                  {% if it.image_url %}
-                  <img src="{{ it.image_url }}" alt="{{ it.product_name }}" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">
-                  {% else %}
-                  <div class="w-16 h-16 rounded-xl bg-gray-200 shadow-sm"></div>
-                  {% endif %}
-                </div>
-                <div class="flex-1">
-                  <div class="font-bold text-gray-900 text-sm">{{ it.product_name }}</div>
-                  <div class="text-xs text-gray-500">{{ it.variant.color.name }} / {{ it.variant.size.name }}</div>
-                  <div class="text-xs text-gray-500">Qty {{ it.quantity }}</div>
-                </div>
-                <div class="text-right">
-                  <div class="font-bold text-gray-900">₹{{ it.price|floatformat:2|intcomma }}</div>
-                </div>
-              </div>
-              {% endfor %}
-              <div class="flex flex-wrap items-center justify-end gap-3 mt-2">
-                <a href="{% url 'by_order_receipt' order.id %}" target="_blank" class="px-4 py-2 rounded-xl bg-brand-50 text-brand-600 text-sm font-bold hover:bg-brand-500 hover:text-white transition-all flex items-center gap-2 border border-brand-100">
-                  <i class="fas fa-file-invoice"></i> Receipt
-                </a>
-                <a href="{% url 'by_shop' %}" class="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-800 text-sm font-bold hover:border-brand-500 hover:text-brand-600">Buy again</a>
-                {% if order.status == "pending" or order.status == "processing" %}
-                <form action="{% url 'by_cancel_order' order.id %}" method="post">
-                  {% csrf_token %}
-                  <button type="submit" class="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-bold hover:bg-brand-600">Cancel</button>
-                </form>
-                {% endif %}
-                {% if order.status == "delivered" %}
-                <form action="{% url 'by_return_order' order.id %}" method="post">
-                  {% csrf_token %}
-                  <button type="submit" class="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-800 text-sm font-bold hover:border-brand-500 hover:text-brand-600">Return</button>
-                </form>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-          {% empty %}
-          <div class="text-center py-16">
-            <div class="text-2xl font-black text-gray-900 mb-2">No orders yet</div>
-            <p class="text-gray-600 mb-6">When you place orders, they will appear here.</p>
-            <a href="{% url 'by_shop' %}" class="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-gray-900 text-white font-bold hover:bg-brand-600">Go to Shop</a>
-          </div>
-          {% endfor %}
+            {% endfor %}
         </div>
-      </div>
-    </main>
-  </div>
-</div>
-<script>
-(function () {
-  function statusBadge(s) {
-    if (s === "delivered") return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold"><i class="fas fa-check-circle"></i> Delivered</span>';
-    if (s === "processing") return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold"><i class="fas fa-sync-alt"></i> Processing</span>';
-    if (s === "cancelled") return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-bold"><i class="fas fa-times-circle"></i> Cancelled</span>';
-    if (s === "return_requested") return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-bold"><i class="fas fa-undo"></i> Return Requested</span>';
-    if (s === "returned") return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold"><i class="fas fa-undo-alt"></i> Returned</span>';
-    if (s === "shipped") return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-bold"><i class="fas fa-truck"></i> Shipped</span>';
-    return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold"><i class="fas fa-clock"></i> Pending</span>';
-  }
-  function getCsrf() {
-    var name = 'csrftoken';
-    var cookies = document.cookie ? document.cookie.split(';') : [];
-    for (var i = 0; i < cookies.length; i++) {
-      var c = cookies[i].trim();
-      if (c.substring(0, name.length + 1) === (name + '=')) {
-        return decodeURIComponent(c.substring(name.length + 1));
-      }
-    }
-    return '';
-  }
-  window.cancelOrder = async function (id) {
-    try {
-      await fetch('/order/'+id+'/cancel/', { method: 'POST', headers: { 'X-CSRFToken': getCsrf() } });
-    } catch (_) {}
-  }
-  window.returnOrder = async function (id) {
-    try {
-      await fetch('/order/'+id+'/return/', { method: 'POST', headers: { 'X-CSRFToken': getCsrf() } });
-    } catch (_) {}
-  }
-  function cardHtml(o) {
-    var actions = '';
-    if (o.status === "pending" || o.status === "processing") {
-      actions += '<button onclick="cancelOrder('+o.id+')" class="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-bold hover:bg-brand-600">Cancel</button>';
-    } else if (o.status === "delivered") {
-      actions += '<button onclick="returnOrder('+o.id+')" class="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-800 text-sm font-bold hover:border-brand-500 hover:text-brand-600">Return</button>';
-    }
-    var totalStr = (typeof o.total === 'number') ? o.total.toFixed(2) : (o.total || '0.00');
-    return '<div class="rounded-2xl border border-gray-200 bg-gray-50" data-order-id="'+o.id+'">'+
-      '<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 sm:p-6 border-b border-gray-200">'+
-        '<div class="space-y-1"><div class="text-xs text-gray-500">Order Placed</div><div class="font-bold text-gray-900">'+(o.created_at||'')+'</div></div>'+
-        '<div class="space-y-1"><div class="text-xs text-gray-500">Total</div><div class="font-bold text-gray-900">₹'+ Number(o.total || 0).toLocaleString('en-IN', {minimumFractionDigits: 2}) +'</div></div>'+
-        '<div class="space-y-1"><div class="text-xs text-gray-500">Order #</div><div class="font-bold text-gray-900">'+(o.order_number||'')+'</div></div>'+
-        '<div>'+statusBadge(o.status||'')+'</div>'+
-      '</div>'+
-      '<div class="p-4 sm:p-6 space-y-4">'+
-        '<div data-items class="space-y-4"></div>'+
-        '<div class="flex flex-wrap items-center justify-end gap-3 mt-2">'+
-          '<a href="/order/'+o.id+'/receipt/" target="_blank" class="px-4 py-2 rounded-xl bg-brand-50 text-brand-600 text-sm font-bold hover:bg-brand-500 hover:text-white transition-all flex items-center gap-2 border border-brand-100">'+
-            '<i class="fas fa-file-invoice"></i> Receipt'+
-          '</a>'+
-          '<a href="/shop/" class="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-800 text-sm font-bold hover:border-brand-500 hover:text-brand-600">Buy again</a>'+
-          actions+
-        '</div>'+
-      '</div>'+
-    '</div>';
-  }
-  function renderItem(it) {
-    var img = it.image_url ? '<img src="'+it.image_url+'" alt="'+(it.product_name||'')+'" class="w-16 h-16 rounded-xl object-cover shadow-sm bg-white p-1">' : '<div class="w-16 h-16 rounded-xl bg-gray-200 shadow-sm"></div>';
-    var priceStr = (typeof it.price === 'number') ? it.price.toFixed(2) : (it.price || '0.00');
-    return '<div class="flex items-center gap-4">'+
-      '<div class="relative">'+ img + '</div>'+
-      '<div class="flex-1">'+
-        '<div class="font-bold text-gray-900 text-sm">'+(it.product_name||'')+'</div>'+
-        '<div class="text-xs text-gray-500">'+(it.color||'')+' / '+(it.size||'')+'</div>'+
-        '<div class="text-xs text-gray-500">Qty '+(it.quantity||0)+'</div>'+
-      '</div>'+
-      '<div class="text-right"><div class="font-bold text-gray-900">₹'+ Number(it.price || 0).toLocaleString('en-IN', {minimumFractionDigits: 2}) +'</div></div>'+
-    '</div>';
-  }
-  async function loadItems(orderId) {
-    try {
-      var res = await fetch('/order/'+orderId+'/items/');
-      if (!res.ok) return;
-      var data = await res.json();
-      var card = document.querySelector('div[data-order-id="'+orderId+'"]');
-      if (!card) return;
-      var itemsBox = card.querySelector('[data-items]');
-      if (!itemsBox) return;
-      var html = '';
-      (data.items || []).forEach(function (it) { html += renderItem(it); });
-      itemsBox.innerHTML = html;
-    } catch (_) {}
-  }
-  try {
-    var proto = (location.protocol === 'https:') ? 'wss' : 'ws';
-    var socket = new WebSocket(proto+'://'+location.host+'/ws/orders/');
-    var list = document.getElementById('orderHistoryList');
-    var wid = {{ request.session.buyer_id|default:"0" }};
-    function isMine(o) { return Number(o.buyer_id) === Number(wid); }
-    function upsert(o) {
-      if (!list) return;
-      var card = list.querySelector('div[data-order-id="'+o.id+'"]');
-      var html = cardHtml(o);
-      if (card) {
-        card.outerHTML = html;
-      } else {
-        list.insertAdjacentHTML('afterbegin', html);
-      }
-      loadItems(o.id);
-    }
-    function remove(id) {
-      if (!list) return;
-      var card = list.querySelector('div[data-order-id="'+id+'"]');
-      if (card) card.remove();
-    }
-    socket.onmessage = function (e) {
-      try {
-        var data = JSON.parse(e.data);
-        if (data.type === 'order_added' && isMine(data.order)) upsert(data.order);
-        else if (data.type === 'order_updated' && isMine(data.order)) upsert(data.order);
-        else if (data.type === 'order_deleted' && data.id) remove(data.id);
-      } catch (_) {}
-    };
-  } catch (_) {}
-})();
-</script>
-{% endblock buyer_layout %}
+        {% else %}
+        <div class="py-32 text-center bg-white rounded-[3rem] shadow-sm border border-gray-50">
+            <div class="bg-brandCream w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8">
+                <i data-lucide="package" class="w-8 h-8 text-accent"></i>
+            </div>
+            <h2 class="text-3xl font-serif mb-6">No orders yet</h2>
+            <p class="text-gray-500 mb-12 max-w-sm mx-auto">Your journey of elegance begins with your first selection.</p>
+            <a href="{% url 'by_shop' %}" class="inline-block bg-primary text-white px-12 py-5 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-accent transition-all">Explore Collections</a>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock buyer_content %}

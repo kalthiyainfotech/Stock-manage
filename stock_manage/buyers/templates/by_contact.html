@@ -1,175 +1,116 @@
 {% extends "by_base.html" %}
-{% block buyer_layout %}
-    <div class="pt-32 pb-16 bg-brand-50 relative overflow-hidden">
-        <!-- Deco -->
-        <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-brand-500 rounded-full blur-3xl opacity-10"></div>
-        <div class="absolute -top-20 -right-20 w-64 h-64 bg-pink-500 rounded-full blur-3xl opacity-10"></div>
+{% load static %}
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight">Get in Touch</h1>
-            <p class="text-gray-500 max-w-xl mx-auto text-lg hover:text-gray-800 transition-colors">We'd love to hear
-                from you. Whether you have a question about products, pricing, or anything else, our team is ready to
-                answer all your questions.</p>
+{% block title %}Concierge | Contact LUXE{% endblock %}
+
+{% block buyer_content %}
+<main>
+    <!-- Hero Section -->
+    <section class="py-24 text-center max-w-4xl mx-auto px-4">
+        <h1 class="text-5xl md:text-6xl font-serif mb-8 italic">At Your Service</h1>
+        <p class="text-gray-500 leading-relaxed text-lg font-light">Whether you need assistance with an order, styling advice, or detailed product information, our concierge team is dedicated to providing an impeccable experience.</p>
+    </section>
+
+    <!-- Contact Grid -->
+    <section class="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-2 gap-24">
+        <!-- Form -->
+        <div class="bg-white p-12 rounded-[2.5rem] shadow-xl border border-gray-50">
+            <h2 class="text-2xl font-serif mb-10">Send A Request</h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-6 p-4 rounded-xl {% if message.tags == 'success' %}bg-green-50 text-green-600{% else %}bg-red-50 text-red-600{% endif %} text-xs font-bold uppercase tracking-widest">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" action="{% url 'by_contact' %}" class="space-y-8">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label class="block text-[10px] uppercase tracking-widest font-bold mb-3">Full Name</label>
+                        <input type="text" name="name" required placeholder="Johnathan Doe" class="w-full bg-gray-50 border-none rounded-xl py-4 px-6 text-sm outline-none focus:ring-1 focus:ring-accent">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] uppercase tracking-widest font-bold mb-3">Email Address</label>
+                        <input type="email" name="email" required placeholder="john@example.com" class="w-full bg-gray-50 border-none rounded-xl py-4 px-6 text-sm outline-none focus:ring-1 focus:ring-accent">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase tracking-widest font-bold mb-3">Subject</label>
+                    <select name="subject" class="w-full bg-gray-50 border-none rounded-xl py-4 px-6 text-sm outline-none focus:ring-1 focus:ring-accent appearance-none">
+                        <option value="Order Assistance">Order Assistance</option>
+                        <option value="Styling Consultation">Styling Consultation</option>
+                        <option value="Press Inquiries">Press Inquiries</option>
+                        <option value="Private Viewing">Private Viewing</option>
+                        <option value="General feedback">General Feedback</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[10px] uppercase tracking-widest font-bold mb-3">Message</label>
+                    <textarea name="message" required rows="5" placeholder="How can we assist you?" class="w-full bg-gray-50 border-none rounded-xl py-4 px-6 text-sm outline-none focus:ring-1 focus:ring-accent"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-5 rounded-2xl text-[10px] uppercase tracking-widest font-bold hover:bg-accent transition-all">Submit Request</button>
+            </form>
         </div>
-    </div>
 
-    <!-- Contact Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 group">
-        <div class="flex flex-col lg:flex-row gap-12 lg:gap-20">
-
-            <!-- Contact Info -->
-            <div class="w-full lg:w-1/3">
-                <div class="space-y-10">
-                    <div>
-                        <h2 class="text-3xl font-black text-gray-900 mb-6 group-hover:text-brand-600 transition-colors">
-                            Contact Information</h2>
-                        <p class="text-gray-500 mb-8 leading-relaxed">Fill up the form and our Team will get back to you
-                            within 24 hours.</p>
-                    </div>
-
-                    <!-- Info Blocks -->
-                    <div class="space-y-6">
-                        <div
-                            class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow group/item cursor-pointer">
-                            <div
-                                class="w-12 h-12 bg-brand-50 text-brand-500 rounded-xl flex items-center justify-center text-xl shrink-0 group-hover/item:text-white group-hover/item:bg-brand-500 transition-colors">
-                                <i class="fas fa-phone-alt"></i>
-                            </div>
-                            <div>
-                                <h4
-                                    class="font-bold text-gray-900 text-lg group-hover/item:text-brand-600 transition-colors">
-                                    Phone Number</h4>
-                                <p class="text-gray-500 text-sm mt-1">+1 (800) 123-4567<br>+1 (800) 987-6543</p>
-                            </div>
-                        </div>
-
-                        <div
-                            class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow group/item cursor-pointer">
-                            <div
-                                class="w-12 h-12 bg-brand-50 text-brand-500 rounded-xl flex items-center justify-center text-xl shrink-0 group-hover/item:text-white group-hover/item:bg-brand-500 transition-colors">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            <div>
-                                <h4
-                                    class="font-bold text-gray-900 text-lg group-hover/item:text-brand-600 transition-colors">
-                                    Email Address</h4>
-                                <p class="text-gray-500 text-sm mt-1 mb-1">support@luxe.com</p>
-                                <a href="mailto:contact@luxe.com"
-                                    class="text-brand-500 font-bold hover:underline text-sm">Send us an email</a>
-                            </div>
-                        </div>
-
-                        <div
-                            class="flex items-start gap-4 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow group/item cursor-pointer">
-                            <div
-                                class="w-12 h-12 bg-brand-50 text-brand-500 rounded-xl flex items-center justify-center text-xl shrink-0 group-hover/item:text-white group-hover/item:bg-brand-500 transition-colors">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </div>
-                            <div>
-                                <h4
-                                    class="font-bold text-gray-900 text-lg group-hover/item:text-brand-600 transition-colors">
-                                    Our Location</h4>
-                                <p class="text-gray-500 text-sm mt-1">123 Fashion Avenue, Suite 400<br>New York, NY
-                                    10001<br>United States</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Social Media -->
-                    <div>
-                        <h4 class="font-bold text-gray-900 mb-4 text-lg">Follow Us</h4>
-                        <div class="flex gap-4">
-                            <a href="#"
-                                class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-500 hover:text-white hover:border-brand-500 shadow-sm transition-all hover:-translate-y-1"><i
-                                    class="fab fa-facebook-f"></i></a>
-                            <a href="#"
-                                class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-blue-400 hover:text-white hover:border-blue-400 shadow-sm transition-all hover:-translate-y-1"><i
-                                    class="fab fa-twitter"></i></a>
-                            <a href="#"
-                                class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-pink-600 hover:text-white hover:border-pink-600 shadow-sm transition-all hover:-translate-y-1"><i
-                                    class="fab fa-instagram"></i></a>
-                            <a href="#"
-                                class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-red-600 hover:text-white hover:border-red-600 shadow-sm transition-all hover:-translate-y-1"><i
-                                    class="fab fa-youtube"></i></a>
-                        </div>
-                    </div>
+        <!-- Details & FAQ -->
+        <div class="space-y-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <h4 class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center"><i data-lucide="mail" class="w-4 h-4 mr-3 text-accent"></i> Direct Contact</h4>
+                    <p class="text-sm text-gray-500 mb-2">atelier@luxe.com</p>
+                    <p class="text-sm text-gray-500">+91 98765 43210</p>
+                </div>
+                <div>
+                    <h4 class="text-[10px] uppercase tracking-widest font-bold mb-6 flex items-center"><i data-lucide="clock" class="w-4 h-4 mr-3 text-accent"></i> Hours (IST)</h4>
+                    <p class="text-sm text-gray-500 mb-2">Mon - Fri: 09:00 - 18:00</p>
+                    <p class="text-sm text-gray-500">Sat: 10:00 - 16:00</p>
                 </div>
             </div>
 
-            <!-- Contact Form -->
-            <div class="w-full lg:w-2/3">
-                <div
-                    class="bg-white rounded-3xl p-8 sm:p-12 shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow duration-500 relative overflow-hidden">
-                    <div class="absolute -top-32 -right-32 w-64 h-64 bg-brand-50 rounded-full blur-3xl z-0"></div>
-                    <form class="relative z-10" method="post" action="{% url 'by_contact' %}">
-                        {% csrf_token %}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">First Name</label>
-                                <input type="text" name="fname" placeholder="John"
-                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Last Name</label>
-                                <input type="text" name="lname" placeholder="Doe"
-                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
-                                <input type="email" name="email" placeholder="john.doe@example.com"
-                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
-                                <input type="tel" placeholder="+1 (555) 000-0000"
-                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Subject</label>
-                                <div class="relative">
-                                    <select
-                                        class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium appearance-none text-gray-600">
-                                        <option>General Inquiry</option>
-                                        <option>Order Status</option>
-                                        <option>Returns & Refunds</option>
-                                        <option>Product Information</option>
-                                        <option>Other</option>
-                                    </select>
-                                    <div
-                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
-                                        <i class="fas fa-chevron-down text-sm"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Message</label>
-                                <textarea rows="5" name="message" placeholder="Write your message here..."
-                                    class="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-1 focus:ring-brand-500 transition-all font-medium resize-none"></textarea>
-                            </div>
-                        </div>
-
-                        <button type="submit"
-                            class="group px-5 py-3 text-sm bg-gray-900 border border-gray-900 text-white font-semibold rounded-lg hover:bg-brand-600 hover:border-brand-600 transition-all shadow-md flex items-center justify-center gap-2 w-auto">
-                            <span>Send Message</span>
-                            <i class="fas fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
-                        </button>
-                    </form>
+            <div>
+                <h3 class="text-2xl font-serif mb-10 italic">Common Inquiries</h3>
+                <div class="space-y-6">
+                    <details class="group border-b border-gray-100 pb-6 cursor-pointer">
+                        <summary class="list-none flex justify-between items-center text-sm font-semibold uppercase tracking-widest">
+                            Global Shipping Options 
+                            <i data-lucide="plus" class="w-4 h-4 group-open:hidden"></i>
+                            <i data-lucide="minus" class="w-4 h-4 hidden group-open:block"></i>
+                        </summary>
+                        <p class="mt-4 text-sm text-gray-500 leading-relaxed">We offer complimentary nationwide shipping on all orders over ₹4,999. Express delivery (2-3 business days) is available for most major cities.</p>
+                    </details>
+                    <details class="group border-b border-gray-100 pb-6 cursor-pointer">
+                        <summary class="list-none flex justify-between items-center text-sm font-semibold uppercase tracking-widest">
+                            Returns Policy
+                            <i data-lucide="plus" class="w-4 h-4 group-open:hidden"></i>
+                            <i data-lucide="minus" class="w-4 h-4 hidden group-open:block"></i>
+                        </summary>
+                        <p class="mt-4 text-sm text-gray-500 leading-relaxed">Returns are accepted within 7 days of delivery for unused items in original packaging. Some personal care items are non-returnable for hygiene reasons.</p>
+                    </details>
+                    <details class="group border-b border-gray-100 pb-6 cursor-pointer">
+                        <summary class="list-none flex justify-between items-center text-sm font-semibold uppercase tracking-widest">
+                            Authentic Product Guarantee
+                            <i data-lucide="plus" class="w-4 h-4 group-open:hidden"></i>
+                            <i data-lucide="minus" class="w-4 h-4 hidden group-open:block"></i>
+                        </summary>
+                        <p class="mt-4 text-sm text-gray-500 leading-relaxed">Every LUXE piece is guaranteed 100% authentic, sourced directly from our boutique workshops across India.</p>
+                    </details>
                 </div>
             </div>
 
-        </div>
-    </div>
-
-    <!-- Map Section (Placeholder) -->
-    <div class="w-full h-96 bg-gray-300 relative">
-        <div class="absolute inset-0 bg-gray-200 flex items-center justify-center mix-blend-multiply">
-            <div class="text-center group cursor-pointer p-8 rounded-full hover:bg-white/50 transition-colors">
-                <i
-                    class="fas fa-map-marker-alt text-4xl text-brand-500 drop-shadow-lg group-hover:scale-125 transition-transform duration-300 group-hover:-translate-y-2 group-hover:text-red-500 animate-bounce cursor-pointer"></i>
-                <h3 class="font-bold text-gray-800 text-xl font-sans mt-2 shadow-white">123 Fashion Ave</h3>
+            <!-- Simple Map Placeholder -->
+            <div class="h-64 bg-gray-100 rounded-[2.5rem] relative overflow-hidden group">
+                <img src="https://images.unsplash.com/photo-1549439602-43ebcb232811?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover opacity-60 grayscale group-hover:grayscale-0 transition-all duration-700">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="bg-white p-6 rounded-2xl shadow-xl text-center">
+                        <h5 class="text-[10px] uppercase tracking-widest font-bold mb-1">Udaipur Atelier</h5>
+                        <p class="text-[10px] text-gray-500">The City Palace Boutique</p>
+                    </div>
+                </div>
             </div>
         </div>
-        <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1500&q=80"
-            class="w-full h-full object-cover opacity-60">
-    </div>
-{% endblock buyer_layout %}
+    </section>
+</main>
+{% endblock buyer_content %}

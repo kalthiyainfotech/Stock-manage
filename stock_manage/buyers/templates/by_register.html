@@ -1,98 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md">
-        <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Welcome Back</h2>
-                <p class="text-gray-600 mt-2">Please login to your account</p>
-            </div>
+{% extends "by_base.html" %}
+{% load static %}
 
-            <form method="POST" id="loginForm" class="space-y-6">
-                {% csrf_token %}
-                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                    <div class="relative">
-    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
+{% block title %}Register | LUXE{% endblock %}
+
+{% block buyer_content %}
+<main class="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-20 relative">
+    <div class="absolute inset-0 z-0">
+        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop" class="w-full h-full object-cover opacity-10 filter grayscale">
     </div>
-    <input
-        type="text"
-        id="name"
-        name="name"
-        required
-        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-        placeholder="Enter your name">
-</div>
 
+    <div class="max-w-md w-full relative z-10" data-aos="fade-up">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-gray-50 text-center">
+            <h1 class="text-4xl font-serif mb-4">Create Account</h1>
+            <p class="text-gray-400 text-sm mb-12">Register to join the Luxe collective.</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="mb-8 p-4 rounded-2xl bg-red-50 text-red-700 text-[10px] uppercase font-bold tracking-widest text-center">
+                    {{ message }}
                 </div>
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
-                            </svg>
-                        </div>
-                        <input 
-                            type="text" 
-                            id="email" 
-                            name="email" 
-                            required
-                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                            placeholder="Username">
+                {% endfor %}
+            {% endif %}
+
+            <form action="{% url 'by_register' %}" method="POST" class="space-y-8">
+                {% csrf_token %}
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2 text-left">
+                        <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">First Name</label>
+                        <input type="text" name="first_name" required class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors" placeholder="Rivaan">
+                    </div>
+                    <div class="space-y-2 text-left">
+                        <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Last Name</label>
+                        <input type="text" name="last_name" required class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors" placeholder="Jaiswal">
                     </div>
                 </div>
-
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                        </div>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            required
-                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                            placeholder="Enter your password">
-                    </div>
+                <div class="space-y-2 text-left">
+                    <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Email Address</label>
+                    <input type="email" name="email" required class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors" placeholder="you@luxe.com">
+                </div>
+                <div class="space-y-2 text-left relative">
+                    <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Password</label>
+                    <input type="password" name="password" id="reg-pass" required class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors" placeholder="••••••••">
+                    <button type="button" onclick="const p = document.getElementById('reg-pass'); p.type = p.type === 'password' ? 'text' : 'password';" class="absolute right-0 bottom-4 text-gray-400 hover:text-accent">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
                 </div>
 
-               
+                <div class="text-left py-4">
+                    <label class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" required class="rounded border-gray-300 text-accent focus:ring-accent">
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest leading-relaxed">I agree to the <a href="#" class="text-accent font-bold">Privacy Policy</a> and <a href="#" class="text-accent font-bold">Terms of Service</a></span>
+                    </label>
+                </div>
 
-                <button 
-                    type="submit" 
-                    class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
-                    Sign In
+                <button type="submit" class="w-full bg-primary text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-black transition-all transform hover:scale-[1.02] shadow-xl shadow-primary/10">
+                    Register
                 </button>
             </form>
-            <div class="text-center mt-2">Alrady have an account ?<a class="text-red-500 ml-2" href="{% url "by_login" %}">Login</a></div>
-            
 
-           
-
-           
+            <p class="mt-12 text-sm text-gray-500">Already a member? <a href="{% url 'by_login' %}" class="text-accent font-bold underline-offset-4 hover:underline">Log in</a></p>
         </div>
     </div>
-
-    
-</body>
-</html>
+</main>
+{% endblock buyer_content %}

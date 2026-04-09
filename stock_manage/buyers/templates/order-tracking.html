@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Your Order | LUXE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#1a1a1a', accent: '#c5a059', surface: '#fbfbfb', brandGold: '#dfc691', brandCream: '#fbf9f5' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Playfair Display', 'serif'] },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-primary font-sans antialiased">
+    <!-- Luxe Header -->
+    <div class="bg-primary text-[#dfc691] text-[10px] sm:text-xs tracking-[0.2em] uppercase py-2.5 text-center font-semibold relative overflow-hidden">
+        <div class="flex items-center justify-center space-x-8 animate-pulse text-white">
+            <span>✨ Festive Glow: Complimentary Gifting on orders above ₹4,999</span>
+        </div>
+    </div>
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 transition-all duration-500 h-20 flex items-center" id="main-header">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex items-center justify-between">
+            <button class="lg:hidden p-2 text-primary focus:outline-none" id="mobile-menu-btn">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <div class="flex-shrink-0">
+                <a href="index.html" class="font-serif text-3xl md:text-4xl font-black tracking-tighter text-primary group transition-all">
+                    LUXE<span class="text-accent">.</span>
+                </a>
+            </div>
+            <div class="hidden lg:flex items-center space-x-12">
+                <a href="index.html" class="nav-link text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 hover:text-accent">Home</a>
+                <a href="shop.html" class="nav-link text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 hover:text-accent">Shop</a>
+                <a href="product.html" class="nav-link text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 hover:text-accent">Product</a>
+                <a href="blog.html" class="nav-link text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 hover:text-accent">Journal</a>
+                <a href="contact.html" class="nav-link text-[10px] uppercase tracking-[0.2em] font-bold text-gray-500 hover:text-accent">Concierge</a>
+            </div>
+            <div class="flex items-center space-x-6">
+                <button class="p-2 hover:text-accent transition-all duration-300"><i data-lucide="search" class="w-5 h-5"></i></button>
+                <a href="profile.html" class="hidden sm:block p-2 hover:text-accent transition-all duration-300"><i data-lucide="user" class="w-5 h-5"></i></a>
+                <a href="#" class="p-2 hover:text-accent transition-all duration-300 relative">
+                    <i data-lucide="heart" class="w-5 h-5"></i>
+                    <span class="absolute top-1 right-1 bg-accent text-[8px] text-white w-3 h-3 rounded-full flex items-center justify-center font-bold">4</span>
+                </a>
+                <a href="cart.html" class="p-2 hover:text-accent transition-all duration-300 relative group">
+                    <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                    <span class="absolute top-1 right-1 bg-primary text-[8px] text-white w-3 h-3 rounded-full flex items-center justify-center font-bold group-hover:bg-accent transition-colors">2</span>
+                </a>
+            </div>
+        </nav>
+    </header>
+    <div id="mobile-menu" class="fixed inset-0 z-[60] bg-white transform translate-x-full transition-transform duration-700 lg:hidden">
+        <div class="p-8 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-20 text-primary">
+                <span class="font-serif text-3xl font-black">LUXE.</span>
+                <button id="close-mobile-menu" class="p-2 bg-gray-50 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <div class="flex flex-col space-y-10">
+                <a href="index.html" class="text-3xl font-serif text-primary">Home</a>
+                <a href="shop.html" class="text-3xl font-serif text-primary">Collections</a>
+                <a href="blog.html" class="text-3xl font-serif text-primary">Our Story</a>
+                <a href="contact.html" class="text-3xl font-serif text-primary">Concierge</a>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-5xl mx-auto px-4 py-16">
+        <div class="bg-white p-12 rounded-[3rem] shadow-2xl border border-gray-50">
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-8">
+                <div>
+                    <h1 class="text-4xl font-serif mb-4 italic">Tracking Your Delivery</h1>
+                    <p class="text-[10px] uppercase font-bold tracking-widest text-gray-400">Order ID: <span class="text-primary">#LX-99201</span> · Carrier: <span class="text-primary">LUXE Premium Express</span></p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] uppercase font-bold tracking-widest text-gray-400 mb-2">Estimated Arrival</p>
+                    <p class="text-3xl font-serif text-accent">Oct 28, 2026</p>
+                </div>
+            </header>
+
+            <!-- Visual Timeline -->
+            <div class="relative py-12 mb-20">
+                <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-100 -translate-y-1/2"></div>
+                <div class="relative flex justify-between">
+                    <!-- Step 1 -->
+                    <div class="timeline-step active flex flex-col items-center group">
+                        <div class="dot w-8 h-8 rounded-full bg-primary border-4 border-white shadow-xl flex items-center justify-center mb-6 relative z-10 transition-all duration-700">
+                            <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                        </div>
+                        <span class="text-[9px] uppercase tracking-widest font-bold mb-2">Order Placed</span>
+                        <span class="text-[8px] text-gray-400">Oct 24, 10:20 AM</span>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="timeline-step active flex flex-col items-center group">
+                        <div class="dot w-8 h-8 rounded-full bg-primary border-4 border-white shadow-xl flex items-center justify-center mb-6 relative z-10 transition-all duration-700">
+                             <i data-lucide="check" class="w-3 h-3 text-white"></i>
+                        </div>
+                        <span class="text-[9px] uppercase tracking-widest font-bold mb-2">Confirmed</span>
+                        <span class="text-[8px] text-gray-400">Oct 24, 2:45 PM</span>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="timeline-step active flex flex-col items-center group">
+                        <div class="dot w-8 h-8 rounded-full bg-accent border-4 border-white shadow-xl flex items-center justify-center mb-6 relative z-10 animate-pulse">
+                        </div>
+                        <span class="text-[9px] uppercase tracking-widest font-bold mb-2 text-accent">In Transit</span>
+                        <span class="text-[8px] text-gray-400">Oct 25, 6:00 AM</span>
+                    </div>
+                    <!-- Step 4 -->
+                    <div class="timeline-step flex flex-col items-center group opacity-30">
+                        <div class="dot w-8 h-8 rounded-full bg-gray-200 border-4 border-white shadow-xl relative z-10"></div>
+                        <span class="text-[9px] uppercase tracking-widest font-bold mb-2">Out For Delivery</span>
+                    </div>
+                    <!-- Step 5 -->
+                    <div class="timeline-step flex flex-col items-center group opacity-30">
+                        <div class="dot w-8 h-8 rounded-full bg-gray-200 border-4 border-white shadow-xl relative z-10"></div>
+                        <span class="text-[9px] uppercase tracking-widest font-bold mb-2">At Your Door</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tracking Details -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 pt-16 border-t border-gray-100">
+                <div>
+                    <h3 class="text-[10px] uppercase font-bold tracking-widest mb-8 text-gray-400">Logistics History</h3>
+                    <ul class="space-y-8 relative">
+                         <li class="pl-8 border-l-2 border-accent relative">
+                            <i data-lucide="circle" class="w-2 h-2 fill-accent text-accent absolute left-[-5px] top-1"></i>
+                            <p class="text-[11px] font-bold mb-1 uppercase tracking-widest">Arrived at Distribution Center</p>
+                            <p class="text-[10px] text-gray-400">Frankfurt, DE · Oct 25, 2026 18:30</p>
+                         </li>
+                         <li class="pl-8 border-l-2 border-gray-100 relative">
+                            <i data-lucide="circle" class="w-2 h-2 fill-gray-100 text-gray-100 absolute left-[-5px] top-1"></i>
+                            <p class="text-[11px] font-bold mb-1 uppercase tracking-widest">Departed Atelier Warehouse</p>
+                            <p class="text-[10px] text-gray-400">Paris, FR · Oct 25, 2026 09:12</p>
+                         </li>
+                         <li class="pl-8 relative">
+                            <i data-lucide="circle" class="w-2 h-2 fill-gray-100 text-gray-100 absolute left-[-5px] top-1"></i>
+                            <p class="text-[11px] font-bold mb-1 uppercase tracking-widest">Quality Assurance Cleared</p>
+                            <p class="text-[10px] text-gray-400">Paris, FR · Oct 24, 2026 15:45</p>
+                         </li>
+                    </ul>
+                </div>
+                <!-- Shipping Context -->
+                <div class="bg-gray-50 p-10 rounded-[2.5rem] border border-gray-100">
+                    <h3 class="text-[10px] uppercase font-bold tracking-widest mb-8 text-gray-400">Delivery Information</h3>
+                    <div class="space-y-10">
+                        <div>
+                            <p class="text-[10px] uppercase font-bold mb-3 tracking-[0.2em] text-accent">Shipping Address</p>
+                            <p class="text-sm font-medium leading-loose">Eleanor Vance<br>212 Rue Saint-Honoré<br>Paris, 75001, FR</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] uppercase font-bold mb-3 tracking-[0.2em] text-accent">Shipping Method</p>
+                            <p class="text-sm font-medium">Luxe White Glove Pan-India Delivery</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Luxe Footer -->
+    <footer class="bg-primary text-gray-500 pt-24 pb-12 mt-20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <a href="index.html" class="font-serif text-3xl text-white font-black block mb-8">LUXE.</a>
+            <p class="mt-20 text-[8px] uppercase tracking-widest">&copy; 2026 LUXE INDIA PVT LTD.</p>
+        </div>
+    </footer>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

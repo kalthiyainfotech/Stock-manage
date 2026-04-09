@@ -1,94 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md">
-        <div class="bg-white rounded-2xl shadow-xl p-8 md:p-10">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Welcome Back</h2>
-                <p class="text-gray-600 mt-2">Please login to your account</p>
+{% extends "by_base.html" %}
+{% load static %}
+
+{% block title %}Login | LUXE{% endblock %}
+
+{% block buyer_content %}
+<main class="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-20 relative">
+    <div class="absolute inset-0 z-0">
+        <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2000&auto=format&fit=crop" class="w-full h-full object-cover opacity-10 filter grayscale">
+    </div>
+
+    <div class="max-w-md w-full relative z-10" data-aos="zoom-in">
+        <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-gray-50">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-serif mb-4">Welcome Back</h1>
+                <p class="text-gray-400 text-sm">Please enter your credentials to access your world.</p>
             </div>
 
             {% if messages %}
-            <div class="mb-4 space-y-2">
                 {% for message in messages %}
-                    {% if 'buyer' in message.tags %}
-                    <div class="rounded-lg border px-3 py-2 text-sm
-                        {% if 'error' in message.tags %}border-rose-200 bg-rose-50 text-rose-700{% elif 'success' in message.tags %}border-emerald-200 bg-emerald-50 text-emerald-700{% elif 'warning' in message.tags %}border-amber-200 bg-amber-50 text-amber-800{% else %}border-sky-200 bg-sky-50 text-sky-700{% endif %}">
-                        {{ message }}
-                    </div>
-                    {% endif %}
+                <div class="mb-8 p-4 rounded-2xl bg-red-50 text-red-700 text-[10px] uppercase font-bold tracking-widest text-center">
+                    {{ message }}
+                </div>
                 {% endfor %}
-            </div>
             {% endif %}
 
-            <form method="POST" id="loginForm" class="space-y-6">
+            <form action="{% url 'by_login' %}" method="POST" class="space-y-8">
                 {% csrf_token %}
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
-                            </svg>
-                        </div>
-                        <input 
-                            type="text" 
-                            id="email" 
-                            name="email" 
-                            required
-                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                            placeholder="Username">
+                <div class="space-y-2 text-left">
+                    <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Email Address</label>
+                    <input type="email" name="email" required class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors" placeholder="account@luxe.com">
+                </div>
+                
+                <div class="space-y-2 text-left relative">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Password</label>
+                        <a href="#" class="text-[10px] uppercase tracking-widest font-bold text-accent hover:text-primary transition-colors">Forgot?</a>
                     </div>
+                    <input type="password" name="password" id="login-pass" required class="w-full bg-white border-b border-gray-200 py-3 focus:outline-none focus:border-accent transition-colors" placeholder="••••••••">
+                    <button type="button" onclick="const p = document.getElementById('login-pass'); p.type = p.type === 'password' ? 'text' : 'password';" class="absolute right-0 bottom-4 text-gray-400 hover:text-accent">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                    </button>
                 </div>
 
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                            </svg>
-                        </div>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            required
-                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                            placeholder="Enter your password">
-                    </div>
-                </div>
-
-               
-
-                <button 
-                    type="submit" 
-                    class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                <button type="submit" class="w-full bg-primary text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-black transition-all transform hover:scale-[1.02] shadow-xl shadow-primary/10">
                     Sign In
                 </button>
             </form>
-                            <div class="text-center mt-2">Don't have an account ?<a class="text-red-500 ml-2" href="{% url "by_register" %}">Register</a></div>
 
+            <div class="flex items-center my-10 space-x-4">
+                <div class="flex-1 h-px bg-gray-100"></div>
+                <span class="text-[10px] text-gray-300 uppercase tracking-widest">or continue with</span>
+                <div class="flex-1 h-px bg-gray-100"></div>
+            </div>
 
-            
+            <div class="grid grid-cols-2 gap-4">
+                <button class="flex items-center justify-center space-x-3 py-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all text-xs font-bold uppercase tracking-widest">
+                    <img src="https://www.google.com/favicon.ico" class="w-4" alt="Google">
+                    <span>Google</span>
+                </button>
+                <button class="flex items-center justify-center space-x-3 py-4 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all text-xs font-bold uppercase tracking-widest">
+                    <i data-lucide="apple" class="w-4 h-4"></i>
+                    <span>Apple</span>
+                </button>
+            </div>
 
-           
-
-           
+            <p class="mt-12 text-center text-sm text-gray-500">Not luxury yet? <a href="{% url 'by_register' %}" class="text-accent font-bold underline-offset-4 hover:underline">Register now</a></p>
         </div>
     </div>
-
-    
-</body>
-</html>
+</main>
+{% endblock buyer_content %}

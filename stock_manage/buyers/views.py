@@ -114,7 +114,11 @@ def by_login(request):
 
 @never_cache
 def by_index(request):
-    from admin_panel.models import Category, Product, ProductImage
+    from admin_panel.models import Category, Product, ProductImage, Slider
+    
+    # Fetch active sliders for the homepage
+    sliders = Slider.objects.filter(status=True).order_by('order', '-created_at')
+    
     categories_qs = Category.objects.filter(status=True).order_by('name')
     cards = []
     for c in categories_qs:
@@ -137,7 +141,10 @@ def by_index(request):
             'name': c.name,
             'image_url': image_url
         })
-    return render(request,'by_index.html', {'home_categories': cards})
+    return render(request,'by_index.html', {
+        'home_categories': cards,
+        'sliders': sliders
+    })
 
 @never_cache
 def by_blog(request):

@@ -60,4 +60,9 @@ urlpatterns = [
     path('orders/delete/<int:id>/', delete_order, name='delete_order'),
     path('orders/items/<int:order_id>/', admin_order_items_api, name='admin_order_items_api'),
 
+    path('sliders/', auth_sliders, name='auth_sliders'),
+    path('sliders/add/', add_slider, name='add_slider'),
+    path('sliders/edit/<int:id>/', edit_slider, name='edit_slider'),
+    path('sliders/delete/<int:id>/', delete_slider, name='delete_slider'),
+    path('sliders/toggle/<int:id>/', toggle_slider_status, name='toggle_slider_status'),
 ]
