@@ -114,7 +114,7 @@ def by_login(request):
 
 @never_cache
 def by_index(request):
-    from admin_panel.models import Category, Product, ProductImage, Slider
+    from admin_panel.models import Category, Product, ProductImage, Slider, ProductVariant
     
     # Fetch active sliders for the homepage
     sliders = Slider.objects.filter(status=True).order_by('order', '-created_at')
@@ -141,9 +141,66 @@ def by_index(request):
             'name': c.name,
             'image_url': image_url
         })
+
+    # Fetch 4 random products for "The Seasonal Edit" section
+    # We get variants to have access to specific prices and images
+    unique_product_ids = Product.objects.filter(status=True).values_list('id', flat=True)
+    random_ids = random.sample(list(unique_product_ids), min(len(unique_product_ids), 4))
+    
+    trending_products = []
+    for pid in random_ids:
+        variant = ProductVariant.objects.filter(product_id=pid).select_related('product', 'color', 'size').first()
+        if variant:
+            variant.calculated_image_url = _resolve_shop_image_url(variant.product, variant)
+            # Add category/subcategory info for subtitle
+            try:
+                sub_name = variant.product.brand.subcetegory.name
+                color_name = variant.color.name
+                # Hide if it looks like a hex code (e.g. #FFFFFF)
+                if color_name.startswith('#'):
+                    variant.category_info = sub_name
+                else:
+                    variant.category_info = f"{sub_name} · {color_name}"
+            except Exception:
+                variant.category_info = "Luxury Selection"
+            trending_products.append(variant)
+
+    # Fetch T-shirt products for the new Showcase Slider
+    tshirt_products = list(Product.objects.filter(
+        Q(name__icontains='t-shirt') | Q(name__icontains='tshirt') | Q(name__icontains='top') | Q(brand__subcetegory__category__name__icontains='shirt'),
+        status=True
+    ).prefetch_related('variants', 'variants__color', 'variants__gallery_images', 'images')[:5])
+    
+    if not tshirt_products:
+        tshirt_products = list(Product.objects.filter(status=True).prefetch_related('variants', 'variants__color', 'variants__gallery_images', 'images')[:5])
+        
+    tshirt_showcase = []
+    from admin_panel.models import ProductVariant
+    for p in tshirt_products:
+        # Get all variants grouped by color to show different color variants
+        processed_colors = set()
+        for v in p.variants.all():
+            color_name = v.color.name if v.color else "Standard"
+            if color_name not in processed_colors:
+                processed_colors.add(color_name)
+                # Primary image for this variant
+                img_url = _safe_image_url(getattr(v, 'image', None))
+                if img_url:
+                    tshirt_showcase.append({
+                        'product_id': p.id,
+                        'variant_id': v.id,
+                        'name': p.name,
+                        'color_name': color_name,
+                        'price': v.price,
+                        'image_url': img_url,
+                        'type': 'primary'
+                    })
+
     return render(request,'by_index.html', {
         'home_categories': cards,
-        'sliders': sliders
+        'sliders': sliders,
+        'trending_products': trending_products,
+        'tshirt_showcase': tshirt_showcase
     })
 
 @never_cache
@@ -450,6 +507,8 @@ def by_shop(request):
     price_max = base_qs.order_by('-price').values_list('price', flat=True).first() or 0
 
     category_id = request.GET.get('category')
+    if category_id == 'None':
+        category_id = None
     q = (request.GET.get('q') or '').strip()
     min_price = request.GET.get('min')
     max_price = request.GET.get('max')
@@ -566,6 +625,8 @@ def by_shop_api(request):
         id__in=unique_variant_ids
     )
     category_id = request.GET.get('category')
+    if category_id == 'None':
+        category_id = None
     q = (request.GET.get('q') or '').strip()
 
     qs = base_qs

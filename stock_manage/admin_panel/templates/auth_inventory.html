@@ -19,24 +19,24 @@
     </div>
 
     <div id="inventoryModal"
-        class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-3 sm:px-6">
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 px-2 sm:px-6 py-2 sm:py-6">
 
         <div
-            class="relative w-full max-w-4xl rounded-[2rem] bg-white shadow-2xl shadow-slate-900/40 max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
+            class="relative w-full max-w-4xl rounded-2xl sm:rounded-[2rem] bg-white shadow-2xl shadow-slate-900/40 h-[96vh] sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
 
-            <div class="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-6 py-5 sm:px-8 sm:py-6 shrink-0">
+            <div class="relative bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-4 py-4 sm:px-8 sm:py-6 shrink-0">
                 <div class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-indigo-400 to-transparent opacity-50"></div>
-                <div class="flex items-center justify-between">
+                <div class="flex items-start justify-between gap-4 sm:items-center">
                     <div>
-                        <h2 id="modalTitle" class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                        <h2 id="modalTitle" class="text-lg sm:text-2xl font-bold text-white tracking-tight leading-tight">
                             Add Inventory
                         </h2>
-                        <p class="mt-1.5 text-xs sm:text-sm text-indigo-200/80 font-medium tracking-wide">
+                        <p class="mt-1 sm:mt-1.5 text-[11px] sm:text-sm text-indigo-200/80 font-medium tracking-wide">
                             Configure hierarchy, pricing, and variants for your stock catalog
                         </p>
                     </div>
                     <button id="closeinventoryModal"
-                        class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition backdrop-blur-md">
+                        class="inline-flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition backdrop-blur-md shrink-0 focus:outline-none focus:ring-2 focus:ring-white/50">
                         <span class="sr-only">Close</span>
                         ✕
                     </button>
@@ -87,28 +87,28 @@
                 </div>
             </div>
 
-            <div class="px-6 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/30">
+            <div class="px-3 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-6 overflow-y-auto overflow-x-hidden custom-scrollbar flex-1 bg-slate-50/30 w-full">
                 <form id="inventoryForm" method="POST"
                     action="{% url 'add_inventory' %}"
                     enctype="multipart/form-data"
-                    class="space-y-8">
+                    class="space-y-6 sm:space-y-8 w-full">
 
                     {% csrf_token %}
 
-                    <div class="bg-white rounded-2xl p-5 sm:p-6 ring-1 ring-slate-100 shadow-sm shadow-slate-200/50">
-                        <div class="mb-5 flex items-center gap-3">
-                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                                <i class="fa-solid fa-sitemap text-sm"></i>
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 ring-1 ring-slate-100 shadow-sm shadow-slate-200/50 w-full">
+                        <div class="mb-4 sm:mb-5 flex items-center gap-3">
+                            <span class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+                                <i class="fa-solid fa-sitemap text-xs sm:text-sm"></i>
                             </span>
-                            <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-800">
+                            <h3 class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-slate-800">
                                 Product Hierarchy
                             </h3>
                         </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Category</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full">
+                            <div class="space-y-1.5 w-full">
+                                <label class="text-[11px] sm:text-xs font-medium text-slate-700">Category</label>
                                 <select id="categorySelect" name="category" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 sm:py-2 text-sm text-slate-800 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                                     <option value="">Select Category</option>
                                     {% for category in categories %}
                                     <option value="{{ category.name }}">{{ category.name }}</option>
@@ -119,10 +119,10 @@
                                     class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                             </div>
 
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Subcategory</label>
+                            <div class="space-y-1.5 w-full">
+                                <label class="text-[11px] sm:text-xs font-medium text-slate-700">Subcategory</label>
                                 <select id="subcategorySelect" name="subcategory" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 sm:py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
                                     disabled>
                                     <option value="">Select Subcategory</option>
                                     <option value="__new__">+ Add New Subcategory</option>
@@ -131,10 +131,10 @@
                                     class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                             </div>
 
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Brand</label>
+                            <div class="space-y-1.5 w-full">
+                                <label class="text-[11px] sm:text-xs font-medium text-slate-700">Brand</label>
                                 <select id="brandSelect" name="brand" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 sm:py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
                                     disabled>
                                     <option value="">Select Brand</option>
                                     <option value="__new__">+ Add New Brand</option>
@@ -143,10 +143,10 @@
                                     class="hidden w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm mt-2 text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40">
                             </div>
 
-                            <div class="space-y-1.5">
-                                <label class="text-xs font-medium text-slate-700">Product</label>
+                            <div class="space-y-1.5 w-full">
+                                <label class="text-[11px] sm:text-xs font-medium text-slate-700">Product</label>
                                 <select id="productSelect" name="product" required
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 sm:py-2 text-sm text-slate-800 disabled:bg-slate-50 disabled:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40"
                                     disabled>
                                     <option value="">Select Product</option>
                                     <option value="__new__">+ Add New Product</option>
@@ -158,61 +158,47 @@
                     </div>
 
 
-                    <div class="bg-white rounded-2xl p-5 sm:p-6 ring-1 ring-slate-100 shadow-sm shadow-slate-200/50">
-                        <div class="mb-5 flex items-center gap-3">
-                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
-                                <i class="fa-solid fa-cube text-sm"></i>
-                            </span>
-                            <h3 class="text-sm font-semibold uppercase tracking-widest text-slate-800">
-                                Details & Attributes
-                            </h3>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                            <div class="space-y-1.5 sm:col-span-2">
-                                <label class="text-xs font-medium text-slate-700">Description</label>
-                                <textarea name="description" placeholder="Short description of this product or variant"
-                                    rows="3"
-                                    class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 resize-none"></textarea>
+                    <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 ring-1 ring-slate-100 shadow-sm shadow-slate-200/50 w-full overflow-hidden">
+                        <div class="mb-4 sm:mb-5 flex flex-col sm:flex-row sm:items-center gap-3">
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+                                    <i class="fa-solid fa-cube text-xs sm:text-sm"></i>
+                                </span>
+                                <h3 class="text-xs sm:text-sm font-semibold uppercase tracking-widest text-slate-800">
+                                    Details & Attributes
+                                </h3>
                             </div>
-
-                            <div class="sm:col-span-2 space-y-3 mt-2">
-                                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                                    <h3 class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        </div>
+                        <div class="flex flex-col gap-5 sm:gap-6 w-full">
+                            <div class="space-y-4">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 sm:pb-2 border-b border-slate-100 gap-3">
+                                    <h3 class="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.1em] sm:tracking-[0.18em] text-slate-500 pl-1">
                                         Variants (Color, Size, Price, Stock)
                                     </h3>
                                     <button type="button" id="addMainVariantBtn"
-                                        class="text-xs px-3 py-1.5 rounded-full border border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 font-bold text-indigo-700 flex items-center gap-1.5 transition-colors">
+                                        class="w-full sm:w-auto text-sm sm:text-xs px-4 sm:px-3 py-2.5 sm:py-1.5 rounded-lg sm:rounded-full border border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 font-bold text-indigo-700 flex justify-center items-center gap-1.5 transition-colors shadow-sm sm:shadow-none">
                                         <i class="fa-solid fa-plus text-[10px]"></i> Add Main Variant
                                     </button>
                                 </div>
-                                <div id="variantRows" class="space-y-3">
+                                <div id="variantRows" class="space-y-4 w-full">
                                     <!-- Variant rows will be appended here via JS -->
                                 </div>
                             </div>
 
-                            <div class="sm:col-span-2 rounded-xl border border-dashed border-slate-300 p-5 bg-slate-50/50 shadow-inner">
-                                <div class="flex items-center justify-between gap-3 mb-4">
+                            <div class="w-full rounded-xl border border-dashed border-slate-300 p-4 sm:p-5 bg-slate-50/50 shadow-inner">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                                     <div>
                                         <p class="text-sm font-bold text-slate-800">Specifications</p>
                                         <p class="text-[11px] text-slate-500 font-medium">Add dynamic fields (Storage, RAM, Material, etc.)</p>
                                     </div>
                                     <button type="button" id="addSpecRowBtn"
-                                        class="text-xs px-3 py-1.5 rounded-full border border-slate-300 bg-white hover:bg-slate-100 font-bold text-slate-600 transition">
+                                        class="w-full sm:w-auto text-sm sm:text-xs px-4 sm:px-3 py-2.5 sm:py-1.5 rounded-lg sm:rounded-full border border-slate-300 bg-white hover:bg-slate-100 font-bold text-slate-600 transition shadow-sm sm:shadow-none">
                                         + Add Spec
                                     </button>
                                 </div>
 
-                                <div id="specsContainer" class="space-y-3">
-                                    <div class="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 spec-row items-center">
-                                        <input type="text" name="spec_name" placeholder="Spec name (e.g., Storage)"
-                                            class="w-full rounded-lg border-0 ring-1 ring-inset ring-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm">
-                                        <input type="text" name="spec_value" placeholder="Spec value (e.g., 128GB)"
-                                            class="w-full rounded-lg border-0 ring-1 ring-inset ring-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm">
-                                        <button type="button"
-                                            class="removeSpecRowBtn w-9 h-9 rounded-full border border-rose-200 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition flex items-center justify-center shrink-0">
-                                            <i class="fa-solid fa-xmark text-sm"></i>
-                                        </button>
-                                    </div>
+                                <div id="specsContainer" class="flex flex-col gap-3 w-full">
+                                    <!-- specs dynamically injected -->
                                 </div>
                             </div>
                         </div>
@@ -223,14 +209,14 @@
                     
 
 
-                    <div class="pt-6 mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end border-t border-slate-200">
+                    <div class="pt-5 sm:pt-6 mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end border-t border-slate-200 w-full">
                         <button type="button" id="closeinventoryModalBottom"
-                            class="inline-flex h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">
+                            class="w-full sm:w-auto inline-flex h-12 sm:h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-sm transition focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:outline-none">
                             Cancel
                         </button>
 
                         <button type="submit"
-                            class="group relative inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 text-sm font-bold text-white shadow-xl shadow-slate-900/20 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/30 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
+                            class="w-full sm:w-auto group relative inline-flex h-12 sm:h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 text-sm font-bold text-white shadow-xl shadow-slate-900/20 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-slate-900/30 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
                             <span class="absolute inset-0 rounded-xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
                             <i class="fa-solid fa-floppy-disk relative z-10 transition-transform group-hover:scale-110"></i>
                             <span class="relative z-10">Save Inventory</span>
@@ -319,7 +305,7 @@
                                     data-subcategory="{{ v.product.brand.subcetegory.name|escapejs }}"
                                     data-brand="{{ v.product.brand.name|escapejs }}"
                                     data-product="{{ v.product.name|escapejs }}"
-                                    data-description="{{ v.product.description|default_if_none:''|escapejs }}"
+                                    data-description="{{ v.description|default_if_none:''|escapejs }}"
                                     data-color="{{ v.color.name|escapejs }}"
                                     data-size="{{ v.size.name|escapejs }}"
                                     data-price="{{ v.price }}"
@@ -329,6 +315,7 @@
                                     data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
                                     data-variant-image="{% if v.image %}{{ v.image.url }}{% endif %}"
                                     data-variant-gallery="{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                    data-scent-name="{{ v.scent_name|default_if_none:''|escapejs }}"
                                     data-specs='[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
                                 ></button>
                                 {% endfor %}
@@ -346,7 +333,7 @@
                                     data-subcategory="{{ v.product.brand.subcetegory.name|escapejs }}"
                                     data-brand="{{ v.product.brand.name|escapejs }}"
                                     data-product="{{ v.product.name|escapejs }}"
-                                    data-description="{{ v.product.description|default_if_none:''|escapejs }}"
+                                    data-description="{{ v.description|default_if_none:''|escapejs }}"
                                     data-color="{{ v.color.name|escapejs }}"
                                     data-size="{{ v.size.name|escapejs }}"
                                     data-price="{{ v.price }}"
@@ -356,6 +343,7 @@
                                     data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
                                     data-variant-image="{% if v.image %}{{ v.image.url }}{% endif %}"
                                     data-variant-gallery="{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                    data-scent-name="{{ v.scent_name|default_if_none:''|escapejs }}"
                                     data-specs='[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'
                                 >
                                     {{ v.size.name }}
@@ -388,8 +376,8 @@
                                     data-brand="{{ first.product.brand.name|escapejs }}"
                                     data-category="{{ first.product.brand.subcetegory.category.name|escapejs }}"
                                     data-subcategory="{{ first.product.brand.subcetegory.name|escapejs }}"
-                                    data-description="{{ first.product.description|default_if_none:''|escapejs }}"
-                                    data-variants='[{% for v in group.variants %}{"id":"{{ v.id }}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","sku":"{{ v.sku|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"imageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","galleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                    data-description="{{ first.description|default_if_none:''|escapejs }}"
+                                    data-variants='[{% for v in group.variants %}{"id":"{{ v.id }}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","sku":"{{ v.sku|escapejs }}","description":"{{ v.description|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"scent_name":"{{ v.scent_name|default_if_none:''|escapejs }}","imageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","galleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
                                 >
                                     <i class="fa-solid fa-eye text-xs"></i>
                                     <span class="sr-only">View</span>
@@ -403,10 +391,10 @@
                                         data-subcategory="{{ first.product.brand.subcetegory.name|escapejs }}"
                                         data-brand="{{ first.product.brand.name|escapejs }}"
                                         data-product="{{ first.product.name|escapejs }}"
-                                        data-description="{{ first.product.description|default_if_none:''|escapejs }}"
+                                        data-description="{{ first.description|default_if_none:''|escapejs }}"
                                         data-image="{% if first.product.image %}{{ first.product.image.url }}{% endif %}"
                                         data-gallery="{% for img in first.product.images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                                        data-variants='[{% for v in group.variants %}{"editUrl":"{% url "edit_inventory" v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","sku":"{{ v.sku|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"variantImageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","variantGalleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
+                                        data-variants='[{% for v in group.variants %}{"editUrl":"{% url "edit_inventory" v.id %}","color":"{{ v.color.name|escapejs }}","size":"{{ v.size.name|escapejs }}","sku":"{{ v.sku|escapejs }}","description":"{{ v.description|escapejs }}","price":{{ v.price }},"stock":{{ v.stock }},"scent_name":"{{ v.scent_name|default_if_none:''|escapejs }}","variantImageUrl":"{% if v.image %}{{ v.image.url }}{% endif %}","variantGalleryUrls":"{% for img in v.gallery_images.all %}{{ img.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}","specs":[{% for s in v.specs.all %}{"name":"{{ s.name|escapejs }}","value":"{{ s.value|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]'
                                     >
                                         <i class="fa-solid fa-pen-to-square text-xs"></i>
                                         <span class="sr-only">Edit</span>
@@ -522,6 +510,11 @@
                 <div class="space-y-1.5 w-full sm:w-auto sm:flex-1 min-w-[120px]">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Stock Level</p>
                     <p id="detailStock" class="text-3xl font-black text-slate-900 break-all sm:break-normal"></p>
+                </div>
+                <div class="hidden sm:block w-px bg-slate-100"></div>
+                <div class="space-y-1.5 w-full sm:w-auto sm:flex-1 min-w-[120px] hidden">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Scent</p>
+                    <p id="detailScent" class="text-xl font-bold text-slate-700 break-all sm:break-normal"></p>
                 </div>
             </div>
 
@@ -696,15 +689,22 @@ const addMainVariantBtn = document.getElementById('addMainVariantBtn');
 
 function addSpecRow(name = '', value = '') {
     const row = document.createElement('div');
-    row.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2 spec-row';
+    row.className = 'spec-row flex flex-col sm:flex-row gap-3 items-start sm:items-center w-full p-4 sm:p-0 border sm:border-none border-slate-200 rounded-xl sm:rounded-none bg-white sm:bg-transparent shadow-sm sm:shadow-none';
     row.innerHTML = `
-        <input type="text" name="spec_name" placeholder="Spec name (e.g., Storage, RAM)"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" value="${(name || '').replace(/"/g, '&quot;')}">
-        <div class="flex gap-2">
-            <input type="text" name="spec_value" placeholder="Spec value (e.g., 128GB, 8GB)"
-                class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" value="${(value || '').replace(/"/g, '&quot;')}">
-            <button type="button" class="removeSpecRowBtn px-3 rounded border border-gray-300 hover:bg-gray-50">✕</button>
+        <div class="flex-1 w-full space-y-1 sm:space-y-0">
+            <label class="sm:hidden text-[10px] font-bold text-slate-500 uppercase tracking-wider pl-1">Spec Name</label>
+            <input type="text" name="spec_name" placeholder="Spec name (e.g., Storage)"
+                class="w-full rounded-lg border-0 ring-1 ring-inset ring-slate-200 px-3 py-2.5 sm:py-2 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm placeholder:text-slate-400" value="${(name || '').replace(/"/g, '&quot;')}">
         </div>
+        <div class="flex-1 w-full space-y-1 sm:space-y-0">
+            <label class="sm:hidden text-[10px] font-bold text-slate-500 uppercase tracking-wider pl-1">Spec Value</label>
+            <input type="text" name="spec_value" placeholder="Spec value (e.g., 128GB)"
+                class="w-full rounded-lg border-0 ring-1 ring-inset ring-slate-200 px-3 py-2.5 sm:py-2 text-sm focus:ring-2 focus:ring-indigo-500 shadow-sm placeholder:text-slate-400" value="${(value || '').replace(/"/g, '&quot;')}">
+        </div>
+        <button type="button" class="removeSpecRowBtn w-full sm:w-9 h-[42px] sm:h-9 rounded-lg sm:rounded-full border border-rose-200 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition flex items-center justify-center shrink-0 mt-2 sm:mt-0 shadow-sm sm:shadow-none font-bold sm:font-normal text-sm sm:text-base">
+            <span class="sm:hidden mr-2">Remove Specification</span>
+            <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
     `;
     specsContainer.appendChild(row);
 }
@@ -813,56 +813,79 @@ function addSubVariantRow(block, initial = {}) {
     const colorInput = block.querySelector('.main-variant-color-input');
     const mediaIndex = block.dataset.mediaIndex;
     const row = document.createElement('div');
-    row.className = 'sub-variant-row grid grid-cols-1 sm:grid-cols-5 gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/40';
+    row.className = 'sub-variant-row flex flex-col lg:flex-row gap-3 p-3 sm:p-4 rounded-xl border border-slate-200 bg-white shadow-sm items-start lg:items-center w-full';
     row.innerHTML = `
         <input type="hidden" name="variant_index" value="${subVariantCounter++}">
         <input type="hidden" name="variant_media_index" value="${mediaIndex}">
         <input type="hidden" name="variant_color" value="${colorInput.value}" class="sub-variant-color-hidden">
-        <input type="text" name="variant_size" placeholder="Size (M/L/XL...)" value="${(initial.size || '').replace(/"/g, '&quot;')}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-        <input type="number" step="0.01" name="variant_price" placeholder="Price" value="${initial.price || ''}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-        <input type="number" name="variant_stock" placeholder="Stock" value="${initial.stock || ''}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-        <input type="text" name="variant_sku" placeholder="SKU (optional)" value="${(initial.sku || '').replace(/"/g, '&quot;')}" class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">
-        <button type="button" class="removeSubVariantBtn rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-600 hover:text-white">Remove</button>
+        <input type="hidden" name="variant_scent_name" value="${(initial.scent_name || '').replace(/"/g, '&quot;')}" class="sub-variant-scent-hidden">
+        <input type="hidden" name="variant_description" value="${(initial.description || '').replace(/"/g, '&quot;')}" class="sub-variant-description-hidden">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 flex-1 w-full">
+            <div class="space-y-1 w-full">
+               <label class="lg:hidden text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Size</label>
+               <input type="text" name="variant_size" placeholder="Size (e.g. S, M)" value="${(initial.size || '').replace(/"/g, '&quot;')}" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 sm:py-2 text-sm text-slate-700 h-[42px] sm:h-[38px] placeholder:text-slate-400 focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20">
+            </div>
+            <div class="space-y-1 w-full">
+               <label class="lg:hidden text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Price</label>
+               <input type="number" step="0.01" name="variant_price" placeholder="Price" value="${initial.price || ''}" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 sm:py-2 text-sm text-slate-700 h-[42px] sm:h-[38px] placeholder:text-slate-400 focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20">
+            </div>
+            <div class="space-y-1 w-full">
+               <label class="lg:hidden text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">Stock Level</label>
+               <input type="number" name="variant_stock" placeholder="Stock" value="${initial.stock || ''}" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 sm:py-2 text-sm text-slate-700 h-[42px] sm:h-[38px] placeholder:text-slate-400 focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20">
+            </div>
+            <div class="space-y-1 w-full">
+               <label class="lg:hidden text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">SKU (Opt.)</label>
+               <input type="text" name="variant_sku" placeholder="SKU" value="${(initial.sku || '').replace(/"/g, '&quot;')}" class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 sm:py-2 text-sm text-slate-700 h-[42px] sm:h-[38px] placeholder:text-slate-400 focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20">
+            </div>
+        </div>
+
+        <button type="button" class="removeSubVariantBtn shrink-0 w-full lg:w-auto h-[42px] sm:h-[38px] rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm sm:text-xs font-bold text-rose-600 hover:bg-rose-600 hover:text-white transition-colors mt-2 lg:mt-0 lg:self-end">Remove</button>
     `;
     block.querySelector('.sub-variant-rows').appendChild(row);
 }
 
-function syncSubColors(block) {
+function syncSubAttributes(block) {
     const colorVal = block.querySelector('.main-variant-color-input').value || '#000000';
-    block.querySelectorAll('.sub-variant-color-hidden').forEach(input => {
-        input.value = colorVal;
-    });
+    const scentVal = block.querySelector('.main-variant-scent-input').value || '';
+    const descVal = block.querySelector('.main-variant-description-input').value || '';
+    
+    block.querySelectorAll('.sub-variant-color-hidden').forEach(input => { input.value = colorVal; });
+    block.querySelectorAll('.sub-variant-scent-hidden').forEach(input => { input.value = scentVal; });
+    block.querySelectorAll('.sub-variant-description-hidden').forEach(input => { input.value = descVal; });
 }
 
 function addMainVariantBlock(initial = {}) {
     const mediaIndex = mainVariantCounter++;
     const colorValue = /^#([A-Fa-f0-9]{6})$/.test(initial.color || '') ? initial.color : '#000000';
     const block = document.createElement('div');
-    block.className = 'main-variant-block p-4 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4';
+    block.className = 'main-variant-block p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col gap-5 w-full';
     block.dataset.mediaIndex = mediaIndex;
     block.innerHTML = `
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-3 order-1">
             <div>
-                <h4 class="text-sm font-bold text-slate-900">Main Variant (Color)</h4>
-                <p class="text-xs text-slate-500">Add sub variants like size, price, stock and SKU</p>
+                <h4 class="text-base sm:text-sm font-bold text-slate-900">Main Variant (Color)</h4>
+                <p class="text-[13px] sm:text-xs text-slate-500">Configure media and details</p>
             </div>
-            <button type="button" class="removeMainVariantBtn rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-600 hover:text-white">Remove Color</button>
+            <button type="button" class="removeMainVariantBtn hidden sm:block rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-600 hover:text-white transition-colors shadow-sm">Remove Color</button>
         </div>
-        <div class="flex flex-wrap lg:flex-nowrap gap-4">
-            <div class="space-y-2 w-full lg:w-auto min-w-[160px] shrink-0">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full order-2">
+            <div class="space-y-4 order-1 md:row-start-1 md:col-start-1 w-full">
                 <label class="text-xs font-semibold text-slate-600">Color Value</label>
-                <div class="flex items-center gap-2">
-                    <input type="color" class="main-variant-color-picker h-[38px] w-12 shrink-0 rounded cursor-pointer border border-slate-200 hover:border-slate-400 transition-all p-0.5" value="${colorValue}">
-                    <input type="text" class="main-variant-color-input w-[110px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 font-mono uppercase focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40" placeholder="#000000" value="${colorValue}" maxlength="7">
+                <div class="flex items-center gap-2 w-full">
+                    <input type="color" class="main-variant-color-picker h-[42px] sm:h-[38px] w-12 shrink-0 rounded cursor-pointer border border-slate-200 hover:border-slate-400 transition-all p-0.5" value="${colorValue}">
+                    <input type="text" class="main-variant-color-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 font-mono uppercase focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 h-[42px] sm:h-[38px]" placeholder="#000000" value="${colorValue}" maxlength="7">
                 </div>
             </div>
-            <div class="space-y-2 flex-1 min-w-[250px]">
-                <label class="text-xs font-semibold text-slate-600">Main Image</label>
-                <input type="file" name="variant_image_${mediaIndex}" accept="image/*" class="main-variant-image-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs">
-                <div class="main-variant-image-preview">
+
+            <div class="space-y-2 order-2 md:row-start-1 md:col-start-2 w-full">
+                <label class="text-xs font-semibold text-slate-600 truncate">Main Image</label>
+                <input type="file" name="variant_image_${mediaIndex}" accept="image/*" class="main-variant-image-input w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2.5 sm:py-2 text-[13px] sm:text-xs text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded file:border file:border-slate-300 file:text-xs file:font-semibold file:bg-white file:text-slate-700 hover:file:bg-slate-100 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap block" style="min-width: 100%;">
+                <div class="main-variant-image-preview mt-2 w-full">
                     ${initial.variantImageUrl ? `
-                        <div class="relative inline-block mt-2 existing-main-image-container">
-                            <img src="${initial.variantImageUrl}" class="h-24 w-24 rounded-xl object-cover border-2 border-white shadow-md">
+                        <div class="relative inline-block mt-1 existing-main-image-container">
+                            <img src="${initial.variantImageUrl}" class="h-20 w-20 sm:h-24 sm:w-24 rounded-xl object-cover border-2 border-white shadow-md">
                             <button type="button" class="remove-existing-main absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition" title="Delete Main Image">
                                 <i class="fa-solid fa-xmark text-xs"></i>
                             </button>
@@ -871,19 +894,37 @@ function addMainVariantBlock(initial = {}) {
                     ` : ''}
                 </div>
             </div>
-        </div>
-        <div class="space-y-2">
-            <label class="text-xs font-semibold text-slate-600">Gallery Images</label>
-            <input type="file" name="variant_gallery_${mediaIndex}" multiple accept="image/*" class="main-variant-gallery-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs">
-            <div class="main-variant-gallery-preview flex flex-wrap gap-2"></div>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-3">
-            <div class="flex items-center justify-between mb-3">
-                <h5 class="text-xs font-semibold text-slate-700 uppercase tracking-wide">Sub Variants (Size)</h5>
-                <button type="button" class="addSubVariantBtn rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-700 hover:text-white">Add Sub Variant</button>
+
+            <div class="space-y-2 order-3 md:row-start-2 md:col-start-2 w-full">
+                <label class="text-xs font-semibold text-slate-600 truncate">Gallery Images</label>
+                <input type="file" name="variant_gallery_${mediaIndex}" multiple accept="image/*" class="main-variant-gallery-input w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2.5 sm:py-2 text-[13px] sm:text-xs text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded file:border file:border-slate-300 file:text-xs file:font-semibold file:bg-white file:text-slate-700 hover:file:bg-slate-100 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap block" style="min-width: 100%;">
+                <div class="main-variant-gallery-preview flex flex-wrap gap-2 mt-2 w-full"></div>
             </div>
-            <div class="sub-variant-rows space-y-2"></div>
+
+            <div class="space-y-2 order-4 md:row-start-2 md:col-start-1 w-full flex flex-col justify-start">
+                <label class="text-xs font-semibold text-slate-600">Scent Name</label>
+                <input type="text" class="main-variant-scent-input w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 h-[42px] sm:h-[38px]" placeholder="e.g. Lavender, Rose" value="${(initial.scent_name || '').replace(/"/g, '&quot;')}">
+            </div>
         </div>
+
+        <div class="space-y-2 order-5 w-full">
+            <label class="text-xs font-semibold text-slate-600">Description (Color-wise)</label>
+            <textarea class="main-variant-description-input w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500/40 resize-none min-h-[80px]" placeholder="Describe this color variant...">${initial.description || ''}</textarea>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-3 sm:p-4 w-full order-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+                <h5 class="text-sm sm:text-xs font-bold sm:font-semibold text-slate-800 sm:text-slate-700 uppercase tracking-wide">Sub Variants (Size)</h5>
+                <button type="button" class="addSubVariantBtn w-full sm:w-auto rounded-lg border border-sky-300 bg-white sm:bg-sky-50 px-4 py-2.5 sm:py-2 text-sm sm:text-xs font-bold text-sky-700 hover:bg-sky-700 hover:text-white transition-colors text-center shadow-sm">
+                    + Add Size / Value
+                </button>
+            </div>
+            <div class="sub-variant-rows space-y-3 w-full"></div>
+        </div>
+
+        <button type="button" class="removeMainVariantBtn sm:hidden w-full order-7 rounded-xl border-2 border-rose-200 bg-white px-4 py-3.5 text-sm font-bold text-rose-600 shadow-sm hover:bg-rose-600 hover:text-white text-center transition-colors">
+            Remove Entire Color
+        </button>
     `;
     variantRows.appendChild(block);
 
@@ -935,10 +976,12 @@ function addMainVariantBlock(initial = {}) {
 
     const picker = block.querySelector('.main-variant-color-picker');
     const input = block.querySelector('.main-variant-color-input');
+    const scentInput = block.querySelector('.main-variant-scent-input');
+    const descInput = block.querySelector('.main-variant-description-input');
     
     picker.addEventListener('input', () => {
         input.value = picker.value.toUpperCase();
-        syncSubColors(block);
+        syncSubAttributes(block);
     });
 
     input.addEventListener('input', () => {
@@ -948,13 +991,16 @@ function addMainVariantBlock(initial = {}) {
         
         if (/^#([A-Fa-f0-9]{6})$/.test(val)) {
             picker.value = val;
-            syncSubColors(block);
+            syncSubAttributes(block);
         } else if (/^#([A-Fa-f0-9]{3})$/.test(val)) {
             let expanded = '#' + val[1]+val[1]+val[2]+val[2]+val[3]+val[3];
             picker.value = expanded;
-            syncSubColors(block);
+            syncSubAttributes(block);
         }
     });
+
+    scentInput.addEventListener('input', () => syncSubAttributes(block));
+    descInput.addEventListener('input', () => syncSubAttributes(block));
 
     block.querySelector('.addSubVariantBtn').addEventListener('click', () => addSubVariantRow(block));
     block.querySelector('.removeMainVariantBtn').addEventListener('click', () => block.remove());
@@ -1469,7 +1515,7 @@ function unescapeJS(str) {
               .replace(/\\u002D/g, '-');
 }
 
-async function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, sku, specsJson, imageUrl = '', galleryUrls = '', variantImageUrl = '', variantGalleryUrls = '') {
+async function openEditModal(editUrl, category, subcategory, brand, product, description, color, size, price, stock, sku, specsJson, imageUrl = '', galleryUrls = '', variantImageUrl = '', variantGalleryUrls = '', scent_name = '') {
     inventoryModal.classList.remove('hidden');
     inventoryModal.classList.add('flex');
 
@@ -1521,7 +1567,7 @@ async function openEditModal(editUrl, category, subcategory, brand, product, des
         }
     }
     
-    inventoryForm.description.value = desc;
+    if (inventoryForm.description) inventoryForm.description.value = desc;
     
     // Show and populate Old Data Section for comparison
     const oldSection = document.getElementById('oldDataSection');
@@ -1550,6 +1596,8 @@ async function openEditModal(editUrl, category, subcategory, brand, product, des
             price: price, 
             stock: stock,
             sku: sku,
+            description: desc,
+            scent_name: scent_name,
             variantImageUrl: variantImageUrl,
             variantGalleryUrls: variantGalleryUrls
         });
@@ -1655,7 +1703,8 @@ function renderVariantItems(common, variants) {
                 common.imageUrl || '',
                 common.galleryUrls || '',
                 v.variantImageUrl || '',
-                v.variantGalleryUrls || ''
+                v.variantGalleryUrls || '',
+                v.scent_name || ''
             );
             hideVariantPicker();
         });
@@ -1784,7 +1833,8 @@ document.querySelectorAll('.edit-variant-color-btn').forEach(btn => {
             d.image || '',
             d.gallery || '',
             d.variantImage || '',
-            d.variantGallery || ''
+            d.variantGallery || '',
+            d.scentName || ''
         );
     });
 });
@@ -1809,7 +1859,8 @@ document.querySelectorAll('.edit-variant-size-btn').forEach(btn => {
             d.image || '',
             d.gallery || '',
             d.variantImage || '',
-            d.variantGallery || ''
+            d.variantGallery || '',
+            d.scentName || ''
         );
     });
 });
@@ -1902,6 +1953,16 @@ function showVariantDetail(vId) {
     document.getElementById('detailCategory').innerText = common.category;
     document.getElementById('detailBrand').innerText = common.brand;
     document.getElementById('detailDesc').innerText = common.description || 'No description available for this product.';
+
+    const scentEl = document.getElementById('detailScent');
+    if (scentEl) {
+        if (v.scent_name) {
+            scentEl.innerText = v.scent_name;
+            scentEl.parentElement.classList.remove('hidden');
+        } else {
+            scentEl.parentElement.classList.add('hidden');
+        }
+    }
 
     const mainImg = document.getElementById('detailMainImage');
     mainImg.src = v.imageUrl || 'https://placehold.co/600x800?text=No+Image';

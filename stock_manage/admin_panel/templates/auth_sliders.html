@@ -121,26 +121,34 @@
         </div>
     </section>
 
-    
+    <!-- Pagination -->
+    {% if sliders.has_other_pages %}
+    <div class="mt-auto pt-6 flex justify-end mb-4 mr-4 w-full">
+        <nav class="flex items-center gap-1 p-2 rounded">
+            {% if sliders.has_previous %}
+                <a href="?page={{ sliders.previous_page_number }}"
+                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 transition-colors">
+                    ‹
+                </a>
+            {% else %}
+                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
+                    ‹
+                </span>
+            {% endif %}
 
             {% for num in sliders.paginator.page_range %}
                 {% if num == sliders.number %}
-                    <span class="h-9 w-9 flex items-center justify-center
-                                 rounded bg-slate-900 text-white font-medium">
+                    <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
                         {{ num }}
                     </span>
                 {% elif num > sliders.number|add:'-2' and num < sliders.number|add:'2' %}
                     <a href="?page={{ num }}"
-                       class="h-9 w-9 flex items-center justify-center
-                              rounded border border-gray-300
-                              hover:bg-gray-100 transition-colors">
+                       class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm transition-colors">
                         {{ num }}
                     </a>
                 {% elif num == 1 or num == sliders.paginator.num_pages %}
                     <a href="?page={{ num }}"
-                       class="h-9 w-9 flex items-center justify-center
-                              rounded border border-gray-300
-                              hover:bg-gray-100 transition-colors">
+                       class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm transition-colors">
                         {{ num }}
                     </a>
                 {% elif num == sliders.number|add:'-3' or num == sliders.number|add:'3' %}
@@ -150,14 +158,11 @@
 
             {% if sliders.has_next %}
                 <a href="?page={{ sliders.next_page_number }}"
-                   class="h-9 w-9 flex items-center justify-center
-                          rounded border border-gray-300
-                          hover:bg-gray-100 transition-colors">
+                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 transition-colors">
                     ›
                 </a>
             {% else %}
-                <span class="h-9 w-9 flex items-center justify-center
-                             rounded border border-gray-200 text-gray-400">
+                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
                     ›
                 </span>
             {% endif %}
@@ -165,167 +170,6 @@
     </div>
     {% endif %}
 
-
-    <!-- Pagination ALWAYS visible -->
-    <div class="mt-auto pt-6 flex justify-end mb-4 mr-4 w-full">
-        <nav class="flex items-center gap-1 p-2 rounded">
-            {% if sliders.has_previous %}
-                <a href="?page={{ sliders.previous_page_number }}"
-                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
-                    ‹
-                </a>
-            {% else %}
-                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
-                    ‹
-                </span>
-            {% endif %}
-
-            {% if sliders.paginator %}
-                {% for num in sliders.paginator.page_range %}
-                    {% if num == sliders.number %}
-                        <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
-                            {{ num }}
-                        </span>
-                    {% elif num > sliders.number|add:'-2' and num < sliders.number|add:'2' %}
-                        <a href="?page={{ num }}"
-                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
-                            {{ num }}
-                        </a>
-                    {% elif num == 1 or num == sliders.paginator.num_pages %}
-                        <a href="?page={{ num }}"
-                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
-                            {{ num }}
-                        </a>
-                    {% elif num == sliders.number|add:'-3' or num == sliders.number|add:'3' %}
-                        <span class="px-2">…</span>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
-                    1
-                </span>
-            {% endif %}
-
-            {% if sliders.has_next %}
-                <a href="?page={{ sliders.next_page_number }}"
-                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
-                    ›
-                </a>
-            {% else %}
-                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
-                    ›
-                </span>
-            {% endif %}
-        </nav>
-    </div>
-
-
-    <!-- Pagination ALWAYS visible -->
-    <div class="mt-auto pt-6 flex justify-end mb-4 mr-4 w-full">
-        <nav class="flex items-center gap-1 p-2 rounded">
-            {% if sliders.has_previous %}
-                <a href="?page={{ sliders.previous_page_number }}"
-                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
-                    ‹
-                </a>
-            {% else %}
-                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
-                    ‹
-                </span>
-            {% endif %}
-
-            {% if sliders.paginator %}
-                {% for num in sliders.paginator.page_range %}
-                    {% if num == sliders.number %}
-                        <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
-                            {{ num }}
-                        </span>
-                    {% elif num > sliders.number|add:'-2' and num < sliders.number|add:'2' %}
-                        <a href="?page={{ num }}"
-                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
-                            {{ num }}
-                        </a>
-                    {% elif num == 1 or num == sliders.paginator.num_pages %}
-                        <a href="?page={{ num }}"
-                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
-                            {{ num }}
-                        </a>
-                    {% elif num == sliders.number|add:'-3' or num == sliders.number|add:'3' %}
-                        <span class="px-2">…</span>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
-                    1
-                </span>
-            {% endif %}
-
-            {% if sliders.has_next %}
-                <a href="?page={{ sliders.next_page_number }}"
-                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
-                    ›
-                </a>
-            {% else %}
-                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
-                    ›
-                </span>
-            {% endif %}
-        </nav>
-    </div>
-
-
-    <!-- Pagination ALWAYS visible -->
-    <div class="mt-auto pt-6 flex justify-end mb-4 mr-4 w-full">
-        <nav class="flex items-center gap-1 p-2 rounded">
-            {% if sliders.has_previous %}
-                <a href="?page={{ sliders.previous_page_number }}"
-                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
-                    ‹
-                </a>
-            {% else %}
-                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
-                    ‹
-                </span>
-            {% endif %}
-
-            {% if sliders.paginator %}
-                {% for num in sliders.paginator.page_range %}
-                    {% if num == sliders.number %}
-                        <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
-                            {{ num }}
-                        </span>
-                    {% elif num > sliders.number|add:'-2' and num < sliders.number|add:'2' %}
-                        <a href="?page={{ num }}"
-                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
-                            {{ num }}
-                        </a>
-                    {% elif num == 1 or num == sliders.paginator.num_pages %}
-                        <a href="?page={{ num }}"
-                           class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 shadow-sm">
-                            {{ num }}
-                        </a>
-                    {% elif num == sliders.number|add:'-3' or num == sliders.number|add:'3' %}
-                        <span class="px-2">…</span>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                <span class="h-9 w-9 flex items-center justify-center rounded bg-slate-900 text-white font-medium shadow-sm">
-                    1
-                </span>
-            {% endif %}
-
-            {% if sliders.has_next %}
-                <a href="?page={{ sliders.next_page_number }}"
-                   class="h-9 w-9 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100">
-                    ›
-                </a>
-            {% else %}
-                <span class="h-9 w-9 flex items-center justify-center rounded border border-gray-200 text-gray-400">
-                    ›
-                </span>
-            {% endif %}
-        </nav>
-    </div>
 </main>
 
 <!-- Slider Modal (Add/Edit) -->

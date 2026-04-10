@@ -126,61 +126,87 @@
 
             <!-- Product Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12" id="trending-grid">
-                <!-- Trending cards will be populated if static or from dynamic source -->
-                <div class="group lux-card" data-aos="fade-up">
-                    <div class="relative aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden mb-8 shadow-sm group-hover:shadow-3xl transition-all">
-                        <img src="https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?auto=format&fit=crop&q=80&w=400" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                {% for p in trending_products %}
+                <div class="group lux-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter|add:1 }}00">
+                    <div class="relative aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden mb-8 shadow-sm group-hover:shadow-3xl transition-all p-8 flex items-center justify-center">
+                        {% if p.calculated_image_url %}
+                        <img src="{{ p.calculated_image_url }}" class="max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-110" alt="{{ p.product.name }}">
+                        {% else %}
+                        <img src="https://images.unsplash.com/photo-1586790170083-2f9ceadc732d?auto=format&fit=crop&q=80&w=400" class="max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-110">
+                        {% endif %}
+                        
                         <div class="absolute top-6 left-6 flex space-x-2">
                             <span class="bg-accent text-white text-[8px] uppercase tracking-widest px-3 py-1 font-bold rounded-full">Trending</span>
                         </div>
                         <div class="absolute top-6 right-6 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
-                            <button class="w-10 h-10 bg-white shadow-xl rounded-full flex items-center justify-center hover:bg-accent hover:text-white transition-colors"><i data-lucide="heart" class="w-4 h-4"></i></button>
+                            <button class="w-10 h-10 bg-white shadow-xl rounded-full flex items-center justify-center hover:bg-accent hover:text-white transition-colors">
+                                <i data-lucide="heart" class="w-4 h-4"></i>
+                            </button>
                         </div>
-                        <button class="absolute bottom-4 left-4 right-4 bg-primary text-white text-[10px] py-4 rounded-3xl uppercase tracking-widest font-bold translate-y-20 group-hover:translate-y-0 transition-transform duration-700">Explore Collection</button>
+                        <a href="{% url 'by_product' p.id %}" class="absolute bottom-4 left-4 right-4 bg-primary text-white text-[10px] py-4 rounded-3xl uppercase tracking-widest font-bold translate-y-20 group-hover:translate-y-0 transition-transform duration-700 text-center">Explore Collection</a>
                     </div>
                     <div class="text-center px-4">
-                        <p class="text-[10px] uppercase text-gray-400 tracking-widest mb-2">Lipstick · Matte Finish</p>
-                        <h4 class="text-lg font-serif mb-2">Midnight Crimson Velvet</h4>
+                        <p class="text-[10px] uppercase text-gray-400 tracking-widest mb-2">{{ p.category_info }}</p>
+                        <h4 class="text-lg font-serif mb-2">{{ p.product.name }}</h4>
                         <div class="flex justify-center items-center space-x-2 text-accent">
-                            <span class="text-lg font-black font-serif">₹1,299</span>
-                            <span class="text-[10px] text-gray-400 line-through">₹1,899</span>
+                            <span class="text-lg font-black font-serif">₹{{ p.price }}</span>
+                            {% if p.product.base_price > p.price %}
+                            <span class="text-[10px] text-gray-400 line-through">₹{{ p.product.base_price }}</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
+                {% empty %}
+                <div class="col-span-full py-20 text-center text-gray-400 font-serif italic">
+                    Discovering our seasonal favorites...
+                </div>
+                {% endfor %}
             </div>
         </div>
     </section>
 
-    <!-- 6. Best Sellers Section -->
-    <section class="py-24 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- 6. Premium T-Shirt Showcase Section -->
+    <section class="py-24 bg-brandCream border-y border-gray-100 overflow-hidden relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-[10px] tracking-[0.6em] uppercase text-accent font-black mb-4">Elite Selection</h2>
-                <h3 class="text-5xl font-serif italic">Top Of the Tier</h3>
+                <h2 class="text-[10px] tracking-[0.6em] uppercase text-accent font-black mb-4">Premium Showcase</h2>
+                <h3 class="text-5xl font-serif italic mb-4">Exclusive T-Shirt Collection</h3>
+                <p class="text-gray-500 max-w-2xl mx-auto text-sm italic font-light">Explore all shades and angles of our finely crafted essentials.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div class="relative rounded-[3rem] overflow-hidden group h-[500px]" data-aos="fade-right">
-                    <img src="https://images.unsplash.com/photo-1541108564883-fae1270086bc?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                    <div class="absolute bottom-12 left-12 text-white">
-                        <span class="bg-brandGold text-primary text-[8px] font-black px-4 py-1 rounded-full uppercase mb-4 inline-block">Iconic</span>
-                        <h4 class="text-3xl font-serif mb-6">Velvet Matte Mastery</h4>
-                        <p class="text-gray-300 text-sm mb-10 max-w-xs leading-relaxed font-light italic">The lipstick that defined a generation of Indian luxury.</p>
-                        <button class="text-[10px] uppercase font-bold tracking-widest border-b border-white pb-2 hover:text-brandGold hover:border-brandGold transition-all">Shop Iconic</button>
+            
+            <div class="swiper eliteTshirtSwiper" data-aos="fade-up" data-aos-delay="200">
+                <div class="swiper-wrapper pb-16 pt-4">
+                    {% for item in tshirt_showcase %}
+                    <div class="swiper-slide w-[80vw] sm:w-[400px]">
+                        <div class="relative rounded-[2rem] overflow-hidden group h-[450px] sm:h-[550px] shadow-lg hover:shadow-2xl transition-all duration-500 bg-white border border-gray-50">
+                            <img src="{{ item.image_url }}" class="w-full h-full object-cover transition-transform duration-[4s] group-hover:scale-110" alt="{{ item.name }}">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-95 transition-opacity"></div>
+                            
+                            <div class="absolute bottom-10 left-8 right-8 text-white translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="bg-brandGold text-primary text-[8px] font-black px-4 py-1.5 rounded-full uppercase">{{ item.color_name }}</span>
+                                    <span class="text-accent font-serif font-bold text-2xl">₹{{ item.price }}</span>
+                                </div>
+                                <h4 class="text-2xl font-serif mb-3">{{ item.name }}</h4>
+                                <a href="{% url 'by_product' item.variant_id %}" class="inline-flex items-center text-[10px] uppercase font-bold tracking-widest border-b border-white/50 pb-1 hover:text-brandGold hover:border-brandGold transition-all">Shop This Variant <i data-lucide="arrow-right" class="w-3 h-3 ml-2"></i></a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="relative rounded-[3rem] overflow-hidden group h-[500px]" data-aos="fade-left">
-                    <img src="https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                    <div class="absolute bottom-12 left-12 text-white">
-                        <span class="bg-brandGold text-primary text-[8px] font-black px-4 py-1 rounded-full uppercase mb-4 inline-block">Legend</span>
-                        <h4 class="text-3xl font-serif mb-6">Supreme 24K Serum</h4>
-                        <p class="text-gray-300 text-sm mb-10 max-w-xs leading-relaxed font-light italic">Pure Himalayan gold in a bottle for eternal glow.</p>
-                        <button class="text-[10px] uppercase font-bold tracking-widest border-b border-white pb-2 hover:text-brandGold hover:border-brandGold transition-all">Shop High Luxury</button>
+                    {% empty %}
+                    <div class="col-span-full py-20 text-center text-gray-400 font-serif italic w-full">
+                        Curating our premium collection...
                     </div>
+                    {% endfor %}
                 </div>
+                <!-- Controls -->
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-next !text-white !hidden sm:!flex bg-primary/50 w-12 h-12 rounded-full backdrop-blur-md hover:bg-primary transition-colors"></div>
+                <div class="swiper-button-prev !text-white !hidden sm:!flex bg-primary/50 w-12 h-12 rounded-full backdrop-blur-md hover:bg-primary transition-colors"></div>
             </div>
         </div>
+        <!-- Background decorative elements for a more premium look -->
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
     </section>
 
     <!-- 7. New Arrivals Section -->
@@ -497,34 +523,25 @@
         }
     });
 
-    // populate trending cards if needed or manage via JS
-    const trendProducts = [
-        {name: 'Saffron Glow Elixir', cat: 'Serum · Ayurvedic', price: '₹4,499', oldPrice: '₹5,500', img: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&q=80&w=400'},
-        {name: 'Kohled Mystery Liner', cat: 'Eyes · Waterproof', price: '₹750', oldPrice: '', img: 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&q=80&w=400'}
-    ];
-    
-    // Example of dynamic injection if grid was empty
-    const grid = document.getElementById('trending-grid');
-    trendProducts.forEach((p, i) => {
-        const div = document.createElement('div');
-        div.className = "group lux-card";
-        div.setAttribute('data-aos', 'fade-up');
-        div.setAttribute('data-aos-delay', (i + 2) * 100);
-        div.innerHTML = `
-            <div class="relative aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden mb-8 shadow-sm group-hover:shadow-3xl transition-all">
-                <img src="${p.img}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                <button class="absolute bottom-4 left-4 right-4 bg-primary text-white text-[10px] py-4 rounded-3xl uppercase tracking-widest font-bold translate-y-20 group-hover:translate-y-0 transition-transform duration-700">Explore Item</button>
-            </div>
-            <div class="text-center px-4">
-                <p class="text-[10px] uppercase text-gray-400 tracking-widest mb-2">${p.cat}</p>
-                <h4 class="text-lg font-serif mb-2">${p.name}</h4>
-                <div class="flex justify-center items-center space-x-2 text-accent">
-                    <span class="text-lg font-black font-serif">${p.price}</span>
-                    ${p.oldPrice ? `<span class="text-[10px] text-gray-400 line-through">${p.oldPrice}</span>` : ''}
-                </div>
-            </div>
-        `;
-        grid.appendChild(div);
+    // Premium T-Shirt Showcase Swiper
+    new Swiper('.eliteTshirtSwiper', {
+        effect: 'coverflow',
+        grabCursor: true,
+        centeredSlides: true,
+        slidesPerView: 'auto',
+        loop: true,
+        coverflowEffect: {
+            rotate: 25,
+            stretch: 0,
+            depth: 250,
+            modifier: 1,
+            slideShadows: true,
+        },
+        autoplay: { delay: 3500, disableOnInteraction: false },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
     });
+
+    // trending-grid populated via Django template
 </script>
 {% endblock extra_js %}

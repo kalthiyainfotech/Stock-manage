@@ -75,7 +75,9 @@
                     <!-- Colors -->
                     {% if colors %}
                     <div>
-                        <span class="block text-[10px] uppercase tracking-widest font-bold mb-4">Color: <span class="text-gray-400" id="color-label">{{ variant.color.name }}</span></span>
+                        <span class="block text-[10px] uppercase tracking-widest font-bold mb-4">
+                            Color: <span class="text-gray-400" id="color-label">{% if variant.color.name|slice:":1" == "#" %}Standard{% else %}{{ variant.color.name }}{% endif %}</span>
+                        </span>
                         <div class="flex space-x-3">
                             {% for c in colors %}
                             <button type="button" onclick="selectColor({{ c.id }}, '{{ c.name }}')" data-color-id="{{ c.id }}" class="color-btn w-10 h-10 rounded-full border-2 {% if c.id == variant.color.id %}border-accent{% else %}border-transparent{% endif %} ring-offset-2 hover:ring-1 hover:ring-accent transition-all" style="background-color: {{ c.name|lower }};"></button>
@@ -175,7 +177,8 @@
 
     function selectColor(colorId, colorName) {
         activeColorId = colorId;
-        document.getElementById('color-label').innerText = colorName;
+        // Hide if it looks like a hex code
+        document.getElementById('color-label').innerText = colorName.startsWith('#') ? 'Standard' : colorName;
         
         // Update color buttons border
         document.querySelectorAll('.color-btn').forEach(btn => {
@@ -188,19 +191,49 @@
         
         // Find if current size is available for this color
         const availableSizes = sizeMap[colorId];
-        if (availableSizes && availableSizes[activeSizeId]) {
-            updateVariant(availableSizes[activeSizeId].id);
-        } else if (availableSizes) {
-            // Pick first available size
-            const firstSizeId = Object.keys(availableSizes)[0];
-            activeSizeId = firstSizeId;
-            updateVariant(availableSizes[firstSizeId].id);
+        let newActiveSizeId = activeSizeId;
+        
+        if (!availableSizes || !availableSizes[activeSizeId]) {
+            if (availableSizes) {
+                newActiveSizeId = Object.keys(availableSizes)[0];
+            }
         }
         
-        // Update size UI availability (not implemented in simple HTML but good for UX)
+        // Update size UI availability
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            const sid = btn.dataset.sizeId;
+            if (availableSizes && availableSizes[sid]) {
+                // Available
+                btn.disabled = false;
+                btn.classList.remove('opacity-30', 'cursor-not-allowed', 'bg-gray-100');
+                btn.classList.add('hover:border-primary');
+            } else {
+                // Unavailable
+                btn.disabled = true;
+                btn.classList.add('opacity-30', 'cursor-not-allowed', 'bg-gray-100');
+                btn.classList.remove('hover:border-primary', 'border-primary', 'bg-primary', 'text-white');
+            }
+            
+            // Set active class strictly for new active size
+            if (sid == newActiveSizeId && availableSizes && availableSizes[sid]) {
+                btn.classList.add('border-primary', 'bg-primary', 'text-white');
+                btn.classList.remove('border-gray-200');
+            } else if (!btn.disabled) {
+                btn.classList.remove('border-primary', 'bg-primary', 'text-white');
+                btn.classList.add('border-gray-200');
+            }
+        });
+        
+        activeSizeId = newActiveSizeId;
+        if (availableSizes && availableSizes[activeSizeId]) {
+            updateVariant(availableSizes[activeSizeId].id);
+        }
     }
 
     function selectSize(sizeId) {
+        const availableSizes = sizeMap[activeColorId];
+        if (!availableSizes || !availableSizes[sizeId]) return; // Do not allow selection of unavailable sizes
+
         activeSizeId = sizeId;
         
         // Update size buttons UI
@@ -208,13 +241,13 @@
             if (btn.dataset.sizeId == sizeId) {
                 btn.classList.add('border-primary', 'bg-primary', 'text-white');
                 btn.classList.remove('border-gray-200');
-            } else {
+            } else if (!btn.disabled) {
                 btn.classList.remove('border-primary', 'bg-primary', 'text-white');
                 btn.classList.add('border-gray-200');
             }
         });
 
-        const vId = sizeMap[activeColorId][sizeId].id;
+        const vId = availableSizes[sizeId].id;
         updateVariant(vId);
     }
 
@@ -291,7 +324,9 @@
         });
     }
 
-    // Initial filter
+    // Initial filter and UI updates
     filterGallery(activeColorId);
+    // Explicitly call selectColor initially to apply disabled states properly on load
+    selectColor(activeColorId, document.getElementById('color-label').innerText);
 </script>
 {% endblock extra_js %}

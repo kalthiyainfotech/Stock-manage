@@ -7,6 +7,21 @@
     <title>Admin Desk</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         html, body { max-width: 100%; overflow-x: hidden; }
         main { max-width: 100vw; overflow-x: hidden; }
@@ -19,18 +34,18 @@
 
         /* Custom Scrollbar Styles */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
             background: transparent;
         }
         ::-webkit-scrollbar-thumb {
             background: #0F182A;
-            border-radius: 20px;
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #1e293b;
+            background: #c5a059;
         }
 
         /* Support for Firefox */
@@ -41,7 +56,7 @@
 
         /* Custom Scrollbar Utility */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
+            width: 4px;
         }
 
         /* Custom Loader */
@@ -74,7 +89,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
     <div id="globalLoader" class="fixed inset-0 z-[1000] bg-white/70 backdrop-blur-sm hidden">
         <div class="h-full w-full flex items-center justify-center">
             <div class="loader"></div>
@@ -406,7 +421,10 @@
         const __origFetch = window.fetch;
         window.fetch = async function(...args){ showLoader(); try { const r = await __origFetch.apply(this, args); return r; } finally { hideLoader(); } };
         window.addEventListener('beforeunload', () => { showLoader(); });
-        document.addEventListener('submit', () => { showLoader(); }, true);
+        document.addEventListener('submit', (e) => {
+            if (e.defaultPrevented) return;
+            showLoader();
+        });
         document.addEventListener('DOMContentLoaded', () => { hideLoader(); });
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');

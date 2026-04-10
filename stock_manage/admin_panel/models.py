@@ -265,7 +265,7 @@ class ProductVariant(models.Model):
         related_name='variants'
     )
     color = models.ForeignKey(Color, on_delete=models.CASCADE)
-    size = models.ForeignKey(Size, on_delete=models.CASCADE)
+    size = models.ForeignKey(Size, on_delete=models.CASCADE) 
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     sku = models.CharField(max_length=100, unique=True)
